@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workspaces WorkspaceMember[]
+  sessions   Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members     WorkspaceMember[]
+  apiKeys     ApiKey[]
+  brandConfig BrandConfig?
+  generations Generation[]
+  audits      Audit[]
+  evals       Eval[]
+}
+
+model WorkspaceMember {
+  id          String   @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        Role     @default(MEMBER)
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model ApiKey {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String
+  keyHash     String    @unique
+  keyPrefix   String
+  lastUsedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model BrandConfig {
+  id             String   @id @default(cuid())
+  workspaceId    String   @unique
+  primaryColor   String   @default("#000000")
+  secondaryColor String   @default("#ffffff")
+  accentColor    String   @default("#0070f3")
+  fontFamily     String   @default("Inter")
+  logoUrl        String?
+  style          String   @default("modern")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model Generation {
+  id          String           @id @default(cuid())
+  workspaceId String
+  url         String
+  imageUrl    String?
+  status      GenerationStatus @default(PENDING)
+  durationMs  Int?
+  error       String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  evals     Eval[]
+
+  @@index([workspaceId, createdAt])
+  @@index([url])
+}
+
+enum GenerationStatus {
+  PENDING
+  PROCESSING
+  COMPLETE
+  FAILED
+}
+
+model Audit {
+  id          String      @id @default(cuid())
+  workspaceId String
+  siteUrl     String
+  status      AuditStatus @default(PENDING)
+  urlsFound   Int         @default(0)
+  urlsChecked Int         @default(0)
+  issuesFound Int         @default(0)
+  results     Json?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+enum AuditStatus {
+  PENDING
+  RUNNING
+  COMPLETE
+  FAILED
+}
+
+model Eval {
+  id           String   @id @default(cuid())
+  workspaceId  String
+  generationId String
+  legibility   Float
+  brandMatch   Float
+  accuracy     Float
+  layout       Float
+  overallScore Float
+  verdict      Json
+  createdAt    DateTime @default(now())
+
+  workspace  Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  generation Generation @relation(fields: [generationId], references: [id], onDelete: Cascade)
+}
