@@ -34,7 +34,7 @@ The platform combines template-based rendering (Satori) with optional AI-generat
 | GitHub Action        | `ogstack/generate-action@v1`                                                                                                       |
 | CLI tool             | `npx ogstack generate --url <url>`                                                                                                 |
 | Free tier watermark  | `⚡ ogstack.dev` (small, bottom-right corner)                                                                                      |
-| Meta tag integration | `<meta property="og:image" content="https://api.ogstack.dev/v1/generate?url=https://myblog.com/post-title&style=gradient_dark" />` |
+| Meta tag integration | `<meta property="og:image" content="https://cdn.ogstack.dev/p/{projectId}/generate?url=https://myblog.com/post-title&style=gradient_dark" />`  |
 
 ---
 
@@ -97,7 +97,7 @@ OGStack evolves from an OG image API into the **visual identity layer for the in
 | **AI Prompt Generation** | Claude Haiku / GPT-4o Mini                           | Converts page metadata into optimized image generation prompts                                                       |
 | **Template Rendering**   | Satori + @resvg/resvg-js                             | JSX → SVG → PNG pipeline; edge-compatible, no browser dependency                                                     |
 | **CDN / Image Storage**  | Cloudflare R2 + Cloudflare CDN                       | Global edge caching for generated images; R2 for persistent storage (S3-compatible, zero egress fees)                |
-| **Authentication**       | API key-based (for API), NextAuth.js (for dashboard) | Simple API key auth for developers; OAuth for dashboard login                                                        |
+| **Authentication**       | Public project IDs (GET endpoint), API keys (POST endpoint), NextAuth.js (dashboard) | Zero-friction meta tag integration via public project ID; API keys for server-side only; OAuth for dashboard          |
 | **Payments**             | Stripe                                               | Subscription billing, usage-based metering, checkout                                                                 |
 | **Monitoring**           | Upstash (rate limiting), Axiom (logging)             | Redis-based rate limiting per API key; structured logging                                                            |
 
@@ -111,18 +111,22 @@ OGStack evolves from an OG image API into the **visual identity layer for the in
 
 **Two Modes:**
 
-**Mode A — URL-based (automatic)**
+**Mode A — URL-based (meta tag integration)**
 
 ```text
-GET https://api.ogstack.dev/v1/generate?url=https://myblog.com/post-title&style=gradient_dark
+GET https://cdn.ogstack.dev/p/{projectId}/generate?url=https://myblog.com/post-title&style=gradient_dark
 ```
+
+No API key required. The public project ID in the URL path identifies the user's account, plan, and Brand Kit. Developers copy the generated link from the dashboard playground and paste it directly into their `<meta>` tag — zero server-side code needed.
 
 The API scrapes the target URL, extracts meta tags (title, description, favicon, author), and generates an OG image automatically. Supports full customization via query parameters.
 
-**Mode B — Parameter-based (manual)**
+**Mode B — Parameter-based (programmatic, API key required)**
 
 ```text
 POST https://api.ogstack.dev/v1/generate
+Authorization: Bearer og_live_abc123xyz
+
 {
   "title": "How to Build a SaaS in 2026",
   "description": "A complete guide for founders",
@@ -134,19 +138,22 @@ POST https://api.ogstack.dev/v1/generate
 }
 ```
 
+This mode is for server-side / build-time usage where developers need programmatic control. Requires a secret API key passed via `Authorization: Bearer` header.
+
 **API Response:** Returns the image as binary PNG (Content-Type: image/png) for direct use in `<meta>` tags, or returns a JSON response with the CDN URL.
 
 **Technical Flow:**
 
-1. Receive request → validate API key → check rate limits
-2. Check CDN cache for existing image (cache key = hash of URL + parameters)
-3. Cache HIT → redirect to CDN URL (< 50ms)
-4. Cache MISS → scrape URL for meta tags (title, description, favicon, og:image fallback)
-5. If `ai_background: true` and user tier allows → generate AI prompt from content → call Flux Schnell API → receive background image
-6. Render Satori template with extracted content + AI background (or template pattern)
-7. Convert SVG → PNG via resvg
-8. Upload to Cloudflare R2 → cache on CDN
-9. Return image
+1. Receive request → resolve project ID (GET) or validate API key (POST) → load user plan and Brand Kit → check rate limits
+2. Validate domain: for GET requests, verify the `url` param domain matches the project's registered domains
+3. Check CDN cache for existing image (cache key = hash of project ID + URL + parameters)
+4. Cache HIT → serve from CDN (< 50ms)
+5. Cache MISS → scrape URL for meta tags (title, description, favicon, og:image fallback)
+6. If `ai_background: true` and user tier allows → generate AI prompt from content → call Flux Schnell API → receive background image
+7. Render Satori template with extracted content + AI background (or template pattern)
+8. Convert SVG → PNG via resvg
+9. Upload to Cloudflare R2 → cache on CDN
+10. Return image
 
 **Acceptance Criteria:**
 
@@ -192,14 +199,15 @@ POST https://api.ogstack.dev/v1/generate
 | Page                    | Description                                                                             |
 | ----------------------- | --------------------------------------------------------------------------------------- |
 | `/dashboard`            | Overview: usage stats, recent images, quick actions                                     |
-| `/dashboard/api-keys`   | Create, revoke, and manage API keys                                                     |
+| `/dashboard/projects`   | Create and manage projects (public IDs, domain allowlists, usage per project)           |
+| `/dashboard/api-keys`   | Create, revoke, and manage API keys (for programmatic POST endpoint)                    |
 | `/dashboard/templates`  | Browse, preview, and customize templates                                                |
 | `/dashboard/images`     | Gallery of all generated images with search/filter                                      |
 | `/dashboard/brand`      | Brand Kit: upload logo, set colors, choose fonts                                        |
 | `/dashboard/settings`   | Account settings, billing, team management                                              |
 | `/dashboard/playground` | Interactive playground: enter a URL, pick a template, preview the OG image in real-time |
 
-**Playground Feature:** The playground is the primary onboarding tool. New users paste a URL, select a template, tweak colors, and see a live preview instantly. The "Deploy" button gives them the meta tag to add to their site.
+**Playground Feature:** The playground is the primary onboarding tool. New users paste a URL, select a template, tweak colors, and see a live preview instantly. The "Deploy" button generates the complete meta tag with their project ID — ready to copy and paste into their HTML. No API key handling needed.
 
 ### 5.3.1 Admin Panel
 
@@ -236,21 +244,41 @@ POST https://api.ogstack.dev/v1/generate
 - Server-side rendered pages (Next.js App Router) — no client-side data fetching for sensitive user data
 - Paginated queries with cursor-based pagination for the user list (expect 10K+ users by month 6)
 - Stripe API integration for subscription mutations (use Stripe SDK, not direct database writes, for plan changes)
-- Admin audit log stored in a separate `AdminAuditLog` table
+- All actions (admin and user) are logged to the `AuditLog` table with actor, action, and affected entity
 
-### 5.4 User Authentication & API Key Management
+### 5.4 User Authentication & Project-Based Access
 
-**Authentication Methods:**
+**Authentication Model:**
 
-- **Dashboard:** GitHub OAuth, Google OAuth, email + password (via NextAuth.js)
-- **API:** API key passed as `Authorization: Bearer <key>` header or `?api_key=<key>` query param
+OGStack uses a split authentication model optimized for the two primary use cases:
 
-**API Key Features:**
+| Use Case | Auth Method | Visibility |
+| --- | --- | --- |
+| Meta tag integration (GET) | Public project ID in URL path | Public — safe to expose in HTML source |
+| Programmatic API (POST) | API key via `Authorization: Bearer` header | Secret — server-side only |
+| Dashboard | GitHub OAuth, Google OAuth, email + password (NextAuth.js) | Session-based |
 
-- Users can create multiple API keys (e.g., one per project)
-- Each key can be scoped to specific domains (e.g., only generate images for `myblog.com`)
+**Projects:**
+
+- Each user gets a default project on signup with a unique public project ID (e.g., `cLx8kZ9m`)
+- Users can create multiple projects (e.g., one per site)
+- Each project has a **domain allowlist** — GET requests are only served if the `url` parameter matches a registered domain
+- Projects are tied to the user's plan, Brand Kit, and usage quota
+- Project IDs are public and safe to embed in HTML — abuse is prevented via domain allowlisting and rate limiting
+
+**API Keys (for programmatic POST endpoint only):**
+
+- Users can create multiple API keys for server-side / build-time integrations
+- Keys are secret and should never be exposed in client-side code
 - Keys can be revoked instantly
 - Usage is tracked per key
+
+**Abuse Prevention for Public Project IDs:**
+
+- Domain allowlisting: GET requests rejected if `url` domain is not in the project's registered domains
+- Rate limiting per project ID + IP
+- Referrer/origin validation for additional protection
+- Known social crawler user agents (Twitterbot, LinkedInBot, Slackbot) are always allowed
 
 ### 5.5 Caching Strategy
 
@@ -266,7 +294,7 @@ POST https://api.ogstack.dev/v1/generate
 
 - Users can manually purge a specific URL's cache via dashboard or API call
 - Auto-refresh feature (Phase 2) re-scrapes URLs on a schedule and regenerates if content changed
-- Cache key = SHA-256 hash of (URL + template + parameters + version)
+- Cache key = SHA-256 hash of (project ID + URL + template + parameters + version)
 
 ### 5.6 Pricing & Billing
 
@@ -427,25 +455,29 @@ datasource db {
 // ─── Users & Auth ───────────────────────────
 
 model User {
-  id              String    @id @default(cuid())
-  email           String    @unique
-  name            String?
-  avatarUrl       String?
-  passwordHash    String?
-  githubId        String?   @unique
-  googleId        String?   @unique
-  plan            Plan      @default(FREE)
-  role            Role      @default(USER)
-  stripeCustomerId String?  @unique
-  stripeSubId     String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id               String    @id @default(cuid())
+  email            String    @unique
+  name             String?
+  avatarUrl        String?   @map("avatar_url")
+  passwordHash     String?   @map("password_hash")
+  githubId         String?   @unique @map("github_id")
+  googleId         String?   @unique @map("google_id")
+  plan             Plan      @default(FREE)
+  role             Role      @default(USER)
+  stripeCustomerId String?   @unique @map("stripe_customer_id")
+  stripeSubId      String?   @map("stripe_sub_id")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
 
-  apiKeys         ApiKey[]
-  brandKits       BrandKit[]
-  generatedImages GeneratedImage[]
-  auditReports    AuditReport[]
-  usageRecords    UsageRecord[]
+  projects         Project[]
+  apiKeys          ApiKey[]
+  brandKits        BrandKit[]
+  generatedImages  GeneratedImage[]
+  auditReports     AuditReport[]
+  auditLogs        AuditLog[]
+  usageRecords     UsageRecord[]
+
+  @@map("users")
 }
 
 enum Plan {
@@ -458,66 +490,93 @@ enum Plan {
 enum Role {
   USER
   ADMIN
+  SUPER_ADMIN // hard-coded in the database, not assignable via UI
 }
 
+// ─── Projects (Public Access) ────────────────
+
+model Project {
+  id             String    @id @default(cuid())
+  publicId       String    @unique @default(cuid()) @map("public_id") // Short public ID used in meta tag URLs
+  name           String
+  userId         String    @map("user_id")
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  allowedDomains String[]  @default([]) @map("allowed_domains") // Domain allowlist for abuse prevention
+  isActive       Boolean   @default(true) @map("is_active")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  generatedImages GeneratedImage[]
+  usageRecords    UsageRecord[]
+
+  @@index([publicId])
+  @@index([userId])
+  @@map("projects")
+}
+
+// ─── API Keys (Secret, for POST endpoint) ────
+
 model ApiKey {
-  id            String    @id @default(cuid())
-  key           String    @unique @default(cuid())
-  name          String
-  userId        String
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  allowedDomains String[] @default([])
-  isActive      Boolean   @default(true)
-  lastUsedAt    DateTime?
-  createdAt     DateTime  @default(now())
+  id          String    @id @default(cuid())
+  key         String    @unique @default(cuid())
+  name        String
+  userId      String    @map("user_id")
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isActive    Boolean   @default(true) @map("is_active")
+  lastUsedAt  DateTime? @map("last_used_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
 
   generatedImages GeneratedImage[]
   usageRecords    UsageRecord[]
 
   @@index([key])
+  @@map("api_keys")
 }
 
 // ─── Brand Kit ──────────────────────────────
 
 model BrandKit {
   id              String   @id @default(cuid())
-  userId          String
+  userId          String   @map("user_id")
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   name            String   @default("Default")
   domains         String[] @default([])
-  logoUrl         String?
-  primaryColor    String   @default("#000000")
-  secondaryColor  String   @default("#FFFFFF")
-  accentColor     String   @default("#3B82F6")
-  fontFamily      String   @default("inter")
-  defaultTemplate String   @default("gradient_dark")
-  isDefault       Boolean  @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  logoUrl         String?  @map("logo_url")
+  primaryColor    String   @default("#000000") @map("primary_color")
+  secondaryColor  String   @default("#FFFFFF") @map("secondary_color")
+  accentColor     String   @default("#3B82F6") @map("accent_color")
+  fontFamily      String   @default("inter") @map("font_family")
+  defaultTemplate String   @default("gradient_dark") @map("default_template")
+  isDefault       Boolean  @default(false) @map("is_default")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@unique([userId, name])
+  @@map("brand_kits")
 }
 
 // ─── Templates ──────────────────────────────
 
 model Template {
-  id          String         @id @default(cuid())
-  slug        String         @unique
-  name        String
-  description String?
-  category    TemplateCategory
-  previewUrl  String?
-  jsxCode     String         @db.Text
-  isBuiltIn   Boolean        @default(false)
-  isCommunity Boolean        @default(false)
-  contributorName String?
-  contributorUrl  String?
-  darkMode    Boolean        @default(true)
-  lightMode   Boolean        @default(true)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id              String           @id @default(cuid())
+  slug            String           @unique
+  name            String
+  description     String?
+  category        TemplateCategory
+  previewUrl      String?          @map("preview_url")
+  jsxCode         String           @db.Text @map("jsx_code")
+  isBuiltIn       Boolean          @default(false) @map("is_built_in")
+  isCommunity     Boolean          @default(false) @map("is_community")
+  contributorName String?          @map("contributor_name")
+  contributorUrl  String?          @map("contributor_url")
+  darkMode        Boolean          @default(true) @map("dark_mode")
+  lightMode       Boolean          @default(true) @map("light_mode")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
 
   generatedImages GeneratedImage[]
+
+  @@map("templates")
 }
 
 enum TemplateCategory {
@@ -533,41 +592,44 @@ enum TemplateCategory {
 // ─── Generated Images ───────────────────────
 
 model GeneratedImage {
-  id            String    @id @default(cuid())
-  userId        String
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  apiKeyId      String?
-  apiKey        ApiKey?   @relation(fields: [apiKeyId], references: [id])
-  templateId    String?
-  template      Template? @relation(fields: [templateId], references: [id])
+  id           String      @id @default(cuid())
+  userId       String      @map("user_id")
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId    String?     @map("project_id")
+  project      Project?    @relation(fields: [projectId], references: [id])
+  apiKeyId     String?     @map("api_key_id")
+  apiKey       ApiKey?     @relation(fields: [apiKeyId], references: [id])
+  templateId   String?     @map("template_id")
+  template     Template?   @relation(fields: [templateId], references: [id])
 
-  sourceUrl     String?
-  cacheKey      String    @unique
-  imageUrl      String
-  cdnUrl        String?
+  sourceUrl    String?     @map("source_url")
+  cacheKey     String      @unique @map("cache_key")
+  imageUrl     String      @map("image_url")
+  cdnUrl       String?     @map("cdn_url")
 
-  title         String?
-  description   String?
-  faviconUrl    String?
+  title        String?
+  description  String?
+  faviconUrl   String?     @map("favicon_url")
 
-  width         Int       @default(1200)
-  height        Int       @default(630)
-  format        ImageFormat @default(PNG)
-  fileSize      Int?
+  width        Int         @default(1200)
+  height       Int         @default(630)
+  format       ImageFormat @default(PNG)
+  fileSize     Int?        @map("file_size")
 
-  aiModel       String?
-  aiPrompt      String?   @db.Text
-  aiEnabled     Boolean   @default(false)
+  aiModel      String?     @map("ai_model")
+  aiPrompt     String?     @db.Text @map("ai_prompt")
+  aiEnabled    Boolean     @default(false) @map("ai_enabled")
 
-  generationMs  Int?
-  serveCount    Int       @default(0)
+  generationMs Int?        @map("generation_ms")
+  serveCount   Int         @default(0) @map("serve_count")
 
-  createdAt     DateTime  @default(now())
-  expiresAt     DateTime?
+  createdAt    DateTime    @default(now()) @map("created_at")
+  expiresAt    DateTime?   @map("expires_at")
 
   @@index([cacheKey])
   @@index([userId, createdAt])
   @@index([sourceUrl])
+  @@map("generated_images")
 }
 
 enum ImageFormat {
@@ -579,60 +641,69 @@ enum ImageFormat {
 // ─── OG Score Audit ─────────────────────────
 
 model AuditReport {
-  id            String   @id @default(cuid())
-  userId        String?
-  user          User?    @relation(fields: [userId], references: [id])
-  url           String
-  overallScore  Int
-  letterGrade   String
-  hasOgImage    Boolean
-  ogImageUrl    String?
-  ogImageWidth  Int?
-  ogImageHeight Int?
-  ogImageSize   Int?
-  hasOgTitle    Boolean
-  hasOgDesc     Boolean
-  hasTwitterCard Boolean
-  issues        Json
-  previews      Json
-  createdAt     DateTime @default(now())
+  id             String   @id @default(cuid())
+  userId         String?  @map("user_id")
+  user           User?    @relation(fields: [userId], references: [id])
+  url            String
+  overallScore   Int      @map("overall_score")
+  letterGrade    String   @map("letter_grade")
+  hasOgImage     Boolean  @map("has_og_image")
+  ogImageUrl     String?  @map("og_image_url")
+  ogImageWidth   Int?     @map("og_image_width")
+  ogImageHeight  Int?     @map("og_image_height")
+  ogImageSize    Int?     @map("og_image_size")
+  hasOgTitle     Boolean  @map("has_og_title")
+  hasOgDesc      Boolean  @map("has_og_desc")
+  hasTwitterCard Boolean  @map("has_twitter_card")
+  issues         Json
+  previews       Json
+  createdAt      DateTime @default(now()) @map("created_at")
 
   @@index([url])
+  @@map("audit_reports")
 }
 
 // ─── Usage Tracking ─────────────────────────
 
 model UsageRecord {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  apiKeyId    String?
-  apiKey      ApiKey?  @relation(fields: [apiKeyId], references: [id])
-  period      String
-  imageCount  Int      @default(0)
-  aiImageCount Int     @default(0)
-  cacheHits   Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId    String?  @map("project_id")
+  project      Project? @relation(fields: [projectId], references: [id])
+  apiKeyId     String?  @map("api_key_id")
+  apiKey       ApiKey?  @relation(fields: [apiKeyId], references: [id])
+  period       String
+  imageCount   Int      @default(0) @map("image_count")
+  aiImageCount Int      @default(0) @map("ai_image_count")
+  cacheHits    Int      @default(0) @map("cache_hits")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
-  @@unique([userId, apiKeyId, period])
+  @@unique([userId, projectId, apiKeyId, period])
   @@index([userId, period])
+  @@map("usage_records")
 }
 
-// ─── Admin Audit Log ────────────────────────
+// ─── Audit Log ──────────────────────────────
 
-model AdminAuditLog {
-  id          String   @id @default(cuid())
-  adminId     String
-  adminEmail  String
-  action      String
-  targetUserId String?
-  details     Json?
-  createdAt   DateTime @default(now())
+model AuditLog {
+  id           String   @id @default(cuid())
+  actorId      String   @map("actor_id")
+  actor        User     @relation(fields: [actorId], references: [id])
+  actorRole    Role     @map("actor_role")          // USER or ADMIN — captures role at time of action
+  action       String                               // e.g. "user.register", "project.create", "admin.plan_change", "api_key.revoke"
+  entityType   String?  @map("entity_type")         // e.g. "user", "project", "api_key", "brand_kit"
+  entityId     String?  @map("entity_id")           // ID of the affected entity
+  metadata      Json?                                // Additional context (old/new values, metadata)
+  ipAddress    String?  @map("ip_address")
+  createdAt    DateTime @default(now()) @map("created_at")
 
-  @@index([adminId])
-  @@index([targetUserId])
+  @@index([actorId])
+  @@index([entityType, entityId])
+  @@index([action])
   @@index([createdAt])
+  @@map("audit_logs")
 }
 ```
 
@@ -642,7 +713,11 @@ model AdminAuditLog {
 
 ### 10.1 Authentication
 
-All API requests require an API key:
+OGStack uses two authentication methods depending on the endpoint:
+
+**Public endpoints (GET — meta tag integration):** No API key required. The project ID in the URL path identifies the account. Domain allowlisting prevents abuse.
+
+**Private endpoints (POST, DELETE, GET /v1/usage):** Require a secret API key:
 
 ```text
 Authorization: Bearer og_live_abc123xyz
@@ -650,15 +725,17 @@ Authorization: Bearer og_live_abc123xyz
 
 ### 10.2 Endpoints
 
-#### Generate OG Image (GET — URL Mode)
+#### Generate OG Image (GET — Meta Tag Mode, No API Key)
 
 ```text
-GET /v1/generate?url={url}&template={template}&theme={theme}&ai={boolean}
+GET https://cdn.ogstack.dev/p/{projectId}/generate?url={url}&template={template}&theme={theme}&ai={boolean}
 ```
+
+This is the primary integration point. Developers copy this URL from the dashboard and paste it into their `<meta og:image>` tag. No API key needed — the project ID identifies the account.
 
 | Parameter  | Type              | Required | Default         | Description                     |
 | ---------- | ----------------- | -------- | --------------- | ------------------------------- |
-| `url`      | string            | Yes\*    | —               | URL to generate OG image for    |
+| `url`      | string            | Yes      | —               | URL to generate OG image for (must match project's registered domains) |
 | `template` | string            | No       | User's default  | Template slug                   |
 | `theme`    | `dark` \| `light` | No       | `dark`          | Color theme                     |
 | `ai`       | boolean           | No       | `false`         | Enable AI background            |
@@ -671,10 +748,11 @@ GET /v1/generate?url={url}&template={template}&theme={theme}&ai={boolean}
 
 **Response:** `200 OK` with `Content-Type: image/png` (binary image data)
 
-#### Generate OG Image (POST — Manual Mode)
+#### Generate OG Image (POST — Programmatic Mode, API Key Required)
 
 ```text
-POST /v1/generate
+POST https://api.ogstack.dev/v1/generate
+Authorization: Bearer og_live_abc123xyz
 Content-Type: application/json
 
 {
@@ -801,14 +879,15 @@ X-RateLimit-Reset: 1711036800
 
 | Code                  | Status | Description                                     |
 | --------------------- | ------ | ----------------------------------------------- |
-| `invalid_api_key`     | 401    | API key is missing, invalid, or revoked         |
+| `invalid_api_key`     | 401    | API key is missing, invalid, or revoked (POST endpoints only) |
+| `invalid_project`     | 404    | Project ID not found or inactive                |
 | `rate_limit_exceeded` | 429    | Too many requests                               |
 | `quota_exceeded`      | 402    | Monthly image quota exceeded                    |
 | `invalid_url`         | 400    | URL is malformed or unreachable                 |
 | `scrape_failed`       | 422    | Could not extract metadata from URL             |
 | `template_not_found`  | 404    | Template slug does not exist                    |
 | `generation_failed`   | 500    | Image generation failed (AI or rendering error) |
-| `domain_not_allowed`  | 403    | URL domain not in API key's allowed domains     |
+| `domain_not_allowed`  | 403    | URL domain not in project's registered domains  |
 
 ---
 
@@ -828,9 +907,11 @@ X-RateLimit-Reset: 1711036800
 
 - All API communication over HTTPS (TLS 1.3)
 - API keys hashed in database (bcrypt); only shown once on creation
+- Public project IDs are non-secret identifiers — abuse prevention relies on domain allowlisting, rate limiting, and referrer validation (same model as Google Fonts, Vercel Analytics)
 - URL scraping: sanitize and validate all input URLs; block private IP ranges (SSRF protection)
 - Image generation: content moderation on AI outputs (reject NSFW/harmful content)
-- Rate limiting per API key and per IP
+- Rate limiting per project ID + IP (GET endpoint) and per API key (POST endpoint)
+- Known social crawler user agents (Twitterbot, LinkedInBot, Slackbot, Discordbot) are always allowed through rate limits
 - CORS configuration: API allows requests from any origin (public API)
 - Dashboard: CSRF protection, secure session cookies, OAuth state validation
 - Admin panel: role-based access control (ADMIN role only); all admin actions logged to audit trail; impersonation mode is read-only
@@ -965,8 +1046,8 @@ X-RateLimit-Reset: 1711036800
 1. **Discovery:** Sees a tweet: "Just got a 94/100 OG Score on ogstack.dev/audit — my social cards look incredible now"
 2. **Audit:** Visits `ogstack.dev/audit`, enters their blog URL, sees a score of 32/100 with ugly previews
 3. **Playground:** Clicks "Fix it" → enters the playground, pastes their blog URL, picks a dark gradient template, sees a beautiful preview instantly
-4. **Signup:** Creates a free account (GitHub OAuth), gets their API key
-5. **Integration:** Adds a few lines to their site's server/build step to call the API and set the `og:image` meta tag — takes minutes with framework plugins (Next.js, Astro)
+4. **Signup:** Creates a free account (GitHub OAuth), gets a project with a public ID automatically
+5. **Integration:** Copies the generated meta tag from the playground (e.g., `<meta property="og:image" content="https://cdn.ogstack.dev/p/cLx8kZ9m/generate?url=..." />`) and pastes it into their HTML — done in 30 seconds, no API key, no server-side code
 6. **Wow moment:** Shares a blog post on Twitter, sees the beautiful OG image in the preview
 7. **Upgrade trigger:** Hits 50 image limit, or wants AI backgrounds / no watermark → upgrades to Pro ($12/mo)
 8. **Retention:** Sets up Brand Kit, adds all their projects → switching cost increases
