@@ -63,7 +63,7 @@ Claude Code entered Plan Mode (`/plan`) and created a structured plan file at `.
 
 ### Commit 1 — Project Setup
 
-```
+```text
 a48b90a docs: rewrite CLAUDE.md and fix stale project references for OGStack
 ```
 
@@ -71,7 +71,7 @@ a48b90a docs: rewrite CLAUDE.md and fix stale project references for OGStack
 
 ### Commit 2 — Database Schema
 
-```
+```text
 e2c3787 feat(db): add OGStack Prisma schema with User, Project, and ApiKey models
 ```
 
@@ -79,7 +79,7 @@ e2c3787 feat(db): add OGStack Prisma schema with User, Project, and ApiKey model
 
 ### Commits 3-4 — TDD Cycle 1: Registration (Red → Green)
 
-```
+```text
 a483386 test(api): add registration tests for auth service (red)
 c8e8d54 feat(api): implement user registration (green)
 ```
@@ -90,7 +90,7 @@ c8e8d54 feat(api): implement user registration (green)
 
 ### Commits 5-6 — TDD Cycle 2: Login (Red → Green)
 
-```
+```text
 0200b39 test(api): add login tests for auth service (red)
 f0f2ea2 feat(api): implement user login (green)
 ```
@@ -101,7 +101,7 @@ f0f2ea2 feat(api): implement user login (green)
 
 ### Commits 7-8 — TDD Cycle 3: Refresh/Logout (Red → Green)
 
-```
+```text
 933d5cb test(api): add token refresh and logout tests (red)
 31a55f2 feat(api): implement token refresh and logout (green)
 ```
@@ -112,7 +112,7 @@ f0f2ea2 feat(api): implement user login (green)
 
 ### Commit 9 — Refactor
 
-```
+```text
 efcb5c5 refactor(api): extract token generation helpers in auth service
 ```
 
@@ -120,7 +120,7 @@ Extracted `buildAuthResponse()` to eliminate duplicated response assembly across
 
 ### Commit 10 — Auth Controller
 
-```
+```text
 5a4306d feat(api): add auth controller with register, login, refresh, logout routes
 ```
 
@@ -128,7 +128,7 @@ Created thin controller with 4 endpoints: POST /auth/register, /auth/login, /aut
 
 ### Commit 11 — User Module
 
-```
+```text
 1b9a15f feat(api): add user module with profile endpoints
 ```
 
@@ -136,7 +136,7 @@ Created user module (schema, service, controller): GET /users/me and PATCH /user
 
 ### Post-plan refinements
 
-```
+```text
 d2e4b30 refactor(api): move crypto utils, use env for token expiry, add SUPER_ADMIN role
 ```
 

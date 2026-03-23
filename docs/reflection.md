@@ -1,35 +1,33 @@
-# HW4 Reflection — Claude Code Workflow & TDD
+# HW4 Reflection - Claude Code Workflow & TDD
 
 ## How does the Explore→Plan→Implement→Commit workflow compare to your previous approach?
 
-Before using Claude Code's structured workflow, my development process was more ad-hoc. I would typically jump into coding after a quick mental plan, often discovering issues mid-implementation that forced me to backtrack. The Explore→Plan→Implement→Commit pattern changed this in three meaningful ways.
+My usual process is: skim the code, start building, fix stuff as it breaks. That works for small changes but I always end up backtracking on bigger features.
 
-**Explore phase eliminated assumptions.** When I started this assignment, the repository had placeholder files copied from a previous project (DepVault). Rather than assuming the codebase was clean, the Explore phase — using Glob, Grep, and Read tools — systematically uncovered stale references everywhere: the CLAUDE.md described the wrong product, the Prisma schema had models for Students and Employers, the Swagger plugin said "Connect API," and `.claude/rules/` referenced `@depvault/shared`. Without structured exploration, I might have built on top of broken foundations and spent hours debugging import errors later.
+The Explore phase caught things I would have missed. Running Glob and Grep systematically across the codebase surfaced inconsistencies in config files, stale references in documentation, and gaps in the database schema before I wrote a single line of code. One example: there was a wrong package import buried in `.claude/rules/` that I never would have found by hand; it's in a config file I don't open. Without structured exploration, I'd have been debugging weird import errors 30 minutes into implementation.
 
-**Plan mode forced scope discipline.** Entering Plan mode before writing any code was surprisingly effective. I had to make explicit decisions: which feature to implement (auth + user vs. metadata scraper), how to handle the stale PRD (condensed summary vs. full import), and what the TDD commit sequence would look like. The Plan agent helped me think through the mocking strategy for tests before writing a single line. In my previous approach, these decisions would have been made implicitly during coding, often leading to inconsistencies or over-engineering.
+Plan mode was honestly the part I expected to blow past. Instead it turned out to be the most valuable step. Writing out the plan forced real decisions: auth+user module or metadata scraper? Condense the 1000-line PRD or import the whole thing? What's the mocking strategy for tests? I normally figure that stuff out while coding, and the results are inconsistent. Having the plan written down meant I knew commit 3 would be failing tests, commit 4 would make them pass, and so on. No guessing.
 
-**Commit-driven development created accountability.** Planning the commit sequence in advance — knowing that commit 3 would be "red" tests and commit 4 would be "green" implementation — gave each coding session a clear deliverable. Instead of working on "the auth feature" as an amorphous blob, I was working toward a specific, committable state. This made the work feel more structured and progress more measurable.
+Planning commits ahead of time also changed how the work felt. Instead of vaguely working on "the auth feature," each step had a specific goal: write 4 tests, make them green, next cycle. By the time I hit the refactor commit, the duplication across register/login/refresh was obvious because I'd just built all three.
 
-The main trade-off is speed on small tasks. For a quick bug fix, the full four-phase workflow adds overhead. But for any feature that touches multiple files or requires architectural decisions, the upfront investment in exploration and planning pays for itself many times over.
+For a one-line fix, this whole workflow is too much. But for anything that spans multiple files, the upfront time saved me from the kind of rework I usually end up doing.
 
 ## What context management strategies worked best?
 
-Context window management turned out to be one of the most impactful aspects of using Claude Code effectively. Three strategies stood out:
+Context limits are a real constraint, and I had to be more deliberate about them than I expected.
 
-**1. Parallel Explore agents.** Rather than sequentially reading files and accumulating context, I launched multiple Explore subagents simultaneously — one to scan the project structure, another to read the PRD and configuration files. Each agent worked in isolation and returned a summary, keeping the main conversation context lean. This was critical because the repo had 43+ TypeScript files in the backend alone.
+Parallel Explore agents were the biggest win. Instead of reading files one at a time and filling the conversation with raw content, I launched two subagents at once: one for the project structure and backend files, the other for the PRD and configuration. Each returned a summary. The backend has 43+ TypeScript files, so dumping those into the main conversation would have been a problem.
 
-**2. Condensed reference documents.** The PRD (`docs/prd.md`) was approximately 1,000 lines — far too large to import into every conversation. Instead, I created `docs/prd-summary.md` at roughly 80 lines, containing only the key specs: API modes, auth model, data model, pricing tiers, and security requirements. This was added as an `@import` in CLAUDE.md, so Claude Code loads it automatically but at a fraction of the context cost. The full PRD remains available for deep dives when needed.
+Creating a condensed PRD also helped a lot. The full `docs/prd.md` runs about 1,000 lines. Most conversations only need the API spec, auth model, and data schema, so I wrote `docs/prd-summary.md` at ~80 lines and added it as an `@import` in CLAUDE.md. Claude Code loads it automatically, and the full version is there when I need to look up pricing details or launch timeline.
 
-**3. Targeted file reads.** Instead of reading entire directories, I read specific files that I knew I needed: `app.ts` for route registration, `http.error.ts` for error classes, `password.ts` for existing utilities, `bunfig.toml` for test configuration. This prevented context bloat and kept responses focused.
+Beyond that, I tried to only read files I actually needed: `app.ts` for route registration, `http.error.ts` for error classes, `bunfig.toml` for test setup. Browsing whole directories is tempting but wasteful.
 
-One strategy I would use more in future sessions is `/compact` between major phases. After the exploration phase produced extensive file contents, compacting before the implementation phase would have freed up context for the more detailed coding work.
+Something I'd do differently next time: run `/compact` between exploring and implementing. The exploration phase pulled in a lot of file content that just sat there taking up space once I started writing code.
 
-## Key Takeaways
+## What I learned
 
-1. **TDD through Claude Code is remarkably effective.** Writing tests first forced me to think about the API contract before implementation. The mocking strategy (PrismaClient, password utils, JWT) was planned during the Plan phase, so the test file was coherent from the start rather than accumulating hacks.
+Writing tests first through Claude Code went better than expected, and I think the reason is that it forces you to define mocks and expected behavior before you write the implementation. I planned the PrismaClient mocking approach during Plan mode, so the test file was coherent from the start instead of accumulating workarounds.
 
-2. **The Explore phase catches what humans miss.** I would not have found the `@depvault/shared/api` reference in `.claude/rules/web/api-and-auth.md` manually — it was buried in a configuration file I rarely open. Systematic exploration surfaced it immediately.
+The git history became documentation on its own. Tagging TDD commits with `(red)` and `(green)` means you can run `git log --oneline` and read the feature's story without opening any files.
 
-3. **Commit messages as documentation.** Following Conventional Commits with `(red)` and `(green)` suffixes in TDD commits created a self-documenting git history. Anyone reviewing `git log --oneline` can immediately understand both the workflow and the feature's evolution.
-
-4. **Configuration matters.** The `.claude/settings.json` with its PostToolUse hook (auto-formatting with Prettier on every edit) and permission allowlists (Bun commands, GitHub CLI, Playwright) made the workflow seamless. Without the Prettier hook, every commit would have required a manual formatting step.
+The `.claude/settings.json` setup mattered more than I initially thought. There's a PostToolUse hook that auto-formats every edit with Prettier, so I never dealt with formatting before commits. The permission allowlists for Bun and GitHub CLI commands cut down on approval prompts. Small things, but across 12+ commits in one session, they add up.
