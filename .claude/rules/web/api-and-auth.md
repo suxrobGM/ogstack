@@ -7,7 +7,7 @@ paths: [apps/web/src/**]
 
 ## Client-Side API Client
 
-Located at `src/lib/api.ts`. Uses Eden Treaty via `createApiClient()` from `@depvault/shared/api` with `credentials: "include"` for cookie auth.
+Located at `src/lib/api.ts`. Uses Eden Treaty via `createApiClient()` from `@ogstack/shared/api` with `credentials: "include"` for cookie auth.
 
 ## Server-Side API Client
 

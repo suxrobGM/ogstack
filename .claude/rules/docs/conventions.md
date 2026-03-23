@@ -20,7 +20,7 @@ paths: [apps/docs/**]
 
 ## Theme
 
-- Dark mode matching DepVault palette (emerald primary `#10b981`)
+- Dark mode matching OGStack palette (emerald primary `#10b981`)
 - CSS overrides in `global.css`
 - No auth required — docs are public
 
@@ -30,7 +30,6 @@ paths: [apps/docs/**]
 - No "Overview" sections that repeat the page heading
 - No "What's Next" / "Next Steps" sections — the sidebar handles navigation
 - No "Best Practices" sections unless advice is specific and non-obvious
-- Encryption details (AES-256-GCM) belong on the Environment Vault page only — other pages say "encrypted at rest"
 - Step-by-step UI instructions: 3–4 steps max
 - Include CLI examples with flags tables for relevant features
 - Keep pages focused — one feature per page

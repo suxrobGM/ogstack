@@ -8,13 +8,14 @@ export const swaggerPlugin = new Elysia({ name: "swagger" }).use(
   swagger({
     documentation: {
       info: {
-        title: "Connect API",
+        title: "OGStack API",
         version: "1.0.0",
-        description: "Connect platform API — paid 1-on-1 communication between fans and creators",
+        description: "OGStack API — generate beautiful Open Graph images for any URL",
       },
       tags: [
         { name: "Auth", description: "Authentication & authorization" },
         { name: "Users", description: "User profile management" },
+        { name: "Projects", description: "Project management" },
         { name: "Admin", description: "Admin management" },
       ],
       components: {

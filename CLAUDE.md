@@ -1,6 +1,8 @@
-# DepVault Platform
+# OGStack Platform
 
-DepVault is a web dashboard that analyzes dependencies, detects vulnerabilities, and securely stores environment variables across any tech stack - from package.json to .env to appsettings.json - all in one place.
+@docs/prd-summary.md
+
+OGStack is a developer-first API platform for generating beautiful Open Graph images. A single meta tag or API call produces contextual social preview images for any URL — no design effort required.
 
 ## Tech Stack
 
@@ -11,9 +13,8 @@ DepVault is a web dashboard that analyzes dependencies, detects vulnerabilities,
 
 ## PRD & Design References
 
-- **PRD**: `docs/prd.md` — user stories US-01 through US-10, sprint plan, acceptance criteria
-- **UI Mockups**: `docs/ui-mockups.md` — ASCII wireframes for every screen (app shell, auth, dashboard, analysis, env vault, diff, secrets, settings, members, notifications, profile, converter)
-- **Sprint Plan**: PRD Section 9 — Sprint 1 (Foundation & Core Analysis), Sprint 2 (Env Vault & Polish)
+- **PRD**: `docs/prd.md` — full product spec, API design, data model, pricing, launch plan
+- **PRD Summary**: `docs/prd-summary.md` — condensed reference for key specs and acceptance criteria
 
 ### UI Component Guidelines
 
@@ -26,11 +27,11 @@ DepVault is a web dashboard that analyzes dependencies, detects vulnerabilities,
 
 ### Key User Flows
 
-1. **Registration**: Landing → Register form → Email verification → Dashboard
-2. **Analysis**: Dashboard → Project → Upload file → Parse → Results table with badges
-3. **Env vault**: Project → Env tab → Select environment → CRUD variables → Diff view
-4. **Secret sharing**: Env vault → Select variables → Generate link → Copy/share → One-time access
-5. **Onboarding**: New member → Checklist page → Fill required vars → Download .env.example
+1. **Registration**: Landing → Register (email/password or OAuth) → Dashboard
+2. **Playground**: Dashboard → Paste URL → Select template → Preview OG image → Copy meta tag
+3. **OG Generation (GET)**: Add `<meta>` tag with public project ID → CDN serves generated image
+4. **OG Generation (POST)**: Server-side call with API key → JSON response with image URL
+5. **OG Audit**: Paste URL → Score 0-100 → Platform previews → Fix recommendations
 
 ## Layout
 
@@ -38,7 +39,6 @@ DepVault is a web dashboard that analyzes dependencies, detects vulnerabilities,
 apps/api/        → Elysia REST API (port 4000)
 apps/web/        → Next.js web app (port 4001)
 apps/docs/       → Nextra documentation site (port 4002)
-apps/cli/        → .NET 10 CLI (Native AOT)
 packages/shared/ → Shared types & utils
 ```
 
@@ -88,7 +88,7 @@ Scopes: `api`, `web`, `shared`, `db`, `ci`
 Examples:
 
 - `feat(api): add email/password registration endpoint`
-- `fix(web): correct analysis table sorting order`
+- `fix(web): correct template preview rendering`
 - `chore(ci): add type-check step to GitHub Actions`
 
 ### Pull Request Workflow
@@ -120,13 +120,13 @@ Aim for ~300–350 LOC per file as a soft ceiling. If a service or controller gr
 
 ## Frontend Architecture
 
-### Folder Structure (apps/frontend/)
+### Folder Structure (apps/web/)
 
 ```text
 src/
 ├── app/                 # Next.js App Router pages
 │   ├── (auth)/          # Auth pages (login, register, reset-password)
-│   ├── (dashboard)/     # Authenticated pages (projects, analysis, vault)
+│   ├── (dashboard)/     # Authenticated pages (projects, playground, settings)
 │   └── layout.tsx       # Root layout with theme provider
 ├── components/          # Reusable UI components
 │   ├── ui/              # Generic components (buttons, modals, forms)
@@ -160,8 +160,8 @@ src/
 │   ├── errors/         # HttpError classes (400, 401, 403, 404, 409)
 │   ├── middleware/      # auth guard, role guard, global error handler
 │   ├── plugins/        # swagger + cors Elysia plugins
-│   ├── utils/          # password, logger, date, billing, commission helpers
-│   ├── services/       # connection manager
+│   ├── utils/          # password, logger, date helpers
+│   ├── services/       # email service, connection manager
 │   └── database/       # Prisma client singleton with pg adapter
 ├── modules/            # Feature modules (domain-driven)
 ├── jobs/               # Background/scheduled tasks
@@ -194,13 +194,13 @@ Applies when modifying Prisma schema files or writing database queries.
 ## Schema
 
 - **ORM**: Prisma 7 with PostgreSQL driver adapter (`@prisma/adapter-pg`)
-- **Schema location**: `apps/backend/prisma/schema/` (multi-file via `prismaSchemaFolder`)
+- **Schema location**: `apps/api/prisma/schema/` (multi-file via `prismaSchemaFolder`)
 
 ## Model Rules
 
 - **IDs**: UUID for all primary keys
 - **Money**: `Decimal(12,2)` for prices, `Decimal(14,2)` for balances/totals
-- **Soft deletes**: `deletedAt DateTime?` on User and Message models
+- **Soft deletes**: `deletedAt DateTime?` on User model
 - **Timestamps**: every model must have `createdAt DateTime @default(now())` and `updatedAt DateTime @updatedAt`
 
 ## Workflow
@@ -224,17 +224,16 @@ Each module uses a 3-file core with optional extras:
 ### Optional Files
 
 - `{module}.repository.ts` — Only when the module has dynamic WHERE clauses, raw SQL, or multi-table upserts. Skip for simple `findUnique`/`create`/`update`/`delete`.
-- `{module}.mapper.ts` — Pure exported functions (not class methods) that convert Prisma models to API response shapes. Extract when the service has 3+ mapping functions. Handle `Decimal` → `Number` and nested relation flattening.
-- `{module}.ws.ts` — WebSocket handlers (currently only `messages/` module).
+- `{module}.mapper.ts` — Pure exported functions (not class methods) that convert Prisma models to API response shapes. Extract when the service has 3+ mapping functions.
 
 ## Registration
 
 Every module exports an Elysia plugin. Register it in `src/app.ts`:
 
 ```ts
-import { ordersController } from "./modules/orders";
+import { authController } from "./modules/auth";
 
-app.use(ordersController);
+app.use(authController);
 ```
 
 ---
@@ -249,9 +248,8 @@ app.use(ordersController);
 - Use error classes from `common/errors/` — never throw raw `Error`
 - Use UUID for all primary keys
 - Add `createdAt` and `updatedAt` to every Prisma model
-- Use `Decimal(12,2)` for money fields, never `float`
 - Hash passwords with bcrypt, never store plaintext
-- Encrypt env variable values with AES-256-GCM before storage
+- Hash API keys before storage — never store raw keys in the database
 - Keep controllers thin — business logic belongs in services
 - Use MUI components for all UI elements in the web app
 - Use `next/link` for navigation, `next/image` for images
@@ -272,12 +270,13 @@ app.use(ordersController);
 
 ### Security Rules
 
-- All API endpoints behind auth guard except `/auth/register`, `/auth/login`, `/auth/github`, `/auth/github/callback`
-- Only project owner can delete project or manage member roles
+- All API endpoints behind auth guard except `/auth/register`, `/auth/login`, `/auth/refresh`
+- Only project owner can delete project or manage API keys
 - Rate-limit auth endpoints (login, register, password reset)
-- Sanitize all user-provided file content before parsing
-- Never log decrypted secret values
-- One-time links must be cryptographically random and delete content after first access
+- SSRF protection on URL scraping — block private IP ranges, localhost, link-local addresses
+- Domain allowlisting on public project IDs to prevent abuse
+- Never log raw API keys or decrypted secrets
+- Validate and sanitize all user-provided URLs before fetching
 
 ---
 
@@ -301,7 +300,6 @@ app.use(ordersController);
 ### Coverage Goals
 
 - Services: 80%+ line coverage
-- Parsers: 90%+ (critical path with many edge cases)
 - Controllers: integration test for each endpoint
 - Frontend: test all form submissions and key user interactions
 
@@ -309,8 +307,8 @@ app.use(ordersController);
 
 - Service business logic (validation, transformation, error cases)
 - API endpoint request/response contracts
-- Dependency file parsers (valid input, malformed input, edge cases)
-- Encryption/decryption round-trips
+- URL metadata extraction (valid input, malformed HTML, edge cases)
+- Template rendering pipeline
 - Auth flows (registration, login, token validation, role checks)
 
 ### What NOT to Test
