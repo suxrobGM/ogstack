@@ -3,11 +3,13 @@ import { injectable } from "tsyringe";
 import { ConflictError, UnauthorizedError } from "@/common/errors";
 import { hashPassword, verifyPassword } from "@/common/utils/password";
 import { PrismaClient } from "@/generated/prisma";
-import type { AuthResponse, LoginBody, RefreshBody, RegisterBody } from "./auth.schema";
+import type { AuthResponse, AuthUser, LoginBody, RefreshBody, RegisterBody } from "./auth.schema";
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET ?? "dev-secret");
 const JWT_EXPIRY = process.env.JWT_EXPIRY ?? "7d";
 const REFRESH_TOKEN_EXPIRY_DAYS = parseInt(process.env.REFRESH_TOKEN_EXPIRY ?? "30", 10);
+
+type TransactionClient = Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0];
 
 @injectable()
 export class AuthService {
@@ -29,23 +31,15 @@ export class AuthService {
         data: { email, passwordHash, name },
       });
 
-      const publicId = this.generatePublicId();
       await tx.project.create({
         data: {
           userId: user.id,
-          publicId,
+          publicId: this.generatePublicId(),
           name: "Default Project",
         },
       });
 
-      const accessToken = await this.generateAccessToken(user);
-      const refreshTokenRecord = await this.createRefreshToken(tx, user.id);
-
-      return {
-        user: { id: user.id, email: user.email, name: user.name, role: user.role },
-        accessToken,
-        refreshToken: refreshTokenRecord.token,
-      };
+      return this.buildAuthResponse(user, tx);
     });
   }
 
@@ -54,11 +48,7 @@ export class AuthService {
     const { email, password } = data;
 
     const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user || user.deletedAt) {
-      throw new UnauthorizedError("Invalid email or password");
-    }
-
-    if (!user.passwordHash) {
+    if (!user || user.deletedAt || !user.passwordHash) {
       throw new UnauthorizedError("Invalid email or password");
     }
 
@@ -67,14 +57,7 @@ export class AuthService {
       throw new UnauthorizedError("Invalid email or password");
     }
 
-    const accessToken = await this.generateAccessToken(user);
-    const refreshTokenRecord = await this.createRefreshToken(this.prisma, user.id);
-
-    return {
-      user: { id: user.id, email: user.email, name: user.name, role: user.role },
-      accessToken,
-      refreshToken: refreshTokenRecord.token,
-    };
+    return this.buildAuthResponse(user, this.prisma);
   }
 
   /** Exchange a valid refresh token for new access + refresh tokens. */
@@ -92,25 +75,12 @@ export class AuthService {
       throw new UnauthorizedError("Invalid or expired refresh token");
     }
 
-    // Revoke old token
     await this.prisma.refreshToken.update({
       where: { id: record.id },
       data: { revokedAt: new Date() },
     });
 
-    const accessToken = await this.generateAccessToken(record.user);
-    const newRefreshToken = await this.createRefreshToken(this.prisma, record.userId);
-
-    return {
-      user: {
-        id: record.user.id,
-        email: record.user.email,
-        name: record.user.name,
-        role: record.user.role,
-      },
-      accessToken,
-      refreshToken: newRefreshToken.token,
-    };
+    return this.buildAuthResponse(record.user, this.prisma);
   }
 
   /** Revoke a refresh token. */
@@ -119,6 +89,20 @@ export class AuthService {
       where: { token: refreshToken },
       data: { revokedAt: new Date() },
     });
+  }
+
+  private async buildAuthResponse(
+    user: { id: string; email: string; name: string; role: string },
+    client: TransactionClient,
+  ): Promise<AuthResponse> {
+    const accessToken = await this.generateAccessToken(user);
+    const refreshTokenRecord = await this.createRefreshToken(client, user.id);
+
+    return {
+      user: toAuthUser(user),
+      accessToken,
+      refreshToken: refreshTokenRecord.token,
+    };
   }
 
   private async generateAccessToken(user: {
@@ -133,14 +117,11 @@ export class AuthService {
       .sign(JWT_SECRET);
   }
 
-  private async createRefreshToken(
-    tx: Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0],
-    userId: string,
-  ) {
-    const token = this.generateRandomToken();
+  private async createRefreshToken(client: TransactionClient, userId: string) {
+    const token = generateRandomToken();
     const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
 
-    return tx.refreshToken.create({
+    return client.refreshToken.create({
       data: { userId, token, expiresAt },
     });
   }
@@ -148,11 +129,15 @@ export class AuthService {
   private generatePublicId(): string {
     return crypto.randomUUID().replace(/-/g, "").slice(0, 12);
   }
+}
 
-  private generateRandomToken(): string {
-    const bytes = crypto.getRandomValues(new Uint8Array(32));
-    return Array.from(bytes)
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
-  }
+function toAuthUser(user: { id: string; email: string; name: string; role: string }): AuthUser {
+  return { id: user.id, email: user.email, name: user.name, role: user.role };
+}
+
+function generateRandomToken(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
