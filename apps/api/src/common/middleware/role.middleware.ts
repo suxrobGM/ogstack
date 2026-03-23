@@ -5,6 +5,7 @@ import { authGuard } from "./auth.middleware";
 
 /**
  * Role-based access control middleware.
+ * SUPER_ADMIN implicitly passes every role check.
  *
  * @example
  * someRoutes.use(requireRole(UserRole.ADMIN)).get(...)
@@ -14,6 +15,10 @@ export const requireRole = (...roles: UserRole[]) =>
     .use(authGuard)
     .onBeforeHandle({ as: "scoped" }, ({ user }) => {
       const role = user?.role as UserRole;
+
+      if (role === UserRole.SUPER_ADMIN) {
+        return;
+      }
 
       if (!roles.includes(role)) {
         throw new ForbiddenError("Insufficient permissions");

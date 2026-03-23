@@ -1,13 +1,13 @@
 import { SignJWT } from "jose";
 import { injectable } from "tsyringe";
 import { ConflictError, UnauthorizedError } from "@/common/errors";
+import { generatePublicId, generateRandomToken } from "@/common/utils/crypto";
 import { hashPassword, verifyPassword } from "@/common/utils/password";
 import { PrismaClient } from "@/generated/prisma";
-import type { AuthResponse, AuthUser, LoginBody, RefreshBody, RegisterBody } from "./auth.schema";
+import type { AuthResponse, LoginBody, RefreshBody, RegisterBody } from "./auth.schema";
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET ?? "dev-secret");
 const JWT_EXPIRY = process.env.JWT_EXPIRY ?? "7d";
-const REFRESH_TOKEN_EXPIRY_DAYS = parseInt(process.env.REFRESH_TOKEN_EXPIRY ?? "30", 10);
 
 type TransactionClient = Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0];
 
@@ -34,7 +34,7 @@ export class AuthService {
       await tx.project.create({
         data: {
           userId: user.id,
-          publicId: this.generatePublicId(),
+          publicId: generatePublicId(),
           name: "Default Project",
         },
       });
@@ -99,7 +99,7 @@ export class AuthService {
     const refreshTokenRecord = await this.createRefreshToken(client, user.id);
 
     return {
-      user: toAuthUser(user),
+      user: { id: user.id, email: user.email, name: user.name, role: user.role },
       accessToken,
       refreshToken: refreshTokenRecord.token,
     };
@@ -119,25 +119,17 @@ export class AuthService {
 
   private async createRefreshToken(client: TransactionClient, userId: string) {
     const token = generateRandomToken();
-    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
+    const expiryDays = parseRefreshTokenExpiryDays();
+    const expiresAt = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000);
 
     return client.refreshToken.create({
       data: { userId, token, expiresAt },
     });
   }
-
-  private generatePublicId(): string {
-    return crypto.randomUUID().replace(/-/g, "").slice(0, 12);
-  }
 }
 
-function toAuthUser(user: { id: string; email: string; name: string; role: string }): AuthUser {
-  return { id: user.id, email: user.email, name: user.name, role: user.role };
-}
-
-function generateRandomToken(): string {
-  const bytes = crypto.getRandomValues(new Uint8Array(32));
-  return Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+function parseRefreshTokenExpiryDays(): number {
+  const raw: string = process.env.REFRESH_TOKEN_EXPIRY ?? "30d";
+  const match = raw.match(/^(\d+)d?$/);
+  return match?.[1] ? parseInt(match[1], 10) : 30;
 }
