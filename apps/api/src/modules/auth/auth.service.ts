@@ -3,7 +3,7 @@ import { injectable } from "tsyringe";
 import { ConflictError, UnauthorizedError } from "@/common/errors";
 import { hashPassword, verifyPassword } from "@/common/utils/password";
 import { PrismaClient } from "@/generated/prisma";
-import type { AuthResponse, LoginBody, RegisterBody } from "./auth.schema";
+import type { AuthResponse, LoginBody, RefreshBody, RegisterBody } from "./auth.schema";
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET ?? "dev-secret");
 const JWT_EXPIRY = process.env.JWT_EXPIRY ?? "7d";
@@ -11,7 +11,7 @@ const REFRESH_TOKEN_EXPIRY_DAYS = parseInt(process.env.REFRESH_TOKEN_EXPIRY ?? "
 
 @injectable()
 export class AuthService {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient) {}
 
   /** Register a new user, create a default project, and return auth tokens. */
   async register(data: RegisterBody): Promise<AuthResponse> {
@@ -75,6 +75,50 @@ export class AuthService {
       accessToken,
       refreshToken: refreshTokenRecord.token,
     };
+  }
+
+  /** Exchange a valid refresh token for new access + refresh tokens. */
+  async refresh(data: RefreshBody): Promise<AuthResponse> {
+    const record = await this.prisma.refreshToken.findFirst({
+      where: {
+        token: data.refreshToken,
+        revokedAt: null,
+        expiresAt: { gt: new Date() },
+      },
+      include: { user: true },
+    });
+
+    if (!record || record.user.deletedAt) {
+      throw new UnauthorizedError("Invalid or expired refresh token");
+    }
+
+    // Revoke old token
+    await this.prisma.refreshToken.update({
+      where: { id: record.id },
+      data: { revokedAt: new Date() },
+    });
+
+    const accessToken = await this.generateAccessToken(record.user);
+    const newRefreshToken = await this.createRefreshToken(this.prisma, record.userId);
+
+    return {
+      user: {
+        id: record.user.id,
+        email: record.user.email,
+        name: record.user.name,
+        role: record.user.role,
+      },
+      accessToken,
+      refreshToken: newRefreshToken.token,
+    };
+  }
+
+  /** Revoke a refresh token. */
+  async logout(refreshToken: string): Promise<void> {
+    await this.prisma.refreshToken.updateMany({
+      where: { token: refreshToken },
+      data: { revokedAt: new Date() },
+    });
   }
 
   private async generateAccessToken(user: {
