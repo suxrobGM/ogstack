@@ -6,6 +6,7 @@ import { logger } from "@/common/logger";
 import { errorMiddleware } from "@/common/middleware";
 import { corsPlugin, swaggerPlugin, uploadsStaticPlugin } from "@/common/plugins";
 import { validateEnv } from "@/env";
+import { authController } from "@/modules/auth";
 import { HttpErrorResponses } from "@/types/response";
 
 validateEnv();
@@ -24,10 +25,11 @@ const app = new Elysia()
       .guard({
         response: HttpErrorResponses,
       })
+      .use(authController),
   )
   .listen(parseInt(process.env.PORT!));
 
-logger.info(`Connect API running at http://${app.server?.hostname}:${app.server?.port}`);
+logger.info(`OGStack API running at http://${app.server?.hostname}:${app.server?.port}`);
 
 if (process.env.NODE_ENV === "development") {
   logger.info(

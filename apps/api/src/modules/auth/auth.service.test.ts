@@ -367,7 +367,7 @@ describe("AuthService", () => {
 
   describe("logout", () => {
     it("should revoke refresh token on logout", async () => {
-      let revokedToken: string | null = null;
+      let revokedToken = null as string | null;
       (mockPrisma.refreshToken as unknown as Record<string, ReturnType<typeof mock>>).updateMany =
         mock((args: { where: { token: string }; data: { revokedAt: Date } }) => {
           revokedToken = args.where.token;
