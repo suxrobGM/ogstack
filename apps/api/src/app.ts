@@ -22,12 +22,7 @@ const app = new Elysia()
   })
   .get("/health", () => ({ status: "ok", timestamp: new Date().toISOString() }))
   .group("/api", (api) =>
-    api
-      .guard({
-        response: HttpErrorResponses,
-      })
-      .use(authController)
-      .use(userController),
+    api.guard({ response: HttpErrorResponses }).use(authController).use(userController),
   )
   .listen(parseInt(process.env.PORT!));
 

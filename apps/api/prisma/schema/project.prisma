@@ -17,12 +17,12 @@ model Project {
 }
 
 model ApiKey {
-  id        String    @id @default(uuid()) @db.Uuid
-  projectId String    @db.Uuid
-  userId    String    @db.Uuid
-  keyHash   String    @unique
-  prefix    String
-  name      String
+  id         String    @id @default(uuid()) @db.Uuid
+  projectId  String    @db.Uuid
+  userId     String    @db.Uuid
+  keyHash    String    @unique
+  prefix     String
+  name       String
   lastUsedAt DateTime?
   revokedAt  DateTime?
 

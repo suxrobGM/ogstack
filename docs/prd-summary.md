@@ -23,7 +23,7 @@ Parameters: `url`, `template`, `accent`, `dark`, `ai_bg`, `font`, `logo`
 
 ### POST (Programmatic Mode) — Requires API key
 
-```
+```text
 POST https://api.ogstack.dev/v1/generate
 Authorization: Bearer {apiKey}
 Body: { url, template, options: { accent, dark, ai_background, font, logo_position } }
