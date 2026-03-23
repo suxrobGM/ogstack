@@ -49,6 +49,34 @@ export class AuthService {
     });
   }
 
+  /** Authenticate a user by email and password. */
+  async login(data: LoginBody): Promise<AuthResponse> {
+    const { email, password } = data;
+
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user || user.deletedAt) {
+      throw new UnauthorizedError("Invalid email or password");
+    }
+
+    if (!user.passwordHash) {
+      throw new UnauthorizedError("Invalid email or password");
+    }
+
+    const valid = await verifyPassword(password, user.passwordHash);
+    if (!valid) {
+      throw new UnauthorizedError("Invalid email or password");
+    }
+
+    const accessToken = await this.generateAccessToken(user);
+    const refreshTokenRecord = await this.createRefreshToken(this.prisma, user.id);
+
+    return {
+      user: { id: user.id, email: user.email, name: user.name, role: user.role },
+      accessToken,
+      refreshToken: refreshTokenRecord.token,
+    };
+  }
+
   private async generateAccessToken(user: {
     id: string;
     role: string;
