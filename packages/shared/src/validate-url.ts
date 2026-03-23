@@ -1,9 +1,17 @@
+/** Result of a URL validation check. */
 export interface UrlValidationResult {
   valid: boolean;
   reason?: string;
 }
 
-function isPrivateIPv4(hostname: string): boolean {
+/**
+ * Checks whether an IPv4 address falls within a private or reserved range.
+ * Covers 0.0.0.0/8, 10.0.0.0/8, 127.0.0.0/8, 169.254.0.0/16,
+ * 172.16.0.0/12, and 192.168.0.0/16.
+ *
+ * Returns false for non-IPv4 hostnames (domain names).
+ */
+export function isPrivateIp(hostname: string): boolean {
   const parts = hostname.split('.');
   if (parts.length !== 4) return false;
 
@@ -43,11 +51,20 @@ function isBlockedIPv6(bare: string): boolean {
   if (lower.startsWith('fe80:')) return true;
 
   const mapped = extractIPv4FromMappedIPv6(lower);
-  if (mapped !== null) return isPrivateIPv4(mapped);
+  if (mapped !== null) return isPrivateIp(mapped);
 
   return false;
 }
 
+/**
+ * Validates a URL for SSRF safety. Parses with the WHATWG URL constructor
+ * (which normalizes hex, octal, decimal, and short-form IPs) then checks
+ * the resolved hostname against blocked ranges.
+ *
+ * Rejects: private IPv4 ranges, localhost, link-local (169.254.x.x),
+ * IPv6 loopback/link-local, IPv4-mapped IPv6, non-http(s) protocols,
+ * and malformed URLs.
+ */
 export function validateUrl(url: string): UrlValidationResult {
   let parsed: URL;
   try {
@@ -78,7 +95,7 @@ export function validateUrl(url: string): UrlValidationResult {
     return { valid: false, reason: 'URL resolves to a blocked address range' };
   }
 
-  if (isPrivateIPv4(hostname)) {
+  if (isPrivateIp(hostname)) {
     return { valid: false, reason: 'URL resolves to a blocked address range' };
   }
 
