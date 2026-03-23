@@ -1,28 +1,25 @@
 import type { ReactElement, ReactNode } from "react";
 import { Body, Container, Head, Hr, Html, Preview, Section, Text } from "@react-email/components";
-import { t, type Language } from "@/i18n";
-import { commonTranslations } from "@/i18n/translations/common";
 import { brand, styles } from "./styles";
 
 interface BaseLayoutProps {
   children: ReactNode;
   preview: string;
-  lang: Language;
 }
 
-/** Shared email layout with Mehnatsevar branding, header, and footer. */
+/** Shared email layout with OGStack branding, header, and footer. */
 export function BaseLayout(props: BaseLayoutProps): ReactElement {
-  const { children, preview, lang } = props;
+  const { children, preview } = props;
 
   return (
-    <Html lang={lang.toLowerCase()}>
+    <Html lang="en">
       <Head />
       <Preview>{preview}</Preview>
       <Body style={styles.body}>
         <Container style={{ maxWidth: "600px", margin: "0 auto", padding: "24px 16px" }}>
           <Container style={styles.container}>
             <Section style={styles.headerBanner}>
-              <Text style={styles.brandName}>Mehnatsevar</Text>
+              <Text style={styles.brandName}>OGStack</Text>
             </Section>
 
             <Section style={styles.content}>{children}</Section>
@@ -30,10 +27,7 @@ export function BaseLayout(props: BaseLayoutProps): ReactElement {
             <Hr style={styles.hr} />
 
             <Section style={styles.footerSection}>
-              <Text style={styles.footer}>{t(commonTranslations, "footerTagline", lang)}</Text>
-              <Text style={{ ...styles.footer, marginTop: "4px" }}>
-                {t(commonTranslations, "footerLocation", lang)}
-              </Text>
+              <Text style={styles.footer}>Beautiful social previews. Zero effort.</Text>
             </Section>
           </Container>
 
@@ -47,7 +41,7 @@ export function BaseLayout(props: BaseLayoutProps): ReactElement {
                 lineHeight: "18px",
               }}
             >
-              © {new Date().getFullYear()} Mehnatsevar
+              © {new Date().getFullYear()} OGStack
             </Text>
           </Container>
         </Container>

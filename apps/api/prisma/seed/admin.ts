@@ -17,17 +17,14 @@ export async function seedAdmin(): Promise<void> {
     where: { email },
     update: {
       passwordHash,
-      role: "SUPER_ADMIN",
-      status: "ACTIVE",
+      role: "ADMIN",
       deletedAt: null,
     },
     create: {
       email,
       passwordHash,
-      firstName: "Admin",
-      lastName: "User",
-      role: "SUPER_ADMIN",
-      status: "ACTIVE",
+      name: "Admin",
+      role: "ADMIN",
     },
   });
 

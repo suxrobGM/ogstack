@@ -1,28 +1,17 @@
+import type { ReactElement } from "react";
 import { render } from "@react-email/render";
 
-const templates = {
-  
-};
+const templates: Record<string, ReactElement> = {};
 
-const name = process.argv[2] as keyof typeof templates;
-const lang = (process.argv[3] as "EN" | "RU" | "UZ") ?? undefined;
+const name = process.argv[2];
 
 if (!name || !templates[name]) {
-  console.log("Usage: bun run scripts/preview-email.tsx <template> [lang]\n");
-  console.log("Templates:", Object.keys(templates).join(", "));
-  console.log("Languages: EN, RU, UZ (default: EN)");
+  console.log("Usage: bun run scripts/preview-email.tsx <template>\n");
+  console.log("Templates:", Object.keys(templates).join(", ") || "(none registered)");
   process.exit(1);
 }
 
-let element = templates[name];
-
-// Override lang if provided
-if (lang) {
-  const props = { ...element.props, lang };
-  element = { ...element, props };
-}
-
-const html = await render(element);
+const html = await render(templates[name]);
 const outPath = `./scripts/preview-${name}.html`;
 await Bun.write(outPath, html);
 console.log(`Written to ${outPath} — open in browser to preview`);
