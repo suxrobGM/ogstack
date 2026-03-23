@@ -7,6 +7,7 @@ import { errorMiddleware } from "@/common/middleware";
 import { corsPlugin, swaggerPlugin, uploadsStaticPlugin } from "@/common/plugins";
 import { validateEnv } from "@/env";
 import { authController } from "@/modules/auth";
+import { userController } from "@/modules/user";
 import { HttpErrorResponses } from "@/types/response";
 
 validateEnv();
@@ -25,7 +26,8 @@ const app = new Elysia()
       .guard({
         response: HttpErrorResponses,
       })
-      .use(authController),
+      .use(authController)
+      .use(userController),
   )
   .listen(parseInt(process.env.PORT!));
 
