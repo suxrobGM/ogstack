@@ -236,4 +236,81 @@ describe("AuthService", () => {
       expect(projectCreated).toBe(true);
     });
   });
+
+  describe("login", () => {
+    it("should login with valid credentials and return tokens", async () => {
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue({
+        id: "user-uuid-1",
+        email: "test@example.com",
+        name: "Test User",
+        role: "USER",
+        passwordHash: "hashed_password_123",
+        deletedAt: null,
+      });
+
+      (mockPrisma.refreshToken.create as ReturnType<typeof mock>).mockResolvedValue({
+        id: "rt-uuid-1",
+        token: "mock_refresh_token",
+      });
+
+      const result = await authService.login({
+        email: "test@example.com",
+        password: "securePassword123",
+      });
+
+      expect(result).toHaveProperty("user");
+      expect(result).toHaveProperty("accessToken");
+      expect(result).toHaveProperty("refreshToken");
+      expect(result.user.email).toBe("test@example.com");
+    });
+
+    it("should throw UnauthorizedError for non-existent email", async () => {
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
+
+      await expect(
+        authService.login({
+          email: "noone@example.com",
+          password: "securePassword123",
+        }),
+      ).rejects.toThrow("Invalid email or password");
+    });
+
+    it("should throw UnauthorizedError for wrong password", async () => {
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue({
+        id: "user-uuid-1",
+        email: "test@example.com",
+        name: "Test User",
+        role: "USER",
+        passwordHash: "hashed_password_123",
+        deletedAt: null,
+      });
+
+      (verifyPassword as ReturnType<typeof mock>).mockResolvedValueOnce(false);
+
+      await expect(
+        authService.login({
+          email: "test@example.com",
+          password: "wrongPassword",
+        }),
+      ).rejects.toThrow("Invalid email or password");
+    });
+
+    it("should throw UnauthorizedError for deleted user", async () => {
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue({
+        id: "user-uuid-1",
+        email: "test@example.com",
+        name: "Test User",
+        role: "USER",
+        passwordHash: "hashed_password_123",
+        deletedAt: new Date(),
+      });
+
+      await expect(
+        authService.login({
+          email: "test@example.com",
+          password: "securePassword123",
+        }),
+      ).rejects.toThrow("Invalid email or password");
+    });
+  });
 });
