@@ -1,7 +1,19 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pnpm build:*)"
+      "Bash(pnpm build:*)",
+      "Bash(git push:*)",
+      "Bash(find /c/Users/nraja/Desktop/VibeCoding/projects/ogstack -name *.eslint* -o -name .eslintrc* -o -name eslint.config*)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Read(//c/Users/nraja/Desktop/VibeCoding/projects/ogstack/**)",
+      "Bash(done)",
+      "Bash(find /c/Users/nraja/Desktop/VibeCoding/projects/ogstack -name .eslintrc* -o -name eslint.config.*)",
+      "Bash(pnpm lint:*)",
+      "Bash(node -e \":*)",
+      "Bash(npx vitest:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
