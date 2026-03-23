@@ -313,4 +313,70 @@ describe("AuthService", () => {
       ).rejects.toThrow("Invalid email or password");
     });
   });
+
+  describe("refresh", () => {
+    it("should refresh tokens with a valid refresh token", async () => {
+      (mockPrisma.refreshToken as unknown as Record<string, ReturnType<typeof mock>>).findFirst =
+        mock(() =>
+          Promise.resolve({
+            id: "rt-uuid-1",
+            userId: "user-uuid-1",
+            token: "valid_refresh_token",
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            revokedAt: null,
+            user: {
+              id: "user-uuid-1",
+              email: "test@example.com",
+              name: "Test User",
+              role: "USER",
+              deletedAt: null,
+            },
+          }),
+        );
+
+      (mockPrisma.refreshToken as unknown as Record<string, ReturnType<typeof mock>>).update = mock(
+        () => Promise.resolve({}),
+      );
+
+      const result = await authService.refresh({ refreshToken: "valid_refresh_token" });
+
+      expect(result).toHaveProperty("accessToken");
+      expect(result).toHaveProperty("refreshToken");
+      expect(result).toHaveProperty("user");
+      expect(result.user.email).toBe("test@example.com");
+    });
+
+    it("should throw UnauthorizedError for expired refresh token", async () => {
+      (mockPrisma.refreshToken as unknown as Record<string, ReturnType<typeof mock>>).findFirst =
+        mock(() => Promise.resolve(null));
+
+      await expect(authService.refresh({ refreshToken: "expired_token" })).rejects.toThrow(
+        "Invalid or expired refresh token",
+      );
+    });
+
+    it("should throw UnauthorizedError for revoked refresh token", async () => {
+      (mockPrisma.refreshToken as unknown as Record<string, ReturnType<typeof mock>>).findFirst =
+        mock(() => Promise.resolve(null));
+
+      await expect(authService.refresh({ refreshToken: "revoked_token" })).rejects.toThrow(
+        "Invalid or expired refresh token",
+      );
+    });
+  });
+
+  describe("logout", () => {
+    it("should revoke refresh token on logout", async () => {
+      let revokedToken: string | null = null;
+      (mockPrisma.refreshToken as unknown as Record<string, ReturnType<typeof mock>>).updateMany =
+        mock((args: { where: { token: string }; data: { revokedAt: Date } }) => {
+          revokedToken = args.where.token;
+          return Promise.resolve({ count: 1 });
+        });
+
+      await authService.logout("some_refresh_token");
+
+      expect(revokedToken).toBe("some_refresh_token");
+    });
+  });
 });
