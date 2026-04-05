@@ -1,0 +1,38 @@
+"use client";
+
+import type { ReactElement } from "react";
+import { TextField, type TextFieldProps } from "@mui/material";
+import type { AnyFieldApi } from "@tanstack/react-form";
+import type { AnyReactForm } from "./types";
+
+type FormTextFieldProps = {
+  form: AnyReactForm;
+  name: string;
+  transform?: (value: string) => string;
+} & Omit<TextFieldProps, "value" | "onChange" | "onBlur" | "error" | "helperText" | "name">;
+
+export function FormTextField(props: FormTextFieldProps): ReactElement {
+  const { form, name, transform, ...textFieldProps } = props;
+
+  return (
+    <form.Field name={name}>
+      {(field: AnyFieldApi) => (
+        <TextField
+          fullWidth
+          value={field.state.value}
+          onChange={(e) => {
+            const value = transform ? transform(e.target.value) : e.target.value;
+            field.handleChange(value);
+          }}
+          onBlur={field.handleBlur}
+          error={field.state.meta.errors.length > 0}
+          helperText={
+            (field.state.meta.errors[0] as { message?: string })?.message ??
+            field.state.meta.errors[0]?.toString()
+          }
+          {...textFieldProps}
+        />
+      )}
+    </form.Field>
+  );
+}
