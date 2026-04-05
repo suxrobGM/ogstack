@@ -79,7 +79,7 @@ describe("ApiKeyService", () => {
       expect(data.data.keyHash).not.toStartWith("og_live_");
     });
 
-    it("should throw NotFoundError if project does not belong to user", async () => {
+    it("should throw NotFoundError if project does not belong to user", () => {
       (mockPrisma.project.findUnique as ReturnType<typeof mock>).mockResolvedValue(
         createMockProject({ userId: "other-user" }),
       );
@@ -89,7 +89,7 @@ describe("ApiKeyService", () => {
       );
     });
 
-    it("should throw NotFoundError if project does not exist", async () => {
+    it("should throw NotFoundError if project does not exist", () => {
       (mockPrisma.project.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
 
       expect(service.create("user-uuid-1", "nonexistent", { name: "Test" })).rejects.toThrow(
@@ -108,7 +108,7 @@ describe("ApiKeyService", () => {
       expect(result[0]).not.toHaveProperty("key");
     });
 
-    it("should throw NotFoundError if project does not belong to user", async () => {
+    it("should throw NotFoundError if project does not belong to user", () => {
       (mockPrisma.project.findUnique as ReturnType<typeof mock>).mockResolvedValue(
         createMockProject({ userId: "other-user" }),
       );
@@ -124,13 +124,13 @@ describe("ApiKeyService", () => {
       expect(mockPrisma.apiKey.delete).toHaveBeenCalled();
     });
 
-    it("should throw NotFoundError if key does not exist", async () => {
+    it("should throw NotFoundError if key does not exist", () => {
       (mockPrisma.apiKey.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
 
       expect(service.delete("user-uuid-1", "nonexistent")).rejects.toThrow("API key not found");
     });
 
-    it("should throw NotFoundError if user does not own the key", async () => {
+    it("should throw NotFoundError if user does not own the key", () => {
       expect(service.delete("other-user", "key-uuid-1")).rejects.toThrow("API key not found");
     });
   });

@@ -120,7 +120,7 @@ describe("ProjectService", () => {
       expect(mockPrisma.project.update).toHaveBeenCalled();
     });
 
-    it("should throw NotFoundError when project does not exist", async () => {
+    it("should throw NotFoundError when project does not exist", () => {
       (mockPrisma.project.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
 
       expect(service.update("user-uuid-1", "nonexistent", { name: "X" })).rejects.toThrow(
@@ -128,7 +128,7 @@ describe("ProjectService", () => {
       );
     });
 
-    it("should throw NotFoundError when user is not the owner", async () => {
+    it("should throw NotFoundError when user is not the owner", () => {
       expect(service.update("other-user", "proj-uuid-1", { name: "X" })).rejects.toThrow(
         "Project not found",
       );
@@ -142,13 +142,13 @@ describe("ProjectService", () => {
       expect(mockPrisma.project.delete).toHaveBeenCalled();
     });
 
-    it("should throw NotFoundError when project does not exist", async () => {
+    it("should throw NotFoundError when project does not exist", () => {
       (mockPrisma.project.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
 
       expect(service.delete("user-uuid-1", "nonexistent")).rejects.toThrow("Project not found");
     });
 
-    it("should throw NotFoundError when user is not the owner", async () => {
+    it("should throw NotFoundError when user is not the owner", () => {
       expect(service.delete("other-user", "proj-uuid-1")).rejects.toThrow("Project not found");
     });
   });

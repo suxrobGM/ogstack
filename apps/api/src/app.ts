@@ -9,6 +9,7 @@ import { validateEnv } from "@/env";
 import { apiKeyController, apiKeyDeleteController } from "@/modules/api-key";
 import { authController } from "@/modules/auth";
 import { projectController } from "@/modules/project";
+import { templateController } from "@/modules/template";
 import { userController } from "@/modules/user";
 import { HttpErrorResponses } from "@/types/response";
 
@@ -30,6 +31,7 @@ const app = new Elysia()
       .use(apiKeyController)
       .use(apiKeyDeleteController)
       .use(projectController)
+      .use(templateController)
       .use(userController),
   )
   .listen(parseInt(process.env.PORT!));

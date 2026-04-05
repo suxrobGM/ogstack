@@ -222,7 +222,7 @@ describe("AuthService", () => {
       expect(result.user.email).toBe("test@example.com");
     });
 
-    it("should throw UnauthorizedError for non-existent email", async () => {
+    it("should throw UnauthorizedError for non-existent email", () => {
       (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
 
       expect(
@@ -233,7 +233,7 @@ describe("AuthService", () => {
       ).rejects.toThrow("Invalid email or password");
     });
 
-    it("should throw UnauthorizedError for wrong password", async () => {
+    it("should throw UnauthorizedError for wrong password", () => {
       (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(createMockUser());
 
       (verifyPassword as ReturnType<typeof mock>).mockResolvedValueOnce(false);
@@ -246,7 +246,7 @@ describe("AuthService", () => {
       ).rejects.toThrow("Invalid email or password");
     });
 
-    it("should throw UnauthorizedError for deleted user", async () => {
+    it("should throw UnauthorizedError for deleted user", () => {
       (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(
         createMockUser({ deletedAt: new Date() }),
       );
@@ -272,7 +272,7 @@ describe("AuthService", () => {
       expect(result.user.email).toBe("test@example.com");
     });
 
-    it("should throw UnauthorizedError for invalid refresh token", async () => {
+    it("should throw UnauthorizedError for invalid refresh token", () => {
       (jwtVerify as ReturnType<typeof mock>).mockRejectedValueOnce(new Error("invalid token"));
 
       expect(authService.refresh("invalid_token")).rejects.toThrow(
@@ -280,7 +280,7 @@ describe("AuthService", () => {
       );
     });
 
-    it("should throw UnauthorizedError for non-refresh token type", async () => {
+    it("should throw UnauthorizedError for non-refresh token type", () => {
       (jwtVerify as ReturnType<typeof mock>).mockResolvedValueOnce({
         payload: { sub: "user-uuid-1", type: "access" },
       });
@@ -290,7 +290,7 @@ describe("AuthService", () => {
       );
     });
 
-    it("should throw UnauthorizedError for deleted user", async () => {
+    it("should throw UnauthorizedError for deleted user", () => {
       (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(
         createMockUser({ deletedAt: new Date() }),
       );
@@ -358,7 +358,7 @@ describe("AuthService", () => {
       expect(mockPrisma.user.update).toHaveBeenCalled();
     });
 
-    it("should throw BadRequestError for invalid token", async () => {
+    it("should throw BadRequestError for invalid token", () => {
       (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
 
       expect(
@@ -366,7 +366,7 @@ describe("AuthService", () => {
       ).rejects.toThrow("Invalid or expired reset token");
     });
 
-    it("should throw BadRequestError for expired token", async () => {
+    it("should throw BadRequestError for expired token", () => {
       (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(
         createMockUser({
           passwordResetToken: "expired_token",
