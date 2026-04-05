@@ -1,0 +1,92 @@
+import { Elysia } from "elysia";
+import { container } from "@/common/di";
+import { apiKeyGuard, authGuard } from "@/common/middleware";
+import {
+  DashboardGenerateBodySchema,
+  GenerateBodySchema,
+  GenerateResponseSchema,
+  PublicGenerateParamsSchema,
+  PublicGenerateQuerySchema,
+} from "./generation.schema";
+import { GenerationService } from "./generation.service";
+
+const generationService = container.resolve(GenerationService);
+
+/** POST /api/generate — API key auth, programmatic generation. */
+export const generationController = new Elysia({ prefix: "/generate", tags: ["Generation"] })
+  .use(apiKeyGuard)
+  .post(
+    "/",
+    ({ apiKeyContext, body }) =>
+      generationService.generate({
+        userId: apiKeyContext.userId,
+        projectId: apiKeyContext.projectId,
+        url: body.url,
+        template: body.template ?? "gradient_dark",
+        options: body.options,
+      }),
+    {
+      body: GenerateBodySchema,
+      response: GenerateResponseSchema,
+      detail: {
+        summary: "Generate OG image",
+        description: "Generate an Open Graph image from a URL. Requires API key authentication.",
+      },
+    },
+  );
+
+/** GET /og/:publicId — Public meta-tag mode, no auth needed. */
+export const generationPublicController = new Elysia({ prefix: "/og", tags: ["Generation"] }).get(
+  "/:publicId",
+  async ({ params, query, redirect }) => {
+    const result = await generationService.generateByPublicId(
+      params.publicId,
+      query.url,
+      query.template ?? "gradient_dark",
+      {
+        accent: query.accent,
+        dark: query.dark === "false" ? false : true,
+        font: query.font,
+        logoUrl: query.logoUrl,
+        logoPosition: query.logoPosition,
+      },
+    );
+
+    return redirect(result.imageUrl);
+  },
+  {
+    params: PublicGenerateParamsSchema,
+    query: PublicGenerateQuerySchema,
+    detail: {
+      summary: "Generate OG image (public)",
+      description: "Public endpoint for meta-tag mode. Redirects to the generated image URL.",
+    },
+  },
+);
+
+/** POST /api/generate/playground — JWT auth, dashboard playground. */
+export const generationDashboardController = new Elysia({
+  prefix: "/generate",
+  tags: ["Generation"],
+})
+  .use(authGuard)
+  .post(
+    "/playground",
+    ({ user, body }) =>
+      generationService.generate({
+        userId: user.id,
+        projectId: body.projectId,
+        url: body.url,
+        template: body.template ?? "gradient_dark",
+        options: body.options,
+      }),
+    {
+      body: DashboardGenerateBodySchema,
+      response: GenerateResponseSchema,
+      detail: {
+        summary: "Generate OG image (dashboard)",
+        description:
+          "Generate an OG image from the dashboard playground. Requires user authentication.",
+      },
+    },
+  );
