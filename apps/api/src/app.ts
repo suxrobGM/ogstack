@@ -7,6 +7,7 @@ import { errorMiddleware } from "@/common/middleware";
 import { corsPlugin, swaggerPlugin, uploadsStaticPlugin } from "@/common/plugins";
 import { validateEnv } from "@/env";
 import { authController } from "@/modules/auth";
+import { projectController } from "@/modules/project";
 import { userController } from "@/modules/user";
 import { HttpErrorResponses } from "@/types/response";
 
@@ -22,7 +23,11 @@ const app = new Elysia()
   })
   .get("/health", () => ({ status: "ok", timestamp: new Date().toISOString() }))
   .group("/api", (api) =>
-    api.guard({ response: HttpErrorResponses }).use(authController).use(userController),
+    api
+      .guard({ response: HttpErrorResponses })
+      .use(authController)
+      .use(projectController)
+      .use(userController),
   )
   .listen(parseInt(process.env.PORT!));
 
