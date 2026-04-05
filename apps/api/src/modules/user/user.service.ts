@@ -1,9 +1,9 @@
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors";
 import { PrismaClient } from "@/generated/prisma";
 import type { UpdateProfileBody, UserProfile } from "./user.schema";
 
-@injectable()
+@singleton()
 export class UserService {
   constructor(private readonly prisma: PrismaClient) {}
 

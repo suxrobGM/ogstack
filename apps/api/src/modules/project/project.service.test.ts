@@ -35,6 +35,7 @@ describe("ProjectService", () => {
   let mockPrisma: ReturnType<typeof createMockPrisma>;
 
   beforeEach(() => {
+    container.clearInstances();
     mockPrisma = createMockPrisma();
     container.registerInstance(PrismaClient, mockPrisma as unknown as PrismaClient);
     service = container.resolve(ProjectService);
@@ -82,15 +83,11 @@ describe("ProjectService", () => {
     it("should throw NotFoundError when project does not exist", async () => {
       (mockPrisma.project.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      await expect(service.getById("user-uuid-1", "nonexistent")).rejects.toThrow(
-        "Project not found",
-      );
+      expect(service.getById("user-uuid-1", "nonexistent")).rejects.toThrow("Project not found");
     });
 
     it("should throw NotFoundError when user is not the owner", async () => {
-      await expect(service.getById("other-user", "proj-uuid-1")).rejects.toThrow(
-        "Project not found",
-      );
+      expect(service.getById("other-user", "proj-uuid-1")).rejects.toThrow("Project not found");
     });
   });
 
@@ -126,13 +123,13 @@ describe("ProjectService", () => {
     it("should throw NotFoundError when project does not exist", async () => {
       (mockPrisma.project.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      await expect(service.update("user-uuid-1", "nonexistent", { name: "X" })).rejects.toThrow(
+      expect(service.update("user-uuid-1", "nonexistent", { name: "X" })).rejects.toThrow(
         "Project not found",
       );
     });
 
     it("should throw NotFoundError when user is not the owner", async () => {
-      await expect(service.update("other-user", "proj-uuid-1", { name: "X" })).rejects.toThrow(
+      expect(service.update("other-user", "proj-uuid-1", { name: "X" })).rejects.toThrow(
         "Project not found",
       );
     });
@@ -148,15 +145,11 @@ describe("ProjectService", () => {
     it("should throw NotFoundError when project does not exist", async () => {
       (mockPrisma.project.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      await expect(service.delete("user-uuid-1", "nonexistent")).rejects.toThrow(
-        "Project not found",
-      );
+      expect(service.delete("user-uuid-1", "nonexistent")).rejects.toThrow("Project not found");
     });
 
     it("should throw NotFoundError when user is not the owner", async () => {
-      await expect(service.delete("other-user", "proj-uuid-1")).rejects.toThrow(
-        "Project not found",
-      );
+      expect(service.delete("other-user", "proj-uuid-1")).rejects.toThrow("Project not found");
     });
   });
 });

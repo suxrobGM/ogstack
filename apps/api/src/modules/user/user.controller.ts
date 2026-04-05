@@ -8,19 +8,14 @@ const userService = container.resolve(UserService);
 
 export const userController = new Elysia({ prefix: "/users", tags: ["Users"] })
   .use(authGuard)
-  .get(
-    "/me",
-    ({ user }) => userService.getProfile(user.id),
-
-    {
-      response: UserProfileSchema,
-      detail: {
-        summary: "Get current user profile",
-        description:
-          "Returns the authenticated user's profile including email, name, role, and avatar.",
-      },
+  .get("/me", ({ user }) => userService.getProfile(user.id), {
+    response: UserProfileSchema,
+    detail: {
+      summary: "Get current user profile",
+      description:
+        "Returns the authenticated user's profile including email, name, role, and avatar.",
     },
-  )
+  })
   .patch("/me", ({ user, body }) => userService.updateProfile(user.id, body), {
     body: UpdateProfileBodySchema,
     response: UserProfileSchema,

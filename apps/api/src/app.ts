@@ -6,6 +6,7 @@ import { logger } from "@/common/logger";
 import { errorMiddleware } from "@/common/middleware";
 import { corsPlugin, swaggerPlugin, uploadsStaticPlugin } from "@/common/plugins";
 import { validateEnv } from "@/env";
+import { apiKeyController, apiKeyDeleteController } from "@/modules/api-key";
 import { authController } from "@/modules/auth";
 import { projectController } from "@/modules/project";
 import { userController } from "@/modules/user";
@@ -26,6 +27,8 @@ const app = new Elysia()
     api
       .guard({ response: HttpErrorResponses })
       .use(authController)
+      .use(apiKeyController)
+      .use(apiKeyDeleteController)
       .use(projectController)
       .use(userController),
   )

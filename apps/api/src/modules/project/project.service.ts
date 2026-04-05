@@ -1,4 +1,4 @@
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors";
 import { generatePublicId } from "@/common/utils/crypto";
 import { PrismaClient } from "@/generated/prisma";
@@ -10,7 +10,7 @@ import type {
   UpdateProjectBody,
 } from "./project.schema";
 
-@injectable()
+@singleton()
 export class ProjectService {
   constructor(private readonly prisma: PrismaClient) {}
 

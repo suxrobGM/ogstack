@@ -1,4 +1,4 @@
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { PasswordResetEmail } from "@/common/emails/templates/password-reset";
 import { BadRequestError, ConflictError, UnauthorizedError } from "@/common/errors";
 import { EmailService } from "@/common/services/email.service";
@@ -17,7 +17,7 @@ import type {
 const WEBSITE_URL = process.env.WEBSITE_URL ?? "http://localhost:4001";
 const PASSWORD_RESET_EXPIRY_MS = 60 * 60 * 1000; // 1 hour
 
-@injectable()
+@singleton()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaClient,

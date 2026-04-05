@@ -113,6 +113,7 @@ describe("AuthService", () => {
   let mockEmailService: ReturnType<typeof createMockEmailService>;
 
   beforeEach(() => {
+    container.clearInstances();
     mockPrisma = createMockPrisma();
     mockEmailService = createMockEmailService();
     container.registerInstance(PrismaClient, mockPrisma as unknown as PrismaClient);
@@ -153,7 +154,7 @@ describe("AuthService", () => {
         },
       );
 
-      await expect(
+      expect(
         authService.register({
           email: "taken@example.com",
           password: "securePassword123",
@@ -224,7 +225,7 @@ describe("AuthService", () => {
     it("should throw UnauthorizedError for non-existent email", async () => {
       (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      await expect(
+      expect(
         authService.login({
           email: "noone@example.com",
           password: "securePassword123",
@@ -237,7 +238,7 @@ describe("AuthService", () => {
 
       (verifyPassword as ReturnType<typeof mock>).mockResolvedValueOnce(false);
 
-      await expect(
+      expect(
         authService.login({
           email: "test@example.com",
           password: "wrongPassword",
@@ -250,7 +251,7 @@ describe("AuthService", () => {
         createMockUser({ deletedAt: new Date() }),
       );
 
-      await expect(
+      expect(
         authService.login({
           email: "test@example.com",
           password: "securePassword123",
@@ -274,7 +275,7 @@ describe("AuthService", () => {
     it("should throw UnauthorizedError for invalid refresh token", async () => {
       (jwtVerify as ReturnType<typeof mock>).mockRejectedValueOnce(new Error("invalid token"));
 
-      await expect(authService.refresh("invalid_token")).rejects.toThrow(
+      expect(authService.refresh("invalid_token")).rejects.toThrow(
         "Invalid or expired refresh token",
       );
     });
@@ -284,7 +285,7 @@ describe("AuthService", () => {
         payload: { sub: "user-uuid-1", type: "access" },
       });
 
-      await expect(authService.refresh("access_token_as_refresh")).rejects.toThrow(
+      expect(authService.refresh("access_token_as_refresh")).rejects.toThrow(
         "Invalid or expired refresh token",
       );
     });
@@ -294,7 +295,7 @@ describe("AuthService", () => {
         createMockUser({ deletedAt: new Date() }),
       );
 
-      await expect(authService.refresh("valid_refresh_token")).rejects.toThrow(
+      expect(authService.refresh("valid_refresh_token")).rejects.toThrow(
         "Invalid or expired refresh token",
       );
     });
@@ -360,7 +361,7 @@ describe("AuthService", () => {
     it("should throw BadRequestError for invalid token", async () => {
       (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      await expect(
+      expect(
         authService.resetPassword({ token: "bad_token", password: "newPassword123" }),
       ).rejects.toThrow("Invalid or expired reset token");
     });
@@ -373,7 +374,7 @@ describe("AuthService", () => {
         }),
       );
 
-      await expect(
+      expect(
         authService.resetPassword({ token: "expired_token", password: "newPassword123" }),
       ).rejects.toThrow("Invalid or expired reset token");
     });
