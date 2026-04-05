@@ -27,7 +27,7 @@ export class EmailService {
     this.from = `${name} <${address}>`;
 
     if (!this.client) {
-      logger.warn("RESEND_API_KEY not set — emails will be logged instead of sent");
+      logger.warn("RESEND_API_KEY not set - emails will be logged instead of sent");
     }
   }
 
@@ -35,7 +35,7 @@ export class EmailService {
     const html = await render(options.react);
 
     if (!this.client) {
-      logger.info({ to: options.to, subject: options.subject }, "Email (dev mode — not sent)");
+      logger.info({ to: options.to, subject: options.subject }, "Email (dev mode - not sent)");
       logger.debug({ html }, "Email HTML content");
       return;
     }

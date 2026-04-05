@@ -6,34 +6,34 @@ enum ImageFormat {
 
 model GeneratedImage {
   id         String  @id @default(uuid()) @db.Uuid
-  userId     String  @db.Uuid
-  projectId  String? @db.Uuid
-  apiKeyId   String? @db.Uuid
-  templateId String? @db.Uuid
+  userId     String  @map("user_id") @db.Uuid
+  projectId  String? @map("project_id") @db.Uuid
+  apiKeyId   String? @map("api_key_id") @db.Uuid
+  templateId String? @map("template_id") @db.Uuid
 
-  sourceUrl String?
-  cacheKey  String  @unique
-  imageUrl  String
-  cdnUrl    String?
+  sourceUrl String? @map("source_url")
+  cacheKey  String  @unique @map("cache_key")
+  imageUrl  String  @map("image_url")
+  cdnUrl    String? @map("cdn_url")
 
   title       String?
   description String?
-  faviconUrl  String?
+  faviconUrl  String? @map("favicon_url")
 
   width    Int         @default(1200)
   height   Int         @default(630)
   format   ImageFormat @default(PNG)
-  fileSize Int?
+  fileSize Int?        @map("file_size")
 
-  aiModel   String?
-  aiPrompt  String? @db.Text
-  aiEnabled Boolean @default(false)
+  aiModel   String? @map("ai_model")
+  aiPrompt  String? @db.Text @map("ai_prompt")
+  aiEnabled Boolean @default(false) @map("ai_enabled")
 
-  generationMs Int?
-  serveCount   Int  @default(0)
+  generationMs Int? @map("generation_ms")
+  serveCount   Int  @default(0) @map("serve_count")
 
-  createdAt DateTime  @default(now())
-  expiresAt DateTime?
+  createdAt DateTime  @default(now()) @map("created_at")
+  expiresAt DateTime? @map("expires_at")
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   project  Project?  @relation(fields: [projectId], references: [id])

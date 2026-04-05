@@ -44,8 +44,8 @@ describe("RateLimitStore", () => {
   });
 
   describe("get", () => {
-    it("should return undefined for unknown key", () => {
-      expect(store.get("nonexistent")).toBeUndefined();
+    it("should return null for unknown key", () => {
+      expect(store.get("nonexistent")).toBeNull();
     });
 
     it("should return entry for active key", () => {
@@ -55,10 +55,10 @@ describe("RateLimitStore", () => {
       expect(entry!.count).toBe(1);
     });
 
-    it("should return undefined for expired key", async () => {
+    it("should return null for expired key", async () => {
       store.hit("key1", 50);
       await Bun.sleep(60);
-      expect(store.get("key1")).toBeUndefined();
+      expect(store.get("key1")).toBeNull();
     });
   });
 
@@ -66,7 +66,7 @@ describe("RateLimitStore", () => {
     it("should remove a key from the store", () => {
       store.hit("key1", 60_000);
       store.reset("key1");
-      expect(store.get("key1")).toBeUndefined();
+      expect(store.get("key1")).toBeNull();
     });
   });
 

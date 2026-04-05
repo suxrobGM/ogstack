@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { container } from "@/common/di";
+import { EmailService } from "@/common/services/email.service";
 import { hashPassword, verifyPassword } from "@/common/utils/password";
 import { PrismaClient } from "@/generated/prisma";
 import { AuthService } from "./auth.service";
@@ -53,6 +54,8 @@ function createMockUser(overrides = {}) {
     avatarUrl: null,
     emailVerified: false,
     deletedAt: null,
+    passwordResetToken: null,
+    passwordResetExpiresAt: null,
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
@@ -64,6 +67,7 @@ function createMockPrisma() {
     user: {
       findUnique: mock(() => Promise.resolve(null)),
       create: mock(() => Promise.resolve(createMockUser())),
+      update: mock(() => Promise.resolve(createMockUser())),
     },
     project: {
       create: mock(() =>
@@ -99,13 +103,20 @@ function createMockPrisma() {
   } as unknown as PrismaClient;
 }
 
+function createMockEmailService() {
+  return { send: mock(() => Promise.resolve()) } as unknown as EmailService;
+}
+
 describe("AuthService", () => {
   let authService: AuthService;
   let mockPrisma: ReturnType<typeof createMockPrisma>;
+  let mockEmailService: ReturnType<typeof createMockEmailService>;
 
   beforeEach(() => {
     mockPrisma = createMockPrisma();
+    mockEmailService = createMockEmailService();
     container.registerInstance(PrismaClient, mockPrisma as unknown as PrismaClient);
+    container.registerInstance(EmailService, mockEmailService as unknown as EmailService);
     authService = container.resolve(AuthService);
   });
 
@@ -286,6 +297,101 @@ describe("AuthService", () => {
       await expect(authService.refresh("valid_refresh_token")).rejects.toThrow(
         "Invalid or expired refresh token",
       );
+    });
+  });
+
+  describe("forgotPassword", () => {
+    it("should send reset email for existing user", async () => {
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(createMockUser());
+
+      await authService.forgotPassword({ email: "test@example.com" });
+
+      expect(mockPrisma.user.update).toHaveBeenCalled();
+      expect(mockEmailService.send).toHaveBeenCalled();
+    });
+
+    it("should not throw for non-existent email", async () => {
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
+
+      await authService.forgotPassword({ email: "noone@example.com" });
+
+      expect(mockPrisma.user.update).not.toHaveBeenCalled();
+      expect(mockEmailService.send).not.toHaveBeenCalled();
+    });
+
+    it("should not send email for OAuth-only user without password", async () => {
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(
+        createMockUser({ passwordHash: null }),
+      );
+
+      await authService.forgotPassword({ email: "test@example.com" });
+
+      expect(mockPrisma.user.update).not.toHaveBeenCalled();
+      expect(mockEmailService.send).not.toHaveBeenCalled();
+    });
+
+    it("should not send email for deleted user", async () => {
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(
+        createMockUser({ deletedAt: new Date() }),
+      );
+
+      await authService.forgotPassword({ email: "test@example.com" });
+
+      expect(mockPrisma.user.update).not.toHaveBeenCalled();
+      expect(mockEmailService.send).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("resetPassword", () => {
+    it("should reset password with valid token", async () => {
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(
+        createMockUser({
+          passwordResetToken: "valid_token",
+          passwordResetExpiresAt: new Date(Date.now() + 60 * 60 * 1000),
+        }),
+      );
+
+      await authService.resetPassword({ token: "valid_token", password: "newPassword123" });
+
+      expect(hashPassword).toHaveBeenCalledWith("newPassword123");
+      expect(mockPrisma.user.update).toHaveBeenCalled();
+    });
+
+    it("should throw BadRequestError for invalid token", async () => {
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
+
+      await expect(
+        authService.resetPassword({ token: "bad_token", password: "newPassword123" }),
+      ).rejects.toThrow("Invalid or expired reset token");
+    });
+
+    it("should throw BadRequestError for expired token", async () => {
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(
+        createMockUser({
+          passwordResetToken: "expired_token",
+          passwordResetExpiresAt: new Date(Date.now() - 1000),
+        }),
+      );
+
+      await expect(
+        authService.resetPassword({ token: "expired_token", password: "newPassword123" }),
+      ).rejects.toThrow("Invalid or expired reset token");
+    });
+
+    it("should clear reset token after successful reset", async () => {
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(
+        createMockUser({
+          passwordResetToken: "valid_token",
+          passwordResetExpiresAt: new Date(Date.now() + 60 * 60 * 1000),
+        }),
+      );
+
+      await authService.resetPassword({ token: "valid_token", password: "newPassword123" });
+
+      const updateCall = (mockPrisma.user.update as ReturnType<typeof mock>).mock.calls[0];
+      const updateData = (updateCall as unknown[])[0] as { data: Record<string, unknown> };
+      expect(updateData.data.passwordResetToken).toBeNull();
+      expect(updateData.data.passwordResetExpiresAt).toBeNull();
     });
   });
 });

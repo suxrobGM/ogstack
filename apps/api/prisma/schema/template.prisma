@@ -14,17 +14,17 @@ model Template {
   name            String
   description     String?
   category        TemplateCategory
-  previewUrl      String?
-  jsxCode         String           @db.Text
-  isBuiltIn       Boolean          @default(false)
-  isCommunity     Boolean          @default(false)
-  contributorName String?
-  contributorUrl  String?
-  darkMode        Boolean          @default(true)
-  lightMode       Boolean          @default(true)
+  previewUrl      String?          @map("preview_url")
+  jsxCode         String           @db.Text @map("jsx_code")
+  isBuiltIn       Boolean          @default(false) @map("is_built_in")
+  isCommunity     Boolean          @default(false) @map("is_community")
+  contributorName String?          @map("contributor_name")
+  contributorUrl  String?          @map("contributor_url")
+  darkMode        Boolean          @default(true) @map("dark_mode")
+  lightMode       Boolean          @default(true) @map("light_mode")
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   generatedImages GeneratedImage[]
 

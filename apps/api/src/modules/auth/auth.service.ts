@@ -1,14 +1,28 @@
 import { injectable } from "tsyringe";
-import { ConflictError, UnauthorizedError } from "@/common/errors";
-import { generatePublicId } from "@/common/utils/crypto";
+import { PasswordResetEmail } from "@/common/emails/templates/password-reset";
+import { BadRequestError, ConflictError, UnauthorizedError } from "@/common/errors";
+import { EmailService } from "@/common/services/email.service";
+import { generatePublicId, generateRandomToken } from "@/common/utils/crypto";
 import { generateAccessToken, generateRefreshToken, verifyToken } from "@/common/utils/jwt";
 import { hashPassword, verifyPassword } from "@/common/utils/password";
 import { PrismaClient } from "@/generated/prisma";
-import type { AuthResponse, LoginBody, RegisterBody } from "./auth.schema";
+import type {
+  AuthResponse,
+  ForgotPasswordBody,
+  LoginBody,
+  RegisterBody,
+  ResetPasswordBody,
+} from "./auth.schema";
+
+const WEBSITE_URL = process.env.WEBSITE_URL ?? "http://localhost:4001";
+const PASSWORD_RESET_EXPIRY_MS = 60 * 60 * 1000; // 1 hour
 
 @injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly emailService: EmailService,
+  ) {}
 
   /** Register a new user, create a default project, and return auth tokens. */
   async register(data: RegisterBody): Promise<AuthResponse> {
@@ -77,6 +91,52 @@ export class AuthService {
     }
 
     return this.buildAuthResponse(user);
+  }
+
+  /** Generate a password reset token and send reset email. */
+  async forgotPassword(data: ForgotPasswordBody): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { email: data.email } });
+
+    // Always return success to prevent email enumeration
+    if (!user || user.deletedAt || !user.passwordHash) return;
+
+    const token = generateRandomToken();
+    const expiresAt = new Date(Date.now() + PASSWORD_RESET_EXPIRY_MS);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { passwordResetToken: token, passwordResetExpiresAt: expiresAt },
+    });
+
+    const resetUrl = `${WEBSITE_URL}/reset-password?token=${token}`;
+
+    await this.emailService.send({
+      to: user.email,
+      subject: "Reset your OGStack password",
+      react: PasswordResetEmail({ name: user.name, resetUrl }),
+    });
+  }
+
+  /** Validate the reset token and set the new password. */
+  async resetPassword(data: ResetPasswordBody): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { passwordResetToken: data.token },
+    });
+
+    if (!user || !user.passwordResetExpiresAt || user.passwordResetExpiresAt < new Date()) {
+      throw new BadRequestError("Invalid or expired reset token");
+    }
+
+    const passwordHash = await hashPassword(data.password);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordHash,
+        passwordResetToken: null,
+        passwordResetExpiresAt: null,
+      },
+    });
   }
 
   private async buildAuthResponse(user: {

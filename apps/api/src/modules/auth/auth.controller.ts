@@ -1,11 +1,14 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di";
 import { rateLimiter } from "@/common/middleware/rate-limiter";
+import { MessageResponseSchema } from "@/types/response";
 import {
   AuthResponseSchema,
+  ForgotPasswordBodySchema,
   LoginBodySchema,
   RefreshBodySchema,
   RegisterBodySchema,
+  ResetPasswordBodySchema,
 } from "./auth.schema";
 import { AuthService } from "./auth.service";
 
@@ -39,4 +42,35 @@ export const authController = new Elysia({ prefix: "/auth", tags: ["Auth"] })
       description:
         "Exchange a valid refresh token for a new access token and rotated refresh token.",
     },
-  });
+  })
+  .post(
+    "/forgot-password",
+    async ({ body }) => {
+      await authService.forgotPassword(body);
+      return { message: "If an account with that email exists, a reset link has been sent" };
+    },
+    {
+      body: ForgotPasswordBodySchema,
+      response: MessageResponseSchema,
+      detail: {
+        summary: "Request password reset",
+        description:
+          "Send a password reset email to the provided address. Always returns success to prevent email enumeration.",
+      },
+    },
+  )
+  .post(
+    "/reset-password",
+    async ({ body }) => {
+      await authService.resetPassword(body);
+      return { message: "Password has been reset successfully" };
+    },
+    {
+      body: ResetPasswordBodySchema,
+      response: MessageResponseSchema,
+      detail: {
+        summary: "Reset password",
+        description: "Set a new password using a valid reset token from the forgot-password email.",
+      },
+    },
+  );

@@ -1,18 +1,18 @@
 model BrandKit {
   id              String   @id @default(uuid()) @db.Uuid
-  userId          String   @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
   name            String   @default("Default")
   domains         String[] @default([])
-  logoUrl         String?
-  primaryColor    String   @default("#000000")
-  secondaryColor  String   @default("#FFFFFF")
-  accentColor     String   @default("#3B82F6")
-  fontFamily      String   @default("inter")
-  defaultTemplate String   @default("gradient_dark")
-  isDefault       Boolean  @default(false)
+  logoUrl         String?  @map("logo_url")
+  primaryColor    String   @default("#000000") @map("primary_color")
+  secondaryColor  String   @default("#FFFFFF") @map("secondary_color")
+  accentColor     String   @default("#3B82F6") @map("accent_color")
+  fontFamily      String   @default("inter") @map("font_family")
+  defaultTemplate String   @default("gradient_dark") @map("default_template")
+  isDefault       Boolean  @default(false) @map("is_default")
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

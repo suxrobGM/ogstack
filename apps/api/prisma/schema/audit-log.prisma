@@ -1,14 +1,14 @@
 model AuditLog {
   id         String   @id @default(uuid()) @db.Uuid
-  actorId    String   @db.Uuid
-  actorRole  UserRole
+  actorId    String   @map("actor_id") @db.Uuid
+  actorRole  UserRole @map("actor_role")
   action     String
-  entityType String?
-  entityId   String?
+  entityType String?  @map("entity_type")
+  entityId   String?  @map("entity_id")
   metadata   Json?
-  ipAddress  String?
+  ipAddress  String?  @map("ip_address")
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
 
   actor User @relation(fields: [actorId], references: [id])
 

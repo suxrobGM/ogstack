@@ -1,13 +1,13 @@
 model Project {
   id       String   @id @default(uuid()) @db.Uuid
-  userId   String   @db.Uuid
-  publicId String   @unique
+  userId   String   @map("user_id") @db.Uuid
+  publicId String   @unique @map("public_id")
   name     String
   domains  String[] @default([])
-  isActive Boolean  @default(true)
+  isActive Boolean  @default(true) @map("is_active")
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   apiKeys         ApiKey[]
@@ -21,15 +21,15 @@ model Project {
 
 model ApiKey {
   id         String    @id @default(uuid()) @db.Uuid
-  projectId  String    @db.Uuid
-  userId     String    @db.Uuid
-  keyHash    String    @unique
+  projectId  String    @map("project_id") @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  keyHash    String    @unique @map("key_hash")
   prefix     String
   name       String
-  lastUsedAt DateTime?
-  revokedAt  DateTime?
+  lastUsedAt DateTime? @map("last_used_at")
+  revokedAt  DateTime? @map("revoked_at")
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
 
   project         Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
   user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
