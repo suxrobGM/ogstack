@@ -1,12 +1,11 @@
 import { singleton } from "tsyringe";
-import { BadRequestError, NotFoundError } from "@/common/errors/http.error";
+import { BadRequestError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { ScraperService } from "@/common/services/scraper.service";
 import { hashSha256 } from "@/common/utils/crypto";
 import { PrismaClient } from "@/generated/prisma";
-import type { RenderOptions, TemplateSlug } from "@/modules/template/template.schema";
-import { TemplateService } from "@/modules/template/template.service";
-import { UsageService } from "@/modules/usage/usage.service";
+import { TemplateService, type RenderOptions, type TemplateSlug } from "@/modules/template";
+import { UsageService } from "@/modules/usage";
 import type { GenerateResponse } from "./generation.schema";
 
 interface GenerateParams {
@@ -108,12 +107,70 @@ export class GenerationService {
     };
   }
 
-  async generateByPublicId(
+  async generateImageByPublicId(
     publicId: string,
     url: string,
     template: TemplateSlug,
     options?: RenderOptions,
-  ): Promise<GenerateResponse> {
+  ): Promise<Buffer> {
+    const project = await this.resolveAndValidatePublicProject(publicId, url);
+
+    await this.usageService.enforceQuota(project.user.id, project.id);
+
+    const cacheKey = await this.buildCacheKey(project.id, url, template, options);
+    const cached = await this.prisma.generatedImage.findUnique({ where: { cacheKey } });
+
+    if (cached) {
+      await this.usageService.recordUsage(project.user.id, project.id, true);
+      await this.prisma.generatedImage.update({
+        where: { id: cached.id },
+        data: { serveCount: { increment: 1 } },
+      });
+
+      const imageResponse = await fetch(cached.cdnUrl ?? cached.imageUrl);
+      return Buffer.from(await imageResponse.arrayBuffer());
+    }
+
+    const startMs = performance.now();
+
+    const metadata = await this.scraper.extractMetadata(url);
+    const pngBuffer = await this.templateService.render(template, metadata, options);
+    const generationMs = Math.round(performance.now() - startMs);
+
+    const templateRecord = await this.prisma.template.findUnique({
+      where: { slug: template },
+      select: { id: true },
+    });
+
+    const imageUrl = await this.storeImage(cacheKey, pngBuffer);
+
+    await this.prisma.generatedImage.create({
+      data: {
+        userId: project.user.id,
+        projectId: project.id,
+        templateId: templateRecord?.id,
+        sourceUrl: url,
+        cacheKey,
+        imageUrl,
+        title: metadata.ogTitle ?? metadata.title,
+        description: metadata.ogDescription ?? metadata.description,
+        faviconUrl: metadata.favicon,
+        width: 1200,
+        height: 630,
+        format: "PNG",
+        fileSize: pngBuffer.length,
+        generationMs,
+        serveCount: 1,
+      },
+    });
+
+    await this.usageService.recordUsage(project.user.id, project.id, false);
+
+    logger.info({ cacheKey, generationMs, template }, "OG image generated (public)");
+    return pngBuffer;
+  }
+
+  private async resolveAndValidatePublicProject(publicId: string, url: string) {
     const project = await this.prisma.project.findUnique({
       where: { publicId },
       include: { user: { select: { id: true } } },
@@ -131,13 +188,7 @@ export class GenerationService {
       }
     }
 
-    return this.generate({
-      userId: project.user.id,
-      projectId: project.id,
-      url,
-      template,
-      options,
-    });
+    return project;
   }
 
   private async buildCacheKey(

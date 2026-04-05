@@ -35,11 +35,11 @@ export const generationController = new Elysia({ prefix: "/generate", tags: ["Ge
     },
   );
 
-/** GET /og/:publicId — Public meta-tag mode, no auth needed. */
+/** GET /og/:publicId — Public meta-tag mode, returns PNG directly. */
 export const generationPublicController = new Elysia({ prefix: "/og", tags: ["Generation"] }).get(
   "/:publicId",
-  async ({ params, query, redirect }) => {
-    const result = await generationService.generateByPublicId(
+  async ({ params, query, set }) => {
+    const pngBuffer = await generationService.generateImageByPublicId(
       params.publicId,
       query.url,
       query.template ?? "gradient_dark",
@@ -52,14 +52,17 @@ export const generationPublicController = new Elysia({ prefix: "/og", tags: ["Ge
       },
     );
 
-    return redirect(result.imageUrl);
+    set.headers["content-type"] = "image/png";
+    set.headers["cache-control"] = "public, max-age=86400, s-maxage=604800";
+    return pngBuffer;
   },
   {
     params: PublicGenerateParamsSchema,
     query: PublicGenerateQuerySchema,
     detail: {
       summary: "Generate OG image (public)",
-      description: "Public endpoint for meta-tag mode. Redirects to the generated image URL.",
+      description:
+        "Public endpoint for meta-tag mode. Returns PNG image directly with caching headers.",
     },
   },
 );

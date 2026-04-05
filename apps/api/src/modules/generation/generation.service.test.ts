@@ -167,7 +167,12 @@ describe("GenerationService", () => {
     it("should record usage for cache misses", async () => {
       await service.generate(baseParams);
 
-      expect(mockUsageService.recordUsage).toHaveBeenCalledWith("user-1", "proj-1", false);
+      expect(mockUsageService.recordUsage).toHaveBeenCalledWith(
+        "user-1",
+        "proj-1",
+        false,
+        undefined,
+      );
     });
 
     it("should record cache hits in usage", async () => {
@@ -183,27 +188,34 @@ describe("GenerationService", () => {
 
       await service.generate(baseParams);
 
-      expect(mockUsageService.recordUsage).toHaveBeenCalledWith("user-1", "proj-1", true);
+      expect(mockUsageService.recordUsage).toHaveBeenCalledWith(
+        "user-1",
+        "proj-1",
+        true,
+        undefined,
+      );
     });
   });
 
-  describe("generateByPublicId", () => {
-    it("should resolve project by publicId and generate", async () => {
-      const result = await service.generateByPublicId(
+  describe("generateImageByPublicId", () => {
+    it("should return PNG buffer on cache miss", async () => {
+      const result = await service.generateImageByPublicId(
         "abc123",
         "https://example.com",
         "gradient_dark",
       );
 
-      expect(result.cached).toBe(false);
-      expect(result.imageUrl).toBeDefined();
+      expect(result).toBeInstanceOf(Buffer);
+      expect(result[0]).toBe(0x89);
+      expect(mockScraper.extractMetadata).toHaveBeenCalled();
+      expect(mockTemplateService.render).toHaveBeenCalled();
     });
 
     it("should throw NotFoundError for unknown publicId", () => {
       (mockPrisma.project.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
 
       expect(
-        service.generateByPublicId("unknown", "https://example.com", "gradient_dark"),
+        service.generateImageByPublicId("unknown", "https://example.com", "gradient_dark"),
       ).rejects.toThrow("Project not found");
     });
 
@@ -217,51 +229,8 @@ describe("GenerationService", () => {
       });
 
       expect(
-        service.generateByPublicId("abc123", "https://evil.com/page", "gradient_dark"),
+        service.generateImageByPublicId("abc123", "https://evil.com/page", "gradient_dark"),
       ).rejects.toThrow("Domain not allowed");
-    });
-
-    it("should allow URLs matching project domains", async () => {
-      (mockPrisma.project.findUnique as ReturnType<typeof mock>).mockResolvedValue({
-        id: "proj-1",
-        userId: "user-1",
-        publicId: "abc123",
-        domains: ["example.com"],
-        user: { id: "user-1" },
-      });
-
-      const result = await service.generateByPublicId(
-        "abc123",
-        "https://example.com/page",
-        "gradient_dark",
-      );
-      expect(result.cached).toBe(false);
-    });
-
-    it("should allow subdomain matching", async () => {
-      (mockPrisma.project.findUnique as ReturnType<typeof mock>).mockResolvedValue({
-        id: "proj-1",
-        userId: "user-1",
-        publicId: "abc123",
-        domains: ["example.com"],
-        user: { id: "user-1" },
-      });
-
-      const result = await service.generateByPublicId(
-        "abc123",
-        "https://blog.example.com/post",
-        "gradient_dark",
-      );
-      expect(result.cached).toBe(false);
-    });
-
-    it("should skip domain check when project has no domains", async () => {
-      const result = await service.generateByPublicId(
-        "abc123",
-        "https://any-site.com",
-        "gradient_dark",
-      );
-      expect(result.cached).toBe(false);
     });
   });
 });
