@@ -50,8 +50,13 @@ export const GenerateResponseSchema = t.Object({
   }),
 });
 
+export const InvalidateCacheParamsSchema = t.Object({
+  cacheKey: t.String(),
+});
+
 export type GenerateBody = Static<typeof GenerateBodySchema>;
 export type DashboardGenerateBody = Static<typeof DashboardGenerateBodySchema>;
 export type PublicGenerateParams = Static<typeof PublicGenerateParamsSchema>;
 export type PublicGenerateQuery = Static<typeof PublicGenerateQuerySchema>;
 export type GenerateResponse = Static<typeof GenerateResponseSchema>;
+export type InvalidateCacheParams = Static<typeof InvalidateCacheParamsSchema>;

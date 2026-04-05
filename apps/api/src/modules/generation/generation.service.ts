@@ -2,6 +2,7 @@ import { singleton } from "tsyringe";
 import { BadRequestError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { ScraperService } from "@/common/services/scraper.service";
+import { ImageStorageService } from "@/common/services/storage";
 import { hashSha256 } from "@/common/utils/crypto";
 import { PrismaClient } from "@/generated/prisma";
 import { TemplateService, type RenderOptions, type TemplateSlug } from "@/modules/template";
@@ -24,6 +25,7 @@ export class GenerationService {
     private readonly scraper: ScraperService,
     private readonly templateService: TemplateService,
     private readonly usageService: UsageService,
+    private readonly storage: ImageStorageService,
   ) {}
 
   async generate(params: GenerateParams): Promise<GenerateResponse> {
@@ -68,7 +70,7 @@ export class GenerationService {
       select: { id: true },
     });
 
-    const imageUrl = await this.storeImage(cacheKey, pngBuffer);
+    const stored = await this.storage.store(cacheKey, pngBuffer);
 
     const image = await this.prisma.generatedImage.create({
       data: {
@@ -78,14 +80,14 @@ export class GenerationService {
         templateId: templateRecord?.id,
         sourceUrl: url,
         cacheKey,
-        imageUrl,
+        imageUrl: stored.url,
         title: metadata.ogTitle ?? metadata.title,
         description: metadata.ogDescription ?? metadata.description,
         faviconUrl: metadata.favicon,
         width: 1200,
         height: 630,
         format: "PNG",
-        fileSize: pngBuffer.length,
+        fileSize: stored.size,
         generationMs,
         serveCount: 1,
       },
@@ -127,8 +129,8 @@ export class GenerationService {
         data: { serveCount: { increment: 1 } },
       });
 
-      const imageResponse = await fetch(cached.cdnUrl ?? cached.imageUrl);
-      return Buffer.from(await imageResponse.arrayBuffer());
+      const buffer = await this.storage.get(cacheKey);
+      if (buffer) return buffer;
     }
 
     const startMs = performance.now();
@@ -142,7 +144,7 @@ export class GenerationService {
       select: { id: true },
     });
 
-    const imageUrl = await this.storeImage(cacheKey, pngBuffer);
+    const stored = await this.storage.store(cacheKey, pngBuffer);
 
     await this.prisma.generatedImage.create({
       data: {
@@ -151,14 +153,14 @@ export class GenerationService {
         templateId: templateRecord?.id,
         sourceUrl: url,
         cacheKey,
-        imageUrl,
+        imageUrl: stored.url,
         title: metadata.ogTitle ?? metadata.title,
         description: metadata.ogDescription ?? metadata.description,
         faviconUrl: metadata.favicon,
         width: 1200,
         height: 630,
         format: "PNG",
-        fileSize: pngBuffer.length,
+        fileSize: stored.size,
         generationMs,
         serveCount: 1,
       },
@@ -168,6 +170,19 @@ export class GenerationService {
 
     logger.info({ cacheKey, generationMs, template }, "OG image generated (public)");
     return pngBuffer;
+  }
+
+  async invalidateCache(userId: string, cacheKey: string): Promise<void> {
+    const image = await this.prisma.generatedImage.findUnique({ where: { cacheKey } });
+
+    if (!image || image.userId !== userId) {
+      throw new NotFoundError("Image not found");
+    }
+
+    await this.storage.delete(cacheKey);
+    await this.prisma.generatedImage.delete({ where: { id: image.id } });
+
+    logger.info({ cacheKey }, "Image cache invalidated");
   }
 
   private async resolveAndValidatePublicProject(publicId: string, url: string) {
@@ -199,10 +214,5 @@ export class GenerationService {
   ): Promise<string> {
     const normalized = JSON.stringify({ projectId, url, template, ...options });
     return hashSha256(normalized);
-  }
-
-  /** Store image and return its URL. Placeholder for R2/CDN integration. */
-  private async storeImage(cacheKey: string, _buffer: Buffer): Promise<string> {
-    return `/images/${cacheKey}.png`;
   }
 }

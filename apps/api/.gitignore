@@ -43,3 +43,5 @@ package-lock.json
 
 src/generated/
 scripts/*.html
+
+uploads/

@@ -1,10 +1,12 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di";
 import { apiKeyGuard, authGuard } from "@/common/middleware";
+import { MessageResponseSchema } from "@/types/response";
 import {
   DashboardGenerateBodySchema,
   GenerateBodySchema,
   GenerateResponseSchema,
+  InvalidateCacheParamsSchema,
   PublicGenerateParamsSchema,
   PublicGenerateQuerySchema,
 } from "./generation.schema";
@@ -90,6 +92,21 @@ export const generationDashboardController = new Elysia({
         summary: "Generate OG image (dashboard)",
         description:
           "Generate an OG image from the dashboard playground. Requires user authentication.",
+      },
+    },
+  )
+  .delete(
+    "/cache/:cacheKey",
+    async ({ user, params }) => {
+      await generationService.invalidateCache(user.id, params.cacheKey);
+      return { message: "Cache invalidated" };
+    },
+    {
+      params: InvalidateCacheParamsSchema,
+      response: MessageResponseSchema,
+      detail: {
+        summary: "Invalidate cached image",
+        description: "Delete a cached generated image by its cache key. Must be the image owner.",
       },
     },
   );
