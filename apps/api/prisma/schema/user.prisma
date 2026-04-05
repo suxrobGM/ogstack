@@ -4,40 +4,40 @@ enum UserRole {
   SUPER_ADMIN
 }
 
+enum Plan {
+  FREE
+  PRO
+  BUSINESS
+  ENTERPRISE
+}
+
 model User {
-  id            String   @id @default(uuid()) @db.Uuid
-  role          UserRole @default(USER)
-  email         String   @unique
-  name          String
-  passwordHash  String?
-  avatarUrl     String?
-  emailVerified Boolean  @default(false)
+  id               String   @id @default(uuid()) @db.Uuid
+  role             UserRole @default(USER)
+  email            String   @unique
+  name             String
+  passwordHash     String?
+  avatarUrl        String?
+  emailVerified    Boolean  @default(false)
+  githubId         String?  @unique
+  googleId         String?  @unique
+  plan             Plan     @default(FREE)
+  stripeCustomerId String?  @unique
+  stripeSubId      String?
 
   deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  refreshTokens RefreshToken[]
-  projects      Project[]
-  apiKeys       ApiKey[]
+  projects        Project[]
+  apiKeys         ApiKey[]
+  brandKits       BrandKit[]
+  generatedImages GeneratedImage[]
+  auditReports    AuditReport[]
+  auditLogs       AuditLog[]
+  usageRecords    UsageRecord[]
 
   @@index([email])
   @@index([deletedAt])
   @@map("users")
-}
-
-model RefreshToken {
-  id        String    @id @default(uuid()) @db.Uuid
-  userId    String    @db.Uuid
-  token     String    @unique
-  expiresAt DateTime
-  revokedAt DateTime?
-  createdAt DateTime  @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([token])
-  @@index([expiresAt])
-  @@map("refresh_tokens")
 }

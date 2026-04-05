@@ -1,0 +1,24 @@
+model AuditReport {
+  id             String  @id @default(uuid()) @db.Uuid
+  userId         String? @db.Uuid
+  url            String
+  overallScore   Int
+  letterGrade    String
+  hasOgImage     Boolean
+  ogImageUrl     String?
+  ogImageWidth   Int?
+  ogImageHeight  Int?
+  ogImageSize    Int?
+  hasOgTitle     Boolean
+  hasOgDesc      Boolean
+  hasTwitterCard Boolean
+  issues         Json
+  previews       Json
+
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([url])
+  @@map("audit_reports")
+}

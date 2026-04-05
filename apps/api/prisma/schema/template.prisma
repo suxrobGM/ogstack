@@ -1,0 +1,32 @@
+enum TemplateCategory {
+  TECH
+  MARKETING
+  MINIMAL
+  CREATIVE
+  BUSINESS
+  DOCUMENTATION
+  SOCIAL
+}
+
+model Template {
+  id              String           @id @default(uuid()) @db.Uuid
+  slug            String           @unique
+  name            String
+  description     String?
+  category        TemplateCategory
+  previewUrl      String?
+  jsxCode         String           @db.Text
+  isBuiltIn       Boolean          @default(false)
+  isCommunity     Boolean          @default(false)
+  contributorName String?
+  contributorUrl  String?
+  darkMode        Boolean          @default(true)
+  lightMode       Boolean          @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  generatedImages GeneratedImage[]
+
+  @@map("templates")
+}

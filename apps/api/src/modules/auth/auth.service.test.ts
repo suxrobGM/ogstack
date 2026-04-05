@@ -4,13 +4,14 @@ import { hashPassword, verifyPassword } from "@/common/utils/password";
 import { PrismaClient } from "@/generated/prisma";
 import { AuthService } from "./auth.service";
 
-// Mock password utils
 mock.module("@/common/utils/password", () => ({
   hashPassword: mock(() => Promise.resolve("hashed_password_123")),
   verifyPassword: mock(() => Promise.resolve(true)),
 }));
 
-// Mock jose JWT signing
+const MOCK_ACCESS_TOKEN = "mock_access_token";
+const MOCK_REFRESH_TOKEN = "mock_refresh_token";
+
 mock.module("jose", () => ({
   SignJWT: class MockSignJWT {
     private payload: Record<string, unknown>;
@@ -27,41 +28,42 @@ mock.module("jose", () => ({
       return this;
     }
     async sign() {
-      return "mock_access_token";
+      return this.payload.type === "refresh" ? MOCK_REFRESH_TOKEN : MOCK_ACCESS_TOKEN;
     }
   },
+  jwtVerify: mock(() =>
+    Promise.resolve({
+      payload: {
+        sub: "user-uuid-1",
+        type: "refresh",
+      },
+    }),
+  ),
 }));
+
+const { jwtVerify } = await import("jose");
+
+function createMockUser(overrides = {}) {
+  return {
+    id: "user-uuid-1",
+    email: "test@example.com",
+    name: "Test User",
+    role: "USER",
+    passwordHash: "hashed_password_123",
+    avatarUrl: null,
+    emailVerified: false,
+    deletedAt: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  };
+}
 
 function createMockPrisma() {
   return {
     user: {
       findUnique: mock(() => Promise.resolve(null)),
-      create: mock(() =>
-        Promise.resolve({
-          id: "user-uuid-1",
-          email: "test@example.com",
-          name: "Test User",
-          role: "USER",
-          passwordHash: "hashed_password_123",
-          avatarUrl: null,
-          emailVerified: false,
-          deletedAt: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }),
-      ),
-    },
-    refreshToken: {
-      create: mock(() =>
-        Promise.resolve({
-          id: "rt-uuid-1",
-          userId: "user-uuid-1",
-          token: "mock_refresh_token",
-          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-          revokedAt: null,
-          createdAt: new Date(),
-        }),
-      ),
+      create: mock(() => Promise.resolve(createMockUser())),
     },
     project: {
       create: mock(() =>
@@ -80,43 +82,14 @@ function createMockPrisma() {
       const tx = {
         user: {
           findUnique: mock(() => Promise.resolve(null)),
-          create: mock(() =>
-            Promise.resolve({
-              id: "user-uuid-1",
-              email: "test@example.com",
-              name: "Test User",
-              role: "USER",
-              passwordHash: "hashed_password_123",
-              avatarUrl: null,
-              emailVerified: false,
-              deletedAt: null,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            }),
-          ),
-        },
-        refreshToken: {
-          create: mock(() =>
-            Promise.resolve({
-              id: "rt-uuid-1",
-              userId: "user-uuid-1",
-              token: "mock_refresh_token",
-              expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-              revokedAt: null,
-              createdAt: new Date(),
-            }),
-          ),
+          create: mock(() => Promise.resolve(createMockUser())),
         },
         project: {
           create: mock(() =>
             Promise.resolve({
               id: "proj-uuid-1",
-              userId: "user-uuid-1",
               publicId: "abc12345",
               name: "Default Project",
-              domains: [],
-              createdAt: new Date(),
-              updatedAt: new Date(),
             }),
           ),
         },
@@ -195,22 +168,7 @@ describe("AuthService", () => {
           const tx = {
             user: {
               findUnique: mock(() => Promise.resolve(null)),
-              create: mock(() =>
-                Promise.resolve({
-                  id: "user-uuid-1",
-                  email: "test@example.com",
-                  name: "Test User",
-                  role: "USER",
-                }),
-              ),
-            },
-            refreshToken: {
-              create: mock(() =>
-                Promise.resolve({
-                  id: "rt-uuid-1",
-                  token: "mock_refresh_token",
-                }),
-              ),
+              create: mock(() => Promise.resolve(createMockUser())),
             },
             project: {
               create: mock(() => {
@@ -239,19 +197,7 @@ describe("AuthService", () => {
 
   describe("login", () => {
     it("should login with valid credentials and return tokens", async () => {
-      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue({
-        id: "user-uuid-1",
-        email: "test@example.com",
-        name: "Test User",
-        role: "USER",
-        passwordHash: "hashed_password_123",
-        deletedAt: null,
-      });
-
-      (mockPrisma.refreshToken.create as ReturnType<typeof mock>).mockResolvedValue({
-        id: "rt-uuid-1",
-        token: "mock_refresh_token",
-      });
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(createMockUser());
 
       const result = await authService.login({
         email: "test@example.com",
@@ -276,14 +222,7 @@ describe("AuthService", () => {
     });
 
     it("should throw UnauthorizedError for wrong password", async () => {
-      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue({
-        id: "user-uuid-1",
-        email: "test@example.com",
-        name: "Test User",
-        role: "USER",
-        passwordHash: "hashed_password_123",
-        deletedAt: null,
-      });
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(createMockUser());
 
       (verifyPassword as ReturnType<typeof mock>).mockResolvedValueOnce(false);
 
@@ -296,14 +235,9 @@ describe("AuthService", () => {
     });
 
     it("should throw UnauthorizedError for deleted user", async () => {
-      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue({
-        id: "user-uuid-1",
-        email: "test@example.com",
-        name: "Test User",
-        role: "USER",
-        passwordHash: "hashed_password_123",
-        deletedAt: new Date(),
-      });
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(
+        createMockUser({ deletedAt: new Date() }),
+      );
 
       await expect(
         authService.login({
@@ -316,29 +250,9 @@ describe("AuthService", () => {
 
   describe("refresh", () => {
     it("should refresh tokens with a valid refresh token", async () => {
-      (mockPrisma.refreshToken as unknown as Record<string, ReturnType<typeof mock>>).findFirst =
-        mock(() =>
-          Promise.resolve({
-            id: "rt-uuid-1",
-            userId: "user-uuid-1",
-            token: "valid_refresh_token",
-            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-            revokedAt: null,
-            user: {
-              id: "user-uuid-1",
-              email: "test@example.com",
-              name: "Test User",
-              role: "USER",
-              deletedAt: null,
-            },
-          }),
-        );
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(createMockUser());
 
-      (mockPrisma.refreshToken as unknown as Record<string, ReturnType<typeof mock>>).update = mock(
-        () => Promise.resolve({}),
-      );
-
-      const result = await authService.refresh({ refreshToken: "valid_refresh_token" });
+      const result = await authService.refresh("valid_refresh_token");
 
       expect(result).toHaveProperty("accessToken");
       expect(result).toHaveProperty("refreshToken");
@@ -346,37 +260,32 @@ describe("AuthService", () => {
       expect(result.user.email).toBe("test@example.com");
     });
 
-    it("should throw UnauthorizedError for expired refresh token", async () => {
-      (mockPrisma.refreshToken as unknown as Record<string, ReturnType<typeof mock>>).findFirst =
-        mock(() => Promise.resolve(null));
+    it("should throw UnauthorizedError for invalid refresh token", async () => {
+      (jwtVerify as ReturnType<typeof mock>).mockRejectedValueOnce(new Error("invalid token"));
 
-      await expect(authService.refresh({ refreshToken: "expired_token" })).rejects.toThrow(
+      await expect(authService.refresh("invalid_token")).rejects.toThrow(
         "Invalid or expired refresh token",
       );
     });
 
-    it("should throw UnauthorizedError for revoked refresh token", async () => {
-      (mockPrisma.refreshToken as unknown as Record<string, ReturnType<typeof mock>>).findFirst =
-        mock(() => Promise.resolve(null));
+    it("should throw UnauthorizedError for non-refresh token type", async () => {
+      (jwtVerify as ReturnType<typeof mock>).mockResolvedValueOnce({
+        payload: { sub: "user-uuid-1", type: "access" },
+      });
 
-      await expect(authService.refresh({ refreshToken: "revoked_token" })).rejects.toThrow(
+      await expect(authService.refresh("access_token_as_refresh")).rejects.toThrow(
         "Invalid or expired refresh token",
       );
     });
-  });
 
-  describe("logout", () => {
-    it("should revoke refresh token on logout", async () => {
-      let revokedToken = null as string | null;
-      (mockPrisma.refreshToken as unknown as Record<string, ReturnType<typeof mock>>).updateMany =
-        mock((args: { where: { token: string }; data: { revokedAt: Date } }) => {
-          revokedToken = args.where.token;
-          return Promise.resolve({ count: 1 });
-        });
+    it("should throw UnauthorizedError for deleted user", async () => {
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(
+        createMockUser({ deletedAt: new Date() }),
+      );
 
-      await authService.logout("some_refresh_token");
-
-      expect(revokedToken).toBe("some_refresh_token");
+      await expect(authService.refresh("valid_refresh_token")).rejects.toThrow(
+        "Invalid or expired refresh token",
+      );
     });
   });
 });

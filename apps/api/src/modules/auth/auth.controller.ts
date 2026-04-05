@@ -1,11 +1,9 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di";
-import { authGuard } from "@/common/middleware";
 import { rateLimiter } from "@/common/middleware/rate-limiter";
 import {
   AuthResponseSchema,
   LoginBodySchema,
-  MessageSchema,
   RefreshBodySchema,
   RegisterBodySchema,
 } from "./auth.schema";
@@ -33,29 +31,12 @@ export const authController = new Elysia({ prefix: "/auth", tags: ["Auth"] })
         "Authenticate with email and password credentials. Returns JWT access and refresh tokens on success.",
     },
   })
-  .post("/refresh", ({ body }) => authService.refresh(body), {
+  .post("/refresh", ({ body }) => authService.refresh(body.refreshToken), {
     body: RefreshBodySchema,
     response: AuthResponseSchema,
     detail: {
       summary: "Refresh access token",
       description:
-        "Exchange a valid refresh token for a new access token and rotated refresh token. The old refresh token is revoked.",
+        "Exchange a valid refresh token for a new access token and rotated refresh token.",
     },
-  })
-  .use(authGuard)
-  .post(
-    "/logout",
-    async ({ body }) => {
-      await authService.logout(body.refreshToken);
-      return { message: "Logged out successfully" };
-    },
-    {
-      body: RefreshBodySchema,
-      response: MessageSchema,
-      detail: {
-        summary: "Logout and revoke refresh token",
-        description:
-          "Revoke the provided refresh token. Requires a valid access token in the Authorization header.",
-      },
-    },
-  );
+  });

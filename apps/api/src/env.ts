@@ -4,7 +4,7 @@ import { t, type Static } from "elysia";
 const EnvSchema = t.Object({
   DATABASE_URL: t.String(),
   JWT_SECRET: t.String(),
-  JWT_EXPIRY: t.Optional(t.String({ default: "7d" })),
+  JWT_EXPIRY: t.Optional(t.String({ default: "1d" })),
   REFRESH_TOKEN_EXPIRY: t.Optional(t.String({ default: "30d" })),
   PORT: t.Optional(t.String({ default: "4000" })),
   NODE_ENV: t.Optional(

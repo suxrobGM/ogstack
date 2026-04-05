@@ -1,15 +1,10 @@
-import { SignJWT } from "jose";
 import { injectable } from "tsyringe";
 import { ConflictError, UnauthorizedError } from "@/common/errors";
-import { generatePublicId, generateRandomToken } from "@/common/utils/crypto";
+import { generatePublicId } from "@/common/utils/crypto";
+import { generateAccessToken, generateRefreshToken, verifyToken } from "@/common/utils/jwt";
 import { hashPassword, verifyPassword } from "@/common/utils/password";
 import { PrismaClient } from "@/generated/prisma";
-import type { AuthResponse, LoginBody, RefreshBody, RegisterBody } from "./auth.schema";
-
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET ?? "dev-secret");
-const JWT_EXPIRY = process.env.JWT_EXPIRY ?? "7d";
-
-type TransactionClient = Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0];
+import type { AuthResponse, LoginBody, RegisterBody } from "./auth.schema";
 
 @injectable()
 export class AuthService {
@@ -39,7 +34,7 @@ export class AuthService {
         },
       });
 
-      return this.buildAuthResponse(user, tx);
+      return this.buildAuthResponse(user);
     });
   }
 
@@ -57,79 +52,48 @@ export class AuthService {
       throw new UnauthorizedError("Invalid email or password");
     }
 
-    return this.buildAuthResponse(user, this.prisma);
+    return this.buildAuthResponse(user);
   }
 
   /** Exchange a valid refresh token for new access + refresh tokens. */
-  async refresh(data: RefreshBody): Promise<AuthResponse> {
-    const record = await this.prisma.refreshToken.findFirst({
-      where: {
-        token: data.refreshToken,
-        revokedAt: null,
-        expiresAt: { gt: new Date() },
-      },
-      include: { user: true },
-    });
-
-    if (!record || record.user.deletedAt) {
+  async refresh(refreshToken: string): Promise<AuthResponse> {
+    let payload;
+    try {
+      payload = await verifyToken(refreshToken);
+    } catch {
       throw new UnauthorizedError("Invalid or expired refresh token");
     }
 
-    await this.prisma.refreshToken.update({
-      where: { id: record.id },
-      data: { revokedAt: new Date() },
+    if (payload.type !== "refresh") {
+      throw new UnauthorizedError("Invalid or expired refresh token");
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub as string },
     });
 
-    return this.buildAuthResponse(record.user, this.prisma);
+    if (!user || user.deletedAt) {
+      throw new UnauthorizedError("Invalid or expired refresh token");
+    }
+
+    return this.buildAuthResponse(user);
   }
 
-  /** Revoke a refresh token. */
-  async logout(refreshToken: string): Promise<void> {
-    await this.prisma.refreshToken.updateMany({
-      where: { token: refreshToken },
-      data: { revokedAt: new Date() },
-    });
-  }
-
-  private async buildAuthResponse(
-    user: { id: string; email: string; name: string; role: string },
-    client: TransactionClient,
-  ): Promise<AuthResponse> {
-    const accessToken = await this.generateAccessToken(user);
-    const refreshTokenRecord = await this.createRefreshToken(client, user.id);
+  private async buildAuthResponse(user: {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+  }): Promise<AuthResponse> {
+    const [accessToken, refreshToken] = await Promise.all([
+      generateAccessToken(user),
+      generateRefreshToken(user.id),
+    ]);
 
     return {
       user: { id: user.id, email: user.email, name: user.name, role: user.role },
       accessToken,
-      refreshToken: refreshTokenRecord.token,
+      refreshToken,
     };
   }
-
-  private async generateAccessToken(user: {
-    id: string;
-    role: string;
-    email: string;
-  }): Promise<string> {
-    return new SignJWT({ role: user.role, email: user.email })
-      .setProtectedHeader({ alg: "HS256" })
-      .setSubject(user.id)
-      .setExpirationTime(JWT_EXPIRY)
-      .sign(JWT_SECRET);
-  }
-
-  private async createRefreshToken(client: TransactionClient, userId: string) {
-    const token = generateRandomToken();
-    const expiryDays = parseRefreshTokenExpiryDays();
-    const expiresAt = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000);
-
-    return client.refreshToken.create({
-      data: { userId, token, expiresAt },
-    });
-  }
-}
-
-function parseRefreshTokenExpiryDays(): number {
-  const raw: string = process.env.REFRESH_TOKEN_EXPIRY ?? "30d";
-  const match = raw.match(/^(\d+)d?$/);
-  return match?.[1] ? parseInt(match[1], 10) : 30;
 }

@@ -28,10 +28,6 @@ export const AuthResponseSchema = t.Object({
   refreshToken: t.String(),
 });
 
-export const MessageSchema = t.Object({
-  message: t.String(),
-});
-
 export type RegisterBody = Static<typeof RegisterBodySchema>;
 export type LoginBody = Static<typeof LoginBodySchema>;
 export type RefreshBody = Static<typeof RefreshBodySchema>;

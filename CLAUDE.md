@@ -19,9 +19,8 @@ OGStack is a developer-first API platform for generating beautiful Open Graph im
 ### UI Component Guidelines
 
 - **Component library**: MUI 7 — prefer MUI components over custom HTML elements
-- **Styling**: MUI `sx` prop for all styling. Custom CSS utility classes in `globals.css` for animations
 - **Data tables**: Custom table components or MUI Table for data display. MUI DataGrid for complex grids with sorting/filtering
-- **Forms**: MUI TextField, Select, Checkbox with `react-hook-form` + `zod` for validation
+- **Forms**: MUI TextField, Select, Checkbox with `tanstack/form` + `zod` for validation.
 - **Layout**: MUI Box, Stack, Grid2. App shell uses persistent sidebar + top app bar
 - **Typography**: MUI Typography with semantic variants (h1–h6, body1, body2, caption)
 
@@ -110,7 +109,7 @@ Examples:
 ## Comments
 
 - Don't add inline comments that restate what the code already says. Only comment to explain **why**, not **what**. If the code needs a comment to explain what it does, rename the variable or extract a function instead.
-- Add brief JSDoc (`/** ... */`) for public functions — one-liner description is enough. Skip `@param` / `@returns` when types already convey the meaning.
+- Add brief JSDoc (`/** ... */`) for public functions or complex logic, but avoid over-commenting. The code should be as self-explanatory as possible.
 
 ## File Size Guideline
 
@@ -142,7 +141,8 @@ src/
 - Use React Server Components by default; add `"use client"` only when needed (state, effects, browser APIs)
 - API calls go through a centralized API client in `lib/api.ts`
 - Auth state managed via React context with JWT stored in httpOnly cookie
-- Use `react-hook-form` + `zod` for form validation
+- Use `tanstack/react-query` for data fetching, caching, and mutations.
+- Use `tanstack/form` + `zod` for form state management and validation.
 - Page components are thin — delegate to feature components
 
 ---
