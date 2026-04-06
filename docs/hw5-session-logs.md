@@ -474,7 +474,3 @@ All 5 brand-kit endpoints appear in Swagger with correct:
 
 The /add-module skill generated Swagger-compatible endpoints out of the box.
 No manual Swagger configuration was needed.
-
-```
-
-```
