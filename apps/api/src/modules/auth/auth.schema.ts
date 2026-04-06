@@ -12,7 +12,7 @@ export const LoginBodySchema = t.Object({
 });
 
 export const RefreshBodySchema = t.Object({
-  refreshToken: t.String(),
+  refreshToken: t.Optional(t.String()),
 });
 
 export const AuthUserSchema = t.Object({

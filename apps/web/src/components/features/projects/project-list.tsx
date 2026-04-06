@@ -1,7 +1,7 @@
 "use client";
 
-import type { ReactElement } from "react";
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   Button,
@@ -16,18 +16,23 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
 import { useApiQuery } from "@/hooks";
 import { client } from "@/lib/api";
+import type { ProjectListResponse } from "@/types/api";
 
-export function ProjectsFeature(): ReactElement {
+interface ProjectListProps {
+  initialData?: ProjectListResponse | null;
+}
+
+export function ProjectList(props: ProjectListProps): ReactElement {
+  const { initialData } = props;
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
-  const { data, isLoading } = useApiQuery(
+  const { data, isLoading } = useApiQuery<ProjectListResponse>(
     ["projects", { page, search }],
     () => client.api.projects.get({ query: { page, limit: 10, search } }),
-    { errorMessage: "Failed to load projects." },
+    { initialData: initialData!, errorMessage: "Failed to load projects." },
   );
 
   const items = data?.items ?? [];
@@ -44,12 +49,14 @@ export function ProjectsFeature(): ReactElement {
         size="small"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon />
-            </InputAdornment>
-          ),
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          },
         }}
         sx={{ mb: 2 }}
       />
@@ -80,9 +87,7 @@ export function ProjectsFeature(): ReactElement {
                 </TableCell>
                 <TableCell>{item.domains.join(", ") || "—"}</TableCell>
                 <TableCell>{new Date(item.createdAt).toLocaleDateString()}</TableCell>
-                <TableCell align="right">
-                  {/* TODO: Add edit and delete actions */}
-                </TableCell>
+                <TableCell align="right">{/* TODO: Add edit and delete actions */}</TableCell>
               </TableRow>
             ))}
           </TableBody>

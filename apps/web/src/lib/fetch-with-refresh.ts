@@ -1,6 +1,5 @@
 import { API_BASE_URL, ROUTES } from "./constants";
 
-// Deduplicates concurrent 401s into a single refresh attempt
 let refreshPromise: Promise<boolean> | null = null;
 
 async function tryRefresh(): Promise<boolean> {
@@ -8,6 +7,8 @@ async function tryRefresh(): Promise<boolean> {
     const res = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
       method: "POST",
       credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
     });
     return res.ok;
   } catch {
@@ -21,7 +22,7 @@ async function tryRefresh(): Promise<boolean> {
  * On a 401 response the interceptor calls `POST /api/auth/refresh`, which
  * exchanges the `refresh_token` httpOnly cookie for a fresh `access_token`
  * cookie, then retries the original request once. If the refresh also fails
- * (expired or missing refresh token) the user is redirected to the login page.
+ * the user is redirected to the login page.
  */
 export async function fetchWithRefresh(
   input: RequestInfo | URL,

@@ -1,13 +1,11 @@
 "use client";
 
-import type { ReactElement } from "react";
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import {
   Box,
   Button,
   Chip,
   CircularProgress,
-  Pagination,
   Stack,
   Table,
   TableBody,
@@ -18,19 +16,22 @@ import {
 } from "@mui/material";
 import { useApiQuery } from "@/hooks";
 import { client } from "@/lib/api";
-import { PAGINATION_DEFAULTS } from "@/lib/constants";
+import type { ApiKeyListResponse } from "@/types/api";
 import { CreateApiKeyDialog } from "./create-api-key-dialog";
 
-export function ApiKeysFeature(): ReactElement {
-  const [page, setPage] = useState(PAGINATION_DEFAULTS.page);
+interface ApiKeyListProps {
+  projectId: string;
+  initialData?: ApiKeyListResponse | null;
+}
+
+export function ApiKeyList(props: ApiKeyListProps): ReactElement {
+  const { projectId, initialData } = props;
   const [createOpen, setCreateOpen] = useState(false);
 
-  // API keys are scoped to a project — projectId would come from route params in a real implementation.
-  // TODO: Wire to selected project once projects page and routing are in place.
-  const { data, isLoading } = useApiQuery(
-    ["api-keys", { page }],
-    () => client.api.projects[":projectId"]["api-keys"].get({ params: { projectId: "" } }),
-    { errorMessage: "Failed to load API keys." },
+  const { data, isLoading } = useApiQuery<ApiKeyListResponse>(
+    ["api-keys", projectId],
+    () => client.api.projects({ projectId, id: projectId })["api-keys"].get(),
+    { initialData: initialData!, errorMessage: "Failed to load API keys." },
   );
 
   const items = Array.isArray(data) ? data : [];
@@ -67,22 +68,27 @@ export function ApiKeysFeature(): ReactElement {
                   <Chip label={`${item.prefix}...`} size="small" variant="outlined" />
                 </TableCell>
                 <TableCell>
-                  {item.lastUsedAt
-                    ? new Date(item.lastUsedAt).toLocaleDateString()
-                    : <Typography variant="body2" color="text.secondary">Never</Typography>
-                  }
+                  {item.lastUsedAt ? (
+                    new Date(item.lastUsedAt).toLocaleDateString()
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      Never
+                    </Typography>
+                  )}
                 </TableCell>
                 <TableCell>{new Date(item.createdAt).toLocaleDateString()}</TableCell>
-                <TableCell align="right">
-                  {/* TODO: Add revoke action */}
-                </TableCell>
+                <TableCell align="right">{/* TODO: Add revoke action */}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       )}
 
-      <CreateApiKeyDialog open={createOpen} onClose={() => setCreateOpen(false)} />
+      <CreateApiKeyDialog
+        projectId={projectId}
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+      />
     </Box>
   );
 }

@@ -1,15 +1,10 @@
 import type { ReactElement } from "react";
-import { redirect } from "next/navigation";
+import { ProjectList } from "@/components/features/projects/project-list";
 import { getServerClient } from "@/lib/api-server";
-import { ProjectsFeature } from "@/components/features/projects/projects-feature";
 
 export default async function ProjectsPage(): Promise<ReactElement> {
-  const client = await getServerClient({ auth: true });
-  const { data: user } = await client.api.users.me.get();
+  const client = await getServerClient();
+  const { data } = await client.api.projects.get({ query: { page: 1, limit: 10 } });
 
-  if (!user) {
-    redirect("/login");
-  }
-
-  return <ProjectsFeature />;
+  return <ProjectList initialData={data} />;
 }

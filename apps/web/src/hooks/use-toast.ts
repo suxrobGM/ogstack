@@ -1,12 +1,14 @@
 "use client";
 
-interface UseToastReturn {
-  success: (message: string) => void;
-  error: (message: string) => void;
-  warning: (message: string) => void;
-  info: (message: string) => void;
-}
+import { use } from "react";
+import { NotificationContext, type ToastApi } from "@/providers/notification-provider";
 
-export function useToast(): UseToastReturn {
-  return { success, error, warning, info };
+export function useToast(): ToastApi {
+  const api = use(NotificationContext);
+
+  if (!api) {
+    throw new Error("useToast must be used within a NotificationProvider");
+  }
+
+  return api;
 }

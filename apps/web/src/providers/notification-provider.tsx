@@ -1,8 +1,63 @@
 "use client";
 
-import type { ReactElement } from "react";
+import { createContext, useState, type PropsWithChildren, type ReactElement } from "react";
+import { Alert, Snackbar } from "@mui/material";
 
-export function NotificationProvider(): ReactElement {
-  // TODO: Implement a notification with MUI Snackbar and Context to allow showing notifications from anywhere in the app
-  return <></>;
+type Severity = "success" | "error" | "warning" | "info";
+
+interface Toast {
+  message: string;
+  severity: Severity;
+}
+
+export interface ToastApi {
+  success: (message: string) => void;
+  error: (message: string) => void;
+  warning: (message: string) => void;
+  info: (message: string) => void;
+}
+
+export const NotificationContext = createContext<ToastApi | null>(null);
+
+export function NotificationProvider(props: PropsWithChildren): ReactElement {
+  const { children } = props;
+  const [toast, setToast] = useState<Toast | null>(null);
+
+  const show = (message: string, severity: Severity) => {
+    setToast({ message, severity });
+  };
+
+  const api: ToastApi = {
+    success: (message) => show(message, "success"),
+    error: (message) => show(message, "error"),
+    warning: (message) => show(message, "warning"),
+    info: (message) => show(message, "info"),
+  };
+
+  const handleClose = () => {
+    setToast(null);
+  };
+
+  return (
+    <NotificationContext value={api}>
+      {children}
+      <Snackbar
+        open={toast !== null}
+        autoHideDuration={4000}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        {toast ? (
+          <Alert
+            onClose={handleClose}
+            severity={toast.severity}
+            variant="filled"
+            sx={{ width: "100%" }}
+          >
+            {toast.message}
+          </Alert>
+        ) : undefined}
+      </Snackbar>
+    </NotificationContext>
+  );
 }

@@ -1,6 +1,7 @@
-import { Elysia } from "elysia";
+import { Elysia, type Cookie } from "elysia";
 import { container } from "@/common/di";
 import { rateLimiter } from "@/common/middleware/rate-limiter";
+import { clearAuthCookies, setAuthCookies } from "@/common/utils/cookie";
 import { MessageResponseSchema } from "@/types/response";
 import {
   AuthResponseSchema,
@@ -16,33 +17,73 @@ const authService = container.resolve(AuthService);
 
 export const authController = new Elysia({ prefix: "/auth", tags: ["Auth"] })
   .use(rateLimiter({ max: 10, windowMs: 60_000 }))
-  .post("/register", ({ body }) => authService.register(body), {
-    body: RegisterBodySchema,
-    response: AuthResponseSchema,
-    detail: {
-      summary: "Register a new user",
-      description:
-        "Create a new user account with email and password. Automatically creates a default project and returns JWT access and refresh tokens.",
+  .post(
+    "/register",
+    async ({ body, cookie }) => {
+      const result = await authService.register(body);
+      setAuthCookies(cookie as Record<string, Cookie<unknown>>, result);
+      return result;
     },
-  })
-  .post("/login", ({ body }) => authService.login(body), {
-    body: LoginBodySchema,
-    response: AuthResponseSchema,
-    detail: {
-      summary: "Login with email and password",
-      description:
-        "Authenticate with email and password credentials. Returns JWT access and refresh tokens on success.",
+    {
+      body: RegisterBodySchema,
+      response: AuthResponseSchema,
+      detail: {
+        summary: "Register a new user",
+        description:
+          "Create a new user account with email and password. Automatically creates a default project and returns JWT access and refresh tokens.",
+      },
     },
-  })
-  .post("/refresh", ({ body }) => authService.refresh(body.refreshToken), {
-    body: RefreshBodySchema,
-    response: AuthResponseSchema,
-    detail: {
-      summary: "Refresh access token",
-      description:
-        "Exchange a valid refresh token for a new access token and rotated refresh token.",
+  )
+  .post(
+    "/login",
+    async ({ body, cookie }) => {
+      const result = await authService.login(body);
+      setAuthCookies(cookie as Record<string, Cookie<unknown>>, result);
+      return result;
     },
-  })
+    {
+      body: LoginBodySchema,
+      response: AuthResponseSchema,
+      detail: {
+        summary: "Login with email and password",
+        description:
+          "Authenticate with email and password credentials. Returns JWT access and refresh tokens on success.",
+      },
+    },
+  )
+  .post(
+    "/refresh",
+    async ({ body, cookie }) => {
+      const typedCookie = cookie as Record<string, Cookie<unknown>>;
+      const refreshToken = body.refreshToken || (typedCookie.refresh_token?.value as string);
+      const result = await authService.refresh(refreshToken);
+      setAuthCookies(typedCookie, result);
+      return result;
+    },
+    {
+      body: RefreshBodySchema,
+      response: AuthResponseSchema,
+      detail: {
+        summary: "Refresh access token",
+        description:
+          "Exchange a valid refresh token for a new access token and rotated refresh token.",
+      },
+    },
+  )
+  .post(
+    "/logout",
+    ({ cookie }) => {
+      clearAuthCookies(cookie as Record<string, Cookie<unknown>>);
+      return { message: "Logged out successfully" };
+    },
+    {
+      response: MessageResponseSchema,
+      detail: {
+        summary: "Logout",
+        description: "Clear authentication cookies and end the session.",
+      },
+    },
+  )
   .post(
     "/forgot-password",
     async ({ body }) => {

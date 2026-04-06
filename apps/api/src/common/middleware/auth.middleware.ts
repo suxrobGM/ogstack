@@ -5,6 +5,7 @@ import { UnauthorizedError } from "@/common/errors";
 /**
  * JWT auth guard plugin.
  * Derives `user` (id, role, email) into the Elysia request context.
+ * Checks Authorization header first, then falls back to the `access_token` cookie.
  *
  * Usage:
  *   someRoutes.use(authGuard).get("/protected", ({ user }) => { ... })
@@ -16,13 +17,20 @@ export const authGuard = new Elysia({ name: "auth-guard" })
       secret: process.env.JWT_SECRET!,
     }),
   )
-  .derive({ as: "scoped" }, async ({ headers, jwt }) => {
+  .derive({ as: "scoped" }, async ({ headers, cookie, jwt }) => {
     const authorization = headers.authorization;
-    if (!authorization?.startsWith("Bearer ")) {
-      throw new UnauthorizedError("Missing or invalid authorization header");
+    let token: string | undefined;
+
+    if (authorization?.startsWith("Bearer ")) {
+      token = authorization.slice(7);
+    } else if (cookie.access_token?.value) {
+      token = cookie.access_token.value as string;
     }
 
-    const token = authorization.slice(7);
+    if (!token) {
+      throw new UnauthorizedError("Missing or invalid authorization");
+    }
+
     const payload = await jwt.verify(token);
 
     if (!payload) {

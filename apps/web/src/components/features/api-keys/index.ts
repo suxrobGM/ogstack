@@ -1,2 +1,2 @@
-export * from "./api-keys-feature";
+export * from "./api-key-list";
 export * from "./create-api-key-dialog";
