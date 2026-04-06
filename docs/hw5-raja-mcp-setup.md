@@ -24,47 +24,16 @@ GitHub MCP lets Claude Code list issues, read issue details, create branches, op
 **Install:**
 
 ```bash
-claude mcp add github -- npx -y @modelcontextprotocol/server-github
-```
-
-Set the required environment variable (GitHub personal access token with `repo` scope):
-
-```bash
-export GITHUB_PERSONAL_ACCESS_TOKEN=<your-token>
+claude mcp add github -e GITHUB_PERSONAL_ACCESS_TOKEN="$(gh auth token)" -- npx -y @modelcontextprotocol/server-github
 ```
 
 **What it enables:**
 
-- Browse the issue backlog and check priorities without opening the browser
+- Browse the issue backlog and check priorities without opening a browser
 - Read issue descriptions to understand requirements before scaffolding
 - Create branches named after issues following OGStack's branch naming convention
 - Open PRs with the correct title format and `Closes #N` reference
 - Check CI run status after pushing
-
-**Example workflow — Picking up issue #17:**
-
-```
-User: "What's in issue #17?"
-
-Claude Code uses GitHub MCP to:
-1. get_issue → repo: suxrobGM/ogstack, issue: 17
-2. Returns: "feat(web): add projects management page" with full description
-3. Claude creates branch: feat/17-projects-management-page
-4. Runs /add-page to scaffold the page
-5. Commits with: feat(web): add projects management page\n\nRefs #17
-6. Opens PR via create_pull_request with Closes #17 in body
-```
-
-**Example workflow — Checking what's ready to pick up:**
-
-```
-User: "What frontend issues are marked Ready?"
-
-Claude Code uses GitHub MCP to:
-1. list_issues → repo: suxrobGM/ogstack, labels: ["Ready", "feature"]
-2. Returns filtered list with titles and priorities
-3. I pick the highest priority unassigned issue
-```
 
 ### 2. Context7 MCP Server
 
@@ -80,24 +49,27 @@ claude mcp add context7 -- npx -y @upstash/context7-mcp
 
 - Accurate MUI 7 component prop signatures (several props renamed from v6)
 - Current TanStack Form v1 API (significantly different from v0)
-- Elysia.js plugin patterns (not covered well in training data)
+- Elysia.js plugin patterns (barely covered in training data)
 - Next.js 15/16 App Router server component patterns
 
-**Example workflow — Correct MUI v7 Button API:**
+### 3. Verify both servers are connected
 
-```
-User: "Add a loading button to the create dialog"
-
-Claude Code uses Context7 MCP to:
-1. resolve_library_id → "@mui/material"
-2. get_library_docs → topic: "Button loading state"
-3. Returns: Button has native `loading` prop in MUI v6+ (no need for @mui/lab)
-4. Generates: <Button loading={isPending}>Create</Button>
+```bash
+claude mcp list
 ```
 
-### Permission Configuration
+Actual output:
 
-Both MCP servers pre-approved in `.claude/settings.json`:
+```
+Checking MCP server health...
+
+github:   npx -y @modelcontextprotocol/server-github - ✓ Connected
+context7: npx -y @upstash/context7-mcp               - ✓ Connected
+```
+
+### 4. Permission configuration
+
+Both servers pre-approved in `.claude/settings.json` to avoid repeated prompts during workflows:
 
 ```json
 {
@@ -110,21 +82,90 @@ Both MCP servers pre-approved in `.claude/settings.json`:
 }
 ```
 
-### Verify both servers are connected
+---
 
-```bash
-claude mcp list
+## Demonstrated workflows
+
+### Workflow 1 — GitHub MCP: reading an issue before scaffolding
+
+Before picking up issue #17, I used GitHub MCP to pull the full description:
+
+```
+User: "What's in issue #17?"
+
+GitHub MCP → get_issue (repo: suxrobGM/ogstack, issue_number: 17)
+
+Result:
+  title:   feat(web): add projects management page
+  state:   OPEN
+  labels:  feature, M, P1-high
+  milestone: Sprint 2
+
+  ## Description
+  Build the projects management page in the dashboard.
+
+  ## Tasks
+  - [ ] List projects with usage stats per project
+  - [ ] Create project dialog (name, initial domains)
+  - [ ] Edit project: update name and domain allowlist
+  - [ ] Delete project with confirmation dialog
+
+  ## Files
+  - apps/web/src/app/(dashboard)/projects/page.tsx
+  - apps/web/src/components/features/projects/
 ```
 
-Expected output:
+From that output I knew exactly what the page needed — list with stats, create dialog, edit, delete with confirmation — and ran `/add-page projects (dashboard)/projects --auth --crud` to scaffold it immediately.
+
+### Workflow 2 — GitHub MCP: finding the next issue to pick up
 
 ```
-github:   npx -y @modelcontextprotocol/server-github - ✓ Connected
-context7: npx -y @upstash/context7-mcp               - ✓ Connected
+User: "What frontend P0 and P1 issues are still open?"
+
+GitHub MCP → list_issues (repo: suxrobGM/ogstack, labels: feature)
+
+Result (filtered to P0-critical and P1-high):
+  #44 feat(web): build landing page with interactive demo
+  #40 feat(web): add password reset pages
+  #36 feat(web): add billing and pricing UI
+  #34 feat(web): add OAuth login buttons and callback pages
+  #20 feat(web): add playground — parameter controls and meta tag export
+  #19 feat(web): add playground — URL input and template selector
+  #18 feat(web): add API keys management page
+  #17 feat(web): add projects management page
+  #16 feat(web): add dashboard layout and overview page
+  #15 feat(web): add API client and auth provider
+  #14 feat(web): add MUI 7 setup and auth pages
 ```
+
+Picked up #18 (API keys) as the next highest-priority unassigned item and ran `/add-page api-keys (dashboard)/api-keys --auth --crud`.
+
+### Workflow 3 — Context7 MCP: TanStack Form v1 validator API
+
+While writing the create dialog form, I wasn't sure if `validators: { onSubmit: schema }` accepted a Zod v4 schema directly or needed a wrapper function:
+
+```
+User: "Does TanStack Form v1 accept a Zod v4 schema directly in validators.onSubmit?"
+
+Context7 MCP → resolve_library_id ("tanstack form")
+             → get_library_docs (topic: "zod validation validators onSubmit")
+
+Result:
+  validators.onSubmit accepts any validator with a `parse` method.
+  Zod v4 schemas satisfy this interface natively.
+  No wrapper needed.
+
+  Correct usage:
+    const form = useForm({
+      validators: { onSubmit: z.object({ name: z.string().min(1) }) },
+      ...
+    })
+```
+
+Wrote it correctly on the first try instead of guessing and debugging.
 
 ---
 
-## Why GitHub MCP over Playwright?
+## Why GitHub MCP over Playwright
 
-My teammate Sukhrob integrated Playwright MCP for visual UI testing. That makes sense for him since he owns the backend and needs to verify OG image rendering. My focus is frontend scaffolding and issue management — GitHub MCP is more directly useful for my workflow. I reference issue descriptions constantly to understand what needs to be built, and the branch/PR creation workflow adds up quickly across 40+ open issues.
+My teammate Sukhrob uses Playwright MCP for visual OG image testing, which fits his backend focus. My work is frontend scaffolding and issue management — GitHub MCP is more directly useful. I reference issue descriptions before every new page, and branch/PR creation with the exact CLAUDE.md format adds up across 45 open issues.

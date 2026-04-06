@@ -117,3 +117,84 @@ Page "api-keys" scaffolded successfully!
 - `--crud` flag generated a full `CreateApiKeyDialog` with proper "show key once" UX
 - ROUTES constant updated automatically
 - Typecheck ran at the end with zero errors
+
+---
+
+## Session 3: GitHub MCP — Issue lookup and backlog filtering
+
+```
+$ claude mcp list
+Checking MCP server health...
+
+github:   npx -y @modelcontextprotocol/server-github - ✓ Connected
+context7: npx -y @upstash/context7-mcp               - ✓ Connected
+
+> "What's in issue #17?"
+
+[github: get_issue] repo=suxrobGM/ogstack number=17
+
+  title:     feat(web): add projects management page
+  state:     OPEN
+  labels:    feature, M, P1-high
+  milestone: Sprint 2
+
+  ## Description
+  Build the projects management page in the dashboard.
+
+  ## Tasks
+  - [ ] List projects with usage stats per project
+  - [ ] Create project dialog (name, initial domains)
+  - [ ] Edit project: update name and domain allowlist
+  - [ ] Delete project with confirmation dialog
+
+  ## Files
+  - apps/web/src/app/(dashboard)/projects/page.tsx
+  - apps/web/src/components/features/projects/
+
+> "What P0 and P1 frontend issues are still open?"
+
+[github: list_issues] repo=suxrobGM/ogstack labels=feature,P1-high
+
+  #44 feat(web): build landing page with interactive demo     [P0-critical]
+  #40 feat(web): add password reset pages                     [P1-high]
+  #36 feat(web): add billing and pricing UI                   [P0-critical]
+  #20 feat(web): add playground — parameter controls          [P1-high]
+  #19 feat(web): add playground — URL input and template      [P1-high]
+  #18 feat(web): add API keys management page                 [P1-high]
+  #17 feat(web): add projects management page                 [P1-high]
+  #16 feat(web): add dashboard layout and overview page       [P0-critical]
+  #15 feat(web): add API client and auth provider             [P0-critical]
+  #14 feat(web): add MUI 7 setup and auth pages               [P0-critical]
+
+→ Picked up #18 as next highest-priority unassigned item.
+→ Ran: /add-page api-keys (dashboard)/api-keys --auth --crud
+```
+
+---
+
+## Session 4: Context7 MCP — TanStack Form v1 validator API
+
+```
+> "Does TanStack Form v1 accept a Zod v4 schema directly in validators.onSubmit,
+   or does it need a wrapper?"
+
+[context7: resolve_library_id] query="tanstack form"
+  → /tanstack/form
+
+[context7: get_library_docs] library=/tanstack/form
+                              topic="zod validation validators onSubmit"
+
+  validators.onSubmit accepts any object with a parse() method.
+  Zod v4 schemas satisfy this interface natively — no wrapper needed.
+
+  Correct usage:
+    const form = useForm({
+      validators: {
+        onSubmit: z.object({ name: z.string().min(1) }),
+      },
+      onSubmit: async ({ value }) => { ... },
+    })
+
+→ Used this pattern directly in CreateApiKeyDialog and CreateProjectDialog.
+  Zero debugging — worked on first pass.
+```
