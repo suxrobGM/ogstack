@@ -7,6 +7,8 @@ export const ROUTES = {
   forgotPassword: "/forgot-password",
   resetPassword: "/reset-password",
   docs: "/docs" as Route,
+  projects: "/projects" as Route,
+  apiKeys: "/api-keys" as Route,
 } as const;
 
 export const COOKIE_NAMES = {
