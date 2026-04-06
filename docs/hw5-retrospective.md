@@ -1,113 +1,85 @@
-# HW5 Retrospective — Custom Skill + MCP Integration
+# HW5 Retrospective: Custom Skill + MCP Integration
 
-**Project:** OGStack — Developer-first OG image generation platform
-**Date:** April 5, 2026
-
----
-
-## Part 1: How the Custom Skill Changed My Workflow
-
-### The Problem
-
-OGStack follows a strict module pattern: every backend feature requires a controller, service, schema, and index file — all wired together with specific imports, decorators, and conventions. Manually creating a new module meant:
-
-1. Creating 4+ files with boilerplate code
-2. Remembering exact import paths (`@/common/di`, `@/common/errors`, `@/generated/prisma`)
-3. Setting up TypeBox schemas with the right pagination types
-4. Registering the controller in `app.ts` with proper grouping
-5. Adding `@singleton()` decorators, `container.resolve()` calls, auth guards, Swagger docs
-
-This took 15–20 minutes of copy-pasting from existing modules, and errors (wrong import, missing decorator, typo in prefix) were common.
-
-### The Solution: `/add-module` Skill
-
-The `/add-module` skill encodes all of OGStack's backend conventions into a single slash command. Running `/add-module billing --crud --test --prisma` generates a complete, production-ready module in seconds.
-
-### V1 → V2 Iteration
-
-**V1** was a minimal scaffolder — it created the three core files (controller, service, schema) with placeholder TODO comments and basic structure. Testing it on a real task (adding a `billing` module) revealed several gaps:
-
-- No pagination support in the CRUD list endpoint — had to manually add `PaginationQueryBaseSchema` every time
-- No test file generation — tests are required for every service, so I always had to create one manually after scaffolding
-- Pseudocode templates instead of real code — the generated files needed significant editing to compile
-- No typecheck step — scaffolded code sometimes had import errors that weren't caught until later
-
-**V2** addressed all of these:
-
-- **`--test` flag** generates a test file with mock PrismaClient setup matching our Bun test patterns
-- **`--repo` flag** creates a repository layer for modules with complex queries
-- **`--prisma` flag** generates the Prisma schema file with proper conventions (UUID, timestamps, user relation)
-- **Pagination built-in** — CRUD list endpoints use `PaginatedResponseSchema` and `PaginationQueryBaseSchema` from shared types
-- **Concrete code templates** — generated code matches the exact style of the `project` module (our reference implementation)
-- **Typecheck verification** — runs `bun run typecheck` after scaffolding to catch errors immediately
-- **Reads existing modules first** — ensures generated code matches the latest patterns, preventing style drift
-
-### What Tasks Became Easier
-
-- **New feature development**: Adding a new domain module (e.g., `brand-kit`, `og-audit`, `analytics`) went from ~20 minutes to ~30 seconds
-- **Onboarding**: A new contributor can run `/add-module` and immediately have a working module that follows all conventions
-- **Consistency**: Every module now uses the same structure, imports, and patterns — no more subtle differences between modules
+Project: OGStack (OG image generation platform)
+Date: April 5, 2026
 
 ---
 
-## Part 2: What MCP Integration Enabled
+## Part 1: How the custom skill changed my workflow
 
-### Playwright MCP — Browser Testing from the Conversation
+### The problem I kept running into
 
-Before Playwright MCP, testing UI changes required switching to a browser, manually navigating, and visually checking. With Playwright MCP, Claude Code can:
+Every backend feature in OGStack needs the same four files: controller, service, schema, index. They all follow the same pattern, use the same decorators, import from the same paths. I was copy-pasting from the `project` module every time, then spending 15 minutes renaming things and fixing the imports I got wrong.
 
-- **Navigate the running app** at `localhost:4001` and take screenshots
-- **Test user flows** end-to-end: fill forms, click buttons, verify redirects
-- **Debug visual issues** by capturing what the page actually renders
-- **Verify OG image generation** by testing the playground flow programmatically
+The annoying part wasn't the time. It was the inconsistency. Some modules used slightly different import styles because I copied from `auth` instead of `project`. Some forgot the `@singleton()` decorator. One time I registered a controller outside the `/api` group in `app.ts` and didn't notice until the routes were missing from Swagger.
 
-This is particularly valuable for OGStack because the core product is visual (OG images). Being able to generate an image and immediately see the result in the conversation — without leaving the terminal — closes the feedback loop dramatically.
+### What I built
 
-### Context7 MCP — Up-to-Date Library Documentation
+I created an `/add-module` skill. You run `/add-module billing --crud --test --prisma` and it generates all the files, wires them into `app.ts`, and runs a typecheck to make sure everything compiles. That's it.
 
-OGStack uses several bleeding-edge libraries: Elysia.js, Prisma 7, Next.js 16, MUI 7, React 19. Claude's training data doesn't always cover the latest APIs. Context7 MCP solves this by fetching current documentation on demand.
+### How v1 fell short, and what v2 fixed
 
-Real examples where this helped:
+V1 was barebones. It created the three core files with TODO placeholders and called it a day. When I actually used it to scaffold a `billing` module, the gaps were obvious:
 
-- **Prisma 7 driver adapter API** — the `@prisma/adapter-pg` setup changed between versions; Context7 provided the current syntax
-- **Elysia WebSocket plugin** — the API differs significantly from Express/Fastify patterns; real-time docs prevented incorrect implementations
-- **MUI 7 component props** — new components and changed prop names were accurately resolved
+- The CRUD list endpoint had no pagination. Every module in OGStack uses `PaginationQueryBaseSchema`, so I was adding it manually after every scaffold.
+- No test file. Our convention says every service needs tests, so I'd scaffold the module and immediately have to create the test file from scratch.
+- The generated code was pseudocode, not real TypeScript. It didn't compile without editing.
+- No typecheck at the end. Import typos would slip through and show up later.
 
-### What Wasn't Possible Before
+V2 added `--test`, `--repo`, and `--prisma` flags. The generated code now matches the `project` module exactly, including pagination in list endpoints. It reads existing modules before generating to prevent style drift. And it runs `bun run typecheck` at the end so broken scaffolds get caught immediately.
 
-1. **Visual verification in conversation** — Playwright screenshots let Claude Code "see" the UI without the developer describing it
-2. **Accurate library APIs** — Context7 eliminates the "hallucinated API" problem where Claude generates plausible but incorrect function signatures
-3. **Automated permission grants** — pre-approved MCP permissions in `settings.json` mean no interruptions during testing workflows
+### What actually got easier
+
+Adding a new domain module (like `brand-kit` or `og-audit`) went from a 20 minute copy-paste session to a single command. More importantly, every module now looks the same. No more "why does this one import differently" moments during code review.
 
 ---
 
-## Part 3: What I Would Build Next
+## Part 2: What MCP integration enabled
 
-### More Skills
+### Playwright: seeing the UI without leaving the terminal
 
-- **`/add-page`** — scaffold a Next.js page with MUI layout, auth checks, and API client hooks, mirroring the frontend conventions as `/add-module` mirrors the backend
-- **`/og-test`** — generate an OG image for a given URL and display the result, combining the API call with Playwright to render the preview
-- **`/db-seed`** — generate realistic seed data for any Prisma model, useful for development and demos
+Before Playwright MCP, checking a UI change meant switching to Chrome, navigating to the right page, logging in, and visually inspecting. For OGStack this is especially tedious because the core product is visual. You're generating OG images, and you need to see them.
+
+With Playwright MCP, Claude Code can navigate to `localhost:4001`, fill in a login form, go to the playground, paste a URL, click generate, and screenshot the result. I can see the generated OG image right in the conversation. The whole loop of "change code, switch to browser, come back" turns into one step.
+
+I used this to verify the landing page layout after a MUI theme change, and to test the full playground flow (login, enter URL, select template, generate image) without touching a browser.
+
+### Context7: documentation that isn't six months stale
+
+OGStack uses libraries where the latest version barely has blog posts yet: Elysia.js, Prisma 7, Next.js 16, MUI 7. Claude's training data lags behind. Context7 MCP fetches current documentation on demand, so when I need the Elysia WebSocket plugin API or the Prisma 7 adapter setup, I get the real syntax instead of something that looks right but doesn't exist.
+
+Concrete cases where this mattered: the `@prisma/adapter-pg` API changed between Prisma 6 and 7, the Elysia WebSocket plugin doesn't follow Express/Fastify conventions at all, and MUI 7 renamed several component props.
+
+### What wasn't possible before
+
+Playwright screenshots let Claude Code "see" the UI. Before, I had to describe what was on screen. Context7 solved the stale documentation problem, where Claude would confidently generate function signatures that don't exist in the version I'm using. Both MCP servers are pre-approved in `settings.json`, so there are no permission prompts interrupting the flow.
+
+---
+
+## Part 3: What I'd build next
+
+### More skills
+
+`/add-page` for the frontend side, mirroring what `/add-module` does for the backend. Right now scaffolding a Next.js page with MUI layout, auth context, and API hooks is the same copy-paste problem I already solved on the backend.
+
+`/og-test` to generate an OG image for a URL and display it inline. This would combine an API call with Playwright to render the preview, which is the most common thing I do during development.
+
+`/db-seed` to generate realistic test data for any Prisma model. Writing seed scripts by hand gets old.
 
 ### Hooks
 
-- **Pre-commit typecheck** — automatically run `bun run typecheck` before every commit to prevent type errors from landing in the repo
-- **Auto-format on save** — already have this (Prettier hook on Edit/Write), but could extend to run ESLint fixes too
-- **Post-scaffold validation** — after `/add-module` runs, automatically verify the new module compiles and the dev server still starts
+A pre-commit typecheck hook (run `bun run typecheck` before every commit) would catch type errors before they hit the repo. I already have a Prettier hook that formats on Edit/Write, but extending it to run ESLint would close another gap. A post-scaffold hook that verifies the new module compiles after `/add-module` runs would make the skill more self-contained.
 
-### Sub-Agents
+### Sub-agents
 
-- **Code review agent** — a specialized agent that reviews PRs against OGStack's conventions (DI patterns, error handling, schema validation) and flags violations
-- **Migration checker agent** — when a Prisma schema change is detected, automatically generates and validates the migration, checking for data loss risks
-- **Security audit agent** — scans new endpoints for SSRF vulnerabilities (critical for OGStack's URL scraping feature), missing auth guards, and exposed secrets
+A code review agent that checks PRs against OGStack conventions, specifically the DI patterns, error handling with typed errors, and schema validation. A migration checker that runs when Prisma schema files change and flags potential data loss. A security audit agent that scans new endpoints for SSRF vulnerabilities, which matters because OGStack scrapes URLs and needs to block private IP ranges.
 
-### MCP Expansions
+### More MCP servers
 
-- **PostgreSQL MCP** — direct database queries from the conversation for debugging data issues, checking migration state, and verifying seed data
-- **GitHub MCP** — deeper integration for creating issues, reviewing PRs, and managing the project board without switching to the browser
+PostgreSQL MCP for running queries directly from the conversation, useful for debugging data issues and verifying migrations. GitHub MCP for deeper issue and PR management without switching to the browser.
 
 ---
 
-## Summary
+## Wrapping up
 
-The custom skill and MCP integration fundamentally changed the development workflow for OGStack. The `/add-module` skill eliminated repetitive scaffolding work and enforced consistency across the codebase. Playwright MCP enabled visual testing without leaving the terminal, and Context7 MCP ensured accurate library usage for bleeding-edge dependencies. Together, these tools reduced the feedback loop from minutes to seconds and caught errors earlier in the development process.
+The `/add-module` skill cut out the copy-paste when adding backend features. Honestly, the consistency matters more to me than the time savings. Every module looks the same now, and code review got easier because of it. Playwright MCP let me stop switching between the terminal and browser during frontend work. Context7 stopped me from using APIs that don't exist in the library versions I'm running, which happened more often than I'd like to admit. The common thread is a shorter feedback loop. I can change code, see what happened, and fix the issue without leaving the conversation.
