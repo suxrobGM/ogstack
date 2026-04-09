@@ -70,11 +70,11 @@ export function CreateApiKeyDialog(props: CreateApiKeyDialogProps): ReactElement
               <TextField
                 value={createdKey}
                 fullWidth
-                InputProps={{ readOnly: true }}
+                slotProps={{ input: { readOnly: true } }}
                 label="Your API Key"
                 size="small"
               />
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
                 Use this key in the <code>Authorization: Bearer</code> header for API requests.
               </Typography>
             </Stack>
@@ -94,7 +94,7 @@ export function CreateApiKeyDialog(props: CreateApiKeyDialogProps): ReactElement
         >
           <DialogTitle>New API Key</DialogTitle>
           <DialogContent>
-            <Stack spacing={2} mt={1}>
+            <Stack spacing={2} sx={{ mt: 1 }}>
               <form.Field name="name">
                 {(field) => <FormTextField field={field} label="Key Name" required />}
               </form.Field>

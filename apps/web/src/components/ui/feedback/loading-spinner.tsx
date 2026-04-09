@@ -12,7 +12,7 @@ export function LoadingSpinner(props: LoadingSpinnerProps): ReactElement {
   const { size, py = 8, sx } = props;
 
   return (
-    <Stack alignItems="center" justifyContent="center" sx={{ py, ...sx }}>
+    <Stack sx={{ alignItems: "center", justifyContent: "center", py, ...sx }}>
       <CircularProgress size={size} />
     </Stack>
   );

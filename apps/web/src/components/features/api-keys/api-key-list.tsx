@@ -38,7 +38,7 @@ export function ApiKeyList(props: ApiKeyListProps): ReactElement {
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+      <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 3 }}>
         <Typography variant="h4">API Keys</Typography>
         <Button variant="contained" onClick={() => setCreateOpen(true)}>
           New API Key
@@ -48,7 +48,7 @@ export function ApiKeyList(props: ApiKeyListProps): ReactElement {
       {isLoading ? (
         <CircularProgress />
       ) : items.length === 0 ? (
-        <Typography color="text.secondary">No API keys found.</Typography>
+        <Typography sx={{ color: "text.secondary" }}>No API keys found.</Typography>
       ) : (
         <Table>
           <TableHead>
@@ -71,7 +71,7 @@ export function ApiKeyList(props: ApiKeyListProps): ReactElement {
                   {item.lastUsedAt ? (
                     new Date(item.lastUsedAt).toLocaleDateString()
                   ) : (
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{ color: "text.secondary" }}>
                       Never
                     </Typography>
                   )}

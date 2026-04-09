@@ -12,7 +12,9 @@ export default async function ApiKeysPage(): Promise<ReactElement> {
 
   if (!project) {
     return (
-      <Typography color="text.secondary">Create a project first to manage API keys.</Typography>
+      <Typography sx={{ color: "text.secondary" }}>
+        Create a project first to manage API keys.
+      </Typography>
     );
   }
 

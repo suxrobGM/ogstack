@@ -36,7 +36,7 @@ export function FormDateField(props: FormDateFieldProps): ReactElement {
             field.state.meta.errors[0]?.toString()
           }
           slotProps={{
-            input: { inputProps: { min, max } },
+            htmlInput: { min, max },
             inputLabel: { shrink: true },
           }}
           {...textFieldProps}

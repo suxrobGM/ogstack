@@ -39,7 +39,7 @@ export function ProjectList(props: ProjectListProps): ReactElement {
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+      <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 3 }}>
         <Typography variant="h4">Projects</Typography>
         <Button variant="contained">New Project</Button>
       </Stack>
@@ -64,7 +64,7 @@ export function ProjectList(props: ProjectListProps): ReactElement {
       {isLoading ? (
         <CircularProgress />
       ) : items.length === 0 ? (
-        <Typography color="text.secondary">No projects found.</Typography>
+        <Typography sx={{ color: "text.secondary" }}>No projects found.</Typography>
       ) : (
         <Table>
           <TableHead>
@@ -81,7 +81,7 @@ export function ProjectList(props: ProjectListProps): ReactElement {
               <TableRow key={item.id}>
                 <TableCell>{item.name}</TableCell>
                 <TableCell>
-                  <Typography variant="body2" fontFamily="monospace">
+                  <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
                     {item.publicId}
                   </Typography>
                 </TableCell>
