@@ -1,11 +1,10 @@
-"use client";
-
 import type { ReactElement } from "react";
 import CheckIcon from "@mui/icons-material/Check";
 import {
   Box,
   Button,
   Container,
+  Grid,
   List,
   ListItem,
   ListItemIcon,
@@ -95,63 +94,57 @@ export function PricingSection(): ReactElement {
         >
           Start free. Scale as you grow. No surprise charges.
         </Typography>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" },
-            gap: 3,
-            alignItems: "stretch",
-          }}
-        >
+        <Grid container spacing={3} sx={{ alignItems: "stretch" }}>
           {TIERS.map((tier) => (
-            <Surface
-              key={tier.name}
-              variant={tier.highlighted ? "expressive" : "quiet"}
-              padding={4}
-              sx={{ height: "100%", display: "flex", flexDirection: "column" }}
-            >
-              <Typography variant="overline" sx={{ color: "text.disabled" }}>
-                {tier.name}
-              </Typography>
-              <Stack direction="row" sx={{ alignItems: "baseline", mt: 1, mb: 0.5 }}>
-                <Typography
-                  sx={{
-                    fontFamily: fontFamilies.mono,
-                    fontSize: "2.5rem",
-                    fontWeight: 600,
-                    lineHeight: 1,
-                  }}
-                >
-                  {tier.price}
-                </Typography>
-                <Typography variant="body2Muted" sx={{ ml: 0.5 }}>
-                  {tier.period}
-                </Typography>
-              </Stack>
-              <Typography variant="caption" sx={{ color: "accent.amber", mb: 3 }}>
-                {tier.quota}
-              </Typography>
-              <List dense sx={{ flex: 1, py: 0 }}>
-                {tier.features.map((feature) => (
-                  <ListItem key={feature} disableGutters sx={{ py: 0.5 }}>
-                    <ListItemIcon sx={{ minWidth: 28, color: "success.main" }}>
-                      <CheckIcon sx={{ fontSize: 16 }} />
-                    </ListItemIcon>
-                    <ListItemText primary={feature} />
-                  </ListItem>
-                ))}
-              </List>
-              <Button
-                href={ROUTES.register}
-                variant={tier.highlighted ? "contained" : "outlined"}
-                fullWidth
-                sx={{ mt: 3 }}
+            <Grid key={tier.name} size={{ xs: 12, sm: 6, lg: 3 }}>
+              <Surface
+                variant={tier.highlighted ? "expressive" : "quiet"}
+                padding={4}
+                sx={{ height: "100%", display: "flex", flexDirection: "column" }}
               >
-                {tier.cta}
-              </Button>
-            </Surface>
+                <Typography variant="overline" sx={{ color: "text.disabled" }}>
+                  {tier.name}
+                </Typography>
+                <Stack direction="row" sx={{ alignItems: "baseline", mt: 1, mb: 0.5 }}>
+                  <Typography
+                    sx={{
+                      fontFamily: fontFamilies.mono,
+                      fontSize: "2.5rem",
+                      fontWeight: 600,
+                      lineHeight: 1,
+                    }}
+                  >
+                    {tier.price}
+                  </Typography>
+                  <Typography variant="body2Muted" sx={{ ml: 0.5 }}>
+                    {tier.period}
+                  </Typography>
+                </Stack>
+                <Typography variant="caption" sx={{ color: "accent.amber", mb: 3 }}>
+                  {tier.quota}
+                </Typography>
+                <List dense sx={{ flex: 1, py: 0 }}>
+                  {tier.features.map((feature) => (
+                    <ListItem key={feature} disableGutters sx={{ py: 0.5 }}>
+                      <ListItemIcon sx={{ minWidth: 28, color: "success.main" }}>
+                        <CheckIcon sx={{ fontSize: 16 }} />
+                      </ListItemIcon>
+                      <ListItemText primary={feature} />
+                    </ListItem>
+                  ))}
+                </List>
+                <Button
+                  href={ROUTES.register}
+                  variant={tier.highlighted ? "contained" : "outlined"}
+                  fullWidth
+                  sx={{ mt: 3 }}
+                >
+                  {tier.cta}
+                </Button>
+              </Surface>
+            </Grid>
           ))}
-        </Box>
+        </Grid>
       </Container>
     </Box>
   );

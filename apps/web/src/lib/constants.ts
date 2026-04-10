@@ -27,7 +27,7 @@ export const PAGINATION_DEFAULTS = {
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 export const SIDEBAR_NAV_ITEMS = [
-  { label: "Overview", href: ROUTES.overview },
-  { label: "Projects", href: ROUTES.projects },
-  { label: "API Keys", href: ROUTES.apiKeys },
+  { label: "Overview", href: ROUTES.overview, icon: "dashboard" },
+  { label: "Projects", href: ROUTES.projects, icon: "folder" },
+  { label: "API Keys", href: ROUTES.apiKeys, icon: "vpnKey" },
 ] as const;

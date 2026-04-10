@@ -6,7 +6,12 @@ import { Avatar, Box, ListItemIcon, ListItemText, Menu, MenuItem, Typography } f
 import { useAuth } from "@/hooks";
 import { motion, radii } from "@/theme/tokens";
 
-export function UserMenu(): ReactElement {
+interface UserMenuProps {
+  collapsed?: boolean;
+}
+
+export function UserMenu(props: UserMenuProps): ReactElement {
+  const { collapsed = false } = props;
   const { user, logout, isLoading } = useAuth();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const open = Boolean(anchorEl);
@@ -28,8 +33,9 @@ export function UserMenu(): ReactElement {
         sx={{
           display: "flex",
           alignItems: "center",
-          gap: 1.5,
+          gap: collapsed ? 0 : 1.5,
           p: 1.5,
+          justifyContent: collapsed ? "center" : "flex-start",
           borderRadius: `${radii.md}px`,
           cursor: "pointer",
           transition: motion.fast,
@@ -47,14 +53,16 @@ export function UserMenu(): ReactElement {
         >
           {initials}
         </Avatar>
-        <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography variant="body2" noWrap>
-            {user?.name}
-          </Typography>
-          <Typography variant="captionMuted" noWrap>
-            {user?.email}
-          </Typography>
-        </Box>
+        {!collapsed && (
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography variant="body2" noWrap>
+              {user?.name}
+            </Typography>
+            <Typography variant="captionMuted" noWrap>
+              {user?.email}
+            </Typography>
+          </Box>
+        )}
       </Box>
       <Menu
         anchorEl={anchorEl}

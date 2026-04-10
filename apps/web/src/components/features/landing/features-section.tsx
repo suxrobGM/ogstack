@@ -1,11 +1,9 @@
-"use client";
-
 import type { ReactElement } from "react";
 import CodeIcon from "@mui/icons-material/Code";
 import ImageIcon from "@mui/icons-material/Image";
 import SpeedIcon from "@mui/icons-material/Speed";
 import TuneIcon from "@mui/icons-material/Tune";
-import { Box, Container, Stack, Typography } from "@mui/material";
+import { Box, Container, Grid, Stack, Typography } from "@mui/material";
 import { Surface } from "@/components/ui/layout/surface";
 
 const FEATURES = [
@@ -48,49 +46,44 @@ export function FeaturesSection(): ReactElement {
         <Typography variant="h2" sx={{ textAlign: "center", mb: 8 }}>
           Everything you need for social previews
         </Typography>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(4, 1fr)" },
-            gap: 3,
-          }}
-        >
+        <Grid container spacing={3}>
           {FEATURES.map((f) => (
-            <Surface
-              key={f.title}
-              variant="quiet"
-              padding={4}
-              sx={{
-                height: "100%",
-                transition: "border-color 240ms, box-shadow 240ms",
-                "&:hover": {
-                  borderColor: "rgba(16,185,129,0.2)",
-                  boxShadow: "0 8px 32px -8px rgba(16,185,129,0.08)",
-                },
-              }}
-            >
-              <Stack spacing={2}>
-                <Box
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 1.5,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: "rgba(16,185,129,0.08)",
-                    color: "accent.sunset",
-                    fontSize: 22,
-                  }}
-                >
-                  {f.icon}
-                </Box>
-                <Typography variant="h5">{f.title}</Typography>
-                <Typography variant="body2Muted">{f.description}</Typography>
-              </Stack>
-            </Surface>
+            <Grid key={f.title} size={{ xs: 12, sm: 6, md: 3 }}>
+              <Surface
+                variant="quiet"
+                padding={4}
+                sx={{
+                  height: "100%",
+                  transition: "border-color 240ms, box-shadow 240ms",
+                  "&:hover": {
+                    borderColor: "rgba(16,185,129,0.2)",
+                    boxShadow: "0 8px 32px -8px rgba(16,185,129,0.08)",
+                  },
+                }}
+              >
+                <Stack spacing={2}>
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 1.5,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: "rgba(16,185,129,0.08)",
+                      color: "accent.sunset",
+                      fontSize: 22,
+                    }}
+                  >
+                    {f.icon}
+                  </Box>
+                  <Typography variant="h5">{f.title}</Typography>
+                  <Typography variant="body2Muted">{f.description}</Typography>
+                </Stack>
+              </Surface>
+            </Grid>
           ))}
-        </Box>
+        </Grid>
       </Container>
     </Box>
   );

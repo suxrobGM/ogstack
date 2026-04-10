@@ -4,6 +4,9 @@ import { motion } from "../tokens";
 import { fontFamilies } from "../typography";
 
 export const tableOverrides: Components<Theme>["MuiTable"] = {
+  defaultProps: {
+    sx: { minWidth: 600 },
+  },
   styleOverrides: {
     root: {
       borderCollapse: "separate",

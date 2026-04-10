@@ -35,6 +35,14 @@ import { tabOverrides, tabsOverrides } from "./tabs";
 import { typographyOverrides } from "./typography";
 
 export const componentOverrides: Components<Theme> = {
+  MuiAppBar: {
+    styleOverrides: {
+      root: {
+        borderRadius: 0,
+        border: "none",
+      },
+    },
+  },
   MuiBackdrop: backdropOverrides,
   MuiButton: buttonOverrides,
   MuiCard: cardOverrides,

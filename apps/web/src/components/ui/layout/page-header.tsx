@@ -20,10 +20,10 @@ export function PageHeader(props: PageHeaderProps): ReactElement {
   return (
     <Box
       sx={{
-        pt: 5,
-        pb: 4,
+        pt: { xs: 2, md: 5 },
+        pb: { xs: 3, md: 4 },
         borderBottom: `1px solid ${line.divider}`,
-        mb: 4,
+        mb: { xs: 3, md: 4 },
       }}
     >
       {breadcrumbs && <Box sx={{ mb: 2 }}>{breadcrumbs}</Box>}

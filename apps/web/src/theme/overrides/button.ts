@@ -10,13 +10,18 @@ export const buttonOverrides: Components<Theme>["MuiButton"] = {
   styleOverrides: {
     root: {
       borderRadius: radii.md,
-      padding: "11px 24px",
+      padding: "9px 18px",
+      fontSize: "0.875rem",
       transition: `all ${motion.standard}`,
+      "@media (min-width: 900px)": {
+        padding: "11px 24px",
+        fontSize: "0.9375rem",
+      },
     },
     contained: {
       boxShadow: "none",
       backgroundColor: accent.sunset,
-      color: "#fff",
+      color: "#052e16",
       "&:hover": {
         backgroundColor: "#059669",
         boxShadow: "0 8px 24px -8px rgba(16,185,129,0.45)",

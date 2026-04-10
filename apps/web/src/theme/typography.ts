@@ -23,20 +23,20 @@ export const typography: TypographyVariantsOptions = {
   h2: {
     fontFamily: fontFamilies.display,
     fontWeight: 600,
-    fontSize: "2.75rem",
+    fontSize: "clamp(1.75rem, 4vw, 2.75rem)",
     lineHeight: 1.0,
     letterSpacing: "-0.03em",
   },
   h3: {
     fontFamily: fontFamilies.display,
     fontWeight: 600,
-    fontSize: "1.75rem",
+    fontSize: "clamp(1.375rem, 3vw, 1.75rem)",
     letterSpacing: "-0.02em",
   },
   h4: {
     fontFamily: fontFamilies.display,
     fontWeight: 500,
-    fontSize: "1.375rem",
+    fontSize: "clamp(1.125rem, 2.5vw, 1.375rem)",
   },
   h5: {
     fontFamily: fontFamilies.display,

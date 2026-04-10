@@ -71,6 +71,7 @@ export function Surface(props: SurfaceProps): ReactElement {
           border: `1px solid ${line.border}`,
           borderRadius: `${radii.md}px`,
           padding,
+          overflowX: "auto",
         },
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}

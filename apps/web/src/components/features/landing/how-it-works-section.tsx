@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { Box, Container, Stack, Typography } from "@mui/material";
+import { Box, Container, Grid, Stack, Typography } from "@mui/material";
 import { line } from "@/theme/palette";
 import { gradients } from "@/theme/tokens";
 import { fontFamilies } from "@/theme/typography";
@@ -36,34 +36,30 @@ export function HowItWorksSection(): ReactElement {
         <Typography variant="h2" sx={{ textAlign: "center", mb: 8 }}>
           Three steps to beautiful previews
         </Typography>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
-            gap: 4,
-          }}
-        >
+        <Grid container spacing={4}>
           {STEPS.map((step) => (
-            <Stack key={step.number} spacing={2}>
-              <Typography
-                sx={{
-                  fontFamily: fontFamilies.mono,
-                  fontSize: "3rem",
-                  fontWeight: 700,
-                  backgroundImage: gradients.sunsetAmber,
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  lineHeight: 1,
-                }}
-              >
-                {step.number}
-              </Typography>
-              <Typography variant="h4">{step.title}</Typography>
-              <Typography variant="body2Muted">{step.description}</Typography>
-            </Stack>
+            <Grid key={step.number} size={{ xs: 12, md: 4 }}>
+              <Stack spacing={2}>
+                <Typography
+                  sx={{
+                    fontFamily: fontFamilies.mono,
+                    fontSize: "3rem",
+                    fontWeight: 700,
+                    backgroundImage: gradients.sunsetAmber,
+                    backgroundClip: "text",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    lineHeight: 1,
+                  }}
+                >
+                  {step.number}
+                </Typography>
+                <Typography variant="h4">{step.title}</Typography>
+                <Typography variant="body2Muted">{step.description}</Typography>
+              </Stack>
+            </Grid>
           ))}
-        </Box>
+        </Grid>
       </Container>
     </Box>
   );
