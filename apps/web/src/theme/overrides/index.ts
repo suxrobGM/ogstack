@@ -21,6 +21,7 @@ import {
   selectOverrides,
   textFieldOverrides,
 } from "./input";
+import { linkOverrides } from "./link";
 import { menuItemOverrides, menuOverrides } from "./menu";
 import { paperOverrides } from "./paper";
 import {
@@ -47,6 +48,7 @@ export const componentOverrides: Components<Theme> = {
   MuiDialogTitle: dialogTitleOverrides,
   MuiFormHelperText: formHelperTextOverrides,
   MuiInputLabel: inputLabelOverrides,
+  MuiLink: linkOverrides,
   MuiMenu: menuOverrides,
   MuiMenuItem: menuItemOverrides,
   MuiOutlinedInput: outlinedInputOverrides,

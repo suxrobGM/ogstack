@@ -1,16 +1,12 @@
-"use client";
-
 import type { ReactElement, ReactNode } from "react";
-import { Box, Link as MuiLink, Stack, Typography } from "@mui/material";
-import type { Route } from "next";
-import NextLink from "next/link";
+import { Box, Link, Stack, Typography } from "@mui/material";
 import { Surface } from "@/components/ui/layout/surface";
 
 interface AuthCardProps {
   title: string;
   description?: string;
   children: ReactNode;
-  footer?: { text: string; linkText: string; href: Route };
+  footer?: { text: string; linkText: string; href: string };
 }
 
 export function AuthCard(props: AuthCardProps): ReactElement {
@@ -23,24 +19,15 @@ export function AuthCard(props: AuthCardProps): ReactElement {
           <Typography variant="h3" sx={{ mb: 1 }}>
             {title}
           </Typography>
-          {description && (
-            <Typography variant="body2" color="textSecondary">
-              {description}
-            </Typography>
-          )}
+          {description && <Typography variant="body2Muted">{description}</Typography>}
         </Box>
         {children}
         {footer && (
-          <Typography variant="body2" color="textSecondary" sx={{ textAlign: "center" }}>
+          <Typography variant="body2Muted" sx={{ textAlign: "center" }}>
             {footer.text}{" "}
-            <MuiLink
-              href={footer.href}
-              component={NextLink}
-              underline="hover"
-              sx={{ color: "accent.sunset" }}
-            >
+            <Link href={footer.href} underline="hover" sx={{ color: "accent.sunset" }}>
               {footer.linkText}
-            </MuiLink>
+            </Link>
           </Typography>
         )}
       </Stack>
