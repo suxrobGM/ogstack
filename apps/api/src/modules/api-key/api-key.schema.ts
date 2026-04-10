@@ -1,7 +1,7 @@
 import { t, type Static } from "elysia";
 
 export const ProjectIdParamSchema = t.Object({
-  projectId: t.String(),
+  id: t.String(),
 });
 
 export const ApiKeyIdParamSchema = t.Object({

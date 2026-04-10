@@ -30,7 +30,7 @@ export function ApiKeyList(props: ApiKeyListProps): ReactElement {
 
   const { data, isLoading } = useApiQuery<ApiKeyListResponse>(
     ["api-keys", projectId],
-    () => client.api.projects({ projectId, id: projectId })["api-keys"].get(),
+    () => client.api.projects({ id: projectId })["api-keys"].get(),
     { initialData: initialData!, errorMessage: "Failed to load API keys." },
   );
 

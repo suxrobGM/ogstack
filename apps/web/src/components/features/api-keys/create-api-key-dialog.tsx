@@ -35,13 +35,13 @@ export function CreateApiKeyDialog(props: CreateApiKeyDialogProps): ReactElement
   const [createdKey, setCreatedKey] = useState<string | null>(null);
 
   const mutation = useApiMutation(
-    (data: FormValues) => client.api.projects({ projectId, id: projectId })["api-keys"].post(data),
+    (data: FormValues) => client.api.projects({ id: projectId })["api-keys"].post(data),
     {
       successMessage: "API key created.",
       invalidateKeys: [["api-keys"]],
       onSuccess: (result) => {
-        if (result?.data?.key) {
-          setCreatedKey(result.data.key);
+        if (result?.key) {
+          setCreatedKey(result.key);
         }
       },
     },
@@ -95,9 +95,7 @@ export function CreateApiKeyDialog(props: CreateApiKeyDialogProps): ReactElement
           <DialogTitle>New API Key</DialogTitle>
           <DialogContent>
             <Stack spacing={2} sx={{ mt: 1 }}>
-              <form.Field name="name">
-                {(field) => <FormTextField field={field} label="Key Name" required />}
-              </form.Field>
+              <FormTextField form={form} name="name" label="Key Name" required />
             </Stack>
           </DialogContent>
           <DialogActions>

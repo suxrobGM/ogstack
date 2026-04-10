@@ -16,8 +16,8 @@ const apiKeyService = container.resolve(ApiKeyService);
 export const apiKeyController = new Elysia({ prefix: "/projects", tags: ["API Keys"] })
   .use(authGuard)
   .post(
-    "/:projectId/api-keys",
-    ({ user, params, body }) => apiKeyService.create(user.id, params.projectId, body),
+    "/:id/api-keys",
+    ({ user, params, body }) => apiKeyService.create(user.id, params.id, body),
     {
       params: ProjectIdParamSchema,
       body: CreateApiKeyBodySchema,
@@ -29,18 +29,14 @@ export const apiKeyController = new Elysia({ prefix: "/projects", tags: ["API Ke
       },
     },
   )
-  .get(
-    "/:projectId/api-keys",
-    ({ user, params }) => apiKeyService.list(user.id, params.projectId),
-    {
-      params: ProjectIdParamSchema,
-      response: ApiKeyListResponseSchema,
-      detail: {
-        summary: "List API keys",
-        description: "List all API keys for a project. Only the prefix is shown, not the full key.",
-      },
+  .get("/:id/api-keys", ({ user, params }) => apiKeyService.list(user.id, params.id), {
+    params: ProjectIdParamSchema,
+    response: ApiKeyListResponseSchema,
+    detail: {
+      summary: "List API keys",
+      description: "List all API keys for a project. Only the prefix is shown, not the full key.",
     },
-  );
+  });
 
 export const apiKeyDeleteController = new Elysia({ prefix: "/api-keys", tags: ["API Keys"] })
   .use(authGuard)

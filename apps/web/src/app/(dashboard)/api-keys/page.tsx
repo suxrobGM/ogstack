@@ -18,9 +18,7 @@ export default async function ApiKeysPage(): Promise<ReactElement> {
     );
   }
 
-  const { data: keys } = await client.api
-    .projects({ projectId: project.id, id: project.id })
-    ["api-keys"].get();
+  const { data: keys } = await client.api.projects({ id: project.id })["api-keys"].get();
 
   return <ApiKeyList projectId={project.id} initialData={keys} />;
 }
