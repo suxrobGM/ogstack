@@ -26,13 +26,13 @@ export const menuItemOverrides: Components<Theme>["MuiMenuItem"] = {
       borderRadius: 4,
       color: textColors.primary,
       "&:hover": {
-        backgroundColor: "rgba(255,91,46,0.08)",
+        backgroundColor: "rgba(16,185,129,0.08)",
       },
       "&.Mui-selected": {
-        backgroundColor: "rgba(255,91,46,0.14)",
+        backgroundColor: "rgba(16,185,129,0.14)",
         color: accent.sunset,
         "&:hover": {
-          backgroundColor: "rgba(255,91,46,0.18)",
+          backgroundColor: "rgba(16,185,129,0.18)",
         },
       },
     },

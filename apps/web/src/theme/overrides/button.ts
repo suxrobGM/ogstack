@@ -9,38 +9,39 @@ export const buttonOverrides: Components<Theme>["MuiButton"] = {
   },
   styleOverrides: {
     root: {
-      borderRadius: radii.pill,
+      borderRadius: radii.md,
       padding: "11px 24px",
       transition: `all ${motion.standard}`,
     },
     contained: {
       boxShadow: "none",
       backgroundColor: accent.sunset,
-      color: textColors.primary,
+      color: "#fff",
       "&:hover": {
-        backgroundColor: accent.sunset,
-        boxShadow: "0 12px 32px -12px rgba(255,91,46,0.5)",
+        backgroundColor: "#059669",
+        boxShadow: "0 8px 24px -8px rgba(16,185,129,0.45)",
         transform: "translateY(-1px)",
       },
       "&.Mui-disabled": {
-        backgroundColor: "rgba(255,91,46,0.3)",
-        color: "rgba(255,248,240,0.5)",
+        backgroundColor: "rgba(16,185,129,0.25)",
+        color: "rgba(250,250,250,0.4)",
       },
     },
     outlined: {
-      borderColor: line.border,
+      borderColor: line.borderHi,
       color: textColors.primary,
-      backgroundColor: "rgba(255,248,240,0.03)",
+      backgroundColor: "transparent",
       "&:hover": {
-        borderColor: line.borderHi,
-        backgroundColor: "rgba(255,248,240,0.06)",
+        borderColor: accent.sunset,
+        color: accent.sunset,
+        backgroundColor: "rgba(16,185,129,0.06)",
       },
     },
     text: {
       color: textColors.secondary,
       "&:hover": {
         color: accent.sunset,
-        backgroundColor: "transparent",
+        backgroundColor: "rgba(16,185,129,0.06)",
       },
     },
     sizeSmall: {

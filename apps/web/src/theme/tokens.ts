@@ -4,15 +4,15 @@
  */
 
 export const gradients = {
-  sunsetAmber: "linear-gradient(135deg, #FF5B2E, #FFC947)",
-  amberSunset: "linear-gradient(135deg, #FFC947, #FF5B2E)",
-  violetSunset: "linear-gradient(135deg, #7B3FF2, #FF5B2E)",
+  sunsetAmber: "linear-gradient(135deg, #10b981, #22d3ee)",
+  amberSunset: "linear-gradient(135deg, #22d3ee, #10b981)",
+  violetSunset: "linear-gradient(135deg, #34d399, #10b981)",
   mesh: `
-    radial-gradient(circle at 15% 20%, rgba(255,91,46,0.25), transparent 35%),
-    radial-gradient(circle at 85% 10%, rgba(123,63,242,0.22), transparent 40%),
-    radial-gradient(circle at 50% 80%, rgba(255,201,71,0.16), transparent 45%)
+    radial-gradient(ellipse at 30% 0%, rgba(16,185,129,0.18), transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(34,211,238,0.12), transparent 45%),
+    radial-gradient(ellipse at 50% 100%, rgba(52,211,153,0.06), transparent 50%)
   `,
-  heroText: "linear-gradient(135deg, #FFF8F0 0%, #FFF8F0 40%, #FFC947 70%, #FF5B2E 100%)",
+  heroText: "linear-gradient(135deg, #fafafa 0%, #fafafa 30%, #34d399 60%, #22d3ee 100%)",
 } as const;
 
 export const motion = {
@@ -23,6 +23,7 @@ export const motion = {
 
 export const noise = {
   grain: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.15 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+  dots: `url("data:image/svg+xml,%3Csvg width='32' height='32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M32 0H0v32' fill='none' stroke='rgba(250,250,250,0.04)' stroke-width='0.5'/%3E%3C/svg%3E")`,
 } as const;
 
 export const radii = {

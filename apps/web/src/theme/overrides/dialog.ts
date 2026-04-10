@@ -48,7 +48,7 @@ export const dialogActionsOverrides: Components<Theme>["MuiDialogActions"] = {
 export const backdropOverrides: Components<Theme>["MuiBackdrop"] = {
   styleOverrides: {
     root: {
-      backgroundColor: "rgba(10,6,18,0.75)",
+      backgroundColor: "rgba(9,9,11,0.80)",
       backdropFilter: "blur(4px)",
     },
     invisible: {

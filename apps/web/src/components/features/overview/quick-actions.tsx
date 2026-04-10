@@ -59,7 +59,9 @@ export function QuickActions(): ReactElement {
               >
                 <Stack spacing={1.5}>
                   <Box sx={{ color: "accent.sunset" }}>{action.icon}</Box>
-                  <Typography variant="h5">{action.title}</Typography>
+                  <Typography variant="h5" sx={{ color: "accent.sunset" }}>
+                    {action.title}
+                  </Typography>
                   <Typography variant="body2Muted">{action.description}</Typography>
                 </Stack>
               </Surface>

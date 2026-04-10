@@ -6,7 +6,7 @@ import { textColors } from "./palette";
  * in `app/layout.tsx`. Display pairs with body and mono via a shared variable.
  */
 export const fontFamilies = {
-  display: "var(--font-syne), 'Arial Black', sans-serif",
+  display: "var(--font-bricolage), 'Georgia', serif",
   body: "var(--font-dm-sans), system-ui, sans-serif",
   mono: "var(--font-jetbrains-mono), 'Menlo', monospace",
 } as const;

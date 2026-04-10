@@ -14,6 +14,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { Surface } from "@/components/ui/layout/surface";
 import { useApiQuery } from "@/hooks";
 import { client } from "@/lib/api";
 import type { ApiKeyListResponse } from "@/types/api";
@@ -50,36 +51,44 @@ export function ApiKeyList(props: ApiKeyListProps): ReactElement {
       ) : items.length === 0 ? (
         <Typography variant="body1Muted">No API keys found.</Typography>
       ) : (
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Key Prefix</TableCell>
-              <TableCell>Last Used</TableCell>
-              <TableCell>Created</TableCell>
-              <TableCell align="right">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {items.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell>{item.name}</TableCell>
-                <TableCell>
-                  <Chip label={`${item.prefix}...`} size="small" variant="outlined" />
+        <Surface padding={0}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ px: 3 }}>Name</TableCell>
+                <TableCell sx={{ px: 3 }}>Key Prefix</TableCell>
+                <TableCell sx={{ px: 3 }}>Last Used</TableCell>
+                <TableCell sx={{ px: 3 }}>Created</TableCell>
+                <TableCell sx={{ px: 3 }} align="right">
+                  Actions
                 </TableCell>
-                <TableCell>
-                  {item.lastUsedAt ? (
-                    new Date(item.lastUsedAt).toLocaleDateString()
-                  ) : (
-                    <Typography variant="body2Muted">Never</Typography>
-                  )}
-                </TableCell>
-                <TableCell>{new Date(item.createdAt).toLocaleDateString()}</TableCell>
-                <TableCell align="right">{/* TODO: Add revoke action */}</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHead>
+            <TableBody>
+              {items.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell sx={{ px: 3 }}>{item.name}</TableCell>
+                  <TableCell sx={{ px: 3 }}>
+                    <Chip label={`${item.prefix}...`} size="small" variant="outlined" />
+                  </TableCell>
+                  <TableCell sx={{ px: 3 }}>
+                    {item.lastUsedAt ? (
+                      new Date(item.lastUsedAt).toLocaleDateString()
+                    ) : (
+                      <Typography variant="body2Muted">Never</Typography>
+                    )}
+                  </TableCell>
+                  <TableCell sx={{ px: 3 }}>
+                    {new Date(item.createdAt).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell sx={{ px: 3 }} align="right">
+                    {/* TODO: Add revoke action */}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Surface>
       )}
 
       <CreateApiKeyDialog

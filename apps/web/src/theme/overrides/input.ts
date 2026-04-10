@@ -13,7 +13,7 @@ export const textFieldOverrides: Components<Theme>["MuiTextField"] = {
 export const outlinedInputOverrides: Components<Theme>["MuiOutlinedInput"] = {
   styleOverrides: {
     root: {
-      backgroundColor: "rgba(255,248,240,0.03)",
+      backgroundColor: "rgba(250,250,250,0.03)",
       borderRadius: radii.md,
       fontFamily: fontFamilies.body,
       fontSize: "0.9375rem",
@@ -29,13 +29,13 @@ export const outlinedInputOverrides: Components<Theme>["MuiOutlinedInput"] = {
       "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
         borderColor: accent.sunset,
         borderWidth: 1,
-        boxShadow: "0 0 0 3px rgba(255,91,46,0.15)",
+        boxShadow: "0 0 0 3px rgba(16,185,129,0.15)",
       },
       "&.Mui-error .MuiOutlinedInput-notchedOutline": {
-        borderColor: "#FF4B4B",
+        borderColor: "#ef4444",
       },
       "&.Mui-disabled": {
-        backgroundColor: "rgba(255,248,240,0.015)",
+        backgroundColor: "rgba(250,250,250,0.015)",
         color: textColors.disabled,
       },
     },
@@ -86,7 +86,7 @@ export const formHelperTextOverrides: Components<Theme>["MuiFormHelperText"] = {
       fontSize: "0.75rem",
       marginLeft: 2,
       "&.Mui-error": {
-        color: "#FF4B4B",
+        color: "#ef4444",
       },
     },
   },

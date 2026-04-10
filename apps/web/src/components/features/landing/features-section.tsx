@@ -56,9 +56,35 @@ export function FeaturesSection(): ReactElement {
           }}
         >
           {FEATURES.map((f) => (
-            <Surface key={f.title} variant="quiet" padding={4} sx={{ height: "100%" }}>
+            <Surface
+              key={f.title}
+              variant="quiet"
+              padding={4}
+              sx={{
+                height: "100%",
+                transition: "border-color 240ms, box-shadow 240ms",
+                "&:hover": {
+                  borderColor: "rgba(16,185,129,0.2)",
+                  boxShadow: "0 8px 32px -8px rgba(16,185,129,0.08)",
+                },
+              }}
+            >
               <Stack spacing={2}>
-                <Box sx={{ color: "accent.sunset", fontSize: 32 }}>{f.icon}</Box>
+                <Box
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 1.5,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "rgba(16,185,129,0.08)",
+                    color: "accent.sunset",
+                    fontSize: 22,
+                  }}
+                >
+                  {f.icon}
+                </Box>
                 <Typography variant="h5">{f.title}</Typography>
                 <Typography variant="body2Muted">{f.description}</Typography>
               </Stack>

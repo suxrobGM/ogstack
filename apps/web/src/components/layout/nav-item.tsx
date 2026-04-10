@@ -33,9 +33,13 @@ export function NavItem(props: NavItemProps): ReactElement {
           py: 1,
           px: 2,
           "&.Mui-selected": {
-            bgcolor: "aubergine.hi",
+            bgcolor: "rgba(16,185,129,0.12)",
             borderLeft: `2px solid ${accent.sunset}`,
-            "&:hover": { bgcolor: "aubergine.hi" },
+            boxShadow: "inset 0 0 16px rgba(16,185,129,0.06)",
+            "&:hover": { bgcolor: "rgba(16,185,129,0.16)" },
+          },
+          "&:hover:not(.Mui-selected)": {
+            bgcolor: "rgba(250,250,250,0.04)",
           },
         }}
       >
