@@ -64,7 +64,7 @@ export function ProjectList(props: ProjectListProps): ReactElement {
       {isLoading ? (
         <CircularProgress />
       ) : items.length === 0 ? (
-        <Typography sx={{ color: "text.secondary" }}>No projects found.</Typography>
+        <Typography variant="body1Muted">No projects found.</Typography>
       ) : (
         <Table>
           <TableHead>
@@ -81,7 +81,7 @@ export function ProjectList(props: ProjectListProps): ReactElement {
               <TableRow key={item.id}>
                 <TableCell>{item.name}</TableCell>
                 <TableCell>
-                  <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
+                  <Typography variant="body2Muted" sx={{ fontFamily: "monospace" }}>
                     {item.publicId}
                   </Typography>
                 </TableCell>

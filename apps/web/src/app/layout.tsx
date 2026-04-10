@@ -2,17 +2,26 @@ import "./globals.css";
 import type { PropsWithChildren, ReactElement } from "react";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { DM_Sans, JetBrains_Mono, Syne } from "next/font/google";
 import { ThemeProvider } from "@/providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const syne = Syne({
   subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+  variable: "--font-syne",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const dmSans = DM_Sans({
   subsets: ["latin"],
+  variable: "--font-dm-sans",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -23,7 +32,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: PropsWithChildren): ReactElement {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable} antialiased`}>
         <AppRouterCacheProvider>
           <ThemeProvider>{children}</ThemeProvider>
         </AppRouterCacheProvider>

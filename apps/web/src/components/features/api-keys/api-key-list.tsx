@@ -48,7 +48,7 @@ export function ApiKeyList(props: ApiKeyListProps): ReactElement {
       {isLoading ? (
         <CircularProgress />
       ) : items.length === 0 ? (
-        <Typography sx={{ color: "text.secondary" }}>No API keys found.</Typography>
+        <Typography variant="body1Muted">No API keys found.</Typography>
       ) : (
         <Table>
           <TableHead>
@@ -71,9 +71,7 @@ export function ApiKeyList(props: ApiKeyListProps): ReactElement {
                   {item.lastUsedAt ? (
                     new Date(item.lastUsedAt).toLocaleDateString()
                   ) : (
-                    <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                      Never
-                    </Typography>
+                    <Typography variant="body2Muted">Never</Typography>
                   )}
                 </TableCell>
                 <TableCell>{new Date(item.createdAt).toLocaleDateString()}</TableCell>

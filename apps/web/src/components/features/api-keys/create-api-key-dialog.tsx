@@ -74,7 +74,7 @@ export function CreateApiKeyDialog(props: CreateApiKeyDialogProps): ReactElement
                 label="Your API Key"
                 size="small"
               />
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              <Typography variant="body2Muted">
                 Use this key in the <code>Authorization: Bearer</code> header for API requests.
               </Typography>
             </Stack>
