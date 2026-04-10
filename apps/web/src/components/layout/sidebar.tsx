@@ -6,12 +6,14 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import FolderIcon from "@mui/icons-material/Folder";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
-import { Box, Divider, IconButton, List, Typography } from "@mui/material";
+import { Box, Divider, IconButton, List, Stack, Typography } from "@mui/material";
 import { usePathname } from "next/navigation";
 import { SIDEBAR_NAV_ITEMS } from "@/lib/constants";
 import { line } from "@/theme/palette";
 import { motion } from "@/theme/tokens";
+import { FeedbackMenu } from "./feedback-menu";
 import { NavItem } from "./nav-item";
+import { NotificationBell } from "./notification-bell";
 import { UserMenu } from "./user-menu";
 
 export const SIDEBAR_WIDTH_EXPANDED = 260;
@@ -81,6 +83,18 @@ export function Sidebar(props: SidebarProps): ReactElement {
           />
         ))}
       </List>
+      <Divider sx={{ borderColor: line.divider }} />
+      {collapsed ? (
+        <Stack sx={{ alignItems: "center", gap: 0.5, py: 1.5 }}>
+          <FeedbackMenu collapsed />
+          <NotificationBell collapsed />
+        </Stack>
+      ) : (
+        <List sx={{ px: 1.5, py: 1 }}>
+          <FeedbackMenu />
+          <NotificationBell />
+        </List>
+      )}
       <Divider sx={{ borderColor: line.divider }} />
       <Box sx={{ p: collapsed ? 1 : 1.5 }}>
         <UserMenu collapsed={collapsed} />

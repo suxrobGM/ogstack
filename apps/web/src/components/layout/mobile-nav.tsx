@@ -8,7 +8,9 @@ import { Box, Divider, List, Typography } from "@mui/material";
 import { usePathname } from "next/navigation";
 import { SIDEBAR_NAV_ITEMS } from "@/lib/constants";
 import { line } from "@/theme/palette";
+import { FeedbackMenu } from "./feedback-menu";
 import { NavItem } from "./nav-item";
+import { NotificationBell } from "./notification-bell";
 import { UserMenu } from "./user-menu";
 
 const ICON_MAP: Record<string, ReactElement> = {
@@ -50,7 +52,12 @@ export function MobileNav(props: MobileNavProps): ReactElement {
         ))}
       </List>
       <Divider sx={{ borderColor: line.divider }} />
-      <Box sx={{ p: 1.5 }}>
+      <List sx={{ px: 1.5, py: 1 }} onClick={(e) => e.stopPropagation()}>
+        <FeedbackMenu />
+        <NotificationBell />
+      </List>
+      <Divider sx={{ borderColor: line.divider }} />
+      <Box sx={{ p: 1.5 }} onClick={(e) => e.stopPropagation()}>
         <UserMenu />
       </Box>
     </Box>

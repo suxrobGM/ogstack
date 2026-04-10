@@ -2,7 +2,19 @@
 
 import { useState, type MouseEvent, type ReactElement } from "react";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { Avatar, Box, ListItemIcon, ListItemText, Menu, MenuItem, Typography } from "@mui/material";
+import PersonIcon from "@mui/icons-material/Person";
+import SettingsIcon from "@mui/icons-material/Settings";
+import {
+  Box,
+  Divider,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import { UserAvatar } from "@/components/ui/display/user-avatar";
 import { useAuth } from "@/hooks";
 import { motion, radii } from "@/theme/tokens";
 
@@ -24,54 +36,78 @@ export function UserMenu(props: UserMenuProps): ReactElement {
     logout();
   };
 
-  const initials = user?.name?.charAt(0).toUpperCase() ?? "?";
+  const trigger = (
+    <Box
+      onClick={handleOpen}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: collapsed ? 0 : 1.5,
+        p: 1.5,
+        justifyContent: collapsed ? "center" : "flex-start",
+        borderRadius: `${radii.md}px`,
+        cursor: "pointer",
+        transition: motion.fast,
+        "&:hover": { bgcolor: "aubergine.hi" },
+      }}
+    >
+      <UserAvatar name={user?.name} email={user?.email} size={34} />
+      {!collapsed && (
+        <Box sx={{ minWidth: 0, flex: 1 }}>
+          <Typography variant="body2" noWrap>
+            {user?.name}
+          </Typography>
+          <Typography variant="captionMuted" noWrap>
+            {user?.email}
+          </Typography>
+        </Box>
+      )}
+    </Box>
+  );
 
   return (
     <>
-      <Box
-        onClick={handleOpen}
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: collapsed ? 0 : 1.5,
-          p: 1.5,
-          justifyContent: collapsed ? "center" : "flex-start",
-          borderRadius: `${radii.md}px`,
-          cursor: "pointer",
-          transition: motion.fast,
-          "&:hover": { bgcolor: "aubergine.hi" },
-        }}
+      {collapsed ? (
+        <Tooltip title={user?.name ?? "Account"} placement="right" arrow>
+          {trigger}
+        </Tooltip>
+      ) : (
+        trigger
+      )}
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        transformOrigin={{ vertical: "bottom", horizontal: "left" }}
       >
-        <Avatar
-          sx={{
-            width: 32,
-            height: 32,
-            fontSize: "0.875rem",
-            fontWeight: 600,
-            bgcolor: "accent.violet",
-          }}
-        >
-          {initials}
-        </Avatar>
-        {!collapsed && (
-          <Box sx={{ minWidth: 0, flex: 1 }}>
-            <Typography variant="body2" noWrap>
+        <Box sx={{ px: 2, py: 1.5, display: "flex", gap: 1.5, alignItems: "center" }}>
+          <UserAvatar name={user?.name} email={user?.email} size={36} />
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
               {user?.name}
             </Typography>
             <Typography variant="captionMuted" noWrap>
               {user?.email}
             </Typography>
           </Box>
-        )}
-      </Box>
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: "top", horizontal: "left" }}
-      >
-        <MenuItem onClick={handleLogout} disabled={isLoading}>
+        </Box>
+        <Divider sx={{ my: 0.5 }} />
+        <MenuItem onClick={handleClose}>
           <ListItemIcon>
+            <PersonIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Profile</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleClose}>
+          <ListItemIcon>
+            <SettingsIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Settings</ListItemText>
+        </MenuItem>
+        <Divider sx={{ my: 0.5 }} />
+        <MenuItem onClick={handleLogout} disabled={isLoading} sx={{ color: "error.main" }}>
+          <ListItemIcon sx={{ color: "error.main" }}>
             <LogoutIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText>Sign out</ListItemText>
