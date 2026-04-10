@@ -2,13 +2,26 @@
 
 import type { PropsWithChildren, ReactElement } from "react";
 import { Box } from "@mui/material";
+import { Sidebar } from "./sidebar";
 
-/**
- * Main dashboard shell with sidebar and top bar.
- * TODO: Add persistent sidebar navigation and top app bar.
- */
 export function AppShell(props: PropsWithChildren): ReactElement {
   const { children } = props;
 
-  return <Box sx={{ display: "flex", minHeight: "100vh" }}>{children}</Box>;
+  return (
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+      <Sidebar />
+      <Box
+        component="main"
+        sx={{
+          flex: 1,
+          minWidth: 0,
+          bgcolor: "aubergine.base",
+          p: { xs: 2, md: 4 },
+          overflow: "auto",
+        }}
+      >
+        {children}
+      </Box>
+    </Box>
+  );
 }
