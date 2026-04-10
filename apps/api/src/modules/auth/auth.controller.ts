@@ -9,7 +9,9 @@ import {
   LoginBodySchema,
   RefreshBodySchema,
   RegisterBodySchema,
+  ResendVerificationBodySchema,
   ResetPasswordBodySchema,
+  VerifyEmailBodySchema,
 } from "./auth.schema";
 import { AuthService } from "./auth.service";
 
@@ -112,6 +114,37 @@ export const authController = new Elysia({ prefix: "/auth", tags: ["Auth"] })
       detail: {
         summary: "Reset password",
         description: "Set a new password using a valid reset token from the forgot-password email.",
+      },
+    },
+  )
+  .post(
+    "/verify-email",
+    async ({ body }) => {
+      await authService.verifyEmail(body);
+      return { message: "Email verified successfully" };
+    },
+    {
+      body: VerifyEmailBodySchema,
+      response: MessageResponseSchema,
+      detail: {
+        summary: "Verify email address",
+        description: "Verify a user's email address using the token from the verification email.",
+      },
+    },
+  )
+  .post(
+    "/resend-verification",
+    async ({ body }) => {
+      await authService.resendVerification(body);
+      return { message: "If an unverified account exists, a verification email has been sent" };
+    },
+    {
+      body: ResendVerificationBodySchema,
+      response: MessageResponseSchema,
+      detail: {
+        summary: "Resend verification email",
+        description:
+          "Resend the email verification link. Always returns success to prevent enumeration.",
       },
     },
   );

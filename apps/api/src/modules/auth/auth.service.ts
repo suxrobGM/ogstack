@@ -1,4 +1,5 @@
 import { singleton } from "tsyringe";
+import { EmailVerificationEmail } from "@/common/emails/templates/email-verification";
 import { PasswordResetEmail } from "@/common/emails/templates/password-reset";
 import { BadRequestError, ConflictError, UnauthorizedError } from "@/common/errors";
 import { EmailService } from "@/common/services/email.service";
@@ -11,11 +12,14 @@ import type {
   ForgotPasswordBody,
   LoginBody,
   RegisterBody,
+  ResendVerificationBody,
   ResetPasswordBody,
+  VerifyEmailBody,
 } from "./auth.schema";
 
 const WEBSITE_URL = process.env.WEBSITE_URL ?? "http://localhost:4001";
 const PASSWORD_RESET_EXPIRY_MS = 60 * 60 * 1000; // 1 hour
+const EMAIL_VERIFICATION_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 @singleton()
 export class AuthService {
@@ -28,7 +32,7 @@ export class AuthService {
   async register(data: RegisterBody): Promise<AuthResponse> {
     const { email, password, name } = data;
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const existing = await tx.user.findUnique({ where: { email } });
       if (existing) {
         throw new ConflictError("A user with this email already exists");
@@ -50,6 +54,11 @@ export class AuthService {
 
       return this.buildAuthResponse(user);
     });
+
+    // Send verification email (fire-and-forget)
+    this.sendVerificationEmail(result.user.id).catch(() => {});
+
+    return result;
   }
 
   /** Authenticate a user by email and password. */
@@ -137,6 +146,55 @@ export class AuthService {
         passwordResetExpiresAt: null,
       },
     });
+  }
+
+  /** Send a verification email to the user. */
+  async sendVerificationEmail(userId: string): Promise<void> {
+    const token = generateRandomToken();
+    const expiresAt = new Date(Date.now() + EMAIL_VERIFICATION_EXPIRY_MS);
+
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { emailVerificationToken: token, emailVerificationExpiresAt: expiresAt },
+    });
+
+    const verifyUrl = `${WEBSITE_URL}/verify-email?token=${token}`;
+
+    await this.emailService.send({
+      to: user.email,
+      subject: "Verify your OGStack email",
+      react: EmailVerificationEmail({ name: user.name, verifyUrl }),
+    });
+  }
+
+  /** Verify the email using the token. */
+  async verifyEmail(data: VerifyEmailBody): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { emailVerificationToken: data.token },
+    });
+
+    if (!user || !user.emailVerificationExpiresAt || user.emailVerificationExpiresAt < new Date()) {
+      throw new BadRequestError("Invalid or expired verification token");
+    }
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationExpiresAt: null,
+      },
+    });
+  }
+
+  /** Resend the verification email. */
+  async resendVerification(data: ResendVerificationBody): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { email: data.email } });
+
+    // Always return success to prevent email enumeration
+    if (!user || user.deletedAt || user.emailVerified) return;
+
+    await this.sendVerificationEmail(user.id);
   }
 
   private async buildAuthResponse(user: {

@@ -12,21 +12,22 @@ enum Plan {
 }
 
 model User {
-  id               String   @id @default(uuid()) @db.Uuid
-  role             UserRole @default(USER)
-  email            String   @unique
-  name             String
-  passwordHash     String?  @map("password_hash")
-  avatarUrl        String?  @map("avatar_url")
-  emailVerified    Boolean  @default(false) @map("email_verified")
-  githubId         String?  @unique @map("github_id")
-  googleId         String?  @unique @map("google_id")
-  plan             Plan     @default(FREE)
-  stripeCustomerId String?  @unique @map("stripe_customer_id")
-  stripeSubId      String?  @map("stripe_sub_id")
-
-  passwordResetToken     String?   @unique @map("password_reset_token")
-  passwordResetExpiresAt DateTime? @map("password_reset_expires_at")
+  id                         String    @id @default(uuid()) @db.Uuid
+  role                       UserRole  @default(USER)
+  email                      String    @unique
+  name                       String
+  passwordHash               String?   @map("password_hash")
+  avatarUrl                  String?   @map("avatar_url")
+  emailVerified              Boolean   @default(false) @map("email_verified")
+  githubId                   String?   @unique @map("github_id")
+  googleId                   String?   @unique @map("google_id")
+  plan                       Plan      @default(FREE)
+  stripeCustomerId           String?   @unique @map("stripe_customer_id")
+  stripeSubId                String?   @map("stripe_sub_id")
+  passwordResetToken         String?   @unique @map("password_reset_token")
+  passwordResetExpiresAt     DateTime? @map("password_reset_expires_at")
+  emailVerificationToken     String?   @unique @map("email_verification_token")
+  emailVerificationExpiresAt DateTime? @map("email_verification_expires_at")
 
   deletedAt DateTime? @map("deleted_at")
   createdAt DateTime  @default(now()) @map("created_at")

@@ -37,10 +37,20 @@ export const ResetPasswordBodySchema = t.Object({
   password: t.String({ minLength: 8, maxLength: 128 }),
 });
 
+export const VerifyEmailBodySchema = t.Object({
+  token: t.String(),
+});
+
+export const ResendVerificationBodySchema = t.Object({
+  email: t.String({ format: "email" }),
+});
+
 export type RegisterBody = Static<typeof RegisterBodySchema>;
 export type LoginBody = Static<typeof LoginBodySchema>;
 export type RefreshBody = Static<typeof RefreshBodySchema>;
 export type ForgotPasswordBody = Static<typeof ForgotPasswordBodySchema>;
 export type ResetPasswordBody = Static<typeof ResetPasswordBodySchema>;
+export type VerifyEmailBody = Static<typeof VerifyEmailBodySchema>;
+export type ResendVerificationBody = Static<typeof ResendVerificationBodySchema>;
 export type AuthUser = Static<typeof AuthUserSchema>;
 export type AuthResponse = Static<typeof AuthResponseSchema>;
