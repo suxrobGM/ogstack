@@ -1,3 +1,5 @@
+"use client";
+
 import type { ReactElement } from "react";
 import ArticleIcon from "@mui/icons-material/Article";
 import FolderIcon from "@mui/icons-material/Folder";

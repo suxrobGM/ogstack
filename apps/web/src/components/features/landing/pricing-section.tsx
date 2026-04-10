@@ -1,3 +1,5 @@
+"use client";
+
 import type { ReactElement } from "react";
 import CheckIcon from "@mui/icons-material/Check";
 import {

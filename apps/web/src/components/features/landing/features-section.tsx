@@ -1,3 +1,5 @@
+"use client";
+
 import type { ReactElement } from "react";
 import CodeIcon from "@mui/icons-material/Code";
 import ImageIcon from "@mui/icons-material/Image";
