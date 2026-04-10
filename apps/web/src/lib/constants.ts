@@ -6,7 +6,9 @@ export const ROUTES = {
   register: "/register",
   forgotPassword: "/forgot-password",
   resetPassword: "/reset-password",
+  verifyEmail: "/verify-email",
   docs: "/docs" as Route,
+  overview: "/overview" as Route,
   projects: "/projects" as Route,
   apiKeys: "/api-keys" as Route,
 } as const;
@@ -23,3 +25,9 @@ export const PAGINATION_DEFAULTS = {
 } as const;
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
+export const SIDEBAR_NAV_ITEMS = [
+  { label: "Overview", href: ROUTES.overview },
+  { label: "Projects", href: ROUTES.projects },
+  { label: "API Keys", href: ROUTES.apiKeys },
+] as const;
