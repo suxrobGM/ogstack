@@ -1,5 +1,6 @@
 import type { ReactElement, ReactNode } from "react";
 import { Box, Stack, Typography } from "@mui/material";
+import { fontFamilies } from "@/theme";
 import { Surface } from "../layout/surface";
 
 interface StatCardProps {
@@ -24,36 +25,32 @@ export function StatCard(props: StatCardProps): ReactElement {
         direction="row"
         sx={{ justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}
       >
-        <Typography variant="overline" sx={(t) => ({ color: t.palette.text.disabled })}>
+        <Typography variant="overline" sx={{ color: "text.disabled" }}>
           {label}
         </Typography>
-        {icon && <Box sx={(t) => ({ color: t.palette.text.disabled })}>{icon}</Box>}
+        {icon && <Box sx={{ color: "text.disabled" }}>{icon}</Box>}
       </Stack>
       <Typography
-        sx={(t) => ({
-          fontFamily: "var(--font-jetbrains-mono), monospace",
+        sx={{
+          fontFamily: fontFamilies.mono,
           fontSize: "2.25rem",
           fontWeight: 500,
           lineHeight: 1,
-          color: t.palette.text.primary,
+          color: "text.primary",
           letterSpacing: "-0.02em",
-        })}
+        }}
       >
         {value}
       </Typography>
       {delta && (
         <Typography
-          sx={(t) => ({
+          sx={{
             mt: 1.5,
-            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontFamily: fontFamilies.mono,
             fontSize: "0.75rem",
             color:
-              trend === "up"
-                ? t.palette.success.main
-                : trend === "down"
-                  ? t.palette.error.main
-                  : t.palette.text.disabled,
-          })}
+              trend === "up" ? "success.main" : trend === "down" ? "error.main" : "text.disabled",
+          }}
         >
           {trend === "up" ? "▲" : trend === "down" ? "▼" : "•"} {delta}
         </Typography>

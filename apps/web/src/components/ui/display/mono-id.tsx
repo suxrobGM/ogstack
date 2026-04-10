@@ -1,5 +1,8 @@
+"use client";
+
 import type { ReactElement } from "react";
 import { Box, Stack } from "@mui/material";
+import { fontFamilies } from "@/theme";
 import { CopyButton } from "./copy-button";
 
 interface MonoIdProps {
@@ -21,12 +24,12 @@ export function MonoId(props: MonoIdProps): ReactElement {
   const idSpan = (
     <Box
       component="span"
-      sx={(t) => ({
-        fontFamily: "var(--font-jetbrains-mono), monospace",
+      sx={{
+        fontFamily: fontFamilies.mono,
         fontSize,
-        color: t.palette.text.disabled,
+        color: "text.disabled",
         letterSpacing: "0.02em",
-      })}
+      }}
     >
       {displayed}
     </Box>

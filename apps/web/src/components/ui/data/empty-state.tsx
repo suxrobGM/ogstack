@@ -22,25 +22,22 @@ export function EmptyState(props: EmptyStateProps): ReactElement {
       <Stack spacing={2} sx={{ alignItems: "center" }}>
         {icon && (
           <Box
-            sx={(t) => ({
-              color: t.palette.text.disabled,
+            sx={{
+              color: "text.disabled",
               fontSize: 48,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-            })}
+            }}
           >
             {icon}
           </Box>
         )}
-        <Typography variant="h4" sx={(t) => ({ color: t.palette.text.primary })}>
+        <Typography variant="h4" sx={{ color: "text.primary" }}>
           {title}
         </Typography>
         {description && (
-          <Typography
-            variant="body2"
-            sx={(t) => ({ color: t.palette.text.secondary, maxWidth: 420 })}
-          >
+          <Typography variant="body2" sx={{ color: "text.secondary", maxWidth: 420 }}>
             {description}
           </Typography>
         )}

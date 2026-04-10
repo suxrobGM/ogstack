@@ -1,5 +1,6 @@
 import type { ReactElement, ReactNode } from "react";
 import { Box } from "@mui/material";
+import { line } from "@/theme";
 import { SectionHeader } from "./section-header";
 
 interface PageHeaderProps {
@@ -18,12 +19,12 @@ export function PageHeader(props: PageHeaderProps): ReactElement {
 
   return (
     <Box
-      sx={(t) => ({
+      sx={{
         pt: 5,
         pb: 4,
-        borderBottom: `1px solid ${t.palette.line.divider}`,
+        borderBottom: `1px solid ${line.divider}`,
         mb: 4,
-      })}
+      }}
     >
       {breadcrumbs && <Box sx={{ mb: 2 }}>{breadcrumbs}</Box>}
       <SectionHeader title={title} description={description} actions={actions} />

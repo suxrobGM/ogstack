@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 import { Box } from "@mui/material";
+import { fontFamilies } from "@/theme";
 import { Surface } from "../layout/surface";
 import { CopyButton } from "./copy-button";
 
@@ -29,18 +30,18 @@ export function CodeBlock(props: CodeBlockProps): ReactElement {
       <Box
         component="pre"
         className={language ? `language-${language}` : undefined}
-        sx={(t) => ({
+        sx={{
           margin: 0,
           padding: dense ? 2 : 3,
           paddingRight: copyable ? 6 : undefined,
-          fontFamily: "var(--font-jetbrains-mono), monospace",
+          fontFamily: fontFamilies.mono,
           fontSize: "0.8125rem",
           lineHeight: 1.65,
-          color: t.palette.text.primary,
+          color: "text.primary",
           whiteSpace: "pre-wrap",
           wordBreak: "break-word",
           overflow: "auto",
-        })}
+        }}
       >
         {code}
       </Box>

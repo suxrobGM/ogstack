@@ -1,5 +1,6 @@
 import type { ReactElement, ReactNode } from "react";
 import { Box, Stack, Typography } from "@mui/material";
+import { accent, gradients } from "@/theme";
 
 interface SectionHeaderProps {
   overline?: string;
@@ -25,10 +26,7 @@ export function SectionHeader(props: SectionHeaderProps): ReactElement {
     >
       <Box sx={{ flex: 1, minWidth: 0 }}>
         {overline && (
-          <Typography
-            variant="overline"
-            sx={(t) => ({ color: t.palette.accent.sunset, display: "block", mb: 1.5 })}
-          >
+          <Typography variant="overline" sx={{ color: accent.sunset, display: "block", mb: 1.5 }}>
             {overline}
           </Typography>
         )}
@@ -36,12 +34,12 @@ export function SectionHeader(props: SectionHeaderProps): ReactElement {
           variant="h2"
           sx={
             isExpressive
-              ? (t) => ({
-                  backgroundImage: t.gradients.heroText,
+              ? {
+                  backgroundImage: gradients.heroText,
                   backgroundClip: "text",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
-                })
+                }
               : undefined
           }
         >
@@ -50,11 +48,11 @@ export function SectionHeader(props: SectionHeaderProps): ReactElement {
         {description && (
           <Typography
             variant="body2"
-            sx={(t) => ({
+            sx={{
               mt: 1.5,
-              color: t.palette.text.secondary,
+              color: "text.secondary",
               maxWidth: 560,
-            })}
+            }}
           >
             {description}
           </Typography>
