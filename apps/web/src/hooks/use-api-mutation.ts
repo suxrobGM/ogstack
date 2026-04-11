@@ -13,7 +13,7 @@ interface EdenError extends Error {
 }
 
 interface UseApiMutationOptions<TData, TVariables> {
-  invalidateKeys?: unknown[][];
+  invalidateKeys?: readonly (readonly unknown[])[];
   successMessage?: string | ((data: TData) => string);
   errorMessage?: string | ((error: EdenError) => string);
   onSuccess?: (data: TData, variables: TVariables) => void;
@@ -40,7 +40,9 @@ export function useApiMutation<TData, TVariables = void>(
       return data as TData;
     },
     onSuccess: (data, variables) => {
-      options?.invalidateKeys?.forEach((key) => queryClient.invalidateQueries({ queryKey: key }));
+      options?.invalidateKeys?.forEach((key) =>
+        queryClient.invalidateQueries({ queryKey: key as unknown[] }),
+      );
 
       if (options?.successMessage) {
         const msg =

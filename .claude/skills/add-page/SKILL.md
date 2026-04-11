@@ -29,6 +29,7 @@ If no arguments are provided, ask the user for the page name and route.
 ### 1. Parse and validate arguments
 
 Extract from `$ARGUMENTS`:
+
 - **page-name** → convert to:
   - **kebab-case** for file names: `api-keys`
   - **PascalCase** for component names: `ApiKeys`
@@ -37,6 +38,7 @@ Extract from `$ARGUMENTS`:
 - **route-path** → directory under `src/app/`
 
 Validate:
+
 - Page name must be lowercase letters, numbers, hyphens only
 - Target directory `apps/web/src/app/<route-path>/` must NOT already exist. If it does, warn and ask user to confirm.
 
@@ -74,7 +76,7 @@ export default function <PascalName>Page(): ReactElement {
 ```tsx
 import type { ReactElement } from "react";
 import { redirect } from "next/navigation";
-import { getServerClient } from "@/lib/api-server";
+import { getServerClient } from "@/lib/api/server";
 import { <PascalName>Feature } from "@/components/features/<kebab-name>/<kebab-name>-feature";
 
 export default async function <PascalName>Page(): Promise<ReactElement> {
@@ -139,7 +141,7 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useApiQuery } from "@/hooks";
-import { client } from "@/lib/api";
+import { client } from "@/lib/api/client";
 import { PAGINATION_DEFAULTS } from "@/lib/constants";
 
 export function <PascalName>Feature(): ReactElement {
@@ -228,7 +230,7 @@ export function <PascalName>Feature(): ReactElement {
 const [createOpen, setCreateOpen] = useState(false);
 
 // In JSX, add after the closing </Box>:
-<Create<PascalName>Dialog open={createOpen} onClose={() => setCreateOpen(false)} />
+<Create<PascalName> Dialog open={createOpen} onClose={() => setCreateOpen(false)} />;
 ```
 
 **If `--form` is set** (standalone form page, not --crud), generate:
@@ -242,7 +244,7 @@ import { useForm } from "@tanstack/react-form";
 import { z } from "zod/v4";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks";
-import { client } from "@/lib/api";
+import { client } from "@/lib/api/client";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -302,7 +304,7 @@ import { useForm } from "@tanstack/react-form";
 import { z } from "zod/v4";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks";
-import { client } from "@/lib/api";
+import { client } from "@/lib/api/client";
 
 interface Create<PascalName>DialogProps {
   open: boolean;
@@ -382,6 +384,7 @@ cd apps/web && bun run typecheck
 ```
 
 Fix any errors before reporting. Common issues:
+
 - Wrong import path for `getServerClient` (must come from `@/lib/api-server`)
 - MUI component props that changed in v7 (e.g., `loading` prop on Button requires `@mui/lab` or MUI v7+)
 - Missing `"use client"` on feature component

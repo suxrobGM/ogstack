@@ -14,7 +14,8 @@ import { useRouter } from "next/navigation";
 import { DataTable, type Column } from "@/components/ui/data/data-table";
 import { PageHeader } from "@/components/ui/layout/page-header";
 import { useApiMutation, useApiQuery } from "@/hooks";
-import { client } from "@/lib/api";
+import { client } from "@/lib/api/client";
+import { queryKeys } from "@/lib/query-keys";
 
 type Filter = "all" | "unread";
 
@@ -47,7 +48,7 @@ export function NotificationsList(): ReactElement {
   const [filter, setFilter] = useState<Filter>("all");
   const [page, setPage] = useState(1);
 
-  const listQuery = useApiQuery(["notifications", "list", filter, page], () =>
+  const listQuery = useApiQuery(queryKeys.notifications.list(filter, page), () =>
     client.api.notifications.get({
       query: {
         page,
@@ -60,20 +61,20 @@ export function NotificationsList(): ReactElement {
   const markAsRead = useApiMutation(
     (ids: string[]) => client.api.notifications.read.patch({ ids }),
     {
-      invalidateKeys: [["notifications"]],
+      invalidateKeys: [queryKeys.notifications.all],
       successMessage: "Marked as read",
     },
   );
 
   const markAllAsRead = useApiMutation(() => client.api.notifications["read-all"].patch(), {
-    invalidateKeys: [["notifications"]],
+    invalidateKeys: [queryKeys.notifications.all],
     successMessage: "All notifications marked as read",
   });
 
   const deleteNotification = useApiMutation(
     (id: string) => client.api.notifications({ id }).delete(),
     {
-      invalidateKeys: [["notifications"]],
+      invalidateKeys: [queryKeys.notifications.all],
     },
   );
 

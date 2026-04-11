@@ -1,8 +1,8 @@
 "use client";
 
 import { createApiClient } from "@ogstack/shared/api";
+import { fetchWithRefresh } from "../fetch-with-refresh";
 import { API_BASE_URL } from "./constants";
-import { fetchWithRefresh } from "./fetch-with-refresh";
 
 export const client = createApiClient(API_BASE_URL, {
   // Cast needed because Bun's `typeof fetch` includes a `preconnect` static

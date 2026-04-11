@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useToast } from "@/hooks/use-toast";
-import { client } from "@/lib/api";
+import { client } from "@/lib/api/client";
 import { resetPasswordSchema } from "./schema";
 import type { ResetPasswordApiPayload } from "./types";
 

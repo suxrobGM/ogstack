@@ -16,7 +16,8 @@ import { useForm } from "@tanstack/react-form";
 import { z } from "zod/v4";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks";
-import { client } from "@/lib/api";
+import { client } from "@/lib/api/client";
+import { queryKeys } from "@/lib/query-keys";
 
 interface CreateApiKeyDialogProps {
   projectId: string;
@@ -38,7 +39,7 @@ export function CreateApiKeyDialog(props: CreateApiKeyDialogProps): ReactElement
     (data: FormValues) => client.api.projects({ id: projectId })["api-keys"].post(data),
     {
       successMessage: "API key created.",
-      invalidateKeys: [["api-keys"]],
+      invalidateKeys: [queryKeys.apiKeys.all],
       onSuccess: (result) => {
         if (result?.key) {
           setCreatedKey(result.key);
@@ -53,11 +54,11 @@ export function CreateApiKeyDialog(props: CreateApiKeyDialogProps): ReactElement
     onSubmit: async ({ value }) => mutation.mutate(value),
   });
 
-  function handleClose() {
+  const handleClose = () => {
     setCreatedKey(null);
     form.reset();
     onClose();
-  }
+  };
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>

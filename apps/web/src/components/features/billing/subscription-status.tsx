@@ -3,7 +3,8 @@
 import type { ReactElement } from "react";
 import { Alert, Box, Button, Chip, Stack, Typography } from "@mui/material";
 import { useApiMutation, useConfirm } from "@/hooks";
-import { client } from "@/lib/api";
+import { client } from "@/lib/api/client";
+import { queryKeys } from "@/lib/query-keys";
 import { fontFamilies } from "@/theme";
 import type { SubscriptionResponse } from "@/types/api";
 import { formatDate } from "@/utils/formatters";
@@ -39,12 +40,12 @@ export function SubscriptionStatus(props: SubscriptionStatusProps): ReactElement
 
   const cancelMutation = useApiMutation(() => client.api.billing.cancel.post(), {
     successMessage: "Subscription will cancel at end of billing period",
-    invalidateKeys: [["billing", "subscription"]],
+    invalidateKeys: [queryKeys.billing.subscription()],
   });
 
   const resumeMutation = useApiMutation(() => client.api.billing.resume.post(), {
     successMessage: "Subscription resumed",
-    invalidateKeys: [["billing", "subscription"]],
+    invalidateKeys: [queryKeys.billing.subscription()],
   });
 
   const portalMutation = useApiMutation(() => client.api.billing.portal.post(), {

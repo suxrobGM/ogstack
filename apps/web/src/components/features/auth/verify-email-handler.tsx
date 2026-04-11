@@ -4,7 +4,7 @@ import { useEffect, type ReactElement } from "react";
 import { Alert, Button, CircularProgress, Link, Stack } from "@mui/material";
 import { useSearchParams } from "next/navigation";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { client } from "@/lib/api";
+import { client } from "@/lib/api/client";
 import { ROUTES } from "@/lib/constants";
 import type { VerifyEmailPayload } from "./types";
 

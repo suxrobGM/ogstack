@@ -2,7 +2,7 @@
 
 import { createContext, useState, type PropsWithChildren, type ReactElement } from "react";
 import { useRouter } from "next/navigation";
-import { client } from "@/lib/api";
+import { client } from "@/lib/api/client";
 import { ROUTES } from "@/lib/constants";
 import type { AuthUser } from "@/types/api";
 

@@ -1,51 +1,42 @@
 "use client";
 
 import { useApiMutation, useApiQuery } from "@/hooks";
-import { client } from "@/lib/api";
+import { client } from "@/lib/api/client";
+import { queryKeys } from "@/lib/query-keys";
 
 const POLL_INTERVAL = 30_000;
 
 export function useNotifications() {
   const unreadCountQuery = useApiQuery(
-    ["notifications", "unread-count"],
+    queryKeys.notifications.unreadCount(),
     () => client.api.notifications["unread-count"].get(),
     { refetchInterval: POLL_INTERVAL },
   );
 
   const listQuery = useApiQuery(
-    ["notifications", "recent"],
+    queryKeys.notifications.recent(),
     () => client.api.notifications.get({ query: { page: 1, limit: 10 } }),
     { refetchInterval: POLL_INTERVAL },
   );
 
+  const notificationInvalidation = [
+    queryKeys.notifications.unreadCount(),
+    queryKeys.notifications.recent(),
+    queryKeys.notifications.all,
+  ];
+
   const markAsRead = useApiMutation(
     (ids: string[]) => client.api.notifications.read.patch({ ids }),
-    {
-      invalidateKeys: [
-        ["notifications", "unread-count"],
-        ["notifications", "recent"],
-        ["notifications", "list"],
-      ],
-    },
+    { invalidateKeys: notificationInvalidation },
   );
 
   const markAllAsRead = useApiMutation(() => client.api.notifications["read-all"].patch(), {
-    invalidateKeys: [
-      ["notifications", "unread-count"],
-      ["notifications", "recent"],
-      ["notifications", "list"],
-    ],
+    invalidateKeys: notificationInvalidation,
   });
 
   const deleteNotification = useApiMutation(
     (id: string) => client.api.notifications({ id }).delete(),
-    {
-      invalidateKeys: [
-        ["notifications", "unread-count"],
-        ["notifications", "recent"],
-        ["notifications", "list"],
-      ],
-    },
+    { invalidateKeys: notificationInvalidation },
   );
 
   return {

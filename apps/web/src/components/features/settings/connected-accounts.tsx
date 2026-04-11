@@ -7,8 +7,9 @@ import LinkIcon from "@mui/icons-material/Link";
 import LinkOffIcon from "@mui/icons-material/LinkOff";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { client } from "@/lib/api";
+import { client } from "@/lib/api/client";
 import { API_BASE_URL } from "@/lib/constants";
+import { queryKeys } from "@/lib/query-keys";
 import type { UserProfile } from "@/types/api";
 
 interface ConnectedAccountsProps {
@@ -27,7 +28,7 @@ export function ConnectedAccounts(props: ConnectedAccountsProps): ReactElement {
     {
       successMessage: "Account disconnected.",
       errorMessage: "Failed to disconnect account.",
-      invalidateKeys: [["users", "me"]],
+      invalidateKeys: [queryKeys.users.me()],
     },
   );
 

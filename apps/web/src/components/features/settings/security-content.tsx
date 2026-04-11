@@ -9,7 +9,8 @@ import { useAuth } from "@/hooks";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useConfirm } from "@/hooks/use-confirm";
-import { client } from "@/lib/api";
+import { client } from "@/lib/api/client";
+import { queryKeys } from "@/lib/query-keys";
 import type { UserProfile } from "@/types/api";
 import { ChangePasswordForm } from "./change-password-form";
 import { ConnectedAccounts } from "./connected-accounts";
@@ -24,7 +25,7 @@ export function SecurityContent(props: SecurityContentProps): ReactElement {
   const confirm = useConfirm();
 
   const { data: user } = useApiQuery<UserProfile>(
-    ["users", "me"],
+    queryKeys.users.me(),
     () => client.api.users.me.get(),
     { initialData: initialUser },
   );

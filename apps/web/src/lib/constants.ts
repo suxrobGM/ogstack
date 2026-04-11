@@ -10,6 +10,7 @@ export const ROUTES = {
   docs: "/docs" as Route,
   overview: "/overview" as Route,
   projects: "/projects" as Route,
+  projectDetail: (id: string) => `/projects/${id}` as Route,
   apiKeys: "/api-keys" as Route,
   billing: "/billing" as Route,
   notifications: "/notifications" as Route,
@@ -17,12 +18,6 @@ export const ROUTES = {
   settingsProfile: "/settings/profile" as Route,
   settingsSecurity: "/settings/security" as Route,
   pricing: "/pricing" as Route,
-} as const;
-
-export const COOKIE_NAMES = {
-  accessToken: "access_token",
-  refreshToken: "refresh_token",
-  timezone: "timezone",
 } as const;
 
 export const PAGINATION_DEFAULTS = {

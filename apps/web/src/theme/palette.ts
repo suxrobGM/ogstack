@@ -22,7 +22,7 @@ export const accent = {
 export const textColors = {
   primary: "#2C2825",
   secondary: "#8C8378",
-  disabled: "#B8B0A6",
+  disabled: "#9E958A",
 } as const;
 
 export const feedback = {

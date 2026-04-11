@@ -3,7 +3,7 @@ import { Stack } from "@mui/material";
 import { Plan } from "@ogstack/shared";
 import { BillingContent } from "@/components/features/billing";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { getServerClient } from "@/lib/api-server";
+import { getServerClient } from "@/lib/api/server";
 
 export default async function BillingPage(): Promise<ReactElement> {
   const client = await getServerClient();

@@ -1,25 +1,29 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
 import {
-  Box,
   Button,
-  CircularProgress,
+  Chip,
+  IconButton,
   InputAdornment,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
-import { Surface } from "@/components/ui/layout/surface";
-import { useApiQuery } from "@/hooks";
-import { client } from "@/lib/api";
-import type { ProjectListResponse } from "@/types/api";
+import { useRouter } from "next/navigation";
+import { DataTable, type Column } from "@/components/ui/data/data-table";
+import { MonoId } from "@/components/ui/display/mono-id";
+import { PageHeader } from "@/components/ui/layout/page-header";
+import { useApiMutation, useApiQuery, useConfirm, useDebouncedValue } from "@/hooks";
+import { client } from "@/lib/api/client";
+import { queryKeys } from "@/lib/query-keys";
+import { iconSizes } from "@/theme";
+import type { Project, ProjectListResponse } from "@/types/api";
+import { ProjectDialog } from "./project-dialog";
 
 interface ProjectListProps {
   initialData?: ProjectListResponse | null;
@@ -27,29 +31,149 @@ interface ProjectListProps {
 
 export function ProjectList(props: ProjectListProps): ReactElement {
   const { initialData } = props;
+  const router = useRouter();
+  const confirm = useConfirm();
+
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+
+  const debouncedSearch = useDebouncedValue(search, 400);
 
   const { data, isLoading } = useApiQuery<ProjectListResponse>(
-    ["projects", { page, search }],
-    () => client.api.projects.get({ query: { page, limit: 10, search } }),
+    queryKeys.projects.list({ page, search: debouncedSearch }),
+    () => client.api.projects.get({ query: { page, limit: 10, search: debouncedSearch } }),
     { initialData: initialData!, errorMessage: "Failed to load projects." },
   );
 
+  const deleteMutation = useApiMutation((id: string) => client.api.projects({ id }).delete(), {
+    successMessage: "Project deleted.",
+    invalidateKeys: [queryKeys.projects.all],
+  });
+
   const items = data?.items ?? [];
+  const pagination = data?.pagination;
+
+  const handleDelete = async (project: Project) => {
+    const confirmed = await confirm({
+      title: "Delete Project",
+      description: `This will permanently delete "${project.name}" and all its API keys and generated images. This action cannot be undone.`,
+      confirmLabel: "Delete",
+      destructive: true,
+      confirmationText: project.name,
+      confirmationHint: (
+        <Typography variant="body2Muted">
+          Type <strong>{project.name}</strong> to confirm.
+        </Typography>
+      ),
+    });
+
+    if (confirmed) {
+      deleteMutation.mutate(project.id);
+    }
+  };
+
+  const columns: Column<Project>[] = [
+    {
+      key: "name",
+      header: "Name",
+      width: "30%",
+      render: (row) => (
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: 500,
+            cursor: "pointer",
+            "&:hover": { textDecoration: "underline" },
+          }}
+          onClick={() => router.push(`/projects/${row.id}`)}
+        >
+          {row.name}
+        </Typography>
+      ),
+    },
+    {
+      key: "publicId",
+      header: "Public ID",
+      render: (row) => <MonoId id={row.publicId} copyable />,
+    },
+    {
+      key: "domains",
+      header: "Domains",
+      render: (row) =>
+        row.domains.length > 0 ? (
+          <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap", gap: 0.5 }}>
+            {row.domains.map((domain) => (
+              <Chip key={domain} label={domain} size="small" variant="outlined" />
+            ))}
+          </Stack>
+        ) : (
+          <Typography variant="body2Muted">All domains</Typography>
+        ),
+    },
+    {
+      key: "createdAt",
+      header: "Created",
+      width: 140,
+      render: (row) => (
+        <Typography variant="body2Muted">{new Date(row.createdAt).toLocaleDateString()}</Typography>
+      ),
+    },
+    {
+      key: "actions",
+      header: "",
+      width: 90,
+      align: "right",
+      render: (row) => (
+        <Stack direction="row" spacing={0.5}>
+          <Tooltip title="Edit">
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                setEditingProject(row);
+              }}
+            >
+              <EditIcon sx={{ fontSize: iconSizes.sm }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete">
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(row);
+              }}
+            >
+              <DeleteIcon sx={{ fontSize: iconSizes.sm }} />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      ),
+    },
+  ];
 
   return (
-    <Box>
-      <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-        <Typography variant="h4">Projects</Typography>
-        <Button variant="contained">New Project</Button>
-      </Stack>
+    <Stack spacing={3}>
+      <PageHeader
+        title="Projects"
+        description="Manage your OG image generation projects."
+        actions={
+          <Button variant="contained" onClick={() => setCreateOpen(true)}>
+            New Project
+          </Button>
+        }
+      />
 
       <TextField
         placeholder="Search projects..."
         size="small"
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setPage(1);
+        }}
         slotProps={{
           input: {
             startAdornment: (
@@ -59,49 +183,52 @@ export function ProjectList(props: ProjectListProps): ReactElement {
             ),
           },
         }}
-        sx={{ mb: 2 }}
+        sx={{ maxWidth: 360 }}
       />
 
-      {isLoading ? (
-        <CircularProgress />
-      ) : items.length === 0 ? (
-        <Typography variant="body1Muted">No projects found.</Typography>
-      ) : (
-        <Surface padding={0}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ px: 3 }}>Name</TableCell>
-                <TableCell sx={{ px: 3 }}>Public ID</TableCell>
-                <TableCell sx={{ px: 3 }}>Domains</TableCell>
-                <TableCell sx={{ px: 3 }}>Created</TableCell>
-                <TableCell sx={{ px: 3 }} align="right">
-                  Actions
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {items.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell sx={{ px: 3 }}>{item.name}</TableCell>
-                  <TableCell sx={{ px: 3 }}>
-                    <Typography variant="body2Muted" sx={{ fontFamily: "monospace" }}>
-                      {item.publicId}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ px: 3 }}>{item.domains.join(", ") || "—"}</TableCell>
-                  <TableCell sx={{ px: 3 }}>
-                    {new Date(item.createdAt).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell sx={{ px: 3 }} align="right">
-                    {/* TODO: Add edit and delete actions */}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Surface>
+      <DataTable
+        columns={columns}
+        rows={items}
+        rowKey={(row) => row.id}
+        loading={isLoading}
+        onRowClick={(row) => router.push(`/projects/${row.id}`)}
+        empty={{
+          title: "No projects yet",
+          description: debouncedSearch
+            ? "No projects match your search. Try a different query."
+            : "Create your first project to start generating OG images.",
+          action: !debouncedSearch ? (
+            <Button variant="contained" onClick={() => setCreateOpen(true)}>
+              New Project
+            </Button>
+          ) : undefined,
+        }}
+      />
+
+      {pagination && pagination.totalPages > 1 && (
+        <Stack direction="row" spacing={1} sx={{ justifyContent: "center" }}>
+          <Button size="small" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+            Previous
+          </Button>
+          <Typography variant="body2" sx={{ lineHeight: "30px" }}>
+            Page {page} of {pagination.totalPages}
+          </Typography>
+          <Button
+            size="small"
+            disabled={page >= pagination.totalPages}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </Button>
+        </Stack>
       )}
-    </Box>
+
+      <ProjectDialog open={createOpen} onClose={() => setCreateOpen(false)} />
+      <ProjectDialog
+        project={editingProject}
+        open={editingProject !== null}
+        onClose={() => setEditingProject(null)}
+      />
+    </Stack>
   );
 }

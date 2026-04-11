@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { ProjectList } from "@/components/features/projects/project-list";
-import { getServerClient } from "@/lib/api-server";
+import { getServerClient } from "@/lib/api/server";
 
 export default async function ProjectsPage(): Promise<ReactElement> {
   const client = await getServerClient();

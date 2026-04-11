@@ -51,7 +51,7 @@ tsconfig uses `"@/*": ["./src/*"]`. Imports use `@/` without `src/`:
 
 ```typescript
 import { useAuth } from "@/hooks/use-auth";
-import { client } from "@/lib/api";
+import { client } from "@/lib/api/client";
 ```
 
 ## Zod v4

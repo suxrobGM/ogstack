@@ -5,7 +5,7 @@ import { Alert, Button, Stack } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { client } from "@/lib/api";
+import { client } from "@/lib/api/client";
 import { forgotPasswordSchema } from "./schema";
 import type { ForgotPasswordPayload } from "./types";
 

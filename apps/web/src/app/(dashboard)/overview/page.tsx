@@ -4,7 +4,7 @@ import { OverviewStats } from "@/components/features/overview/overview-stats";
 import { QuickActions } from "@/components/features/overview/quick-actions";
 import { RecentProjects } from "@/components/features/overview/recent-projects";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { getServerClient } from "@/lib/api-server";
+import { getServerClient } from "@/lib/api/server";
 
 export default async function OverviewPage(): Promise<ReactElement> {
   const client = await getServerClient();

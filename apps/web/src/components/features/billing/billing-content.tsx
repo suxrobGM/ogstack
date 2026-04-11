@@ -3,7 +3,8 @@
 import type { ReactElement } from "react";
 import { Grid, Stack, Typography } from "@mui/material";
 import { useApiMutation, useApiQuery } from "@/hooks";
-import { client } from "@/lib/api";
+import { client } from "@/lib/api/client";
+import { queryKeys } from "@/lib/query-keys";
 import type { PlanResponse, SubscriptionResponse, UsageStatsResponse } from "@/types/api";
 import { PlanCard } from "./plan-card";
 import { SubscriptionStatus } from "./subscription-status";
@@ -18,17 +19,21 @@ interface BillingContentProps {
 export function BillingContent(props: BillingContentProps): ReactElement {
   const { initialPlans, initialSubscription, initialUsage } = props;
 
-  const { data: plans } = useApiQuery(["billing", "plans"], () => client.api.billing.plans.get(), {
-    initialData: initialPlans,
-  });
+  const { data: plans } = useApiQuery(
+    queryKeys.billing.plans(),
+    () => client.api.billing.plans.get(),
+    {
+      initialData: initialPlans,
+    },
+  );
 
   const { data: subscription } = useApiQuery(
-    ["billing", "subscription"],
+    queryKeys.billing.subscription(),
     () => client.api.billing.subscription.get(),
     { initialData: initialSubscription },
   );
 
-  const { data: usage } = useApiQuery(["usage"], () => client.api.usage.stats.get(), {
+  const { data: usage } = useApiQuery(queryKeys.usage.all, () => client.api.usage.stats.get(), {
     initialData: initialUsage,
   });
 

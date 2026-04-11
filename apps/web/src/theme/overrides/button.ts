@@ -10,13 +10,9 @@ export const buttonOverrides: Components<Theme>["MuiButton"] = {
   styleOverrides: {
     root: {
       borderRadius: radii.md,
-      padding: "9px 18px",
+      padding: "8px 18px",
       fontSize: "0.875rem",
       transition: `all ${motion.standard}`,
-      "@media (min-width: 900px)": {
-        padding: "11px 24px",
-        fontSize: "0.9375rem",
-      },
     },
     contained: {
       boxShadow: "none",
@@ -50,12 +46,12 @@ export const buttonOverrides: Components<Theme>["MuiButton"] = {
       },
     },
     sizeSmall: {
-      padding: "7px 16px",
+      padding: "5px 12px",
       fontSize: "0.8125rem",
     },
     sizeLarge: {
-      padding: "14px 28px",
-      fontSize: "1rem",
+      padding: "10px 24px",
+      fontSize: "0.9375rem",
     },
   },
 };

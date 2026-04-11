@@ -1,7 +1,7 @@
 import { Suspense, type PropsWithChildren, type ReactElement } from "react";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/app-shell";
-import { getServerClient } from "@/lib/api-server";
+import { getServerClient } from "@/lib/api/server";
 import { ROUTES } from "@/lib/constants";
 import { AuthProvider } from "@/providers/auth-provider";
 import { ConfirmProvider } from "@/providers/confirm-provider";

@@ -1,4 +1,4 @@
-import type { client } from "@/lib/api";
+import type { client } from "@/lib/api/client";
 import type { Data } from "./utils";
 
 export type PlansResponse = Data<(typeof client)["api"]["billing"]["plans"]["get"]>;

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { COOKIE_NAMES, ROUTES } from "@/lib/constants";
+import { COOKIE_NAMES } from "@/lib/api/constants";
+import { ROUTES } from "./lib/constants";
 
 const AUTH_ROUTES = [
   ROUTES.login,

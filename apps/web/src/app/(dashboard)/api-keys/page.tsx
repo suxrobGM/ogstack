@@ -1,20 +1,25 @@
 import type { ReactElement } from "react";
-import { Typography } from "@mui/material";
 import { ApiKeyList } from "@/components/features/api-keys/api-key-list";
-import { getServerClient } from "@/lib/api-server";
+import { getServerClient } from "@/lib/api/server";
 
 export default async function ApiKeysPage(): Promise<ReactElement> {
   const client = await getServerClient();
 
-  // Get the user's first project to scope API keys
-  const { data: projects } = await client.api.projects.get({ query: { page: 1, limit: 1 } });
-  const project = projects?.items?.[0];
+  const { data: projects } = await client.api.projects.get({ query: { page: 1, limit: 100 } });
+  const projectItems = projects?.items ?? [];
+  const firstProject = projectItems[0];
 
-  if (!project) {
-    return <Typography variant="body1Muted">Create a project first to manage API keys.</Typography>;
+  let initialKeys = null;
+  if (firstProject) {
+    const { data } = await client.api.projects({ id: firstProject.id })["api-keys"].get();
+    initialKeys = data;
   }
 
-  const { data: keys } = await client.api.projects({ id: project.id })["api-keys"].get();
-
-  return <ApiKeyList projectId={project.id} initialData={keys} />;
+  return (
+    <ApiKeyList
+      projects={projectItems}
+      initialProjectId={firstProject?.id}
+      initialData={initialKeys}
+    />
+  );
 }
