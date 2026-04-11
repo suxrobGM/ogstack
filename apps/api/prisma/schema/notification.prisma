@@ -1,0 +1,25 @@
+enum NotificationType {
+  USAGE_ALERT
+  QUOTA_EXCEEDED
+  BILLING_EVENT
+  SYSTEM_ANNOUNCEMENT
+}
+
+model Notification {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  type      NotificationType
+  title     String
+  message   String
+  metadata  Json?
+  actionUrl String?          @map("action_url")
+  readAt    DateTime?        @map("read_at")
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([createdAt])
+  @@map("notifications")
+}

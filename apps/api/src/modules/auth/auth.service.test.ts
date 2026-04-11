@@ -70,37 +70,6 @@ function createMockPrisma() {
       create: mock(() => Promise.resolve(createMockUser())),
       update: mock(() => Promise.resolve(createMockUser())),
     },
-    project: {
-      create: mock(() =>
-        Promise.resolve({
-          id: "proj-uuid-1",
-          userId: "user-uuid-1",
-          publicId: "abc12345",
-          name: "Default Project",
-          domains: [],
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }),
-      ),
-    },
-    $transaction: mock((fn: (tx: unknown) => Promise<unknown>) => {
-      const tx = {
-        user: {
-          findUnique: mock(() => Promise.resolve(null)),
-          create: mock(() => Promise.resolve(createMockUser())),
-        },
-        project: {
-          create: mock(() =>
-            Promise.resolve({
-              id: "proj-uuid-1",
-              publicId: "abc12345",
-              name: "Default Project",
-            }),
-          ),
-        },
-      };
-      return fn(tx);
-    }),
   } as unknown as PrismaClient;
 }
 
@@ -140,21 +109,10 @@ describe("AuthService", () => {
     });
 
     it("should throw ConflictError if email already exists", async () => {
-      (mockPrisma.$transaction as ReturnType<typeof mock>).mockImplementation(
-        (fn: (tx: unknown) => Promise<unknown>) => {
-          const tx = {
-            user: {
-              findUnique: mock(() =>
-                Promise.resolve({
-                  id: "existing-user",
-                  email: "taken@example.com",
-                }),
-              ),
-            },
-          };
-          return fn(tx);
-        },
-      );
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValueOnce({
+        id: "existing-user",
+        email: "taken@example.com",
+      });
 
       expect(
         authService.register({
@@ -177,30 +135,7 @@ describe("AuthService", () => {
       expect(hashPassword).toHaveBeenCalledWith("securePassword123");
     });
 
-    it("should create a default project for the new user", async () => {
-      let projectCreated = false;
-      (mockPrisma.$transaction as ReturnType<typeof mock>).mockImplementation(
-        (fn: (tx: unknown) => Promise<unknown>) => {
-          const tx = {
-            user: {
-              findUnique: mock(() => Promise.resolve(null)),
-              create: mock(() => Promise.resolve(createMockUser())),
-            },
-            project: {
-              create: mock(() => {
-                projectCreated = true;
-                return Promise.resolve({
-                  id: "proj-uuid-1",
-                  publicId: "abc12345",
-                  name: "Default Project",
-                });
-              }),
-            },
-          };
-          return fn(tx);
-        },
-      );
-
+    it("should not create a default project for the new user", async () => {
       await authService.register({
         email: "test@example.com",
         password: "securePassword123",
@@ -208,7 +143,7 @@ describe("AuthService", () => {
         lastName: "User",
       });
 
-      expect(projectCreated).toBe(true);
+      expect((mockPrisma as any).project).toBeUndefined();
     });
   });
 

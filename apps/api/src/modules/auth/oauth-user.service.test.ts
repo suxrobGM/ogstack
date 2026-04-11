@@ -56,24 +56,6 @@ function createMockPrisma() {
       create: mock(() => Promise.resolve(createMockUser())),
       update: mock(() => Promise.resolve(createMockUser())),
     },
-    project: {
-      create: mock(() =>
-        Promise.resolve({ id: "proj-1", publicId: "abc123", name: "Default Project" }),
-      ),
-    },
-    $transaction: mock((fn: (tx: unknown) => Promise<unknown>) => {
-      const tx = {
-        user: {
-          create: mock(() => Promise.resolve(createMockUser())),
-        },
-        project: {
-          create: mock(() =>
-            Promise.resolve({ id: "proj-1", publicId: "abc123", name: "Default Project" }),
-          ),
-        },
-      };
-      return fn(tx);
-    }),
   } as unknown as PrismaClient;
 }
 
@@ -129,7 +111,7 @@ describe("OAuthUserService", () => {
       expect(service.findOrCreateUser("github", githubProfile)).rejects.toThrow("deactivated");
     });
 
-    it("should create a new user with default project when no match", async () => {
+    it("should create a new user when no match", async () => {
       (mockPrisma.user.findUnique as ReturnType<typeof mock>)
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(null);
@@ -137,7 +119,7 @@ describe("OAuthUserService", () => {
       const result = await service.findOrCreateUser("github", githubProfile);
 
       expect(result).toHaveProperty("accessToken");
-      expect(mockPrisma.$transaction).toHaveBeenCalled();
+      expect(mockPrisma.user.create).toHaveBeenCalled();
     });
 
     it("should update avatar if changed for existing provider user", async () => {

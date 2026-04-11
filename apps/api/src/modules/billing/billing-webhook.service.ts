@@ -3,6 +3,7 @@ import { injectable } from "tsyringe";
 import { BadRequestError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { Plan, PrismaClient } from "@/generated/prisma";
+import { NotificationService } from "@/modules/notification";
 import { BillingService } from "./billing.service";
 
 const SubscriptionStatus = {
@@ -25,6 +26,7 @@ export class BillingWebhookService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly billing: BillingService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async handleEvent(rawBody: string, signature: string): Promise<void> {
@@ -137,6 +139,14 @@ export class BillingWebhookService {
     ]);
 
     logger.info({ userId, plan: plan.key }, "Checkout completed — plan activated");
+
+    await this.notificationService.create({
+      userId,
+      type: "BILLING_EVENT",
+      title: "Plan activated",
+      message: `Your ${plan.name} plan is now active.`,
+      actionUrl: "/billing",
+    });
   }
 
   private async syncSubscription(stripeSub: Stripe.Subscription): Promise<void> {
@@ -193,6 +203,14 @@ export class BillingWebhookService {
     ]);
 
     logger.info({ userId: sub.userId }, "Subscription deleted — reverted to FREE");
+
+    await this.notificationService.create({
+      userId: sub.userId,
+      type: "BILLING_EVENT",
+      title: "Subscription canceled",
+      message: "Your subscription has been canceled. You are now on the Free plan.",
+      actionUrl: "/billing",
+    });
   }
 
   private async onInvoiceStatusChange(invoice: Stripe.Invoice, status: string): Promise<void> {
@@ -211,6 +229,16 @@ export class BillingWebhookService {
     });
 
     logger.info({ subscriptionId, status }, "Invoice status updated subscription");
+
+    if (status === SubscriptionStatus.PAST_DUE) {
+      await this.notificationService.create({
+        userId: sub.userId,
+        type: "BILLING_EVENT",
+        title: "Payment failed",
+        message: "Your recent payment failed. Please update your billing information.",
+        actionUrl: "/billing",
+      });
+    }
   }
 
   private mapStripeStatus(stripeStatus: Stripe.Subscription.Status): string {

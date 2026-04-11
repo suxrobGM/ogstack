@@ -19,6 +19,7 @@ import {
   generationDashboardController,
   generationPublicController,
 } from "@/modules/generation";
+import { notificationController } from "@/modules/notification";
 import { projectController } from "@/modules/project";
 import { templateController } from "@/modules/template";
 import { usageController } from "@/modules/usage";
@@ -51,7 +52,8 @@ const app = new Elysia()
       .use(usageController)
       .use(adminController)
       .use(billingWebhookController)
-      .use(billingController),
+      .use(billingController)
+      .use(notificationController),
   )
   .listen(parseInt(process.env.PORT!));
 

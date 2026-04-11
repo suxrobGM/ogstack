@@ -2,11 +2,15 @@ import { Plan, PLAN_CONFIGS, UNLIMITED_QUOTA } from "@ogstack/shared";
 import { singleton } from "tsyringe";
 import { ForbiddenError } from "@/common/errors/http.error";
 import { PrismaClient } from "@/generated/prisma";
+import { NotificationService } from "@/modules/notification";
 import type { UsageStats } from "./usage.schema";
 
 @singleton()
 export class UsageService {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   async enforceQuota(userId: string, projectId: string, apiKeyId?: string): Promise<void> {
     const user = await this.prisma.user.findUnique({
@@ -25,6 +29,14 @@ export class UsageService {
     });
 
     if (usage && usage.imageCount >= quota) {
+      await this.notificationService.create({
+        userId,
+        type: "QUOTA_EXCEEDED",
+        title: "Monthly quota exceeded",
+        message: `You've reached your monthly limit of ${quota} images. Upgrade your plan for more.`,
+        actionUrl: "/billing",
+      });
+
       throw new ForbiddenError(
         `Monthly quota of ${quota} images exceeded. Upgrade your plan for more.`,
       );
@@ -57,6 +69,56 @@ export class UsageService {
         cacheHits: cacheHit ? 1 : 0,
       },
       update: cacheHit ? { cacheHits: { increment: 1 } } : { imageCount: { increment: 1 } },
+    });
+
+    if (!cacheHit) {
+      await this.checkUsageThreshold(userId, projectId, apiKeyId, period);
+    }
+  }
+
+  private async checkUsageThreshold(
+    userId: string,
+    projectId: string,
+    apiKeyId: string | undefined,
+    period: string,
+  ): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { plan: true },
+    });
+
+    const quota = PLAN_CONFIGS[user?.plan ?? Plan.FREE].quota;
+    if (quota < 0) return;
+
+    const usage = await this.prisma.usageRecord.findUnique({
+      where: {
+        userId_projectId_apiKeyId_period: {
+          userId,
+          projectId,
+          apiKeyId: apiKeyId ?? "",
+          period,
+        },
+      },
+    });
+
+    if (!usage || usage.imageCount < Math.floor(quota * 0.8)) return;
+
+    const existing = await this.prisma.notification.findFirst({
+      where: {
+        userId,
+        type: "USAGE_ALERT",
+        createdAt: { gte: new Date(`${period}-01`) },
+      },
+    });
+    if (existing) return;
+
+    const remaining = quota - usage.imageCount;
+    await this.notificationService.create({
+      userId,
+      type: "USAGE_ALERT",
+      title: "Approaching quota limit",
+      message: `You have ${remaining} image${remaining === 1 ? "" : "s"} remaining this month.`,
+      actionUrl: "/billing",
     });
   }
 

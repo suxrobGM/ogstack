@@ -3,7 +3,7 @@ import { EmailVerificationEmail } from "@/common/emails/templates/email-verifica
 import { PasswordResetEmail } from "@/common/emails/templates/password-reset";
 import { BadRequestError, ConflictError, UnauthorizedError } from "@/common/errors";
 import { EmailService } from "@/common/services/email.service";
-import { generatePublicId, generateRandomToken } from "@/common/utils/crypto";
+import { generateRandomToken } from "@/common/utils/crypto";
 import { buildAuthResponse, verifyToken } from "@/common/utils/jwt";
 import { hashPassword, verifyPassword } from "@/common/utils/password";
 import { PrismaClient } from "@/generated/prisma";
@@ -28,32 +28,22 @@ export class AuthService {
     private readonly emailService: EmailService,
   ) {}
 
-  /** Register a new user, create a default project, and return auth tokens. */
+  /** Register a new user and return auth tokens. */
   async register(data: RegisterBody): Promise<AuthResponse> {
     const { email, password, firstName, lastName } = data;
 
-    const result = await this.prisma.$transaction(async (tx) => {
-      const existing = await tx.user.findUnique({ where: { email } });
-      if (existing) {
-        throw new ConflictError("A user with this email already exists");
-      }
+    const existing = await this.prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      throw new ConflictError("A user with this email already exists");
+    }
 
-      const passwordHash = await hashPassword(password);
+    const passwordHash = await hashPassword(password);
 
-      const user = await tx.user.create({
-        data: { email, passwordHash, firstName, lastName },
-      });
-
-      await tx.project.create({
-        data: {
-          userId: user.id,
-          publicId: generatePublicId(),
-          name: "Default Project",
-        },
-      });
-
-      return buildAuthResponse(user);
+    const user = await this.prisma.user.create({
+      data: { email, passwordHash, firstName, lastName },
     });
+
+    const result = await buildAuthResponse(user);
 
     // Send verification email (fire-and-forget)
     void this.sendVerificationEmail(result.user.id);

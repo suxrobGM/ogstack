@@ -40,6 +40,7 @@ model User {
   auditLogs       AuditLog[]
   usageRecords    UsageRecord[]
   subscription    Subscription?
+  notifications   Notification[]
 
   @@index([email])
   @@index([deletedAt])

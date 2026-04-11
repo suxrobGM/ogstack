@@ -1,6 +1,5 @@
 import { singleton } from "tsyringe";
 import { UnauthorizedError } from "@/common/errors";
-import { generatePublicId } from "@/common/utils/crypto";
 import { buildAuthResponse } from "@/common/utils/jwt";
 import { PrismaClient } from "@/generated/prisma";
 import type { AuthResponse } from "./auth.schema";
@@ -63,29 +62,17 @@ export class OAuthUserService {
       return buildAuthResponse(updated);
     }
 
-    const result = await this.prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: {
-          email: profile.email,
-          firstName: profile.firstName,
-          lastName: profile.lastName,
-          [providerIdField]: profile.id,
-          avatarUrl: profile.avatarUrl,
-          emailVerified: true,
-        },
-      });
-
-      await tx.project.create({
-        data: {
-          userId: user.id,
-          publicId: generatePublicId(),
-          name: "Default Project",
-        },
-      });
-
-      return user;
+    const user = await this.prisma.user.create({
+      data: {
+        email: profile.email,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        [providerIdField]: profile.id,
+        avatarUrl: profile.avatarUrl,
+        emailVerified: true,
+      },
     });
 
-    return buildAuthResponse(result);
+    return buildAuthResponse(user);
   }
 }

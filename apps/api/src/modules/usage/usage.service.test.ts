@@ -2,6 +2,7 @@ import { Plan } from "@ogstack/shared";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { container } from "@/common/di";
 import { PrismaClient } from "@/generated/prisma";
+import { NotificationService } from "@/modules/notification";
 import { UsageService } from "./usage.service";
 
 function createMockPrisma() {
@@ -14,6 +15,10 @@ function createMockPrisma() {
       findMany: mock(() => Promise.resolve([])),
       upsert: mock(() => Promise.resolve({})),
     },
+    notification: {
+      create: mock(() => Promise.resolve({})),
+      findFirst: mock(() => Promise.resolve(null)),
+    },
   } as unknown as PrismaClient;
 }
 
@@ -25,6 +30,9 @@ describe("UsageService", () => {
     container.clearInstances();
     mockPrisma = createMockPrisma();
     container.registerInstance(PrismaClient, mockPrisma as unknown as PrismaClient);
+    container.registerInstance(NotificationService, {
+      create: mock(() => Promise.resolve({})),
+    } as unknown as NotificationService);
     service = container.resolve(UsageService);
   });
 

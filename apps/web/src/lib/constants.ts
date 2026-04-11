@@ -12,6 +12,7 @@ export const ROUTES = {
   projects: "/projects" as Route,
   apiKeys: "/api-keys" as Route,
   billing: "/billing" as Route,
+  notifications: "/notifications" as Route,
   settings: "/settings/profile" as Route,
   settingsProfile: "/settings/profile" as Route,
   settingsSecurity: "/settings/security" as Route,
