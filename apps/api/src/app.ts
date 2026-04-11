@@ -6,6 +6,7 @@ import { logger } from "@/common/logger";
 import { errorMiddleware } from "@/common/middleware";
 import { corsPlugin, swaggerPlugin, uploadsStaticPlugin } from "@/common/plugins";
 import { validateEnv } from "@/env";
+import { adminController } from "@/modules/admin";
 import { apiKeyController, apiKeyDeleteController } from "@/modules/api-key";
 import { authController } from "@/modules/auth";
 import {
@@ -40,7 +41,8 @@ const app = new Elysia()
       .use(generationDashboardController)
       .use(projectController)
       .use(templateController)
-      .use(userController),
+      .use(userController)
+      .use(adminController),
   )
   .listen(parseInt(process.env.PORT!));
 
