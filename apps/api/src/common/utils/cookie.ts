@@ -9,19 +9,25 @@ const UNIT_SECONDS: Record<string, number> = { s: 1, m: 60, h: 3600, d: 86400, w
  * Parses a duration string (e.g. "15m", "2h") into seconds.
  * If the input is invalid or missing, returns the provided fallback value.
  */
-function parseExpiry(expiry: string | undefined, fallback: number): number {
-  if (!expiry) {
-    return fallback;
-  }
+export function parseExpiry(expiry: string | undefined, fallback: number): number {
+  if (!expiry) return fallback;
 
   const match = /^(\d+)([smhdw]?)$/.exec(expiry.trim());
-  if (!match) {
-    return fallback;
-  }
+  if (!match) return fallback;
 
   const value = parseInt(match[1]!, 10);
   const unit = match[2] || "s";
   return value * (UNIT_SECONDS[unit] ?? 1);
+}
+
+function cookieOptions(path: string, maxAge: number) {
+  return {
+    httpOnly: true,
+    secure: IS_PROD,
+    sameSite: IS_PROD ? ("strict" as const) : ("lax" as const),
+    path,
+    maxAge,
+  };
 }
 
 /**
@@ -34,22 +40,10 @@ export function setAuthCookies(cookie: Record<string, Cookie<unknown>>, result: 
   const refreshMaxAge = parseExpiry(process.env.REFRESH_TOKEN_EXPIRY, 7 * 24 * 60 * 60);
 
   cookie.access_token!.value = result.accessToken;
-  cookie.access_token!.set({
-    httpOnly: true,
-    secure: IS_PROD,
-    sameSite: IS_PROD ? "strict" : "lax",
-    path: "/",
-    maxAge: accessMaxAge,
-  });
+  cookie.access_token!.set(cookieOptions("/", accessMaxAge));
 
   cookie.refresh_token!.value = result.refreshToken;
-  cookie.refresh_token!.set({
-    httpOnly: true,
-    secure: IS_PROD,
-    sameSite: IS_PROD ? "strict" : "lax",
-    path: "/api/auth",
-    maxAge: refreshMaxAge,
-  });
+  cookie.refresh_token!.set(cookieOptions("/api/auth", refreshMaxAge));
 }
 
 /**
@@ -58,22 +52,10 @@ export function setAuthCookies(cookie: Record<string, Cookie<unknown>>, result: 
  */
 export function clearAuthCookies(cookie: Record<string, Cookie<unknown>>) {
   cookie.access_token!.value = "";
-  cookie.access_token!.set({
-    httpOnly: true,
-    secure: IS_PROD,
-    sameSite: IS_PROD ? "strict" : "lax",
-    path: "/",
-    maxAge: 0,
-  });
+  cookie.access_token!.set(cookieOptions("/", 0));
 
   cookie.refresh_token!.value = "";
-  cookie.refresh_token!.set({
-    httpOnly: true,
-    secure: IS_PROD,
-    sameSite: IS_PROD ? "strict" : "lax",
-    path: "/api/auth",
-    maxAge: 0,
-  });
+  cookie.refresh_token!.set(cookieOptions("/api/auth", 0));
 }
 
 /**
@@ -83,13 +65,7 @@ export function clearAuthCookies(cookie: Record<string, Cookie<unknown>>) {
  */
 export function setOAuthStateCookie(cookie: Record<string, Cookie<unknown>>, state: string) {
   cookie.oauth_state!.value = state;
-  cookie.oauth_state!.set({
-    httpOnly: true,
-    secure: IS_PROD,
-    sameSite: "lax",
-    path: "/api/auth",
-    maxAge: 600,
-  });
+  cookie.oauth_state!.set({ ...cookieOptions("/api/auth", 600), sameSite: "lax" });
 }
 
 /**
@@ -98,13 +74,7 @@ export function setOAuthStateCookie(cookie: Record<string, Cookie<unknown>>, sta
  */
 export function clearOAuthStateCookie(cookie: Record<string, Cookie<unknown>>) {
   cookie.oauth_state!.value = "";
-  cookie.oauth_state!.set({
-    httpOnly: true,
-    secure: IS_PROD,
-    sameSite: "lax",
-    path: "/api/auth",
-    maxAge: 0,
-  });
+  cookie.oauth_state!.set({ ...cookieOptions("/api/auth", 0), sameSite: "lax" });
 }
 
 /**
