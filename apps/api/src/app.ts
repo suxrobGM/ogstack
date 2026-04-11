@@ -9,7 +9,11 @@ import { validateEnv } from "@/env";
 import { adminController } from "@/modules/admin";
 import { apiKeyController, apiKeyDeleteController } from "@/modules/api-key";
 import { authController } from "@/modules/auth";
-import { billingController, billingWebhookController } from "@/modules/billing";
+import {
+  billingController,
+  billingWebhookController,
+  syncStripeOnStartup,
+} from "@/modules/billing";
 import {
   generationController,
   generationDashboardController,
@@ -53,6 +57,8 @@ const app = new Elysia()
 
 logger.info(`OGStack API running at http://${app.server?.hostname}:${app.server?.port}`);
 logger.info(`Swagger docs available at http://${app.server?.hostname}:${app.server?.port}/swagger`);
+
+syncStripeOnStartup();
 
 // Export app type for Eden Treaty
 export type App = typeof app;
