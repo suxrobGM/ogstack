@@ -1,15 +1,15 @@
 import type { CSSProperties } from "react";
-import type { accent, aubergine, line } from "./palette";
-import type { gradients, motion, noise, radii } from "./tokens";
+import type { accent, line, surfaces } from "./palette";
+import type { gradients, iconSizes, motion, radii, shadows } from "./tokens";
 
 declare module "@mui/material/styles" {
   interface Palette {
-    aubergine: typeof aubergine;
+    surfaces: typeof surfaces;
     accent: typeof accent;
     line: typeof line;
   }
   interface PaletteOptions {
-    aubergine?: typeof aubergine;
+    surfaces?: typeof surfaces;
     accent?: typeof accent;
     line?: typeof line;
   }
@@ -17,14 +17,16 @@ declare module "@mui/material/styles" {
   interface Theme {
     gradients: typeof gradients;
     motion: typeof motion;
-    noise: typeof noise;
     radii: typeof radii;
+    shadows_custom: typeof shadows;
+    iconSizes: typeof iconSizes;
   }
   interface ThemeOptions {
     gradients?: typeof gradients;
     motion?: typeof motion;
-    noise?: typeof noise;
     radii?: typeof radii;
+    shadows_custom?: typeof shadows;
+    iconSizes?: typeof iconSizes;
   }
 
   interface TypographyVariants {

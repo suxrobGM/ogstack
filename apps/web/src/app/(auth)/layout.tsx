@@ -3,7 +3,6 @@ import { Box } from "@mui/material";
 import { AuthProvider } from "@/providers/auth-provider";
 import { NotificationProvider } from "@/providers/notification-provider";
 import { QueryProvider } from "@/providers/query-provider";
-import { gradients } from "@/theme/tokens";
 
 export default function AuthLayout(props: PropsWithChildren): ReactElement {
   const { children } = props;
@@ -21,8 +20,7 @@ export default function AuthLayout(props: PropsWithChildren): ReactElement {
               minHeight: "100vh",
               px: 2,
               py: 6,
-              backgroundImage: gradients.mesh,
-              bgcolor: "aubergine.base",
+              bgcolor: "surfaces.base",
             }}
           >
             {children}

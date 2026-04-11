@@ -1,39 +1,39 @@
 /**
- * OGStack palette — Emerald direction.
+ * OGStack palette — Warm Studio direction.
  *
- * Clean zinc-black base with emerald green + cyan accents.
+ * Cream/sand base with amber accent and charcoal text.
  * Named `textColors` instead of `text` to avoid shadowing MUI's `palette.text`
  * when these tokens are spread into the palette in `theme.ts`.
  */
 
-export const aubergine = {
-  base: "#0a0a10",
-  surface: "#14141e",
-  elevated: "#1e1e2a",
-  hi: "#282836",
+export const surfaces = {
+  base: "#F7F3ED",
+  card: "#FFFDF9",
+  elevated: "#EDE8DF",
+  hover: "#E5DFD5",
 } as const;
 
 export const accent = {
-  sunset: "#10b981",
-  amber: "#22d3ee",
-  violet: "#34d399",
+  primary: "#B45309",
+  secondary: "#D97706",
+  dark: "#92400E",
 } as const;
 
 export const textColors = {
-  primary: "#fafafa",
-  secondary: "#a1a1aa",
-  disabled: "#52525b",
+  primary: "#2C2825",
+  secondary: "#8C8378",
+  disabled: "#B8B0A6",
 } as const;
 
 export const feedback = {
-  error: "#ef4444",
-  success: "#22c55e",
-  info: "#3b82f6",
-  warning: "#eab308",
+  error: "#DC2626",
+  success: "#15803D",
+  info: "#2563EB",
+  warning: "#CA8A04",
 } as const;
 
 export const line = {
-  divider: "rgba(250,250,250,0.08)",
-  border: "rgba(250,250,250,0.12)",
-  borderHi: "rgba(250,250,250,0.20)",
+  divider: "#D5CEC3",
+  border: "#CBC3B6",
+  borderHi: "#B8AFA0",
 } as const;

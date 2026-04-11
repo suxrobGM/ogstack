@@ -9,7 +9,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { accent } from "@/theme/palette";
+import { accent } from "@/theme";
 import { radii } from "@/theme/tokens";
 
 interface NavItemProps {
@@ -44,13 +44,12 @@ export function NavItem(props: NavItemProps): ReactElement {
           justifyContent: collapsed ? "center" : "flex-start",
           minHeight: 40,
           "&.Mui-selected": {
-            bgcolor: "rgba(16,185,129,0.12)",
-            borderLeft: collapsed ? "none" : `2px solid ${accent.sunset}`,
-            boxShadow: "inset 0 0 16px rgba(16,185,129,0.06)",
-            "&:hover": { bgcolor: "rgba(16,185,129,0.16)" },
+            bgcolor: "rgba(180,83,9,0.08)",
+            borderLeft: collapsed ? "none" : `2px solid ${accent.primary}`,
+            "&:hover": { bgcolor: "rgba(180,83,9,0.12)" },
           },
           "&:hover:not(.Mui-selected)": {
-            bgcolor: "rgba(250,250,250,0.04)",
+            bgcolor: "rgba(44,40,37,0.04)",
           },
         }}
       >
@@ -58,7 +57,7 @@ export function NavItem(props: NavItemProps): ReactElement {
           <ListItemIcon
             sx={{
               minWidth: collapsed ? 0 : 36,
-              color: active ? "accent.sunset" : "text.secondary",
+              color: active ? "accent.primary" : "text.secondary",
               justifyContent: "center",
             }}
           >

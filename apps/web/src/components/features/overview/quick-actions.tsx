@@ -53,13 +53,13 @@ export function QuickActions(): ReactElement {
                   transition: motion.standard,
                   "&:hover": {
                     borderColor: line.borderHi,
-                    bgcolor: "aubergine.elevated",
+                    bgcolor: "surfaces.elevated",
                   },
                 }}
               >
                 <Stack spacing={1.5}>
-                  <Box sx={{ color: "accent.sunset" }}>{action.icon}</Box>
-                  <Typography variant="h5" sx={{ color: "accent.sunset" }}>
+                  <Box sx={{ color: "accent.primary" }}>{action.icon}</Box>
+                  <Typography variant="h5" sx={{ color: "accent.primary" }}>
                     {action.title}
                   </Typography>
                   <Typography variant="body2Muted">{action.description}</Typography>

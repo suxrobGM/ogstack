@@ -1,6 +1,6 @@
 import type { Components, Theme } from "@mui/material/styles";
-import { aubergine, line } from "../palette";
-import { radii } from "../tokens";
+import { line, surfaces } from "../palette";
+import { radii, shadows } from "../tokens";
 
 export const cardOverrides: Components<Theme>["MuiCard"] = {
   defaultProps: {
@@ -8,11 +8,11 @@ export const cardOverrides: Components<Theme>["MuiCard"] = {
   },
   styleOverrides: {
     root: {
-      backgroundColor: aubergine.surface,
+      backgroundColor: surfaces.card,
       backgroundImage: "none",
       border: `1px solid ${line.border}`,
       borderRadius: radii.md,
-      boxShadow: "none",
+      boxShadow: shadows.md,
     },
   },
 };

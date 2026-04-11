@@ -1,63 +1,68 @@
 import type { ReactElement } from "react";
-import CodeIcon from "@mui/icons-material/Code";
-import ImageIcon from "@mui/icons-material/Image";
-import SpeedIcon from "@mui/icons-material/Speed";
-import TuneIcon from "@mui/icons-material/Tune";
 import { Box, Container, Grid, Stack, Typography } from "@mui/material";
 import { Surface } from "@/components/ui/layout/surface";
 
 const FEATURES = [
   {
-    icon: <CodeIcon />,
+    icon: "</>",
     title: "One meta tag",
     description:
-      "Drop a single <meta> tag into your HTML. OGStack handles the rest — scraping, rendering, and CDN delivery.",
+      "Add a single line to your HTML. We handle scraping, rendering, caching, and CDN delivery.",
   },
   {
-    icon: <ImageIcon />,
+    icon: "#",
     title: "10+ templates",
     description:
-      "Gradient, split-hero, blog card, docs page, and more. Each template adapts to your content automatically.",
+      "Gradient, split hero, blog card, docs page, changelog \u2014 each designed for specific content.",
   },
   {
-    icon: <SpeedIcon />,
-    title: "Sub-500ms rendering",
+    icon: "\u2193",
+    title: "Sub-500ms",
     description:
-      "Template images render in under 500ms at the p95. Cached on a global CDN for instant repeat serves.",
+      "Template rendering at p95 latency. CDN cache hit ratio above 90%. Fast everywhere.",
   },
   {
-    icon: <TuneIcon />,
-    title: "Full API control",
+    icon: "{}",
+    title: "Full API",
     description:
-      "POST endpoint for programmatic generation. Pass custom colors, fonts, logos, and AI-generated backgrounds.",
+      "GET for meta tags, POST for server-side. Control template, colors, fonts, AI backgrounds.",
+  },
+  {
+    icon: "AI",
+    title: "AI backgrounds",
+    description:
+      "Flux Schnell and Flux Pro generate contextual backgrounds from your page content.",
+  },
+  {
+    icon: "\u2261",
+    title: "Brand Kit",
+    description:
+      "Upload your logo, set brand colors and fonts. Every generated image stays on-brand.",
   },
 ];
 
 export function FeaturesSection(): ReactElement {
   return (
-    <Box sx={{ py: { xs: 10, md: 14 } }}>
+    <Box sx={{ py: { xs: 8, md: 12 } }}>
       <Container maxWidth="lg">
-        <Typography
-          variant="overline"
-          sx={{ color: "accent.sunset", display: "block", textAlign: "center", mb: 2 }}
-        >
+        <Typography variant="overline" sx={{ color: "accent.primary", display: "block", mb: 1.5 }}>
           Features
         </Typography>
-        <Typography variant="h2" sx={{ textAlign: "center", mb: 8 }}>
-          Everything you need for social previews
+        <Typography variant="h2" sx={{ mb: 6, maxWidth: 480 }}>
+          Everything you need, nothing you don&apos;t
         </Typography>
-        <Grid container spacing={3}>
+        <Grid container spacing={2.5}>
           {FEATURES.map((f) => (
-            <Grid key={f.title} size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid key={f.title} size={{ xs: 12, sm: 6, md: 4 }}>
               <Surface
                 variant="quiet"
-                padding={4}
+                padding={3.5}
                 sx={{
                   height: "100%",
-                  transition: "border-color 240ms, box-shadow 240ms",
+                  transition: "box-shadow 240ms, transform 240ms",
                   "&:hover": {
-                    borderColor: "rgba(16,185,129,0.2)",
-                    boxShadow: "0 8px 32px -8px rgba(16,185,129,0.08)",
+                    boxShadow: "0 2px 8px rgba(44,40,37,0.08), 0 16px 40px rgba(44,40,37,0.06)",
+                    transform: "translateY(-2px)",
                   },
                 }}
               >
@@ -66,13 +71,14 @@ export function FeaturesSection(): ReactElement {
                     sx={{
                       width: 40,
                       height: 40,
-                      borderRadius: 1.5,
+                      borderRadius: "10px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      backgroundColor: "rgba(16,185,129,0.08)",
-                      color: "accent.sunset",
-                      fontSize: 22,
+                      bgcolor: "rgba(180,83,9,0.08)",
+                      color: "accent.primary",
+                      fontSize: 18,
+                      fontWeight: 600,
                     }}
                   >
                     {f.icon}

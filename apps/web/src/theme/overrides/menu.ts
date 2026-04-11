@@ -1,15 +1,15 @@
 import type { Components, Theme } from "@mui/material/styles";
-import { accent, aubergine, line, textColors } from "../palette";
-import { radii } from "../tokens";
+import { accent, line, surfaces, textColors } from "../palette";
+import { radii, shadows } from "../tokens";
 
 export const menuOverrides: Components<Theme>["MuiMenu"] = {
   styleOverrides: {
     paper: {
-      backgroundColor: aubergine.elevated,
+      backgroundColor: surfaces.card,
       backgroundImage: "none",
       border: `1px solid ${line.border}`,
       borderRadius: radii.md,
-      boxShadow: "0 24px 48px -16px rgba(0,0,0,0.6)",
+      boxShadow: shadows.lg,
       marginTop: 4,
     },
     list: {
@@ -26,13 +26,13 @@ export const menuItemOverrides: Components<Theme>["MuiMenuItem"] = {
       borderRadius: 4,
       color: textColors.primary,
       "&:hover": {
-        backgroundColor: "rgba(16,185,129,0.08)",
+        backgroundColor: "rgba(180,83,9,0.06)",
       },
       "&.Mui-selected": {
-        backgroundColor: "rgba(16,185,129,0.14)",
-        color: accent.sunset,
+        backgroundColor: "rgba(180,83,9,0.10)",
+        color: accent.primary,
         "&:hover": {
-          backgroundColor: "rgba(16,185,129,0.18)",
+          backgroundColor: "rgba(180,83,9,0.14)",
         },
       },
     },

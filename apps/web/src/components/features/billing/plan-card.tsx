@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { UNLIMITED_QUOTA } from "@ogstack/shared";
 import { Surface } from "@/components/ui/layout/surface";
-import { fontFamilies } from "@/theme";
+import { fontFamilies, iconSizes } from "@/theme";
 import type { PlanResponse } from "@/types/api";
 
 interface PlanCardProps {
@@ -65,14 +65,14 @@ export function PlanCard(props: PlanCardProps): ReactElement {
           {plan.price === 0 ? "forever" : "/month"}
         </Typography>
       </Stack>
-      <Typography variant="caption" sx={{ color: "accent.amber", mb: 3 }}>
+      <Typography variant="caption" sx={{ color: "accent.secondary", mb: 3 }}>
         {quotaLabel}
       </Typography>
       <List dense sx={{ flex: 1, py: 0 }}>
         {plan.features.map((feature) => (
           <ListItem key={feature} disableGutters sx={{ py: 0.5 }}>
             <ListItemIcon sx={{ minWidth: 28, color: "success.main" }}>
-              <CheckIcon sx={{ fontSize: 16 }} />
+              <CheckIcon sx={{ fontSize: iconSizes.xs }} />
             </ListItemIcon>
             <ListItemText primary={feature} />
           </ListItem>

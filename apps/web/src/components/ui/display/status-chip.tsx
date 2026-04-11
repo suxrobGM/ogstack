@@ -14,33 +14,33 @@ const STATUS_CONFIG: Record<
 > = {
   cached: {
     label: "cached",
-    color: "#FFC947",
-    bg: "rgba(255,201,71,0.12)",
-    border: "rgba(255,201,71,0.35)",
+    color: "#A16207",
+    bg: "rgba(202,138,4,0.08)",
+    border: "rgba(202,138,4,0.25)",
   },
   generated: {
     label: "generated",
-    color: "#5CE1A1",
-    bg: "rgba(92,225,161,0.12)",
-    border: "rgba(92,225,161,0.35)",
+    color: "#15803D",
+    bg: "rgba(21,128,61,0.08)",
+    border: "rgba(21,128,61,0.25)",
   },
   processing: {
     label: "processing",
-    color: "#7B3FF2",
-    bg: "rgba(123,63,242,0.14)",
-    border: "rgba(123,63,242,0.4)",
+    color: "#7C3AED",
+    bg: "rgba(124,58,237,0.08)",
+    border: "rgba(124,58,237,0.25)",
   },
   failed: {
     label: "failed",
-    color: "#FF4B4B",
-    bg: "rgba(255,75,75,0.12)",
-    border: "rgba(255,75,75,0.4)",
+    color: "#DC2626",
+    bg: "rgba(220,38,38,0.08)",
+    border: "rgba(220,38,38,0.25)",
   },
   pending: {
     label: "pending",
-    color: "#B3A6C0",
-    bg: "rgba(179,166,192,0.1)",
-    border: "rgba(179,166,192,0.3)",
+    color: "#8C8378",
+    bg: "rgba(140,131,120,0.08)",
+    border: "rgba(140,131,120,0.25)",
   },
 };
 

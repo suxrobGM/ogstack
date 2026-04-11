@@ -1,5 +1,5 @@
 import type { Components, Theme } from "@mui/material/styles";
-import { aubergine, line, textColors } from "../palette";
+import { line, surfaces, textColors } from "../palette";
 import { motion } from "../tokens";
 import { fontFamilies } from "../typography";
 
@@ -25,10 +25,10 @@ export const tableHeadOverrides: Components<Theme>["MuiTableHead"] = {
         textTransform: "uppercase",
         fontWeight: 500,
         color: textColors.secondary,
-        borderBottom: `1px solid ${line.border}`,
+        borderBottom: `2px solid ${textColors.primary}`,
         paddingTop: 14,
         paddingBottom: 14,
-        backgroundColor: aubergine.elevated,
+        backgroundColor: surfaces.card,
       },
     },
   },
@@ -40,7 +40,7 @@ export const tableBodyOverrides: Components<Theme>["MuiTableBody"] = {
       "& .MuiTableRow-root": {
         transition: `background-color ${motion.fast}`,
         "&:hover": {
-          backgroundColor: "rgba(16,185,129,0.04)",
+          backgroundColor: "rgba(180,83,9,0.03)",
         },
         "&:last-of-type .MuiTableCell-root": {
           borderBottom: "none",

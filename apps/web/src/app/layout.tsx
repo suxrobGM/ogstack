@@ -2,19 +2,21 @@ import "./globals.css";
 import type { PropsWithChildren, ReactElement } from "react";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, DM_Sans, JetBrains_Mono } from "next/font/google";
+import { IBM_Plex_Sans, JetBrains_Mono, Newsreader } from "next/font/google";
 import { ThemeProvider } from "@/providers";
 
-const bricolage = Bricolage_Grotesque({
+const newsreader = Newsreader({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-bricolage",
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-newsreader",
   display: "swap",
 });
 
-const dmSans = DM_Sans({
+const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
-  variable: "--font-dm-sans",
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-ibm-plex",
   display: "swap",
 });
 
@@ -33,7 +35,7 @@ export default function RootLayout({ children }: PropsWithChildren): ReactElemen
   return (
     <html lang="en">
       <body
-        className={`${bricolage.variable} ${dmSans.variable} ${jetbrainsMono.variable} antialiased`}
+        className={`${newsreader.variable} ${ibmPlexSans.variable} ${jetbrainsMono.variable} antialiased`}
       >
         <AppRouterCacheProvider>
           <ThemeProvider>{children}</ThemeProvider>

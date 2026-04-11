@@ -25,7 +25,7 @@ export function AuthCard(props: AuthCardProps): ReactElement {
         {footer && (
           <Typography variant="body2Muted" sx={{ textAlign: "center" }}>
             {footer.text}{" "}
-            <Link href={footer.href} underline="hover" sx={{ color: "accent.sunset" }}>
+            <Link href={footer.href} underline="hover" sx={{ color: "accent.primary" }}>
               {footer.linkText}
             </Link>
           </Typography>

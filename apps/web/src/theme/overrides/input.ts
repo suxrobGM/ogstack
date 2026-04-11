@@ -1,6 +1,6 @@
 import type { Components, Theme } from "@mui/material/styles";
-import { accent, aubergine, line, textColors } from "../palette";
-import { radii } from "../tokens";
+import { accent, line, surfaces, textColors } from "../palette";
+import { radii, shadows } from "../tokens";
 import { fontFamilies } from "../typography";
 
 export const textFieldOverrides: Components<Theme>["MuiTextField"] = {
@@ -13,7 +13,7 @@ export const textFieldOverrides: Components<Theme>["MuiTextField"] = {
 export const outlinedInputOverrides: Components<Theme>["MuiOutlinedInput"] = {
   styleOverrides: {
     root: {
-      backgroundColor: "rgba(250,250,250,0.03)",
+      backgroundColor: surfaces.card,
       borderRadius: radii.md,
       fontFamily: fontFamilies.body,
       fontSize: "0.9375rem",
@@ -27,15 +27,15 @@ export const outlinedInputOverrides: Components<Theme>["MuiOutlinedInput"] = {
         borderColor: line.borderHi,
       },
       "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-        borderColor: accent.sunset,
+        borderColor: accent.primary,
         borderWidth: 1,
-        boxShadow: "0 0 0 3px rgba(16,185,129,0.15)",
+        boxShadow: shadows.focus,
       },
       "&.Mui-error .MuiOutlinedInput-notchedOutline": {
-        borderColor: "#ef4444",
+        borderColor: "#DC2626",
       },
       "&.Mui-disabled": {
-        backgroundColor: "rgba(250,250,250,0.015)",
+        backgroundColor: surfaces.elevated,
         color: textColors.disabled,
       },
     },
@@ -45,7 +45,7 @@ export const outlinedInputOverrides: Components<Theme>["MuiOutlinedInput"] = {
         opacity: 1,
       },
       "&:-webkit-autofill, &:-webkit-autofill:hover, &:-webkit-autofill:focus": {
-        WebkitBoxShadow: `0 0 0 100px ${aubergine.surface} inset`,
+        WebkitBoxShadow: `0 0 0 100px ${surfaces.card} inset`,
         WebkitTextFillColor: textColors.primary,
         caretColor: textColors.primary,
       },
@@ -60,7 +60,7 @@ export const inputLabelOverrides: Components<Theme>["MuiInputLabel"] = {
       fontSize: "0.9375rem",
       color: textColors.secondary,
       "&.Mui-focused": {
-        color: accent.sunset,
+        color: accent.primary,
       },
     },
   },
@@ -72,7 +72,7 @@ export const selectOverrides: Components<Theme>["MuiSelect"] = {
       slotProps: {
         paper: {
           sx: {
-            backgroundColor: aubergine.elevated,
+            backgroundColor: surfaces.card,
             border: `1px solid ${line.border}`,
             borderRadius: `${radii.md}px`,
             backgroundImage: "none",
@@ -91,7 +91,7 @@ export const formHelperTextOverrides: Components<Theme>["MuiFormHelperText"] = {
       fontSize: "0.75rem",
       marginLeft: 2,
       "&.Mui-error": {
-        color: "#ef4444",
+        color: "#DC2626",
       },
     },
   },

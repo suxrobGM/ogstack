@@ -42,7 +42,7 @@ export function OAuthButtons(): ReactElement {
           sx={{
             borderColor: "line.default",
             color: "text.primary",
-            "&:hover": { borderColor: "line.hover", bgcolor: "aubergine.elevated" },
+            "&:hover": { borderColor: "line.hover", bgcolor: "surfaces.elevated" },
           }}
         >
           GitHub
@@ -57,7 +57,7 @@ export function OAuthButtons(): ReactElement {
           sx={{
             borderColor: "line.default",
             color: "text.primary",
-            "&:hover": { borderColor: "line.hover", bgcolor: "aubergine.elevated" },
+            "&:hover": { borderColor: "line.hover", bgcolor: "surfaces.elevated" },
           }}
         >
           Google

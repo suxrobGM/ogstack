@@ -1,7 +1,7 @@
 import type { ReactElement, ReactNode } from "react";
 import { Box } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { aubergine, gradients, line, noise, radii } from "@/theme";
+import { line, radii, shadows, surfaces } from "@/theme";
 
 interface SurfaceProps {
   variant?: "quiet" | "expressive";
@@ -14,9 +14,9 @@ interface SurfaceProps {
 /**
  * Primary card/panel primitive for OGStack.
  *
- * Defaults to the "quiet" mode (flat, hairline border, no glow) used in
+ * Defaults to the "quiet" mode (flat, hairline border, subtle shadow) used in
  * dense data zones. Opt-in to "expressive" for landing, hero, playground,
- * and empty-state surfaces — adds a grain overlay and a top gradient edge.
+ * and empty-state surfaces — adds an accent border and stronger shadow.
  */
 export function Surface(props: SurfaceProps): ReactElement {
   const { variant = "quiet", padding = 3, children, sx, className } = props;
@@ -28,21 +28,13 @@ export function Surface(props: SurfaceProps): ReactElement {
         sx={[
           {
             position: "relative",
-            backgroundColor: aubergine.surface,
+            backgroundColor: surfaces.card,
             border: `1px solid ${line.borderHi}`,
             borderRadius: `${radii.lg}px`,
             padding,
             overflow: "hidden",
-            boxShadow: "0 4px 24px -4px rgba(0,0,0,0.25)",
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              inset: 0,
-              backgroundImage: noise.grain,
-              opacity: 0.06,
-              mixBlendMode: "overlay",
-              pointerEvents: "none",
-            },
+            boxShadow: shadows.lg,
+            borderTopColor: surfaces.card,
             "&::after": {
               content: '""',
               position: "absolute",
@@ -50,7 +42,7 @@ export function Surface(props: SurfaceProps): ReactElement {
               left: 0,
               right: 0,
               height: 2,
-              backgroundImage: gradients.sunsetAmber,
+              background: `linear-gradient(90deg, ${line.borderHi}, ${line.border})`,
               pointerEvents: "none",
             },
           },
@@ -67,11 +59,12 @@ export function Surface(props: SurfaceProps): ReactElement {
       className={className}
       sx={[
         {
-          backgroundColor: aubergine.surface,
+          backgroundColor: surfaces.card,
           border: `1px solid ${line.border}`,
           borderRadius: `${radii.md}px`,
           padding,
           overflowX: "auto",
+          boxShadow: shadows.md,
         },
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}

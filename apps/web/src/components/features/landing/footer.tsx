@@ -5,7 +5,7 @@ import { line } from "@/theme/palette";
 
 export function Footer(): ReactElement {
   return (
-    <Box component="footer" sx={{ py: 6, borderTop: `1px solid ${line.divider}` }}>
+    <Box component="footer" sx={{ py: 5, borderTop: `1px solid ${line.divider}` }}>
       <Container maxWidth="lg">
         <Stack
           direction={{ xs: "column", md: "row" }}
@@ -13,10 +13,9 @@ export function Footer(): ReactElement {
           spacing={3}
         >
           <Box>
-            <Typography variant="h5" sx={{ mb: 0.5 }}>
-              OGStack
+            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+              ogstack.dev
             </Typography>
-            <Typography variant="body2Muted">Developer-first OG image generation</Typography>
           </Box>
           <Stack direction="row" spacing={4}>
             <Link href={ROUTES.docs} variant="body2Muted" underline="hover">

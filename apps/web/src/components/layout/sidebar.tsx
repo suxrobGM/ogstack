@@ -44,7 +44,7 @@ export function Sidebar(props: SidebarProps): ReactElement {
         flexShrink: 0,
         display: { xs: "none", md: "flex" },
         flexDirection: "column",
-        bgcolor: "aubergine.surface",
+        bgcolor: "surfaces.elevated",
         borderRight: `1px solid ${line.border}`,
         height: "100vh",
         position: "sticky",
@@ -98,7 +98,7 @@ export function Sidebar(props: SidebarProps): ReactElement {
         </List>
       )}
       <Divider sx={{ borderColor: line.divider }} />
-      <Box sx={{ p: collapsed ? 1 : 1.5 }}>
+      <Box sx={{ p: collapsed ? 0.5 : 1 }}>
         <UserMenu collapsed={collapsed} />
       </Box>
     </Box>

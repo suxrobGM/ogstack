@@ -16,6 +16,7 @@ import { PLAN_CONFIGS, PLANS, UNLIMITED_QUOTA } from "@ogstack/shared";
 import { Surface } from "@/components/ui/layout/surface";
 import { ROUTES } from "@/lib/constants";
 import { line } from "@/theme/palette";
+import { iconSizes } from "@/theme/tokens";
 import { fontFamilies } from "@/theme/typography";
 
 const PLAN_FEATURES: Record<string, string[]> = {
@@ -46,11 +47,11 @@ const PLAN_FEATURES: Record<string, string[]> = {
 
 export default function PricingPage(): ReactElement {
   return (
-    <Box sx={{ bgcolor: "aubergine.base", minHeight: "100vh" }}>
+    <Box sx={{ bgcolor: "surfaces.base", minHeight: "100vh" }}>
       <Container maxWidth="lg" sx={{ py: { xs: 8, md: 12 } }}>
         <Typography
           variant="overline"
-          sx={{ color: "accent.sunset", display: "block", textAlign: "center", mb: 2 }}
+          sx={{ color: "accent.primary", display: "block", textAlign: "center", mb: 2 }}
         >
           Pricing
         </Typography>
@@ -99,14 +100,14 @@ export default function PricingPage(): ReactElement {
                       {config.price === 0 ? "forever" : "/month"}
                     </Typography>
                   </Stack>
-                  <Typography variant="caption" sx={{ color: "accent.amber", mb: 3 }}>
+                  <Typography variant="caption" sx={{ color: "accent.secondary", mb: 3 }}>
                     {quotaLabel}
                   </Typography>
                   <List dense sx={{ flex: 1, py: 0 }}>
                     {features.map((feature) => (
                       <ListItem key={feature} disableGutters sx={{ py: 0.5 }}>
                         <ListItemIcon sx={{ minWidth: 28, color: "success.main" }}>
-                          <CheckIcon sx={{ fontSize: 16 }} />
+                          <CheckIcon sx={{ fontSize: iconSizes.xs }} />
                         </ListItemIcon>
                         <ListItemText primary={feature} />
                       </ListItem>

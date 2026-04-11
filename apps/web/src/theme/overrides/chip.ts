@@ -23,7 +23,7 @@ export const chipOverrides: Components<Theme>["MuiChip"] = {
       backgroundColor: "transparent",
     },
     filled: {
-      backgroundColor: "rgba(250,250,250,0.06)",
+      backgroundColor: "rgba(44,40,37,0.06)",
     },
     label: {
       paddingLeft: 10,

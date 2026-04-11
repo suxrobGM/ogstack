@@ -1,16 +1,16 @@
 import type { Components, Theme } from "@mui/material/styles";
-import { aubergine, line, textColors } from "../palette";
-import { radii } from "../tokens";
+import { line, surfaces, textColors } from "../palette";
+import { radii, shadows } from "../tokens";
 import { fontFamilies } from "../typography";
 
 export const dialogOverrides: Components<Theme>["MuiDialog"] = {
   styleOverrides: {
     paper: {
-      backgroundColor: aubergine.surface,
+      backgroundColor: surfaces.card,
       backgroundImage: "none",
       border: `1px solid ${line.border}`,
       borderRadius: radii.lg,
-      boxShadow: "0 40px 80px -24px rgba(0,0,0,0.6)",
+      boxShadow: shadows.lg,
     },
   },
 };
@@ -48,7 +48,7 @@ export const dialogActionsOverrides: Components<Theme>["MuiDialogActions"] = {
 export const backdropOverrides: Components<Theme>["MuiBackdrop"] = {
   styleOverrides: {
     root: {
-      backgroundColor: "rgba(9,9,11,0.80)",
+      backgroundColor: "rgba(44,40,37,0.40)",
       backdropFilter: "blur(4px)",
     },
     invisible: {

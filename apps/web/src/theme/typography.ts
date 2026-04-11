@@ -3,11 +3,11 @@ import { textColors } from "./palette";
 
 /**
  * Font families — referenced via CSS custom properties set by next/font
- * in `app/layout.tsx`. Display pairs with body and mono via a shared variable.
+ * in `app/layout.tsx`. Newsreader (serif) for headings, IBM Plex Sans for body.
  */
 export const fontFamilies = {
-  display: "var(--font-bricolage), 'Georgia', serif",
-  body: "var(--font-dm-sans), system-ui, sans-serif",
+  display: "var(--font-newsreader), 'Georgia', serif",
+  body: "var(--font-ibm-plex), system-ui, sans-serif",
   mono: "var(--font-jetbrains-mono), 'Menlo', monospace",
 } as const;
 
@@ -15,28 +15,28 @@ export const typography: TypographyVariantsOptions = {
   fontFamily: fontFamilies.body,
   h1: {
     fontFamily: fontFamilies.display,
-    fontWeight: 700,
-    fontSize: "clamp(3rem, 8vw, 6.5rem)",
-    lineHeight: 0.92,
-    letterSpacing: "-0.04em",
+    fontWeight: 600,
+    fontSize: "clamp(2.5rem, 5vw, 4rem)",
+    lineHeight: 1.1,
+    letterSpacing: "-0.02em",
   },
   h2: {
     fontFamily: fontFamilies.display,
     fontWeight: 600,
-    fontSize: "clamp(1.75rem, 4vw, 2.75rem)",
-    lineHeight: 1.0,
-    letterSpacing: "-0.03em",
+    fontSize: "clamp(1.75rem, 3vw, 2.5rem)",
+    lineHeight: 1.15,
+    letterSpacing: "-0.01em",
   },
   h3: {
     fontFamily: fontFamilies.display,
     fontWeight: 600,
-    fontSize: "clamp(1.375rem, 3vw, 1.75rem)",
-    letterSpacing: "-0.02em",
+    fontSize: "clamp(1.375rem, 2.5vw, 1.75rem)",
+    letterSpacing: "-0.01em",
   },
   h4: {
     fontFamily: fontFamilies.display,
     fontWeight: 500,
-    fontSize: "clamp(1.125rem, 2.5vw, 1.375rem)",
+    fontSize: "clamp(1.125rem, 2vw, 1.375rem)",
   },
   h5: {
     fontFamily: fontFamilies.display,
@@ -61,7 +61,7 @@ export const typography: TypographyVariantsOptions = {
   button: {
     fontFamily: fontFamilies.body,
     textTransform: "none",
-    fontWeight: 600,
+    fontWeight: 500,
     fontSize: "0.9375rem",
     letterSpacing: "-0.005em",
   },

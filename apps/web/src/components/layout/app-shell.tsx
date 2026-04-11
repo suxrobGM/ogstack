@@ -20,7 +20,7 @@ export function AppShell(props: PropsWithChildren): ReactElement {
         elevation={0}
         sx={{
           display: { xs: "block", md: "none" },
-          bgcolor: "aubergine.surface",
+          bgcolor: "surfaces.card",
           borderBottom: `1px solid ${line.border}`,
         }}
       >
@@ -45,7 +45,7 @@ export function AppShell(props: PropsWithChildren): ReactElement {
           display: { xs: "block", md: "none" },
           "& .MuiDrawer-paper": {
             width: SIDEBAR_WIDTH_EXPANDED,
-            bgcolor: "aubergine.surface",
+            bgcolor: "surfaces.elevated",
             borderRight: `1px solid ${line.border}`,
             backgroundImage: "none",
           },
@@ -61,7 +61,7 @@ export function AppShell(props: PropsWithChildren): ReactElement {
         sx={{
           flex: 1,
           minWidth: 0,
-          bgcolor: "aubergine.base",
+          bgcolor: "surfaces.base",
           p: { xs: 2, md: 4 },
           pt: { xs: 9, md: 4 },
           overflow: "auto",

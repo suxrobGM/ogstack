@@ -57,7 +57,7 @@ export function UsageQuotas(props: UsageQuotasProps): ReactElement {
               />
             )}
             {isUnlimited && (
-              <Typography variant="caption" sx={{ color: "accent.sunset" }}>
+              <Typography variant="caption" sx={{ color: "accent.primary" }}>
                 Unlimited plan
               </Typography>
             )}

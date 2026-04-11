@@ -9,7 +9,7 @@ export const tabsOverrides: Components<Theme>["MuiTabs"] = {
       minHeight: 44,
     },
     indicator: {
-      backgroundColor: accent.sunset,
+      backgroundColor: accent.primary,
       height: 2,
       borderRadius: 1,
     },

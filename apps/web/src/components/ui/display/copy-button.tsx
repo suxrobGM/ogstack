@@ -35,10 +35,10 @@ export function CopyButton(props: CopyButtonProps): ReactElement {
       <IconButton
         size={size}
         onClick={handleCopy}
-        sx={(t) => ({
-          color: t.palette.text.disabled,
-          "&:hover": { color: t.palette.accent.sunset },
-        })}
+        sx={{
+          color: "text.disabled",
+          "&:hover": { color: "accent.primary" },
+        }}
       >
         <ContentCopyIcon fontSize="inherit" />
       </IconButton>

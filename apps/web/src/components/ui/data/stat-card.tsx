@@ -13,7 +13,7 @@ interface StatCardProps {
 }
 
 /**
- * Metric tile — label + large mono value + optional trend delta.
+ * Metric tile — label + large value + optional trend delta.
  * Used for overview dashboards, billing summaries, analytics.
  */
 export function StatCard(props: StatCardProps): ReactElement {
@@ -46,11 +46,12 @@ export function StatCard(props: StatCardProps): ReactElement {
             mt: 1.5,
             fontFamily: fontFamilies.mono,
             fontSize: "0.75rem",
+            fontWeight: 500,
             color:
               trend === "up" ? "success.main" : trend === "down" ? "error.main" : "text.disabled",
           }}
         >
-          {trend === "up" ? "▲" : trend === "down" ? "▼" : "•"} {delta}
+          {trend === "up" ? "\u25B2" : trend === "down" ? "\u25BC" : "\u2022"} {delta}
         </Typography>
       )}
     </Surface>

@@ -31,8 +31,8 @@ export function NotificationBell(props: NotificationBellProps): ReactElement {
           fontSize: "0.6rem",
           height: 16,
           minWidth: 16,
-          bgcolor: "accent.sunset",
-          color: "#052e16",
+          bgcolor: "accent.primary",
+          color: "#FFFFFF",
         },
       }}
     >

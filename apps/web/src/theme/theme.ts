@@ -1,27 +1,27 @@
 import { createTheme } from "@mui/material/styles";
 import { componentOverrides } from "./overrides";
-import { accent, aubergine, feedback, line, textColors } from "./palette";
-import { gradients, motion, noise, radii } from "./tokens";
+import { accent, feedback, line, surfaces, textColors } from "./palette";
+import { gradients, iconSizes, motion, radii, shadows } from "./tokens";
 import { typography } from "./typography";
 
 export const theme = createTheme({
   cssVariables: true,
   palette: {
-    mode: "dark",
-    primary: { main: accent.sunset, contrastText: textColors.primary },
-    secondary: { main: accent.violet, contrastText: textColors.primary },
+    mode: "light",
+    primary: { main: accent.primary, contrastText: "#FFFFFF" },
+    secondary: { main: accent.dark, contrastText: "#FFFFFF" },
     warning: { main: feedback.warning },
     error: { main: feedback.error },
     success: { main: feedback.success },
     info: { main: feedback.info },
-    background: { default: aubergine.base, paper: aubergine.surface },
+    background: { default: surfaces.base, paper: surfaces.card },
     text: {
       primary: textColors.primary,
       secondary: textColors.secondary,
       disabled: textColors.disabled,
     },
     divider: line.divider,
-    aubergine,
+    surfaces,
     accent,
     line,
   },
@@ -29,7 +29,8 @@ export const theme = createTheme({
   typography,
   gradients,
   motion,
-  noise,
   radii,
+  shadows_custom: shadows,
+  iconSizes,
   components: componentOverrides,
 });

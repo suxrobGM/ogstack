@@ -4,6 +4,7 @@ import { useState, type MouseEvent, type ReactElement } from "react";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PersonIcon from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import {
   Box,
   Divider,
@@ -16,7 +17,7 @@ import {
 } from "@mui/material";
 import { UserAvatar } from "@/components/ui/display/user-avatar";
 import { useAuth } from "@/hooks";
-import { motion, radii } from "@/theme/tokens";
+import { iconSizes, motion, radii } from "@/theme/tokens";
 
 interface UserMenuProps {
   collapsed?: boolean;
@@ -42,25 +43,28 @@ export function UserMenu(props: UserMenuProps): ReactElement {
       sx={{
         display: "flex",
         alignItems: "center",
-        gap: collapsed ? 0 : 1.5,
-        p: 1.5,
+        gap: collapsed ? 0 : 1,
+        p: 0.5,
         justifyContent: collapsed ? "center" : "flex-start",
         borderRadius: `${radii.md}px`,
         cursor: "pointer",
         transition: motion.fast,
-        "&:hover": { bgcolor: "aubergine.hi" },
+        "&:hover": { bgcolor: "surfaces.hover" },
       }}
     >
-      <UserAvatar name={user?.name} email={user?.email} size={34} />
+      <UserAvatar name={user?.name} email={user?.email} size={32} />
       {!collapsed && (
-        <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography variant="body2" noWrap>
-            {user?.name}
-          </Typography>
-          <Typography variant="captionMuted" noWrap>
-            {user?.email}
-          </Typography>
-        </Box>
+        <>
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography variant="body2" noWrap sx={{ fontSize: "0.8125rem" }}>
+              {user?.name}
+            </Typography>
+            <Typography variant="captionMuted" noWrap>
+              {user?.email}
+            </Typography>
+          </Box>
+          <UnfoldMoreIcon sx={{ fontSize: iconSizes.xs, color: "text.disabled", flexShrink: 0 }} />
+        </>
       )}
     </Box>
   );

@@ -20,16 +20,16 @@ export const buttonOverrides: Components<Theme>["MuiButton"] = {
     },
     contained: {
       boxShadow: "none",
-      backgroundColor: accent.sunset,
-      color: "#052e16",
+      backgroundColor: accent.primary,
+      color: "#FFFFFF",
       "&:hover": {
-        backgroundColor: "#059669",
-        boxShadow: "0 8px 24px -8px rgba(16,185,129,0.45)",
+        backgroundColor: "#9A4408",
+        boxShadow: `0 8px 24px -8px rgba(180,83,9,0.35)`,
         transform: "translateY(-1px)",
       },
       "&.Mui-disabled": {
-        backgroundColor: "rgba(16,185,129,0.25)",
-        color: "rgba(250,250,250,0.4)",
+        backgroundColor: "rgba(180,83,9,0.2)",
+        color: "rgba(44,40,37,0.4)",
       },
     },
     outlined: {
@@ -37,16 +37,16 @@ export const buttonOverrides: Components<Theme>["MuiButton"] = {
       color: textColors.primary,
       backgroundColor: "transparent",
       "&:hover": {
-        borderColor: accent.sunset,
-        color: accent.sunset,
-        backgroundColor: "rgba(16,185,129,0.06)",
+        borderColor: accent.primary,
+        color: accent.primary,
+        backgroundColor: "rgba(180,83,9,0.04)",
       },
     },
     text: {
       color: textColors.secondary,
       "&:hover": {
-        color: accent.sunset,
-        backgroundColor: "rgba(16,185,129,0.06)",
+        color: accent.primary,
+        backgroundColor: "rgba(180,83,9,0.04)",
       },
     },
     sizeSmall: {
