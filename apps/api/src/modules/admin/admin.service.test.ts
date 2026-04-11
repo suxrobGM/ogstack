@@ -32,6 +32,12 @@ function createMockPrisma() {
     auditLog: {
       create: mock(() => Promise.resolve({ id: "log-1" })),
     },
+    pricingPlan: {
+      findUnique: mock(() => Promise.resolve({ id: "plan-uuid-1", key: "PRO" })),
+    },
+    subscription: {
+      upsert: mock(() => Promise.resolve({ id: "sub-uuid-1" })),
+    },
   } as unknown as PrismaClient;
 }
 

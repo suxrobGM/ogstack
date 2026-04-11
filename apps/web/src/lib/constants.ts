@@ -11,6 +11,8 @@ export const ROUTES = {
   overview: "/overview" as Route,
   projects: "/projects" as Route,
   apiKeys: "/api-keys" as Route,
+  billing: "/settings/billing" as Route,
+  pricing: "/pricing" as Route,
 } as const;
 
 export const COOKIE_NAMES = {
@@ -30,4 +32,5 @@ export const SIDEBAR_NAV_ITEMS = [
   { label: "Overview", href: ROUTES.overview, icon: "dashboard" },
   { label: "Projects", href: ROUTES.projects, icon: "folder" },
   { label: "API Keys", href: ROUTES.apiKeys, icon: "vpnKey" },
+  { label: "Billing", href: ROUTES.billing, icon: "payment" },
 ] as const;

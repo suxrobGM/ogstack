@@ -28,6 +28,8 @@ const EnvSchema = t.Object({
   GITHUB_CLIENT_SECRET: t.Optional(t.String()),
   GOOGLE_CLIENT_ID: t.Optional(t.String()),
   GOOGLE_CLIENT_SECRET: t.Optional(t.String()),
+  STRIPE_SECRET_KEY: t.Optional(t.String()),
+  STRIPE_WEBHOOK_SECRET: t.Optional(t.String()),
 });
 
 export type Env = Static<typeof EnvSchema>;

@@ -25,9 +25,7 @@ export function StatCard(props: StatCardProps): ReactElement {
         direction="row"
         sx={{ justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}
       >
-        <Typography variant="overline" sx={{ color: "text.secondary" }}>
-          {label}
-        </Typography>
+        <Typography variant="overlineMuted">{label}</Typography>
         {icon && <Box sx={{ color: "text.secondary" }}>{icon}</Box>}
       </Stack>
       <Typography

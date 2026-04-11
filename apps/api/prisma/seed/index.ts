@@ -1,10 +1,12 @@
 import { prisma } from "@/common/database";
 import { seedAdmin } from "./admin";
+import { seedPlans } from "./plans";
 import { seedTemplates } from "./templates";
 
 const seeders = {
   admin: { fn: seedAdmin, description: "Seed admin user" },
   templates: { fn: seedTemplates, description: "Seed built-in templates" },
+  plans: { fn: seedPlans, description: "Seed plan tiers and sync with Stripe" },
 } as const;
 
 type SeederName = keyof typeof seeders;

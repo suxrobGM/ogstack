@@ -46,14 +46,7 @@ export function SectionHeader(props: SectionHeaderProps): ReactElement {
           {title}
         </Typography>
         {description && (
-          <Typography
-            variant="body2"
-            sx={{
-              mt: 1.5,
-              color: "text.secondary",
-              maxWidth: 560,
-            }}
-          >
+          <Typography variant="body2Muted" sx={{ mt: 1.5, maxWidth: 560 }}>
             {description}
           </Typography>
         )}

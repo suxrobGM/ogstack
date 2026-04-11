@@ -134,7 +134,7 @@ export function PricingSection(): ReactElement {
                   ))}
                 </List>
                 <Button
-                  href={ROUTES.register}
+                  href={ROUTES.pricing}
                   variant={tier.highlighted ? "contained" : "outlined"}
                   fullWidth
                   sx={{ mt: 3 }}

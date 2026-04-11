@@ -11,11 +11,7 @@ export default async function ApiKeysPage(): Promise<ReactElement> {
   const project = projects?.items?.[0];
 
   if (!project) {
-    return (
-      <Typography sx={{ color: "text.secondary" }}>
-        Create a project first to manage API keys.
-      </Typography>
-    );
+    return <Typography variant="body1Muted">Create a project first to manage API keys.</Typography>;
   }
 
   const { data: keys } = await client.api.projects({ id: project.id })["api-keys"].get();

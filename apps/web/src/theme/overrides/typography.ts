@@ -20,6 +20,8 @@ export const typographyOverrides: Components<Theme>["MuiTypography"] = {
       body1Muted: "p",
       body2Muted: "p",
       captionMuted: "span",
+      overline: "span",
+      overlineMuted: "span",
     },
   },
   styleOverrides: {

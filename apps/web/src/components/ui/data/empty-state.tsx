@@ -37,7 +37,7 @@ export function EmptyState(props: EmptyStateProps): ReactElement {
           {title}
         </Typography>
         {description && (
-          <Typography variant="body2" sx={{ color: "text.secondary", maxWidth: 420 }}>
+          <Typography variant="body2Muted" sx={{ maxWidth: 420 }}>
             {description}
           </Typography>
         )}

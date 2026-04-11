@@ -31,11 +31,15 @@ declare module "@mui/material/styles" {
     body1Muted: CSSProperties;
     body2Muted: CSSProperties;
     captionMuted: CSSProperties;
+    overline: CSSProperties;
+    overlineMuted: CSSProperties;
   }
   interface TypographyVariantsOptions {
     body1Muted?: CSSProperties;
     body2Muted?: CSSProperties;
     captionMuted?: CSSProperties;
+    overline?: CSSProperties;
+    overlineMuted?: CSSProperties;
   }
 }
 
@@ -44,6 +48,8 @@ declare module "@mui/material/Typography" {
     body1Muted: true;
     body2Muted: true;
     captionMuted: true;
+    overline: true;
+    overlineMuted: true;
   }
 }
 

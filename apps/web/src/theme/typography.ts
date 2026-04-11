@@ -78,6 +78,15 @@ export const typography: TypographyVariantsOptions = {
     lineHeight: 1,
     fontWeight: 500,
   },
+  overlineMuted: {
+    fontFamily: fontFamilies.mono,
+    fontSize: "0.7rem",
+    letterSpacing: "0.15em",
+    textTransform: "uppercase",
+    lineHeight: 1,
+    fontWeight: 500,
+    color: textColors.secondary,
+  },
   body1Muted: {
     fontFamily: fontFamilies.body,
     fontSize: "1rem",

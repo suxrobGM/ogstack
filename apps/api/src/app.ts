@@ -9,6 +9,7 @@ import { validateEnv } from "@/env";
 import { adminController } from "@/modules/admin";
 import { apiKeyController, apiKeyDeleteController } from "@/modules/api-key";
 import { authController } from "@/modules/auth";
+import { billingController, billingWebhookController } from "@/modules/billing";
 import {
   generationController,
   generationDashboardController,
@@ -44,7 +45,9 @@ const app = new Elysia()
       .use(templateController)
       .use(userController)
       .use(usageController)
-      .use(adminController),
+      .use(adminController)
+      .use(billingWebhookController)
+      .use(billingController),
   )
   .listen(parseInt(process.env.PORT!));
 

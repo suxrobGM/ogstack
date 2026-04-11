@@ -45,6 +45,7 @@
     "reflect-metadata": "^0.2.2",
     "resend": "^6.10.0",
     "satori": "^0.26.0",
+    "stripe": "^22.0.1",
     "tsyringe": "^4.10.0"
   },
   "devDependencies": {

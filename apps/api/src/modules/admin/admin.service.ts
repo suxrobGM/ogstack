@@ -111,10 +111,38 @@ export class AdminService {
       throw new BadRequestError(`User is already on the ${body.plan} plan`);
     }
 
+    const pricingPlan = await this.prisma.pricingPlan.findUnique({
+      where: { key: body.plan },
+    });
+    if (!pricingPlan) throw new NotFoundError(`Plan ${body.plan} not found`);
+
+    const now = new Date();
+    const oneYearFromNow = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+
     const [updated] = await Promise.all([
       this.prisma.user.update({
         where: { id: targetUserId },
         data: { plan: body.plan as Plan },
+      }),
+      this.prisma.subscription.upsert({
+        where: { userId: targetUserId },
+        create: {
+          userId: targetUserId,
+          planId: pricingPlan.id,
+          status: "active",
+          currentPeriodStart: now,
+          currentPeriodEnd: oneYearFromNow,
+          isComp: true,
+        },
+        update: {
+          planId: pricingPlan.id,
+          status: "active",
+          currentPeriodStart: now,
+          currentPeriodEnd: oneYearFromNow,
+          isComp: true,
+          cancelAtPeriodEnd: false,
+          cancelAt: null,
+        },
       }),
       this.prisma.auditLog.create({
         data: {
@@ -123,7 +151,7 @@ export class AdminService {
           action: "UPDATE_USER_PLAN",
           entityType: "User",
           entityId: targetUserId,
-          metadata: { oldPlan, newPlan: body.plan },
+          metadata: { oldPlan, newPlan: body.plan, isComp: true },
         },
       }),
     ]);
