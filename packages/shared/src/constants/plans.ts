@@ -11,6 +11,11 @@ export type Plan = (typeof Plan)[keyof typeof Plan];
 
 export const PLANS = [Plan.FREE, Plan.PRO, Plan.BUSINESS, Plan.ENTERPRISE] as const;
 
+export interface RateLimitConfig {
+  perMinute: number;
+  perDay: number;
+}
+
 export interface PlanConfig {
   name: string;
   price: number;
@@ -18,6 +23,7 @@ export interface PlanConfig {
   templates: number | "all";
   aiEnabled: boolean;
   watermark: boolean;
+  rateLimit: RateLimitConfig;
 }
 
 export const PLAN_CONFIGS: Record<Plan, PlanConfig> = {
@@ -28,6 +34,7 @@ export const PLAN_CONFIGS: Record<Plan, PlanConfig> = {
     templates: 5,
     aiEnabled: false,
     watermark: true,
+    rateLimit: { perMinute: 10, perDay: 100 },
   },
   [Plan.PRO]: {
     name: "Pro",
@@ -36,6 +43,7 @@ export const PLAN_CONFIGS: Record<Plan, PlanConfig> = {
     templates: "all",
     aiEnabled: true,
     watermark: false,
+    rateLimit: { perMinute: 60, perDay: 2_000 },
   },
   [Plan.BUSINESS]: {
     name: "Business",
@@ -44,6 +52,7 @@ export const PLAN_CONFIGS: Record<Plan, PlanConfig> = {
     templates: "all",
     aiEnabled: true,
     watermark: false,
+    rateLimit: { perMinute: 120, perDay: 10_000 },
   },
   [Plan.ENTERPRISE]: {
     name: "Enterprise",
@@ -52,5 +61,6 @@ export const PLAN_CONFIGS: Record<Plan, PlanConfig> = {
     templates: "all",
     aiEnabled: true,
     watermark: false,
+    rateLimit: { perMinute: 300, perDay: UNLIMITED_QUOTA },
   },
 };

@@ -4,7 +4,7 @@ import { PasswordResetEmail } from "@/common/emails/templates/password-reset";
 import { BadRequestError, ConflictError, UnauthorizedError } from "@/common/errors";
 import { EmailService } from "@/common/services/email.service";
 import { generatePublicId, generateRandomToken } from "@/common/utils/crypto";
-import { generateAccessToken, generateRefreshToken, verifyToken } from "@/common/utils/jwt";
+import { buildAuthResponse, verifyToken } from "@/common/utils/jwt";
 import { hashPassword, verifyPassword } from "@/common/utils/password";
 import { PrismaClient } from "@/generated/prisma";
 import type {
@@ -52,7 +52,7 @@ export class AuthService {
         },
       });
 
-      return this.buildAuthResponse(user);
+      return buildAuthResponse(user);
     });
 
     // Send verification email (fire-and-forget)
@@ -75,7 +75,7 @@ export class AuthService {
       throw new UnauthorizedError("Invalid email or password");
     }
 
-    return this.buildAuthResponse(user);
+    return buildAuthResponse(user);
   }
 
   /** Exchange a valid refresh token for new access + refresh tokens. */
@@ -99,7 +99,7 @@ export class AuthService {
       throw new UnauthorizedError("Invalid or expired refresh token");
     }
 
-    return this.buildAuthResponse(user);
+    return buildAuthResponse(user);
   }
 
   /** Generate a password reset token and send reset email. */
@@ -195,23 +195,5 @@ export class AuthService {
     if (!user || user.deletedAt || user.emailVerified) return;
 
     await this.sendVerificationEmail(user.id);
-  }
-
-  private async buildAuthResponse(user: {
-    id: string;
-    email: string;
-    name: string;
-    role: string;
-  }): Promise<AuthResponse> {
-    const [accessToken, refreshToken] = await Promise.all([
-      generateAccessToken(user),
-      generateRefreshToken(user.id),
-    ]);
-
-    return {
-      user: { id: user.id, email: user.email, name: user.name, role: user.role },
-      accessToken,
-      refreshToken,
-    };
   }
 }

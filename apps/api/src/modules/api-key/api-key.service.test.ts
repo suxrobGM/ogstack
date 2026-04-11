@@ -14,6 +14,7 @@ function createMockApiKey(overrides = {}) {
     lastUsedAt: null,
     revokedAt: null,
     createdAt: new Date("2026-01-01"),
+    user: { plan: "FREE" },
     ...overrides,
   };
 }
@@ -147,6 +148,7 @@ describe("ApiKeyService", () => {
       expect(result).toEqual({
         userId: "user-uuid-1",
         projectId: "proj-uuid-1",
+        plan: "FREE",
       });
     });
 

@@ -8,11 +8,12 @@ export interface AccessTokenUser {
   id: string;
   role: string;
   email: string;
+  plan: string;
 }
 
 /** Sign a short-lived access token. */
 export function generateAccessToken(user: AccessTokenUser): Promise<string> {
-  return new SignJWT({ role: user.role, email: user.email, type: "access" })
+  return new SignJWT({ role: user.role, email: user.email, plan: user.plan, type: "access" })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(user.id)
     .setExpirationTime(ACCESS_TOKEN_EXPIRY)
@@ -32,4 +33,26 @@ export function generateRefreshToken(userId: string): Promise<string> {
 export async function verifyToken(token: string): Promise<JWTPayload> {
   const { payload } = await jwtVerify(token, JWT_SECRET);
   return payload;
+}
+
+export interface AuthTokenUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  plan: string;
+}
+
+/** Build a standard auth response with access and refresh tokens. */
+export async function buildAuthResponse(user: AuthTokenUser) {
+  const [accessToken, refreshToken] = await Promise.all([
+    generateAccessToken(user),
+    generateRefreshToken(user.id),
+  ]);
+
+  return {
+    user: { id: user.id, email: user.email, name: user.name, role: user.role },
+    accessToken,
+    refreshToken,
+  };
 }

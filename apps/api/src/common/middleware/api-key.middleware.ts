@@ -28,6 +28,7 @@ export const apiKeyGuard = new Elysia({ name: "api-key-guard" }).derive(
       apiKeyContext: {
         userId: result.userId,
         projectId: result.projectId,
+        plan: result.plan,
       },
     };
   },

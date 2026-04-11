@@ -1,7 +1,7 @@
 import { singleton } from "tsyringe";
 import { UnauthorizedError } from "@/common/errors";
 import { generatePublicId } from "@/common/utils/crypto";
-import { generateAccessToken, generateRefreshToken } from "@/common/utils/jwt";
+import { buildAuthResponse } from "@/common/utils/jwt";
 import { PrismaClient } from "@/generated/prisma";
 import type { AuthResponse } from "./auth.schema";
 
@@ -40,7 +40,7 @@ export class OAuthUserService {
           data: { avatarUrl: profile.avatarUrl },
         });
       }
-      return this.buildAuthResponse(existingByProvider);
+      return buildAuthResponse(existingByProvider);
     }
 
     const existingByEmail = await this.prisma.user.findUnique({
@@ -59,7 +59,7 @@ export class OAuthUserService {
           avatarUrl: existingByEmail.avatarUrl ?? profile.avatarUrl,
         },
       });
-      return this.buildAuthResponse(updated);
+      return buildAuthResponse(updated);
     }
 
     const result = await this.prisma.$transaction(async (tx) => {
@@ -84,24 +84,6 @@ export class OAuthUserService {
       return user;
     });
 
-    return this.buildAuthResponse(result);
-  }
-
-  private async buildAuthResponse(user: {
-    id: string;
-    email: string;
-    name: string;
-    role: string;
-  }): Promise<AuthResponse> {
-    const [accessToken, refreshToken] = await Promise.all([
-      generateAccessToken(user),
-      generateRefreshToken(user.id),
-    ]);
-
-    return {
-      user: { id: user.id, email: user.email, name: user.name, role: user.role },
-      accessToken,
-      refreshToken,
-    };
+    return buildAuthResponse(result);
   }
 }

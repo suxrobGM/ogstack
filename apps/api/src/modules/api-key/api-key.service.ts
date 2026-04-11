@@ -65,12 +65,15 @@ export class ApiKeyService {
     await this.prisma.apiKey.delete({ where: { id: apiKeyId } });
   }
 
-  /** Validate a raw API key. Returns the key record with project info, or null. */
-  async validate(rawKey: string): Promise<{ userId: string; projectId: string } | null> {
+  /** Validate a raw API key. Returns the key record with project and user plan info, or null. */
+  async validate(
+    rawKey: string,
+  ): Promise<{ userId: string; projectId: string; plan: string } | null> {
     const keyHash = await hashSha256(rawKey);
 
     const apiKey = await this.prisma.apiKey.findUnique({
       where: { keyHash },
+      include: { user: { select: { plan: true } } },
     });
 
     if (!apiKey) return null;
@@ -80,7 +83,7 @@ export class ApiKeyService {
       data: { lastUsedAt: new Date() },
     });
 
-    return { userId: apiKey.userId, projectId: apiKey.projectId };
+    return { userId: apiKey.userId, projectId: apiKey.projectId, plan: apiKey.user.plan };
   }
 
   private async assertProjectOwner(userId: string, projectId: string): Promise<void> {
