@@ -25,10 +25,10 @@ export function StatCard(props: StatCardProps): ReactElement {
         direction="row"
         sx={{ justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}
       >
-        <Typography variant="overline" sx={{ color: "text.disabled" }}>
+        <Typography variant="overline" sx={{ color: "text.secondary" }}>
           {label}
         </Typography>
-        {icon && <Box sx={{ color: "text.disabled" }}>{icon}</Box>}
+        {icon && <Box sx={{ color: "text.secondary" }}>{icon}</Box>}
       </Stack>
       <Typography
         sx={{

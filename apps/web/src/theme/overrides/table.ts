@@ -24,7 +24,7 @@ export const tableHeadOverrides: Components<Theme>["MuiTableHead"] = {
         letterSpacing: "0.18em",
         textTransform: "uppercase",
         fontWeight: 500,
-        color: textColors.disabled,
+        color: textColors.secondary,
         borderBottom: `1px solid ${line.border}`,
         paddingTop: 14,
         paddingBottom: 14,
