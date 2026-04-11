@@ -126,7 +126,6 @@ export function SubscriptionStatus(props: SubscriptionStatusProps): ReactElement
           {!subscription.isComp && subscription.status !== "canceled" && (
             <Button
               variant="outlined"
-              size="small"
               onClick={() => portalMutation.mutate()}
               disabled={portalMutation.isPending}
             >
@@ -135,12 +134,7 @@ export function SubscriptionStatus(props: SubscriptionStatusProps): ReactElement
           )}
 
           {subscription.cancelAtPeriodEnd && !subscription.isComp && (
-            <Button
-              variant="contained"
-              size="small"
-              onClick={handleResume}
-              disabled={resumeMutation.isPending}
-            >
+            <Button variant="contained" onClick={handleResume} disabled={resumeMutation.isPending}>
               Resume Subscription
             </Button>
           )}
@@ -150,7 +144,6 @@ export function SubscriptionStatus(props: SubscriptionStatusProps): ReactElement
             subscription.status === "active" && (
               <Button
                 variant="outlined"
-                size="small"
                 color="error"
                 onClick={handleCancel}
                 disabled={cancelMutation.isPending}

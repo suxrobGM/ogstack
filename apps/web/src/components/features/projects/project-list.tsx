@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { DataTable, type Column } from "@/components/ui/data/data-table";
+import { Pagination } from "@/components/ui/data/pagination";
 import { MonoId } from "@/components/ui/display/mono-id";
 import { PageHeader } from "@/components/ui/layout/page-header";
 import { useApiMutation, useApiQuery, useConfirm, useDebouncedValue } from "@/hooks";
@@ -205,22 +206,8 @@ export function ProjectList(props: ProjectListProps): ReactElement {
         }}
       />
 
-      {pagination && pagination.totalPages > 1 && (
-        <Stack direction="row" spacing={1} sx={{ justifyContent: "center" }}>
-          <Button size="small" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-            Previous
-          </Button>
-          <Typography variant="body2" sx={{ lineHeight: "30px" }}>
-            Page {page} of {pagination.totalPages}
-          </Typography>
-          <Button
-            size="small"
-            disabled={page >= pagination.totalPages}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Next
-          </Button>
-        </Stack>
+      {pagination && (
+        <Pagination page={page} totalPages={pagination.totalPages} onPageChange={setPage} />
       )}
 
       <ProjectDialog open={createOpen} onClose={() => setCreateOpen(false)} />

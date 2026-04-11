@@ -127,7 +127,7 @@ export class BillingService {
       planId: sub.planId,
       planKey: sub.plan.key,
       planName: sub.plan.name,
-      status: sub.status,
+      status: sub.status as SubscriptionResponse["status"],
       currentPeriodStart: sub.currentPeriodStart,
       currentPeriodEnd: sub.currentPeriodEnd,
       cancelAtPeriodEnd: sub.cancelAtPeriodEnd,

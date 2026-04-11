@@ -119,19 +119,18 @@ export function ProfileContent(props: ProfileContentProps): ReactElement {
       <Surface>
         <SectionHeader title="Email address" />
         <Stack spacing={2} sx={{ mt: 3 }}>
-          <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+          <Stack direction="column" spacing={1.5} sx={{ alignItems: "flex-start" }}>
             <TextField value={user.email} disabled fullWidth />
             <Chip
               icon={user.emailVerified ? <CheckCircleIcon /> : <ErrorIcon />}
               label={user.emailVerified ? "Verified" : "Unverified"}
               color={user.emailVerified ? "success" : "warning"}
-              size="small"
               variant="outlined"
             />
           </Stack>
           {!showEmailForm && (
             <Box>
-              <Button variant="outlined" size="small" onClick={() => setShowEmailForm(true)}>
+              <Button variant="outlined" onClick={() => setShowEmailForm(true)}>
                 Change email
               </Button>
             </Box>

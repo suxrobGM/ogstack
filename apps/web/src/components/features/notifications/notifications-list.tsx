@@ -5,13 +5,13 @@ import CampaignIcon from "@mui/icons-material/Campaign";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
-import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import PaymentIcon from "@mui/icons-material/Payment";
 import SpeedIcon from "@mui/icons-material/Speed";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { Box, Button, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { DataTable, type Column } from "@/components/ui/data/data-table";
+import { Pagination } from "@/components/ui/data/pagination";
 import { PageHeader } from "@/components/ui/layout/page-header";
 import { useApiMutation, useApiQuery } from "@/hooks";
 import { client } from "@/lib/api/client";
@@ -232,22 +232,8 @@ export function NotificationsList(): ReactElement {
         }}
       />
 
-      {pagination && pagination.totalPages > 1 && (
-        <Stack direction="row" spacing={1} sx={{ justifyContent: "center" }}>
-          <Button size="small" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-            Previous
-          </Button>
-          <Typography variant="body2" sx={{ lineHeight: "30px" }}>
-            Page {page} of {pagination.totalPages}
-          </Typography>
-          <Button
-            size="small"
-            disabled={page >= pagination.totalPages}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Next
-          </Button>
-        </Stack>
+      {pagination && (
+        <Pagination page={page} totalPages={pagination.totalPages} onPageChange={setPage} />
       )}
     </Stack>
   );

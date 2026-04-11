@@ -16,7 +16,7 @@ export const outlinedInputOverrides: Components<Theme>["MuiOutlinedInput"] = {
       backgroundColor: surfaces.card,
       borderRadius: radii.md,
       fontFamily: fontFamilies.body,
-      fontSize: "0.9375rem",
+      fontSize: "0.875rem",
       color: textColors.primary,
       transition: "border-color 160ms, box-shadow 160ms",
       "& .MuiOutlinedInput-notchedOutline": {
@@ -40,6 +40,7 @@ export const outlinedInputOverrides: Components<Theme>["MuiOutlinedInput"] = {
       },
     },
     input: {
+      padding: "12px 14px",
       "&::placeholder": {
         color: textColors.disabled,
         opacity: 1,
@@ -57,7 +58,7 @@ export const inputLabelOverrides: Components<Theme>["MuiInputLabel"] = {
   styleOverrides: {
     root: {
       fontFamily: fontFamilies.body,
-      fontSize: "0.9375rem",
+      fontSize: "0.875rem",
       color: textColors.secondary,
       "&.Mui-focused": {
         color: accent.primary,

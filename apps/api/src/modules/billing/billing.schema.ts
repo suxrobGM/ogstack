@@ -8,6 +8,17 @@ export const CreateCheckoutBodySchema = t.Object({
 
 // ── Response schemas ──
 
+export const StripeSubscriptionStatus = t.Union([
+  t.Literal("active"),
+  t.Literal("trialing"),
+  t.Literal("past_due"),
+  t.Literal("canceled"),
+  t.Literal("unpaid"),
+  t.Literal("incomplete"),
+  t.Literal("incomplete_expired"),
+  t.Literal("paused"),
+]);
+
 export const CheckoutResponseSchema = t.Object({
   sessionId: t.String(),
   url: t.String(),
@@ -35,7 +46,7 @@ export const SubscriptionResponseSchema = t.Object({
   planId: t.String(),
   planKey: t.String(),
   planName: t.String(),
-  status: t.String(),
+  status: StripeSubscriptionStatus,
   currentPeriodStart: t.Date(),
   currentPeriodEnd: t.Date(),
   cancelAtPeriodEnd: t.Boolean(),
