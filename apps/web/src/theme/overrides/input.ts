@@ -44,6 +44,11 @@ export const outlinedInputOverrides: Components<Theme>["MuiOutlinedInput"] = {
         color: textColors.disabled,
         opacity: 1,
       },
+      "&:-webkit-autofill, &:-webkit-autofill:hover, &:-webkit-autofill:focus": {
+        WebkitBoxShadow: `0 0 0 100px ${aubergine.surface} inset`,
+        WebkitTextFillColor: textColors.primary,
+        caretColor: textColors.primary,
+      },
     },
   },
 };
@@ -53,7 +58,7 @@ export const inputLabelOverrides: Components<Theme>["MuiInputLabel"] = {
     root: {
       fontFamily: fontFamilies.body,
       fontSize: "0.9375rem",
-      color: textColors.disabled,
+      color: textColors.secondary,
       "&.Mui-focused": {
         color: accent.sunset,
       },

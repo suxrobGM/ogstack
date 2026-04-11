@@ -75,3 +75,42 @@ export function clearAuthCookies(cookie: Record<string, Cookie<unknown>>) {
     maxAge: 0,
   });
 }
+
+/**
+ * Sets the OAuth state cookie used for CSRF protection during OAuth flows.
+ * @param cookie The cookie object from Elysia request context
+ * @param state The random state string to store
+ */
+export function setOAuthStateCookie(cookie: Record<string, Cookie<unknown>>, state: string) {
+  cookie.oauth_state!.value = state;
+  cookie.oauth_state!.set({
+    httpOnly: true,
+    secure: IS_PROD,
+    sameSite: "lax",
+    path: "/api/auth",
+    maxAge: 600,
+  });
+}
+
+/**
+ * Clears the OAuth state cookie after callback validation.
+ * @param cookie The cookie object from Elysia request context
+ */
+export function clearOAuthStateCookie(cookie: Record<string, Cookie<unknown>>) {
+  cookie.oauth_state!.value = "";
+  cookie.oauth_state!.set({
+    httpOnly: true,
+    secure: IS_PROD,
+    sameSite: "lax",
+    path: "/api/auth",
+    maxAge: 0,
+  });
+}
+
+/**
+ * Reads the stored OAuth state value from the cookie.
+ * @param cookie The cookie object from Elysia request context
+ */
+export function getOAuthStateCookie(cookie: Record<string, Cookie<unknown>>): string | undefined {
+  return cookie.oauth_state?.value as string | undefined;
+}

@@ -45,6 +45,11 @@ export const ResendVerificationBodySchema = t.Object({
   email: t.String({ format: "email" }),
 });
 
+export const OAuthCallbackQuerySchema = t.Object({
+  code: t.String(),
+  state: t.Optional(t.String()),
+});
+
 export type RegisterBody = Static<typeof RegisterBodySchema>;
 export type LoginBody = Static<typeof LoginBodySchema>;
 export type RefreshBody = Static<typeof RefreshBodySchema>;
@@ -54,3 +59,4 @@ export type VerifyEmailBody = Static<typeof VerifyEmailBodySchema>;
 export type ResendVerificationBody = Static<typeof ResendVerificationBodySchema>;
 export type AuthUser = Static<typeof AuthUserSchema>;
 export type AuthResponse = Static<typeof AuthResponseSchema>;
+export type OAuthCallbackQuery = Static<typeof OAuthCallbackQuerySchema>;

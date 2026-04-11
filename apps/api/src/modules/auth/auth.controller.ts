@@ -1,12 +1,20 @@
 import { Elysia, type Cookie } from "elysia";
 import { container } from "@/common/di";
 import { rateLimiter } from "@/common/middleware/rate-limiter";
-import { clearAuthCookies, setAuthCookies } from "@/common/utils/cookie";
+import {
+  clearAuthCookies,
+  clearOAuthStateCookie,
+  getOAuthStateCookie,
+  setAuthCookies,
+  setOAuthStateCookie,
+} from "@/common/utils/cookie";
+import { generateRandomToken } from "@/common/utils/crypto";
 import { MessageResponseSchema } from "@/types/response";
 import {
   AuthResponseSchema,
   ForgotPasswordBodySchema,
   LoginBodySchema,
+  OAuthCallbackQuerySchema,
   RefreshBodySchema,
   RegisterBodySchema,
   ResendVerificationBodySchema,
@@ -14,8 +22,13 @@ import {
   VerifyEmailBodySchema,
 } from "./auth.schema";
 import { AuthService } from "./auth.service";
+import { GitHubOAuthService } from "./github-oauth.service";
+import { GoogleOAuthService } from "./google-oauth.service";
 
 const authService = container.resolve(AuthService);
+const githubOAuth = container.resolve(GitHubOAuthService);
+const googleOAuth = container.resolve(GoogleOAuthService);
+const WEBSITE_URL = process.env.WEBSITE_URL ?? "http://localhost:4001";
 
 export const authController = new Elysia({ prefix: "/auth", tags: ["Auth"] })
   .use(rateLimiter({ max: 10, windowMs: 60_000 }))
@@ -145,6 +158,92 @@ export const authController = new Elysia({ prefix: "/auth", tags: ["Auth"] })
         summary: "Resend verification email",
         description:
           "Resend the email verification link. Always returns success to prevent enumeration.",
+      },
+    },
+  )
+  .get(
+    "/github",
+    ({ cookie, redirect }) => {
+      const state = generateRandomToken();
+      setOAuthStateCookie(cookie as Record<string, Cookie<unknown>>, state);
+      return redirect(githubOAuth.getAuthUrl(state));
+    },
+    {
+      detail: {
+        summary: "GitHub OAuth redirect",
+        description: "Redirects the user to GitHub for OAuth authorization.",
+      },
+    },
+  )
+  .get(
+    "/github/callback",
+    async ({ query, cookie, redirect }) => {
+      const typedCookie = cookie as Record<string, Cookie<unknown>>;
+      const storedState = getOAuthStateCookie(typedCookie);
+
+      if (!storedState || storedState !== query.state) {
+        return redirect(`${WEBSITE_URL}/login?error=oauth_state_mismatch`);
+      }
+
+      clearOAuthStateCookie(typedCookie);
+
+      try {
+        const result = await githubOAuth.callback(query.code);
+        setAuthCookies(typedCookie, result);
+        return redirect(`${WEBSITE_URL}/overview`);
+      } catch {
+        return redirect(`${WEBSITE_URL}/login?error=oauth_failed`);
+      }
+    },
+    {
+      query: OAuthCallbackQuerySchema,
+      detail: {
+        summary: "GitHub OAuth callback",
+        description:
+          "Handle the OAuth callback from GitHub. Sets auth cookies and redirects to the frontend.",
+      },
+    },
+  )
+  .get(
+    "/google",
+    ({ cookie, redirect }) => {
+      const state = generateRandomToken();
+      setOAuthStateCookie(cookie as Record<string, Cookie<unknown>>, state);
+      return redirect(googleOAuth.getAuthUrl(state));
+    },
+    {
+      detail: {
+        summary: "Google OAuth redirect",
+        description: "Redirects the user to Google for OAuth authorization.",
+      },
+    },
+  )
+  .get(
+    "/google/callback",
+    async ({ query, cookie, redirect }) => {
+      const typedCookie = cookie as Record<string, Cookie<unknown>>;
+      const storedState = getOAuthStateCookie(typedCookie);
+
+      if (!storedState || storedState !== query.state) {
+        return redirect(`${WEBSITE_URL}/login?error=oauth_state_mismatch`);
+      }
+
+      clearOAuthStateCookie(typedCookie);
+
+      try {
+        const result = await googleOAuth.callback(query.code);
+        setAuthCookies(typedCookie, result);
+        return redirect(`${WEBSITE_URL}/overview`);
+      } catch {
+        return redirect(`${WEBSITE_URL}/login?error=oauth_failed`);
+      }
+    },
+    {
+      query: OAuthCallbackQuerySchema,
+      detail: {
+        summary: "Google OAuth callback",
+        description:
+          "Handle the OAuth callback from Google. Sets auth cookies and redirects to the frontend.",
       },
     },
   );

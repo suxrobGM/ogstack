@@ -20,8 +20,7 @@ export function PageHeader(props: PageHeaderProps): ReactElement {
   return (
     <Box
       sx={{
-        pt: { xs: 2, md: 5 },
-        pb: { xs: 3, md: 4 },
+        pb: { xs: 3, md: 2 },
         borderBottom: `1px solid ${line.divider}`,
         mb: { xs: 3, md: 4 },
       }}

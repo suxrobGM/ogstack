@@ -24,6 +24,10 @@ const EnvSchema = t.Object({
   EMAIL_FROM_NAME: t.Optional(t.String({ default: "OGStack Team" })),
   EMAIL_FROM_ADDRESS: t.Optional(t.String({ default: "noreply@ogstack.dev" })),
   WEBSITE_URL: t.Optional(t.String({ default: "http://localhost:4001" })),
+  GITHUB_CLIENT_ID: t.Optional(t.String()),
+  GITHUB_CLIENT_SECRET: t.Optional(t.String()),
+  GOOGLE_CLIENT_ID: t.Optional(t.String()),
+  GOOGLE_CLIENT_SECRET: t.Optional(t.String()),
 });
 
 export type Env = Static<typeof EnvSchema>;
