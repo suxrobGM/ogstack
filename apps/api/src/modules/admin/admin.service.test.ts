@@ -1,3 +1,4 @@
+import { Plan } from "@ogstack/shared";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { container } from "@/common/di";
 import { PrismaClient } from "@/generated/prisma";
@@ -9,7 +10,7 @@ function createMockUser(overrides = {}) {
     email: "user@example.com",
     name: "Test User",
     role: "USER",
-    plan: "FREE",
+    plan: Plan.FREE,
     avatarUrl: null,
     emailVerified: true,
     suspended: false,
@@ -147,7 +148,7 @@ describe("AdminService", () => {
 
     it("should throw BadRequestError when plan is the same", () => {
       expect(
-        service.updateUserPlan("user-uuid-1", { plan: "FREE" }, "admin-1", "ADMIN" as any),
+        service.updateUserPlan("user-uuid-1", { plan: Plan.FREE }, "admin-1", "ADMIN" as any),
       ).rejects.toThrow("already on the FREE plan");
     });
   });

@@ -1,3 +1,4 @@
+import { Plan } from "@ogstack/shared";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { container } from "@/common/di";
 import { PrismaClient } from "@/generated/prisma";
@@ -34,7 +35,7 @@ function createMockUser(overrides = {}) {
     email: "oauth@example.com",
     name: "OAuth User",
     role: "USER",
-    plan: "FREE",
+    plan: Plan.FREE,
     avatarUrl: "https://example.com/avatar.png",
     emailVerified: true,
     githubId: "gh-123",

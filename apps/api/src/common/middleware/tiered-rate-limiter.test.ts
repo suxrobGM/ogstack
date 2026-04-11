@@ -1,4 +1,4 @@
-import type { Plan } from "@ogstack/shared";
+import { Plan } from "@ogstack/shared";
 import { describe, expect, it } from "bun:test";
 import { Elysia } from "elysia";
 import { resolveApiKeyPlan, resolveUserPlan, tieredRateLimiter } from "./tiered-rate-limiter";
@@ -6,7 +6,7 @@ import { resolveApiKeyPlan, resolveUserPlan, tieredRateLimiter } from "./tiered-
 describe("tieredRateLimiter middleware", () => {
   let testCounter = 0;
 
-  const createApp = (plan: Plan | undefined = "FREE") => {
+  const createApp = (plan: Plan | undefined = Plan.FREE) => {
     const key = `test-key-${++testCounter}`;
     return new Elysia()
       .use(
@@ -20,7 +20,7 @@ describe("tieredRateLimiter middleware", () => {
   };
 
   it("should allow requests within per-minute limit", async () => {
-    const app = createApp("FREE"); // 10/min
+    const app = createApp(Plan.FREE); // 10/min
     const res = await app.handle(new Request("http://localhost/test"));
     expect(res.status).toBe(200);
     expect(res.headers.get("x-ratelimit-limit")).toBe("10");
@@ -28,7 +28,7 @@ describe("tieredRateLimiter middleware", () => {
   });
 
   it("should return 429 when per-minute limit exceeded", async () => {
-    const app = createApp("FREE"); // 10/min
+    const app = createApp(Plan.FREE); // 10/min
 
     for (let i = 0; i < 10; i++) {
       await app.handle(new Request("http://localhost/test"));
@@ -41,14 +41,14 @@ describe("tieredRateLimiter middleware", () => {
   });
 
   it("should use higher limits for PRO plan", async () => {
-    const app = createApp("PRO"); // 60/min
+    const app = createApp(Plan.PRO); // 60/min
     const res = await app.handle(new Request("http://localhost/test"));
     expect(res.headers.get("x-ratelimit-limit")).toBe("60");
     expect(res.headers.get("x-ratelimit-remaining")).toBe("59");
   });
 
   it("should use higher limits for BUSINESS plan", async () => {
-    const app = createApp("BUSINESS"); // 120/min
+    const app = createApp(Plan.BUSINESS); // 120/min
     const res = await app.handle(new Request("http://localhost/test"));
     expect(res.headers.get("x-ratelimit-limit")).toBe("120");
   });
@@ -66,7 +66,7 @@ describe("tieredRateLimiter middleware", () => {
   });
 
   it("should bypass rate limiting for social crawlers", async () => {
-    const app = createApp("FREE");
+    const app = createApp(Plan.FREE);
 
     // Exhaust the limit
     for (let i = 0; i < 11; i++) {
@@ -83,7 +83,7 @@ describe("tieredRateLimiter middleware", () => {
   });
 
   it("should bypass for LinkedInBot", async () => {
-    const app = createApp("FREE");
+    const app = createApp(Plan.FREE);
     for (let i = 0; i < 11; i++) {
       await app.handle(new Request("http://localhost/test"));
     }
@@ -97,7 +97,7 @@ describe("tieredRateLimiter middleware", () => {
   });
 
   it("should bypass for Slackbot", async () => {
-    const app = createApp("FREE");
+    const app = createApp(Plan.FREE);
     for (let i = 0; i < 11; i++) {
       await app.handle(new Request("http://localhost/test"));
     }
@@ -111,7 +111,7 @@ describe("tieredRateLimiter middleware", () => {
   });
 
   it("should bypass for Discordbot", async () => {
-    const app = createApp("FREE");
+    const app = createApp(Plan.FREE);
     for (let i = 0; i < 11; i++) {
       await app.handle(new Request("http://localhost/test"));
     }
@@ -125,7 +125,7 @@ describe("tieredRateLimiter middleware", () => {
   });
 
   it("should set x-ratelimit-reset header", async () => {
-    const app = createApp("FREE");
+    const app = createApp(Plan.FREE);
     const res = await app.handle(new Request("http://localhost/test"));
     const reset = res.headers.get("x-ratelimit-reset");
     expect(reset).toBeDefined();

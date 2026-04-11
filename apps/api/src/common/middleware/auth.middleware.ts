@@ -1,4 +1,5 @@
 import { jwt } from "@elysiajs/jwt";
+import { Plan } from "@ogstack/shared";
 import { Elysia } from "elysia";
 import { UnauthorizedError } from "@/common/errors";
 
@@ -42,7 +43,7 @@ export const authGuard = new Elysia({ name: "auth-guard" })
         id: payload.sub!,
         role: payload.role!,
         email: payload.email!,
-        plan: payload.plan ?? "FREE",
+        plan: payload.plan ?? Plan.FREE,
       },
     };
   });

@@ -1,3 +1,4 @@
+import { Plan } from "@ogstack/shared";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { container } from "@/common/di";
 import { PrismaClient } from "@/generated/prisma";
@@ -14,7 +15,7 @@ function createMockApiKey(overrides = {}) {
     lastUsedAt: null,
     revokedAt: null,
     createdAt: new Date("2026-01-01"),
-    user: { plan: "FREE" },
+    user: { plan: Plan.FREE },
     ...overrides,
   };
 }
@@ -148,7 +149,7 @@ describe("ApiKeyService", () => {
       expect(result).toEqual({
         userId: "user-uuid-1",
         projectId: "proj-uuid-1",
-        plan: "FREE",
+        plan: Plan.FREE,
       });
     });
 

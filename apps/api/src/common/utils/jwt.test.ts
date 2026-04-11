@@ -1,3 +1,4 @@
+import { Plan } from "@ogstack/shared";
 import { describe, expect, it } from "bun:test";
 import { buildAuthResponse, generateAccessToken, generateRefreshToken, verifyToken } from "./jwt";
 
@@ -5,7 +6,7 @@ const testUser = {
   id: "user-1",
   role: "USER",
   email: "test@example.com",
-  plan: "FREE",
+  plan: Plan.FREE,
   name: "Test User",
 };
 
@@ -22,7 +23,7 @@ describe("generateAccessToken", () => {
     expect(payload.sub).toBe("user-1");
     expect(payload.role).toBe("USER");
     expect(payload.email).toBe("test@example.com");
-    expect(payload.plan).toBe("FREE");
+    expect(payload.plan).toBe(Plan.FREE);
     expect(payload.type).toBe("access");
   });
 });

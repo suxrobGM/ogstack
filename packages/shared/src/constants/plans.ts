@@ -5,7 +5,7 @@ export const Plan = {
   ENTERPRISE: "ENTERPRISE",
 } as const;
 
-const UNLIMITED_QUOTA = -1;
+export const UNLIMITED_QUOTA = -1;
 
 export type Plan = (typeof Plan)[keyof typeof Plan];
 

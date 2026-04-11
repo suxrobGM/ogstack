@@ -1,3 +1,4 @@
+import { Plan } from "@ogstack/shared";
 import { t, type Static } from "elysia";
 import { PaginationQueryBaseSchema } from "@/types/pagination";
 import { PaginatedResponseSchema } from "@/types/response";
@@ -5,10 +6,10 @@ import { PaginatedResponseSchema } from "@/types/response";
 // ── Shared enums ──
 
 const PlanEnum = t.Union([
-  t.Literal("FREE"),
-  t.Literal("PRO"),
-  t.Literal("BUSINESS"),
-  t.Literal("ENTERPRISE"),
+  t.Literal(Plan.FREE),
+  t.Literal(Plan.PRO),
+  t.Literal(Plan.BUSINESS),
+  t.Literal(Plan.ENTERPRISE),
 ]);
 
 const UserStatusEnum = t.Union([t.Literal("active"), t.Literal("suspended")]);

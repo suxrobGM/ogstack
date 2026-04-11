@@ -16,6 +16,7 @@ import {
 } from "@/modules/generation";
 import { projectController } from "@/modules/project";
 import { templateController } from "@/modules/template";
+import { usageController } from "@/modules/usage";
 import { userController } from "@/modules/user";
 import { HttpErrorResponses } from "@/types/response";
 
@@ -42,6 +43,7 @@ const app = new Elysia()
       .use(projectController)
       .use(templateController)
       .use(userController)
+      .use(usageController)
       .use(adminController),
   )
   .listen(parseInt(process.env.PORT!));

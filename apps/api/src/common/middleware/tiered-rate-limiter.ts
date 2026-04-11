@@ -1,4 +1,4 @@
-import { PLAN_CONFIGS, type Plan } from "@ogstack/shared";
+import { Plan, PLAN_CONFIGS } from "@ogstack/shared";
 import type { Server } from "bun";
 import { Elysia } from "elysia";
 import { getClientIp, RateLimitStore } from "./rate-limiter";
@@ -58,7 +58,7 @@ export function tieredRateLimiter(options: TieredRateLimitOptions) {
         return;
       }
 
-      const plan = resolvePlan(ctx as Record<string, unknown>) ?? "FREE";
+      const plan = resolvePlan(ctx as Record<string, unknown>) ?? Plan.FREE;
       const config = PLAN_CONFIGS[plan as Plan];
       const { perMinute, perDay } = config.rateLimit;
 
