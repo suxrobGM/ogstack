@@ -8,7 +8,8 @@ import type { AuthResponse } from "./auth.schema";
 export interface OAuthProfile {
   id: string;
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   avatarUrl: string | null;
 }
 
@@ -66,7 +67,8 @@ export class OAuthUserService {
       const user = await tx.user.create({
         data: {
           email: profile.email,
-          name: profile.name,
+          firstName: profile.firstName,
+          lastName: profile.lastName,
           [providerIdField]: profile.id,
           avatarUrl: profile.avatarUrl,
           emailVerified: true,

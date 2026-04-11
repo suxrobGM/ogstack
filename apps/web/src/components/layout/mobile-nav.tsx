@@ -3,6 +3,8 @@
 import type { ReactElement } from "react";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import FolderIcon from "@mui/icons-material/Folder";
+import PaymentIcon from "@mui/icons-material/Payment";
+import SettingsIcon from "@mui/icons-material/Settings";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import { Box, Divider, List, Typography } from "@mui/material";
 import { usePathname } from "next/navigation";
@@ -17,6 +19,8 @@ const ICON_MAP: Record<string, ReactElement> = {
   dashboard: <DashboardIcon fontSize="small" />,
   folder: <FolderIcon fontSize="small" />,
   vpnKey: <VpnKeyIcon fontSize="small" />,
+  payment: <PaymentIcon fontSize="small" />,
+  settings: <SettingsIcon fontSize="small" />,
 };
 
 interface MobileNavProps {
@@ -47,7 +51,11 @@ export function MobileNav(props: MobileNavProps): ReactElement {
             label={item.label}
             href={item.href}
             icon={ICON_MAP[item.icon]}
-            active={pathname === item.href || pathname.startsWith(item.href + "/")}
+            active={
+              item.label === "Settings"
+                ? pathname.startsWith("/settings")
+                : pathname === item.href || pathname.startsWith(item.href + "/")
+            }
           />
         ))}
       </List>

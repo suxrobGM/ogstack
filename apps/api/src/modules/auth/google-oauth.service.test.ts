@@ -26,7 +26,8 @@ function createMockUser(overrides = {}) {
   return {
     id: "user-uuid-1",
     email: "google@example.com",
-    name: "Google User",
+    firstName: "Google",
+    lastName: "User",
     role: "USER",
     plan: Plan.FREE,
     avatarUrl: "https://lh3.googleusercontent.com/photo",

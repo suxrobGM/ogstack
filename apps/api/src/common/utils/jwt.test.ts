@@ -7,7 +7,8 @@ const testUser = {
   role: "USER",
   email: "test@example.com",
   plan: Plan.FREE,
-  name: "Test User",
+  firstName: "Test",
+  lastName: "User",
 };
 
 describe("generateAccessToken", () => {
@@ -67,7 +68,8 @@ describe("buildAuthResponse", () => {
     expect(result.user).toEqual({
       id: "user-1",
       email: "test@example.com",
-      name: "Test User",
+      firstName: "Test",
+      lastName: "User",
       role: "USER",
     });
     expect(typeof result.accessToken).toBe("string");

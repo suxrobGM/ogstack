@@ -30,7 +30,7 @@ export class AuthService {
 
   /** Register a new user, create a default project, and return auth tokens. */
   async register(data: RegisterBody): Promise<AuthResponse> {
-    const { email, password, name } = data;
+    const { email, password, firstName, lastName } = data;
 
     const result = await this.prisma.$transaction(async (tx) => {
       const existing = await tx.user.findUnique({ where: { email } });
@@ -41,7 +41,7 @@ export class AuthService {
       const passwordHash = await hashPassword(password);
 
       const user = await tx.user.create({
-        data: { email, passwordHash, name },
+        data: { email, passwordHash, firstName, lastName },
       });
 
       await tx.project.create({
@@ -56,7 +56,7 @@ export class AuthService {
     });
 
     // Send verification email (fire-and-forget)
-    this.sendVerificationEmail(result.user.id).catch(() => {});
+    void this.sendVerificationEmail(result.user.id);
 
     return result;
   }
@@ -122,7 +122,7 @@ export class AuthService {
     await this.emailService.send({
       to: user.email,
       subject: "Reset your OGStack password",
-      react: PasswordResetEmail({ name: user.name, resetUrl }),
+      react: PasswordResetEmail({ name: user.firstName, resetUrl }),
     });
   }
 
@@ -163,7 +163,7 @@ export class AuthService {
     await this.emailService.send({
       to: user.email,
       subject: "Verify your OGStack email",
-      react: EmailVerificationEmail({ name: user.name, verifyUrl }),
+      react: EmailVerificationEmail({ name: user.firstName, verifyUrl }),
     });
   }
 

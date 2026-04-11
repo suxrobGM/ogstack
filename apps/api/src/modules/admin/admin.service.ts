@@ -25,7 +25,8 @@ export class AdminService {
       ...(search && {
         OR: [
           { email: { contains: search, mode: "insensitive" as const } },
-          { name: { contains: search, mode: "insensitive" as const } },
+          { firstName: { contains: search, mode: "insensitive" as const } },
+          { lastName: { contains: search, mode: "insensitive" as const } },
         ],
       }),
       ...(plan && { plan }),
@@ -82,7 +83,8 @@ export class AdminService {
     return {
       id: user.id,
       email: user.email,
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       role: user.role,
       plan: user.plan,
       avatarUrl: user.avatarUrl,
@@ -198,7 +200,8 @@ export class AdminService {
   private toAdminUser(user: {
     id: string;
     email: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     role: string;
     plan: string;
     emailVerified: boolean;
@@ -208,7 +211,8 @@ export class AdminService {
     return {
       id: user.id,
       email: user.email,
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       role: user.role,
       plan: user.plan,
       emailVerified: user.emailVerified,

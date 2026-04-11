@@ -6,7 +6,7 @@ import { useForm } from "@tanstack/react-form";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
-import { forgotPasswordSchema } from "./schemas";
+import { forgotPasswordSchema } from "./schema";
 import type { ForgotPasswordPayload } from "./types";
 
 export function ForgotPasswordForm(): ReactElement {

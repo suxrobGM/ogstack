@@ -48,7 +48,8 @@ function createMockUser(overrides = {}) {
   return {
     id: "user-uuid-1",
     email: "test@example.com",
-    name: "Test User",
+    firstName: "Test",
+    lastName: "User",
     role: "USER",
     passwordHash: "hashed_password_123",
     avatarUrl: null,
@@ -126,14 +127,15 @@ describe("AuthService", () => {
       const result = await authService.register({
         email: "test@example.com",
         password: "securePassword123",
-        name: "Test User",
+        firstName: "Test",
+        lastName: "User",
       });
 
       expect(result).toHaveProperty("user");
       expect(result).toHaveProperty("accessToken");
       expect(result).toHaveProperty("refreshToken");
       expect(result.user.email).toBe("test@example.com");
-      expect(result.user.name).toBe("Test User");
+      expect(result.user.firstName).toBe("Test");
       expect(result.user.role).toBe("USER");
     });
 
@@ -158,7 +160,8 @@ describe("AuthService", () => {
         authService.register({
           email: "taken@example.com",
           password: "securePassword123",
-          name: "Test User",
+          firstName: "Test",
+          lastName: "User",
         }),
       ).rejects.toThrow("email already exists");
     });
@@ -167,7 +170,8 @@ describe("AuthService", () => {
       await authService.register({
         email: "test@example.com",
         password: "securePassword123",
-        name: "Test User",
+        firstName: "Test",
+        lastName: "User",
       });
 
       expect(hashPassword).toHaveBeenCalledWith("securePassword123");
@@ -200,7 +204,8 @@ describe("AuthService", () => {
       await authService.register({
         email: "test@example.com",
         password: "securePassword123",
-        name: "Test User",
+        firstName: "Test",
+        lastName: "User",
       });
 
       expect(projectCreated).toBe(true);

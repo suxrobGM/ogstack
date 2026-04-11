@@ -8,7 +8,7 @@ import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
-import { resetPasswordSchema } from "./schemas";
+import { resetPasswordSchema } from "./schema";
 import type { ResetPasswordApiPayload } from "./types";
 
 export function ResetPasswordForm(): ReactElement {

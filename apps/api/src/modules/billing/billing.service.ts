@@ -153,7 +153,7 @@ export class BillingService {
     if (!customerId) {
       const customer = await this.stripe.customers.create({
         email: user.email,
-        name: user.name,
+        name: `${user.firstName} ${user.lastName}`.trim(),
         metadata: { userId: user.id },
       });
       customerId = customer.id;

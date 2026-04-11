@@ -25,7 +25,8 @@ mock.module("jose", () => ({
 const githubProfile: OAuthProfile = {
   id: "gh-123",
   email: "oauth@example.com",
-  name: "OAuth User",
+  firstName: "OAuth",
+  lastName: "User",
   avatarUrl: "https://example.com/avatar.png",
 };
 
@@ -33,7 +34,8 @@ function createMockUser(overrides = {}) {
   return {
     id: "user-uuid-1",
     email: "oauth@example.com",
-    name: "OAuth User",
+    firstName: "OAuth",
+    lastName: "User",
     role: "USER",
     plan: Plan.FREE,
     avatarUrl: "https://example.com/avatar.png",

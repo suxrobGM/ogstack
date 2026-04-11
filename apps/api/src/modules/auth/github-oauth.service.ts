@@ -66,10 +66,14 @@ export class GitHubOAuthService {
       throw new BadRequestError("No verified primary email found on your GitHub account");
     }
 
+    const fullName = userData.name || userData.login;
+    const spaceIdx = fullName.indexOf(" ");
+
     return {
       id: String(userData.id),
       email: primaryEmail.email,
-      name: userData.name || userData.login,
+      firstName: spaceIdx > 0 ? fullName.slice(0, spaceIdx) : fullName,
+      lastName: spaceIdx > 0 ? fullName.slice(spaceIdx + 1) : "",
       avatarUrl: userData.avatar_url ?? null,
     };
   }

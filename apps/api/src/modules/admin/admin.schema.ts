@@ -19,7 +19,8 @@ const UserStatusEnum = t.Union([t.Literal("active"), t.Literal("suspended")]);
 export const AdminUserSchema = t.Object({
   id: t.String(),
   email: t.String(),
-  name: t.String(),
+  firstName: t.String(),
+  lastName: t.String(),
   role: t.String(),
   plan: t.String(),
   emailVerified: t.Boolean(),
@@ -68,7 +69,8 @@ export const AdminUserUsageSchema = t.Object({
 export const AdminUserDetailSchema = t.Object({
   id: t.String(),
   email: t.String(),
-  name: t.String(),
+  firstName: t.String(),
+  lastName: t.String(),
   role: t.String(),
   plan: t.String(),
   avatarUrl: t.Nullable(t.String()),

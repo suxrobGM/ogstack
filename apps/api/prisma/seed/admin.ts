@@ -23,7 +23,8 @@ export async function seedAdmin(): Promise<void> {
     create: {
       email,
       passwordHash,
-      name: "Admin",
+      firstName: "Admin",
+      lastName: "",
       role: "SUPER_ADMIN",
     },
   });

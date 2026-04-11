@@ -53,6 +53,8 @@ export class GoogleOAuthService {
       email: string;
       verified_email: boolean;
       name: string;
+      given_name?: string;
+      family_name?: string;
       picture?: string;
     };
 
@@ -63,7 +65,8 @@ export class GoogleOAuthService {
     return {
       id: userData.id,
       email: userData.email,
-      name: userData.name,
+      firstName: userData.given_name || userData.name || "",
+      lastName: userData.family_name || "",
       avatarUrl: userData.picture ?? null,
     };
   }

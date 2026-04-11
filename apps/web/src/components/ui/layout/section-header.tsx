@@ -30,7 +30,7 @@ export function SectionHeader(props: SectionHeaderProps): ReactElement {
             {overline}
           </Typography>
         )}
-        <Typography variant="h2" sx={isExpressive ? { color: accent.primary } : undefined}>
+        <Typography variant="h4" sx={isExpressive ? { color: accent.primary } : undefined}>
           {title}
         </Typography>
         {description && (

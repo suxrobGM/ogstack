@@ -15,8 +15,11 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import type { Route } from "next";
+import { useRouter } from "next/navigation";
 import { UserAvatar } from "@/components/ui/display/user-avatar";
 import { useAuth } from "@/hooks";
+import { ROUTES } from "@/lib/constants";
 import { iconSizes, motion, radii } from "@/theme/tokens";
 
 interface UserMenuProps {
@@ -26,6 +29,7 @@ interface UserMenuProps {
 export function UserMenu(props: UserMenuProps): ReactElement {
   const { collapsed = false } = props;
   const { user, logout, isLoading } = useAuth();
+  const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const open = Boolean(anchorEl);
 
@@ -36,6 +40,13 @@ export function UserMenu(props: UserMenuProps): ReactElement {
     handleClose();
     logout();
   };
+
+  const handleNavigate = (route: string) => {
+    handleClose();
+    router.push(route as Route);
+  };
+
+  const fullName = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
 
   const trigger = (
     <Box
@@ -52,12 +63,12 @@ export function UserMenu(props: UserMenuProps): ReactElement {
         "&:hover": { bgcolor: "surfaces.hover" },
       }}
     >
-      <UserAvatar name={user?.name} email={user?.email} size={32} />
+      <UserAvatar name={fullName} email={user?.email} size={32} />
       {!collapsed && (
         <>
           <Box sx={{ minWidth: 0, flex: 1 }}>
             <Typography variant="body2" noWrap sx={{ fontSize: "0.8125rem" }}>
-              {user?.name}
+              {fullName}
             </Typography>
             <Typography variant="captionMuted" noWrap>
               {user?.email}
@@ -72,7 +83,7 @@ export function UserMenu(props: UserMenuProps): ReactElement {
   return (
     <>
       {collapsed ? (
-        <Tooltip title={user?.name ?? "Account"} placement="right" arrow>
+        <Tooltip title={fullName || "Account"} placement="right" arrow>
           {trigger}
         </Tooltip>
       ) : (
@@ -86,10 +97,10 @@ export function UserMenu(props: UserMenuProps): ReactElement {
         transformOrigin={{ vertical: "bottom", horizontal: "left" }}
       >
         <Box sx={{ px: 2, py: 1.5, display: "flex", gap: 1.5, alignItems: "center" }}>
-          <UserAvatar name={user?.name} email={user?.email} size={36} />
+          <UserAvatar name={fullName} email={user?.email} size={36} />
           <Box sx={{ minWidth: 0 }}>
             <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
-              {user?.name}
+              {fullName}
             </Typography>
             <Typography variant="captionMuted" noWrap>
               {user?.email}
@@ -97,13 +108,13 @@ export function UserMenu(props: UserMenuProps): ReactElement {
           </Box>
         </Box>
         <Divider sx={{ my: 0.5 }} />
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={() => handleNavigate(ROUTES.settingsProfile)}>
           <ListItemIcon>
             <PersonIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText>Profile</ListItemText>
         </MenuItem>
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={() => handleNavigate(ROUTES.settingsSecurity)}>
           <ListItemIcon>
             <SettingsIcon fontSize="small" />
           </ListItemIcon>

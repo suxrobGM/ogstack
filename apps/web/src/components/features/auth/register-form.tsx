@@ -10,7 +10,7 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import type { AuthResponse } from "@/types/api";
-import { registerSchema } from "./schemas";
+import { registerSchema } from "./schema";
 import type { RegisterPayload } from "./types";
 
 export function RegisterForm(): ReactElement {
@@ -29,7 +29,7 @@ export function RegisterForm(): ReactElement {
   );
 
   const form = useForm({
-    defaultValues: { name: "", email: "", password: "" },
+    defaultValues: { firstName: "", lastName: "", email: "", password: "" },
     validators: { onSubmit: registerSchema },
     onSubmit: async ({ value }) => {
       mutation.mutate(value);
@@ -44,7 +44,16 @@ export function RegisterForm(): ReactElement {
       }}
     >
       <Stack spacing={2.5}>
-        <FormTextField form={form} name="name" label="Name" autoComplete="name" autoFocus />
+        <Stack direction="row" spacing={2}>
+          <FormTextField
+            form={form}
+            name="firstName"
+            label="First name"
+            autoComplete="given-name"
+            autoFocus
+          />
+          <FormTextField form={form} name="lastName" label="Last name" autoComplete="family-name" />
+        </Stack>
         <FormTextField form={form} name="email" label="Email" type="email" autoComplete="email" />
         <FormTextField
           form={form}

@@ -1,41 +1,50 @@
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  HeadObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { singleton } from "tsyringe";
 import { logger } from "@/common/logger";
 import type { IImageStorage, StoredImage } from "./types";
 
 @singleton()
 export class R2ImageStorage implements IImageStorage {
-  private readonly accountId = process.env.R2_ACCOUNT_ID ?? "";
+  private readonly client: S3Client;
   private readonly bucketName = process.env.R2_BUCKET_NAME ?? "ogstack-images";
-  private readonly accessKeyId = process.env.R2_ACCESS_KEY_ID ?? "";
-  private readonly secretAccessKey = process.env.R2_SECRET_ACCESS_KEY ?? "";
   private readonly publicUrl = process.env.R2_PUBLIC_URL ?? "";
 
   constructor() {
-    if (!this.accountId || !this.accessKeyId || !this.secretAccessKey) {
+    const accountId = process.env.R2_ACCOUNT_ID ?? "";
+    const accessKeyId = process.env.R2_ACCESS_KEY_ID ?? "";
+    const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY ?? "";
+
+    if (!accountId || !accessKeyId || !secretAccessKey) {
       logger.warn("R2 credentials not configured — R2 storage will not work");
     }
+
+    this.client = new S3Client({
+      region: "auto",
+      endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+      credentials: { accessKeyId, secretAccessKey },
+    });
   }
 
   async store(key: string, buffer: Buffer, contentType: string): Promise<StoredImage> {
     const path = this.keyToPath(key);
 
-    const response = await fetch(this.s3Url(path), {
-      method: "PUT",
-      headers: {
-        ...this.authHeaders("PUT", path),
-        "Content-Type": contentType,
-        "Content-Length": String(buffer.length),
-        "Cache-Control": "public, max-age=31536000, immutable",
-      },
-      body: buffer,
-    });
+    await this.client.send(
+      new PutObjectCommand({
+        Bucket: this.bucketName,
+        Key: path,
+        Body: buffer,
+        ContentType: contentType,
+        CacheControl: "public, max-age=31536000, immutable",
+      }),
+    );
 
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`R2 upload failed: ${response.status} ${text}`);
-    }
-
-    const url = this.publicUrl ? `${this.publicUrl}/${path}` : `${this.s3Url(path)}`;
+    const url = this.publicUrl ? `${this.publicUrl}/${path}` : path;
 
     logger.debug({ key, size: buffer.length }, "Image stored in R2");
 
@@ -45,21 +54,21 @@ export class R2ImageStorage implements IImageStorage {
   async get(key: string): Promise<Buffer | null> {
     const path = this.keyToPath(key);
 
-    const response = await fetch(this.s3Url(path), {
-      headers: this.authHeaders("GET", path),
-    });
-
-    if (!response.ok) return null;
-    return Buffer.from(await response.arrayBuffer());
+    try {
+      const response = await this.client.send(
+        new GetObjectCommand({ Bucket: this.bucketName, Key: path }),
+      );
+      if (!response.Body) return null;
+      return Buffer.from(await response.Body.transformToByteArray());
+    } catch {
+      return null;
+    }
   }
 
   async delete(key: string): Promise<void> {
     const path = this.keyToPath(key);
 
-    await fetch(this.s3Url(path), {
-      method: "DELETE",
-      headers: this.authHeaders("DELETE", path),
-    });
+    await this.client.send(new DeleteObjectCommand({ Bucket: this.bucketName, Key: path }));
 
     logger.debug({ key }, "Image deleted from R2");
   }
@@ -67,30 +76,15 @@ export class R2ImageStorage implements IImageStorage {
   async exists(key: string): Promise<boolean> {
     const path = this.keyToPath(key);
 
-    const response = await fetch(this.s3Url(path), {
-      method: "HEAD",
-      headers: this.authHeaders("HEAD", path),
-    });
-
-    return response.ok;
+    try {
+      await this.client.send(new HeadObjectCommand({ Bucket: this.bucketName, Key: path }));
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   private keyToPath(key: string): string {
     return `images/${key}.png`;
-  }
-
-  private s3Url(path: string): string {
-    return `https://${this.accountId}.r2.cloudflarestorage.com/${this.bucketName}/${path}`;
-  }
-
-  private authHeaders(method: string, _path: string): Record<string, string> {
-    // Basic auth using S3-compatible API key authentication
-    // For production, use AWS Signature V4 or the @aws-sdk/client-s3 package
-    const credentials = Buffer.from(`${this.accessKeyId}:${this.secretAccessKey}`).toString(
-      "base64",
-    );
-    return {
-      Authorization: `Basic ${credentials}`,
-    };
   }
 }

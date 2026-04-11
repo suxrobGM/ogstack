@@ -26,7 +26,8 @@ function createMockUser(overrides = {}) {
   return {
     id: "user-uuid-1",
     email: "github@example.com",
-    name: "GitHub User",
+    firstName: "GitHub",
+    lastName: "User",
     role: "USER",
     plan: Plan.FREE,
     avatarUrl: "https://avatars.githubusercontent.com/u/123",

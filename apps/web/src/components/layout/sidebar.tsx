@@ -6,6 +6,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import FolderIcon from "@mui/icons-material/Folder";
 import PaymentIcon from "@mui/icons-material/Payment";
+import SettingsIcon from "@mui/icons-material/Settings";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import { Box, Divider, IconButton, List, Stack, Typography } from "@mui/material";
 import { usePathname } from "next/navigation";
@@ -25,6 +26,7 @@ const ICON_MAP: Record<string, ReactElement> = {
   folder: <FolderIcon fontSize="small" />,
   vpnKey: <VpnKeyIcon fontSize="small" />,
   payment: <PaymentIcon fontSize="small" />,
+  settings: <SettingsIcon fontSize="small" />,
 };
 
 interface SidebarProps {
@@ -73,7 +75,7 @@ export function Sidebar(props: SidebarProps): ReactElement {
         </IconButton>
       </Box>
       <Divider sx={{ borderColor: line.divider }} />
-      <List sx={{ flex: 1, px: collapsed ? 1 : 1.5, py: 2 }}>
+      <List sx={{ flex: 1, px: collapsed ? 1 : 1.5, py: 2, overflow: "auto" }}>
         {SIDEBAR_NAV_ITEMS.map((item) => (
           <NavItem
             key={item.href}
@@ -81,7 +83,11 @@ export function Sidebar(props: SidebarProps): ReactElement {
             href={item.href}
             icon={ICON_MAP[item.icon]}
             collapsed={collapsed}
-            active={pathname === item.href || pathname.startsWith(item.href + "/")}
+            active={
+              item.label === "Settings"
+                ? pathname.startsWith("/settings")
+                : pathname === item.href || pathname.startsWith(item.href + "/")
+            }
           />
         ))}
       </List>

@@ -10,7 +10,7 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import type { AuthResponse } from "@/types/api";
-import { loginSchema } from "./schemas";
+import { loginSchema } from "./schema";
 import type { LoginPayload } from "./types";
 
 export function LoginForm(): ReactElement {

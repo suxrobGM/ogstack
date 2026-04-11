@@ -11,7 +11,10 @@ export const ROUTES = {
   overview: "/overview" as Route,
   projects: "/projects" as Route,
   apiKeys: "/api-keys" as Route,
-  billing: "/settings/billing" as Route,
+  billing: "/billing" as Route,
+  settings: "/settings/profile" as Route,
+  settingsProfile: "/settings/profile" as Route,
+  settingsSecurity: "/settings/security" as Route,
   pricing: "/pricing" as Route,
 } as const;
 
@@ -33,4 +36,5 @@ export const SIDEBAR_NAV_ITEMS = [
   { label: "Projects", href: ROUTES.projects, icon: "folder" },
   { label: "API Keys", href: ROUTES.apiKeys, icon: "vpnKey" },
   { label: "Billing", href: ROUTES.billing, icon: "payment" },
+  { label: "Settings", href: ROUTES.settings, icon: "settings" },
 ] as const;

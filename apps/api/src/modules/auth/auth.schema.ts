@@ -3,7 +3,8 @@ import { t, type Static } from "elysia";
 export const RegisterBodySchema = t.Object({
   email: t.String({ format: "email" }),
   password: t.String({ minLength: 8, maxLength: 128 }),
-  name: t.String({ minLength: 1, maxLength: 100 }),
+  firstName: t.String({ minLength: 1, maxLength: 50 }),
+  lastName: t.String({ minLength: 1, maxLength: 50 }),
 });
 
 export const LoginBodySchema = t.Object({
@@ -18,7 +19,8 @@ export const RefreshBodySchema = t.Object({
 export const AuthUserSchema = t.Object({
   id: t.String(),
   email: t.String(),
-  name: t.String(),
+  firstName: t.String(),
+  lastName: t.String(),
   role: t.String(),
 });
 
@@ -43,6 +45,10 @@ export const VerifyEmailBodySchema = t.Object({
 
 export const ResendVerificationBodySchema = t.Object({
   email: t.String({ format: "email" }),
+});
+
+export const OAuthRedirectQuerySchema = t.Object({
+  redirect: t.Optional(t.String()),
 });
 
 export const OAuthCallbackQuerySchema = t.Object({

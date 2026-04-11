@@ -3,9 +3,12 @@ import { container } from "@/common/di";
 import { rateLimiter } from "@/common/middleware/rate-limiter";
 import {
   clearAuthCookies,
+  clearOAuthRedirectCookie,
   clearOAuthStateCookie,
+  getOAuthRedirectCookie,
   getOAuthStateCookie,
   setAuthCookies,
+  setOAuthRedirectCookie,
   setOAuthStateCookie,
 } from "@/common/utils/cookie";
 import { generateRandomToken } from "@/common/utils/crypto";
@@ -15,6 +18,7 @@ import {
   ForgotPasswordBodySchema,
   LoginBodySchema,
   OAuthCallbackQuerySchema,
+  OAuthRedirectQuerySchema,
   RefreshBodySchema,
   RegisterBodySchema,
   ResendVerificationBodySchema,
@@ -163,12 +167,16 @@ export const authController = new Elysia({ prefix: "/auth", tags: ["Auth"] })
   )
   .get(
     "/github",
-    ({ cookie, redirect }) => {
+    ({ cookie, redirect, query }) => {
       const state = generateRandomToken();
       setOAuthStateCookie(cookie as Record<string, Cookie<unknown>>, state);
+      if (query.redirect) {
+        setOAuthRedirectCookie(cookie as Record<string, Cookie<unknown>>, query.redirect);
+      }
       return redirect(githubOAuth.getAuthUrl(state));
     },
     {
+      query: OAuthRedirectQuerySchema,
       detail: {
         summary: "GitHub OAuth redirect",
         description: "Redirects the user to GitHub for OAuth authorization.",
@@ -186,11 +194,13 @@ export const authController = new Elysia({ prefix: "/auth", tags: ["Auth"] })
       }
 
       clearOAuthStateCookie(typedCookie);
+      const redirectTo = getOAuthRedirectCookie(typedCookie);
+      clearOAuthRedirectCookie(typedCookie);
 
       try {
         const result = await githubOAuth.callback(query.code);
         setAuthCookies(typedCookie, result);
-        return redirect(`${WEBSITE_URL}/overview`);
+        return redirect(`${WEBSITE_URL}${redirectTo || "/overview"}`);
       } catch {
         return redirect(`${WEBSITE_URL}/login?error=oauth_failed`);
       }
@@ -206,12 +216,16 @@ export const authController = new Elysia({ prefix: "/auth", tags: ["Auth"] })
   )
   .get(
     "/google",
-    ({ cookie, redirect }) => {
+    ({ cookie, redirect, query }) => {
       const state = generateRandomToken();
       setOAuthStateCookie(cookie as Record<string, Cookie<unknown>>, state);
+      if (query.redirect) {
+        setOAuthRedirectCookie(cookie as Record<string, Cookie<unknown>>, query.redirect);
+      }
       return redirect(googleOAuth.getAuthUrl(state));
     },
     {
+      query: OAuthRedirectQuerySchema,
       detail: {
         summary: "Google OAuth redirect",
         description: "Redirects the user to Google for OAuth authorization.",
@@ -229,11 +243,13 @@ export const authController = new Elysia({ prefix: "/auth", tags: ["Auth"] })
       }
 
       clearOAuthStateCookie(typedCookie);
+      const redirectTo = getOAuthRedirectCookie(typedCookie);
+      clearOAuthRedirectCookie(typedCookie);
 
       try {
         const result = await googleOAuth.callback(query.code);
         setAuthCookies(typedCookie, result);
-        return redirect(`${WEBSITE_URL}/overview`);
+        return redirect(`${WEBSITE_URL}${redirectTo || "/overview"}`);
       } catch {
         return redirect(`${WEBSITE_URL}/login?error=oauth_failed`);
       }

@@ -7,10 +7,14 @@ function createMockUser(overrides = {}) {
   return {
     id: "user-uuid-1",
     email: "test@example.com",
-    name: "Test User",
+    firstName: "Test",
+    lastName: "User",
     role: "USER",
     avatarUrl: null,
     emailVerified: false,
+    passwordHash: "hashed_password_123",
+    githubId: null,
+    googleId: null,
     deletedAt: null,
     createdAt: new Date("2026-01-01"),
     updatedAt: new Date("2026-01-01"),
@@ -45,10 +49,14 @@ describe("UserService", () => {
       expect(result).toEqual({
         id: "user-uuid-1",
         email: "test@example.com",
-        name: "Test User",
+        firstName: "Test",
+        lastName: "User",
         role: "USER",
         avatarUrl: null,
         emailVerified: false,
+        hasPassword: true,
+        githubConnected: false,
+        googleConnected: false,
         createdAt: new Date("2026-01-01"),
       });
     });
@@ -68,15 +76,15 @@ describe("UserService", () => {
 
   describe("updateProfile", () => {
     it("should update and return the profile", async () => {
-      const updated = createMockUser({ name: "Updated Name" });
+      const updated = createMockUser({ firstName: "Updated" });
       (mockPrisma.user.update as ReturnType<typeof mock>).mockResolvedValue(updated);
 
-      const result = await service.updateProfile("user-uuid-1", { name: "Updated Name" });
+      const result = await service.updateProfile("user-uuid-1", { firstName: "Updated" });
 
-      expect(result.name).toBe("Updated Name");
+      expect(result.firstName).toBe("Updated");
       expect(mockPrisma.user.update).toHaveBeenCalledWith({
         where: { id: "user-uuid-1" },
-        data: { name: "Updated Name" },
+        data: { firstName: "Updated" },
       });
     });
   });

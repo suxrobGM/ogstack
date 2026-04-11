@@ -38,7 +38,8 @@ export async function verifyToken(token: string): Promise<JWTPayload> {
 export interface AuthTokenUser {
   id: string;
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   role: string;
   plan: string;
 }
@@ -51,7 +52,13 @@ export async function buildAuthResponse(user: AuthTokenUser) {
   ]);
 
   return {
-    user: { id: user.id, email: user.email, name: user.name, role: user.role },
+    user: {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+    },
     accessToken,
     refreshToken,
   };

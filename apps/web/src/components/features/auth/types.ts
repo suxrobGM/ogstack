@@ -4,7 +4,7 @@ import type {
   loginSchema,
   registerSchema,
   resetPasswordSchema,
-} from "./schemas";
+} from "./schema";
 
 export type LoginPayload = z.infer<typeof loginSchema>;
 export type RegisterPayload = z.infer<typeof registerSchema>;

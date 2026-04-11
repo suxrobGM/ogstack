@@ -84,3 +84,20 @@ export function clearOAuthStateCookie(cookie: Record<string, Cookie<unknown>>) {
 export function getOAuthStateCookie(cookie: Record<string, Cookie<unknown>>): string | undefined {
   return cookie.oauth_state?.value as string | undefined;
 }
+
+/** Stores the post-OAuth redirect path (e.g. /settings/security for account linking). */
+export function setOAuthRedirectCookie(cookie: Record<string, Cookie<unknown>>, path: string) {
+  cookie.oauth_redirect!.value = path;
+  cookie.oauth_redirect!.set({ ...cookieOptions("/api/auth", 600), sameSite: "lax" });
+}
+
+export function getOAuthRedirectCookie(
+  cookie: Record<string, Cookie<unknown>>,
+): string | undefined {
+  return cookie.oauth_redirect?.value as string | undefined;
+}
+
+export function clearOAuthRedirectCookie(cookie: Record<string, Cookie<unknown>>) {
+  cookie.oauth_redirect!.value = "";
+  cookie.oauth_redirect!.set({ ...cookieOptions("/api/auth", 0), sameSite: "lax" });
+}
