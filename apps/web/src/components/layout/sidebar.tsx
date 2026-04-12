@@ -5,7 +5,9 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import FolderIcon from "@mui/icons-material/Folder";
+import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import PaymentIcon from "@mui/icons-material/Payment";
+import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import SettingsIcon from "@mui/icons-material/Settings";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
@@ -26,6 +28,8 @@ const ICON_MAP: Record<string, ReactElement> = {
   dashboard: <DashboardIcon fontSize="small" />,
   folder: <FolderIcon fontSize="small" />,
   playCircle: <PlayCircleIcon fontSize="small" />,
+  library: <LibraryBooksIcon fontSize="small" />,
+  photoLibrary: <PhotoLibraryIcon fontSize="small" />,
   vpnKey: <VpnKeyIcon fontSize="small" />,
   payment: <PaymentIcon fontSize="small" />,
   settings: <SettingsIcon fontSize="small" />,

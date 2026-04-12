@@ -53,22 +53,20 @@ export function ControlsPanel(props: ControlsPanelProps): ReactElement {
     <Surface>
       <Stack spacing={3}>
         {/* Project selector */}
-        {projects.length > 1 && (
-          <Stack spacing={0.5}>
-            <Typography variant="body2Muted">Project</Typography>
-            <Select
-              size="small"
-              value={selectedProjectId}
-              onChange={(e) => onProjectChange(e.target.value)}
-            >
-              {projects.map((p) => (
-                <MenuItem key={p.id} value={p.id}>
-                  {p.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </Stack>
-        )}
+        <Stack spacing={0.5}>
+          <Typography variant="body2Muted">Project</Typography>
+          <Select
+            size="small"
+            value={selectedProjectId}
+            onChange={(e) => onProjectChange(e.target.value)}
+          >
+            {projects.map((p) => (
+              <MenuItem key={p.id} value={p.id}>
+                {p.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </Stack>
 
         {/* URL input */}
         <FormTextField

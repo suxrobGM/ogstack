@@ -34,6 +34,18 @@ export const queryKeys = {
     list: () => [...queryKeys.templates.all, "list"] as const,
   },
 
+  images: {
+    all: ["images"] as const,
+    list: (params: {
+      page: number;
+      search: string;
+      projectId: string;
+      category: string;
+      from: string;
+      to: string;
+    }) => [...queryKeys.images.all, "list", params] as const,
+  },
+
   users: {
     all: ["users"] as const,
     me: () => [...queryKeys.users.all, "me"] as const,

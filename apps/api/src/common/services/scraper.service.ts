@@ -1,6 +1,7 @@
 import { singleton } from "tsyringe";
 import { BadRequestError } from "@/common/errors/http.error";
 import { logger } from "@/common/logger";
+import { decodeHtmlEntities } from "@/common/utils/html-entities";
 import { validateUrlForFetch } from "@/common/utils/url";
 
 const FETCH_TIMEOUT_MS = 10_000;
@@ -112,14 +113,16 @@ export class ScraperService {
             if (!content?.trim()) return;
             const value = content.trim();
 
-            if (property === "og:title") metadata.ogTitle ??= value;
-            else if (property === "og:description") metadata.ogDescription ??= value;
+            const decoded = decodeHtmlEntities(value);
+
+            if (property === "og:title") metadata.ogTitle ??= decoded;
+            else if (property === "og:description") metadata.ogDescription ??= decoded;
             else if (property === "og:image") metadata.ogImage ??= value;
-            else if (property === "og:site_name") metadata.siteName ??= value;
+            else if (property === "og:site_name") metadata.siteName ??= decoded;
 
             const nameLower = name?.toLowerCase();
-            if (nameLower === "description") metadata.description ??= value;
-            else if (nameLower === "author") metadata.author ??= value;
+            if (nameLower === "description") metadata.description ??= decoded;
+            else if (nameLower === "author") metadata.author ??= decoded;
           },
         })
         .on('link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]', {
@@ -138,7 +141,7 @@ export class ScraperService {
       return metadata;
     }
 
-    if (titleText.trim()) metadata.title = titleText.trim();
+    if (titleText.trim()) metadata.title = decodeHtmlEntities(titleText.trim());
 
     if (metadata.ogImage) metadata.ogImage = this.resolveUrl(metadata.ogImage, url);
     if (metadata.favicon) {

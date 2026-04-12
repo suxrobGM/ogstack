@@ -9,10 +9,10 @@ model Project {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  apiKeys         ApiKey[]
-  generatedImages GeneratedImage[]
-  usageRecords    UsageRecord[]
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  apiKeys      ApiKey[]
+  images       Image[]
+  usageRecords UsageRecord[]
 
   @@index([userId])
   @@index([publicId])
@@ -31,10 +31,10 @@ model ApiKey {
 
   createdAt DateTime @default(now()) @map("created_at")
 
-  project         Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  generatedImages GeneratedImage[]
-  usageRecords    UsageRecord[]
+  project      Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images       Image[]
+  usageRecords UsageRecord[]
 
   @@index([keyHash])
   @@index([projectId])

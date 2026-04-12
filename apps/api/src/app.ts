@@ -14,11 +14,7 @@ import {
   billingWebhookController,
   syncStripeOnStartup,
 } from "@/modules/billing";
-import {
-  generationController,
-  generationDashboardController,
-  generationPublicController,
-} from "@/modules/generation";
+import { imageApiController, imageController, imagePublicController } from "@/modules/image";
 import { notificationController } from "@/modules/notification";
 import { projectController } from "@/modules/project";
 import { templateController } from "@/modules/template";
@@ -37,15 +33,15 @@ const app = new Elysia()
     await prisma.$disconnect();
   })
   .get("/health", () => ({ status: "ok", timestamp: new Date().toISOString() }))
-  .use(generationPublicController)
+  .use(imagePublicController)
   .group("/api", (api) =>
     api
       .guard({ response: HttpErrorResponses })
       .use(authController)
       .use(apiKeyController)
       .use(apiKeyDeleteController)
-      .use(generationController)
-      .use(generationDashboardController)
+      .use(imageApiController)
+      .use(imageController)
       .use(projectController)
       .use(templateController)
       .use(userController)

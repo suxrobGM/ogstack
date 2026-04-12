@@ -18,6 +18,8 @@ export const ROUTES = {
   settingsProfile: "/settings/profile" as Route,
   settingsSecurity: "/settings/security" as Route,
   playground: "/playground" as Route,
+  templates: "/templates" as Route,
+  images: "/images" as Route,
   pricing: "/pricing" as Route,
 } as const;
 
@@ -32,6 +34,8 @@ export const SIDEBAR_NAV_ITEMS = [
   { label: "Overview", href: ROUTES.overview, icon: "dashboard" },
   { label: "Projects", href: ROUTES.projects, icon: "folder" },
   { label: "Playground", href: ROUTES.playground, icon: "playCircle" },
+  { label: "Templates", href: ROUTES.templates, icon: "library" },
+  { label: "Images", href: ROUTES.images, icon: "photoLibrary" },
   { label: "API Keys", href: ROUTES.apiKeys, icon: "vpnKey" },
   { label: "Billing", href: ROUTES.billing, icon: "payment" },
   { label: "Settings", href: ROUTES.settings, icon: "settings" },

@@ -59,7 +59,14 @@ export const inputLabelOverrides: Components<Theme>["MuiInputLabel"] = {
     root: {
       fontFamily: fontFamilies.body,
       fontSize: "0.875rem",
+      lineHeight: 1.25,
       color: textColors.secondary,
+      // Align the unshrunk (placeholder-like) label with the custom 12px input padding.
+      // MUI's default transform assumes 16.5px padding, which leaves the label sitting too low.
+      transform: "translate(14px, 12px) scale(1)",
+      "&.MuiInputLabel-shrink": {
+        transform: "translate(14px, -8px) scale(0.8125)",
+      },
       "&.Mui-focused": {
         color: accent.primary,
       },

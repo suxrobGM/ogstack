@@ -3,10 +3,16 @@
 import { useState, type ReactElement } from "react";
 import { Grid } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
+import { useSearchParams } from "next/navigation";
 import { useApiMutation, useApiQuery } from "@/hooks";
 import { client } from "@/lib/api/client";
 import { queryKeys } from "@/lib/query-keys";
-import type { GenerateDto, ProjectListResponse, TemplateInfo } from "@/types/api";
+import type {
+  GenerateDto,
+  ImageGenerateBody,
+  ProjectListResponse,
+  TemplateInfo,
+} from "@/types/api";
 import { ControlsPanel } from "./controls-panel";
 import { PreviewPane } from "./preview-pane";
 import type { PlaygroundFormValues } from "./schema";
@@ -41,6 +47,9 @@ function buildMetaTag(publicId: string, values: PlaygroundFormValues): string {
 
 export function Playground(props: PlaygroundProps): ReactElement {
   const { initialProjects, initialTemplates } = props;
+  const searchParams = useSearchParams();
+  const initialTemplate =
+    (searchParams.get("template") as PlaygroundFormValues["template"] | null) ?? DEFAULTS.template;
 
   const [selectedProjectId, setSelectedProjectId] = useState(
     () => initialProjects?.items[0]?.id ?? "",
@@ -59,8 +68,7 @@ export function Playground(props: PlaygroundProps): ReactElement {
   const selectedProject = projects.find((p) => p.id === selectedProjectId);
 
   const generateMutation = useApiMutation(
-    (body: Parameters<typeof client.api.generate.playground.post>[0]) =>
-      client.api.generate.playground.post(body),
+    (body: ImageGenerateBody) => client.api.images.post(body),
     {
       errorMessage: "Failed to generate image. Please check the URL and try again.",
       onSuccess: (data) => {
@@ -70,7 +78,7 @@ export function Playground(props: PlaygroundProps): ReactElement {
   );
 
   const form = useForm({
-    defaultValues: DEFAULTS,
+    defaultValues: { ...DEFAULTS, template: initialTemplate },
     onSubmit: ({ value }) => {
       setLastFormValues(value);
       generateMutation.mutate({
@@ -81,7 +89,7 @@ export function Playground(props: PlaygroundProps): ReactElement {
           accent: value.accent,
           dark: value.dark,
           font: value.font,
-          logoUrl: value.logoUrl || undefined,
+          logoUrl: value.logoUrl,
           logoPosition: value.logoPosition,
         },
       });

@@ -4,12 +4,14 @@ enum ImageFormat {
   WEBP
 }
 
-model GeneratedImage {
+model Image {
   id         String  @id @default(uuid()) @db.Uuid
   userId     String  @map("user_id") @db.Uuid
   projectId  String? @map("project_id") @db.Uuid
   apiKeyId   String? @map("api_key_id") @db.Uuid
   templateId String? @map("template_id") @db.Uuid
+
+  category TemplateCategory?
 
   sourceUrl String? @map("source_url")
   cacheKey  String  @unique @map("cache_key")
@@ -42,6 +44,7 @@ model GeneratedImage {
 
   @@index([cacheKey])
   @@index([userId, createdAt])
+  @@index([userId, category])
   @@index([sourceUrl])
-  @@map("generated_images")
+  @@map("images")
 }

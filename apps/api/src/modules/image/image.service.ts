@@ -1,0 +1,129 @@
+import { singleton } from "tsyringe";
+import { ForbiddenError, NotFoundError } from "@/common/errors";
+import { logger } from "@/common/logger";
+import { ImageStorageService } from "@/common/services/storage";
+import { Prisma, PrismaClient } from "@/generated/prisma";
+import type { ImageItem, ImageListQuery, ImageListResponse, ImageUpdateBody } from "./image.schema";
+
+type ImageWithRelations = Prisma.ImageGetPayload<{
+  include: {
+    template: { select: { slug: true; name: true } };
+    project: { select: { name: true } };
+  };
+}>;
+
+function toImageItem(row: ImageWithRelations): ImageItem {
+  return {
+    id: row.id,
+    sourceUrl: row.sourceUrl,
+    imageUrl: row.imageUrl,
+    cdnUrl: row.cdnUrl,
+    title: row.title,
+    description: row.description,
+    faviconUrl: row.faviconUrl,
+    category: row.category,
+    template: row.template ? { slug: row.template.slug, name: row.template.name } : null,
+    projectId: row.projectId,
+    projectName: row.project?.name ?? null,
+    width: row.width,
+    height: row.height,
+    format: row.format,
+    generationMs: row.generationMs,
+    serveCount: row.serveCount,
+    createdAt: row.createdAt,
+  };
+}
+
+@singleton()
+export class ImageService {
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly storage: ImageStorageService,
+  ) {}
+
+  async list(userId: string, query: ImageListQuery): Promise<ImageListResponse> {
+    const { page, limit, projectId, category, from, to, search } = query;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.ImageWhereInput = {
+      userId,
+      ...(projectId && { projectId }),
+      ...(category && { category }),
+      ...(from || to
+        ? {
+            createdAt: {
+              ...(from && { gte: new Date(from) }),
+              ...(to && { lte: new Date(to) }),
+            },
+          }
+        : {}),
+      ...(search && {
+        OR: [
+          { sourceUrl: { contains: search, mode: "insensitive" as const } },
+          { title: { contains: search, mode: "insensitive" as const } },
+        ],
+      }),
+    };
+
+    const [items, total] = await Promise.all([
+      this.prisma.image.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+        include: {
+          template: { select: { slug: true, name: true } },
+          project: { select: { name: true } },
+        },
+      }),
+      this.prisma.image.count({ where }),
+    ]);
+
+    return {
+      items: items.map(toImageItem),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async update(userId: string, id: string, body: ImageUpdateBody): Promise<ImageItem> {
+    const existing = await this.prisma.image.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundError("Image not found");
+    if (existing.userId !== userId) throw new ForbiddenError("Not allowed");
+
+    const updated = await this.prisma.image.update({
+      where: { id },
+      data: { title: body.title, description: body.description },
+      include: {
+        template: { select: { slug: true, name: true } },
+        project: { select: { name: true } },
+      },
+    });
+    return toImageItem(updated);
+  }
+
+  async delete(userId: string, id: string): Promise<{ success: true }> {
+    const existing = await this.prisma.image.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundError("Image not found");
+    if (existing.userId !== userId) throw new ForbiddenError("Not allowed");
+
+    const otherRefs = await this.prisma.image.count({
+      where: { cacheKey: existing.cacheKey, id: { not: id } },
+    });
+
+    if (otherRefs === 0) {
+      try {
+        await this.storage.delete(existing.cacheKey);
+      } catch (err) {
+        logger.warn({ err, cacheKey: existing.cacheKey }, "storage.delete failed — continuing");
+      }
+    }
+
+    await this.prisma.image.delete({ where: { id } });
+    return { success: true };
+  }
+}

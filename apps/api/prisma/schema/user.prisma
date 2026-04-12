@@ -32,15 +32,15 @@ model User {
   createdAt                  DateTime  @default(now()) @map("created_at")
   updatedAt                  DateTime  @updatedAt @map("updated_at")
 
-  projects        Project[]
-  apiKeys         ApiKey[]
-  brandKits       BrandKit[]
-  generatedImages GeneratedImage[]
-  auditReports    AuditReport[]
-  auditLogs       AuditLog[]
-  usageRecords    UsageRecord[]
-  subscription    Subscription?
-  notifications   Notification[]
+  projects      Project[]
+  apiKeys       ApiKey[]
+  brandKits     BrandKit[]
+  images        Image[]
+  auditReports  AuditReport[]
+  auditLogs     AuditLog[]
+  usageRecords  UsageRecord[]
+  subscription  Subscription?
+  notifications Notification[]
 
   @@index([email])
   @@index([deletedAt])

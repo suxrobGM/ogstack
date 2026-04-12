@@ -15,7 +15,7 @@ model Template {
   description     String?
   category        TemplateCategory
   previewUrl      String?          @map("preview_url")
-  jsxCode         String           @db.Text @map("jsx_code")
+  jsxCode         String           @map("jsx_code") @db.Text
   isBuiltIn       Boolean          @default(false) @map("is_built_in")
   isCommunity     Boolean          @default(false) @map("is_community")
   contributorName String?          @map("contributor_name")
@@ -26,7 +26,7 @@ model Template {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  generatedImages GeneratedImage[]
+  images Image[]
 
   @@map("templates")
 }

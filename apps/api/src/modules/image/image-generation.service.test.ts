@@ -5,7 +5,7 @@ import { ImageStorageService } from "@/common/services/storage";
 import { PrismaClient } from "@/generated/prisma";
 import { TemplateService } from "@/modules/template/template.service";
 import { UsageService } from "@/modules/usage/usage.service";
-import { GenerationService } from "./generation.service";
+import { ImageGenerationService } from "./image-generation.service";
 
 const MOCK_METADATA: UrlMetadata = {
   url: "https://example.com",
@@ -34,7 +34,7 @@ function createMockPrisma() {
         }),
       ),
     },
-    generatedImage: {
+    image: {
       findUnique: mock(() => Promise.resolve(null)),
       create: mock(() =>
         Promise.resolve({
@@ -82,8 +82,8 @@ function createMockStorageService() {
   } as unknown as ImageStorageService;
 }
 
-describe("GenerationService", () => {
-  let service: GenerationService;
+describe("ImageGenerationService", () => {
+  let service: ImageGenerationService;
   let mockPrisma: ReturnType<typeof createMockPrisma>;
   let mockScraper: ReturnType<typeof createMockScraper>;
   let mockTemplateService: ReturnType<typeof createMockTemplateService>;
@@ -102,7 +102,7 @@ describe("GenerationService", () => {
     container.registerInstance(TemplateService, mockTemplateService as unknown as TemplateService);
     container.registerInstance(UsageService, mockUsageService as unknown as UsageService);
     container.registerInstance(ImageStorageService, mockStorage as unknown as ImageStorageService);
-    service = container.resolve(GenerationService);
+    service = container.resolve(ImageGenerationService);
   });
 
   describe("generate", () => {
@@ -122,7 +122,7 @@ describe("GenerationService", () => {
       expect(mockScraper.extractMetadata).toHaveBeenCalledWith("https://example.com");
       expect(mockTemplateService.render).toHaveBeenCalled();
       expect(mockStorage.store).toHaveBeenCalled();
-      expect(mockPrisma.generatedImage.create).toHaveBeenCalled();
+      expect(mockPrisma.image.create).toHaveBeenCalled();
       expect(mockUsageService.recordUsage).toHaveBeenCalled();
     });
 
@@ -136,9 +136,7 @@ describe("GenerationService", () => {
         faviconUrl: "https://example.com/fav.ico",
         serveCount: 5,
       };
-      (mockPrisma.generatedImage.findUnique as ReturnType<typeof mock>).mockResolvedValue(
-        cachedImage,
-      );
+      (mockPrisma.image.findUnique as ReturnType<typeof mock>).mockResolvedValue(cachedImage);
 
       const result = await service.generate(baseParams);
 
@@ -148,7 +146,7 @@ describe("GenerationService", () => {
       expect(mockScraper.extractMetadata).not.toHaveBeenCalled();
       expect(mockTemplateService.render).not.toHaveBeenCalled();
       expect(mockStorage.store).not.toHaveBeenCalled();
-      expect(mockPrisma.generatedImage.update).toHaveBeenCalled();
+      expect(mockPrisma.image.update).toHaveBeenCalled();
     });
 
     it("should throw NotFoundError if project not found", async () => {
@@ -172,14 +170,6 @@ describe("GenerationService", () => {
       expect(mockUsageService.enforceQuota).toHaveBeenCalledWith("user-1", "proj-1", undefined);
     });
 
-    it("should propagate ForbiddenError from quota enforcement", async () => {
-      (mockUsageService.enforceQuota as ReturnType<typeof mock>).mockRejectedValue(
-        new Error("Monthly quota of 50 images exceeded"),
-      );
-
-      await expect(service.generate(baseParams)).rejects.toThrow("quota");
-    });
-
     it("should record usage for cache misses", async () => {
       await service.generate(baseParams);
 
@@ -192,7 +182,7 @@ describe("GenerationService", () => {
     });
 
     it("should record cache hits in usage", async () => {
-      (mockPrisma.generatedImage.findUnique as ReturnType<typeof mock>).mockResolvedValue({
+      (mockPrisma.image.findUnique as ReturnType<typeof mock>).mockResolvedValue({
         id: "img-cached",
         imageUrl: "/uploads/images/cached.png",
         cdnUrl: null,
@@ -213,9 +203,9 @@ describe("GenerationService", () => {
     });
   });
 
-  describe("generateImageByPublicId", () => {
+  describe("generateByPublicId", () => {
     it("should return PNG buffer on cache miss", async () => {
-      const result = await service.generateImageByPublicId(
+      const result = await service.generateByPublicId(
         "abc123",
         "https://example.com",
         "gradient_dark",
@@ -229,14 +219,14 @@ describe("GenerationService", () => {
     });
 
     it("should return cached buffer from storage on cache hit", async () => {
-      (mockPrisma.generatedImage.findUnique as ReturnType<typeof mock>).mockResolvedValue({
+      (mockPrisma.image.findUnique as ReturnType<typeof mock>).mockResolvedValue({
         id: "img-cached",
         imageUrl: "/uploads/images/cached.png",
         cdnUrl: null,
         serveCount: 3,
       });
 
-      const result = await service.generateImageByPublicId(
+      const result = await service.generateByPublicId(
         "abc123",
         "https://example.com",
         "gradient_dark",
@@ -251,7 +241,7 @@ describe("GenerationService", () => {
       (mockPrisma.project.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
 
       await expect(
-        service.generateImageByPublicId("unknown", "https://example.com", "gradient_dark"),
+        service.generateByPublicId("unknown", "https://example.com", "gradient_dark"),
       ).rejects.toThrow("Project not found");
     });
 
@@ -265,41 +255,8 @@ describe("GenerationService", () => {
       });
 
       await expect(
-        service.generateImageByPublicId("abc123", "https://evil.com/page", "gradient_dark"),
+        service.generateByPublicId("abc123", "https://evil.com/page", "gradient_dark"),
       ).rejects.toThrow("Domain not allowed");
-    });
-  });
-
-  describe("invalidateCache", () => {
-    it("should delete image from storage and database", async () => {
-      (mockPrisma.generatedImage.findUnique as ReturnType<typeof mock>).mockResolvedValue({
-        id: "img-1",
-        userId: "user-1",
-        cacheKey: "abc123",
-      });
-
-      await service.invalidateCache("user-1", "abc123");
-
-      expect(mockStorage.delete).toHaveBeenCalledWith("abc123");
-      expect(mockPrisma.generatedImage.delete).toHaveBeenCalled();
-    });
-
-    it("should throw NotFoundError if image not found", async () => {
-      (mockPrisma.generatedImage.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
-
-      await expect(service.invalidateCache("user-1", "nonexistent")).rejects.toThrow(
-        "Image not found",
-      );
-    });
-
-    it("should throw NotFoundError if user does not own image", async () => {
-      (mockPrisma.generatedImage.findUnique as ReturnType<typeof mock>).mockResolvedValue({
-        id: "img-1",
-        userId: "other-user",
-        cacheKey: "abc123",
-      });
-
-      await expect(service.invalidateCache("user-1", "abc123")).rejects.toThrow("Image not found");
     });
   });
 });

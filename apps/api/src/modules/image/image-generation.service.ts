@@ -4,10 +4,15 @@ import { logger } from "@/common/logger";
 import { ScraperService } from "@/common/services/scraper.service";
 import { ImageStorageService } from "@/common/services/storage";
 import { hashSha256 } from "@/common/utils/crypto";
-import { PrismaClient } from "@/generated/prisma";
-import { TemplateService, type RenderOptions, type TemplateSlug } from "@/modules/template";
+import { PrismaClient, type TemplateCategory } from "@/generated/prisma";
+import {
+  getTemplate,
+  TemplateService,
+  type RenderOptions,
+  type TemplateSlug,
+} from "@/modules/template";
 import { UsageService } from "@/modules/usage";
-import type { GenerateResponse } from "./generation.schema";
+import type { GenerateResponse } from "./image.schema";
 
 interface GenerateParams {
   userId: string;
@@ -19,7 +24,7 @@ interface GenerateParams {
 }
 
 @singleton()
-export class GenerationService {
+export class ImageGenerationService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly scraper: ScraperService,
@@ -39,11 +44,11 @@ export class GenerationService {
     await this.usageService.enforceQuota(userId, projectId, apiKeyId);
 
     const cacheKey = await this.buildCacheKey(projectId, url, template, options);
-    const cached = await this.prisma.generatedImage.findUnique({ where: { cacheKey } });
+    const cached = await this.prisma.image.findUnique({ where: { cacheKey } });
 
     if (cached) {
       await this.usageService.recordUsage(userId, projectId, true, apiKeyId);
-      await this.prisma.generatedImage.update({
+      await this.prisma.image.update({
         where: { id: cached.id },
         data: { serveCount: { increment: 1 } },
       });
@@ -72,7 +77,7 @@ export class GenerationService {
 
     const stored = await this.storage.store(cacheKey, pngBuffer);
 
-    const image = await this.prisma.generatedImage.create({
+    const image = await this.prisma.image.create({
       data: {
         userId,
         projectId,
@@ -90,6 +95,7 @@ export class GenerationService {
         fileSize: stored.size,
         generationMs,
         serveCount: 1,
+        category: getTemplate(template).info.category as TemplateCategory,
       },
     });
 
@@ -109,7 +115,7 @@ export class GenerationService {
     };
   }
 
-  async generateImageByPublicId(
+  async generateByPublicId(
     publicId: string,
     url: string,
     template: TemplateSlug,
@@ -120,11 +126,11 @@ export class GenerationService {
     await this.usageService.enforceQuota(project.user.id, project.id);
 
     const cacheKey = await this.buildCacheKey(project.id, url, template, options);
-    const cached = await this.prisma.generatedImage.findUnique({ where: { cacheKey } });
+    const cached = await this.prisma.image.findUnique({ where: { cacheKey } });
 
     if (cached) {
       await this.usageService.recordUsage(project.user.id, project.id, true);
-      await this.prisma.generatedImage.update({
+      await this.prisma.image.update({
         where: { id: cached.id },
         data: { serveCount: { increment: 1 } },
       });
@@ -146,7 +152,7 @@ export class GenerationService {
 
     const stored = await this.storage.store(cacheKey, pngBuffer);
 
-    await this.prisma.generatedImage.create({
+    await this.prisma.image.create({
       data: {
         userId: project.user.id,
         projectId: project.id,
@@ -163,6 +169,7 @@ export class GenerationService {
         fileSize: stored.size,
         generationMs,
         serveCount: 1,
+        category: getTemplate(template).info.category as TemplateCategory,
       },
     });
 
@@ -170,19 +177,6 @@ export class GenerationService {
 
     logger.info({ cacheKey, generationMs, template }, "OG image generated (public)");
     return pngBuffer;
-  }
-
-  async invalidateCache(userId: string, cacheKey: string): Promise<void> {
-    const image = await this.prisma.generatedImage.findUnique({ where: { cacheKey } });
-
-    if (!image || image.userId !== userId) {
-      throw new NotFoundError("Image not found");
-    }
-
-    await this.storage.delete(cacheKey);
-    await this.prisma.generatedImage.delete({ where: { id: image.id } });
-
-    logger.info({ cacheKey }, "Image cache invalidated");
   }
 
   private async resolveAndValidatePublicProject(publicId: string, url: string) {
