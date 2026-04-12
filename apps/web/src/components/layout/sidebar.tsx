@@ -6,6 +6,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import FolderIcon from "@mui/icons-material/Folder";
 import PaymentIcon from "@mui/icons-material/Payment";
+import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import SettingsIcon from "@mui/icons-material/Settings";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import { Box, Divider, IconButton, List, Stack, Typography } from "@mui/material";
@@ -24,6 +25,7 @@ export const SIDEBAR_WIDTH_COLLAPSED = 68;
 const ICON_MAP: Record<string, ReactElement> = {
   dashboard: <DashboardIcon fontSize="small" />,
   folder: <FolderIcon fontSize="small" />,
+  playCircle: <PlayCircleIcon fontSize="small" />,
   vpnKey: <VpnKeyIcon fontSize="small" />,
   payment: <PaymentIcon fontSize="small" />,
   settings: <SettingsIcon fontSize="small" />,

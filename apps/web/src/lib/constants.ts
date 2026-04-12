@@ -17,6 +17,7 @@ export const ROUTES = {
   settings: "/settings/profile" as Route,
   settingsProfile: "/settings/profile" as Route,
   settingsSecurity: "/settings/security" as Route,
+  playground: "/playground" as Route,
   pricing: "/pricing" as Route,
 } as const;
 
@@ -30,6 +31,7 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost
 export const SIDEBAR_NAV_ITEMS = [
   { label: "Overview", href: ROUTES.overview, icon: "dashboard" },
   { label: "Projects", href: ROUTES.projects, icon: "folder" },
+  { label: "Playground", href: ROUTES.playground, icon: "playCircle" },
   { label: "API Keys", href: ROUTES.apiKeys, icon: "vpnKey" },
   { label: "Billing", href: ROUTES.billing, icon: "payment" },
   { label: "Settings", href: ROUTES.settings, icon: "settings" },

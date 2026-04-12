@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { BadRequestError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { Plan, PrismaClient } from "@/generated/prisma";
@@ -21,7 +21,7 @@ function getItemPeriod(stripeSub: Stripe.Subscription) {
   };
 }
 
-@injectable()
+@singleton()
 export class BillingWebhookService {
   constructor(
     private readonly prisma: PrismaClient,

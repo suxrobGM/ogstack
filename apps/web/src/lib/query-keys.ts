@@ -29,6 +29,11 @@ export const queryKeys = {
     all: ["usage"] as const,
   },
 
+  templates: {
+    all: ["templates"] as const,
+    list: () => [...queryKeys.templates.all, "list"] as const,
+  },
+
   users: {
     all: ["users"] as const,
     me: () => [...queryKeys.users.all, "me"] as const,

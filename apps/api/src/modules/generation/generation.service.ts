@@ -76,8 +76,8 @@ export class GenerationService {
       data: {
         userId,
         projectId,
-        apiKeyId,
-        templateId: templateRecord?.id,
+        apiKeyId: apiKeyId ?? null,
+        templateId: templateRecord?.id ?? null,
         sourceUrl: url,
         cacheKey,
         imageUrl: stored.url,

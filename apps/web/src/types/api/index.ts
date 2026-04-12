@@ -4,3 +4,4 @@ export type * from "./user";
 export type * from "./project";
 export type * from "./api-key";
 export type * from "./billing";
+export type * from "./generation";

@@ -22,11 +22,7 @@ export class UsageService {
     if (quota < 0) return;
 
     const period = this.currentPeriod();
-    const usage = await this.prisma.usageRecord.findUnique({
-      where: {
-        userId_projectId_apiKeyId_period: { userId, projectId, apiKeyId: apiKeyId ?? "", period },
-      },
-    });
+    const usage = await this.findUsageRecord(userId, projectId, apiKeyId, period);
 
     if (usage && usage.imageCount >= quota) {
       await this.notificationService.create({
@@ -50,26 +46,25 @@ export class UsageService {
     apiKeyId?: string,
   ): Promise<void> {
     const period = this.currentPeriod();
+    const existing = await this.findUsageRecord(userId, projectId, apiKeyId, period);
 
-    await this.prisma.usageRecord.upsert({
-      where: {
-        userId_projectId_apiKeyId_period: {
+    if (existing) {
+      await this.prisma.usageRecord.update({
+        where: { id: existing.id },
+        data: cacheHit ? { cacheHits: { increment: 1 } } : { imageCount: { increment: 1 } },
+      });
+    } else {
+      await this.prisma.usageRecord.create({
+        data: {
           userId,
           projectId,
-          apiKeyId: apiKeyId ?? "",
+          apiKeyId: apiKeyId ?? null,
           period,
+          imageCount: cacheHit ? 0 : 1,
+          cacheHits: cacheHit ? 1 : 0,
         },
-      },
-      create: {
-        userId,
-        projectId,
-        apiKeyId: apiKeyId ?? null,
-        period,
-        imageCount: cacheHit ? 0 : 1,
-        cacheHits: cacheHit ? 1 : 0,
-      },
-      update: cacheHit ? { cacheHits: { increment: 1 } } : { imageCount: { increment: 1 } },
-    });
+      });
+    }
 
     if (!cacheHit) {
       await this.checkUsageThreshold(userId, projectId, apiKeyId, period);
@@ -90,16 +85,7 @@ export class UsageService {
     const quota = PLAN_CONFIGS[user?.plan ?? Plan.FREE].quota;
     if (quota < 0) return;
 
-    const usage = await this.prisma.usageRecord.findUnique({
-      where: {
-        userId_projectId_apiKeyId_period: {
-          userId,
-          projectId,
-          apiKeyId: apiKeyId ?? "",
-          period,
-        },
-      },
-    });
+    const usage = await this.findUsageRecord(userId, projectId, apiKeyId, period);
 
     if (!usage || usage.imageCount < Math.floor(quota * 0.8)) return;
 
@@ -161,5 +147,16 @@ export class UsageService {
   private currentPeriod(): string {
     const now = new Date();
     return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+  }
+
+  private findUsageRecord(
+    userId: string,
+    projectId: string,
+    apiKeyId: string | undefined,
+    period: string,
+  ) {
+    return this.prisma.usageRecord.findFirst({
+      where: { userId, projectId, apiKeyId: apiKeyId ?? null, period },
+    });
   }
 }

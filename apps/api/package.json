@@ -16,7 +16,8 @@
     "build:linux": "bun build --compile --minify-whitespace --minify-syntax --target bun-linux-x64 --outfile dist/server src/app.ts",
     "build:win": "bun build --compile --minify-whitespace --minify-syntax --target bun-windows-x64 --outfile dist/server.exe src/app.ts",
     "build:types": "tsc --emitDeclarationOnly",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "generate:thumbnails": "bun run scripts/generate-template-thumbnails.ts"
   },
   "prisma": {
     "seed": "bun run prisma/seed/index.ts"
@@ -54,7 +55,9 @@
     "@types/pg": "^8.20.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@types/sharp": "^0.32.0",
     "prisma": "^7.7.0",
+    "sharp": "^0.34.5",
     "typescript": "^6.0.2"
   }
 }

@@ -4,6 +4,7 @@ import type { ReactElement } from "react";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import FolderIcon from "@mui/icons-material/Folder";
 import PaymentIcon from "@mui/icons-material/Payment";
+import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import SettingsIcon from "@mui/icons-material/Settings";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import { Box, Divider, List, Typography } from "@mui/material";
@@ -18,6 +19,7 @@ import { UserMenu } from "./user-menu";
 const ICON_MAP: Record<string, ReactElement> = {
   dashboard: <DashboardIcon fontSize="small" />,
   folder: <FolderIcon fontSize="small" />,
+  playCircle: <PlayCircleIcon fontSize="small" />,
   vpnKey: <VpnKeyIcon fontSize="small" />,
   payment: <PaymentIcon fontSize="small" />,
   settings: <SettingsIcon fontSize="small" />,
