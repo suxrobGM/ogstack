@@ -1,7 +1,7 @@
 import { Suspense, type PropsWithChildren, type ReactElement } from "react";
 import { isAdminRole } from "@ogstack/shared";
 import { redirect } from "next/navigation";
-import { AdminShell } from "@/components/layout/admin-shell";
+import { AppShell } from "@/components/layout/app-shell";
 import { getServerClient } from "@/lib/api/server";
 import { ROUTES } from "@/lib/constants";
 import { AuthProvider } from "@/providers/auth-provider";
@@ -28,7 +28,7 @@ async function AdminAuthenticatedShell(props: PropsWithChildren): Promise<ReactE
 
   return (
     <AuthProvider initialUser={user}>
-      <AdminShell>{children}</AdminShell>
+      <AppShell variant="admin">{children}</AppShell>
     </AuthProvider>
   );
 }

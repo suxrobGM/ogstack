@@ -30,7 +30,7 @@ export function NavItem(props: NavItemProps): ReactElement {
         textDecoration: "none",
         color: "inherit",
         display: "block",
-        mb: 0.5,
+        mb: 0.25,
         borderRadius: `${radii.md}px`,
         "&:hover": { textDecoration: "none" },
       }}
@@ -39,10 +39,10 @@ export function NavItem(props: NavItemProps): ReactElement {
         selected={active}
         sx={{
           borderRadius: `${radii.md}px`,
-          py: 1,
-          px: collapsed ? 1.5 : 2,
+          py: 0.5,
+          px: collapsed ? 1.25 : 1.5,
           justifyContent: collapsed ? "center" : "flex-start",
-          minHeight: 40,
+          minHeight: 34,
           "&.Mui-selected": {
             bgcolor: "rgba(180,83,9,0.08)",
             borderLeft: collapsed ? "none" : `2px solid ${accent.primary}`,
@@ -56,7 +56,7 @@ export function NavItem(props: NavItemProps): ReactElement {
         {icon && (
           <ListItemIcon
             sx={{
-              minWidth: collapsed ? 0 : 36,
+              minWidth: collapsed ? 0 : 30,
               color: active ? "accent.primary" : "text.secondary",
               justifyContent: "center",
             }}

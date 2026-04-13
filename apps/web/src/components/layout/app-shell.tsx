@@ -6,12 +6,18 @@ import { AppBar, Box, Drawer, IconButton, Toolbar, Typography } from "@mui/mater
 import { line } from "@/theme/palette";
 import { motion } from "@/theme/tokens";
 import { MobileNav } from "./mobile-nav";
+import { getShellConfig, type ShellVariant } from "./shell-config";
 import { Sidebar, SIDEBAR_WIDTH_EXPANDED } from "./sidebar";
 
-export function AppShell(props: PropsWithChildren): ReactElement {
-  const { children } = props;
+interface AppShellProps extends PropsWithChildren {
+  variant?: ShellVariant;
+}
+
+export function AppShell(props: AppShellProps): ReactElement {
+  const { children, variant = "dashboard" } = props;
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const config = getShellConfig(variant);
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
@@ -32,7 +38,7 @@ export function AppShell(props: PropsWithChildren): ReactElement {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h5">OGStack</Typography>
+          <Typography variant="h5">{config.mobileTitle}</Typography>
         </Toolbar>
       </AppBar>
 
@@ -51,10 +57,10 @@ export function AppShell(props: PropsWithChildren): ReactElement {
           },
         }}
       >
-        <MobileNav onClose={() => setMobileOpen(false)} />
+        <MobileNav onClose={() => setMobileOpen(false)} config={config} />
       </Drawer>
 
-      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
+      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} config={config} />
 
       <Box
         component="main"
@@ -65,7 +71,6 @@ export function AppShell(props: PropsWithChildren): ReactElement {
           p: { xs: 2, md: 4 },
           pt: { xs: 9, md: 4 },
           overflow: "auto",
-          ml: { xs: 0, md: 0 },
           transition: `margin-left ${motion.standard}`,
         }}
       >

@@ -41,7 +41,7 @@ export function FeedbackMenu(props: FeedbackMenuProps): ReactElement {
       </IconButton>
     </Tooltip>
   ) : (
-    <ListItemButton onClick={handleOpen} sx={{ borderRadius: `${radii.md}px`, px: 2, mb: 0.5 }}>
+    <ListItemButton onClick={handleOpen} sx={{ borderRadius: `${radii.md}px`, px: 2 }}>
       <ListItemIcon sx={{ minWidth: 36, color: "text.secondary" }}>
         <FeedbackIcon fontSize="small" />
       </ListItemIcon>

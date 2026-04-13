@@ -37,21 +37,3 @@ export const PAGINATION_DEFAULTS = {
 } as const;
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-
-export const SIDEBAR_NAV_ITEMS = [
-  { label: "Overview", href: ROUTES.overview, icon: "dashboard" },
-  { label: "Projects", href: ROUTES.projects, icon: "folder" },
-  { label: "Playground", href: ROUTES.playground, icon: "playCircle" },
-  { label: "Templates", href: ROUTES.templates, icon: "library" },
-  { label: "Images", href: ROUTES.images, icon: "photoLibrary" },
-  { label: "Audits", href: ROUTES.audits, icon: "verified" },
-  { label: "API Keys", href: ROUTES.apiKeys, icon: "vpnKey" },
-  { label: "Billing", href: ROUTES.billing, icon: "payment" },
-  { label: "Settings", href: ROUTES.settings, icon: "settings" },
-] as const;
-
-export const ADMIN_NAV_ITEMS = [
-  { label: "Overview", href: ROUTES.adminOverview, icon: "dashboard" },
-  { label: "Users", href: ROUTES.adminUsers, icon: "groups" },
-  { label: "Images", href: ROUTES.adminImages, icon: "photoLibrary" },
-] as const;

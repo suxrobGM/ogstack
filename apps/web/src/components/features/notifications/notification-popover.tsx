@@ -87,7 +87,7 @@ export function NotificationPopover(props: NotificationPopoverProps): ReactEleme
       </IconButton>
     </Tooltip>
   ) : (
-    <ListItemButton onClick={handleOpen} sx={{ borderRadius: `${radii.md}px`, px: 2, mb: 0.5 }}>
+    <ListItemButton onClick={handleOpen} sx={{ borderRadius: `${radii.md}px`, px: 2 }}>
       <ListItemIcon sx={{ minWidth: 36, color: "text.secondary" }}>{icon}</ListItemIcon>
       <ListItemText primary={<Typography variant="body2">Notifications</Typography>} />
     </ListItemButton>
