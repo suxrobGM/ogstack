@@ -37,10 +37,10 @@ export function SocialPreviewsSection(): ReactElement {
                 />
                 <Box sx={{ px: 1.75, py: 1.5 }}>
                   <Typography
+                    variant="body1Muted"
                     sx={{
                       fontFamily: fontFamilies.mono,
                       fontSize: 10,
-                      color: "text.secondary",
                       textTransform: "uppercase",
                       letterSpacing: "1px",
                       mb: 0.5,
@@ -51,7 +51,9 @@ export function SocialPreviewsSection(): ReactElement {
                   <Typography sx={{ fontSize: 13, fontWeight: 500, mb: 0.25 }}>
                     Building with Bun: A Practical Guide
                   </Typography>
-                  <Typography sx={{ fontSize: 11, color: "text.secondary" }}>{p.url}</Typography>
+                  <Typography variant="body1Muted" sx={{ fontSize: 11 }}>
+                    {p.url}
+                  </Typography>
                 </Box>
               </Box>
             </Grid>

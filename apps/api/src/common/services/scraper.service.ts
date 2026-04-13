@@ -28,7 +28,13 @@ export class ScraperService {
     return this.parseMetadata(url.toString(), html);
   }
 
-  private async fetchHtml(url: string): Promise<string> {
+  async fetchValidatedHtml(rawUrl: string): Promise<{ url: string; html: string }> {
+    const url = await validateUrlForFetch(rawUrl);
+    const html = await this.fetchHtml(url.toString());
+    return { url: url.toString(), html };
+  }
+
+  async fetchHtml(url: string): Promise<string> {
     let currentUrl = url;
 
     for (let i = 0; i < MAX_REDIRECTS; i++) {
@@ -182,7 +188,7 @@ export class ScraperService {
     return metadata;
   }
 
-  private resolveUrl(url: string | null, base: string): string | null {
+  resolveUrl(url: string | null, base: string): string | null {
     if (!url) return null;
     try {
       return new URL(url, base).toString();

@@ -6,12 +6,12 @@ import {
   resolveUserPlan,
   tieredRateLimiter,
 } from "@/common/middleware/tiered-rate-limiter";
+import { UuidIdParamSchema } from "@/types/request";
 import { ImageGenerationService } from "./image-generation.service";
 import {
   ApiGenerateBodySchema,
   DashboardGenerateBodySchema,
   GenerateResponseSchema,
-  ImageIdParamsSchema,
   ImageItemSchema,
   ImageListQuerySchema,
   ImageListResponseSchema,
@@ -48,13 +48,13 @@ export const imageController = new Elysia({ prefix: "/images", tags: ["Images"] 
     detail: { summary: "List images for the authenticated user" },
   })
   .patch("/:id", ({ user, params, body }) => imageService.update(user.id, params.id, body), {
-    params: ImageIdParamsSchema,
+    params: UuidIdParamSchema,
     body: ImageUpdateBodySchema,
     response: ImageItemSchema,
     detail: { summary: "Update image metadata" },
   })
   .delete("/:id", ({ user, params }) => imageService.delete(user.id, params.id), {
-    params: ImageIdParamsSchema,
+    params: UuidIdParamSchema,
     response: t.Object({ success: t.Boolean() }),
     detail: { summary: "Delete an image" },
   });

@@ -30,11 +30,23 @@ export function HeroSection(): ReactElement {
           </Typography>
           <Stack direction="row" spacing={3.5} sx={{ alignItems: "center" }}>
             <Typography
+              variant="body1Muted"
+              component="a"
+              href={ROUTES.audit}
+              sx={{
+                fontSize: 14,
+                textDecoration: "none",
+                "&:hover": { color: "text.primary" },
+              }}
+            >
+              Audit
+            </Typography>
+            <Typography
+              variant="body1Muted"
               component="a"
               href={ROUTES.docs}
               sx={{
                 fontSize: 14,
-                color: "text.secondary",
                 textDecoration: "none",
                 "&:hover": { color: "text.primary" },
               }}
@@ -42,11 +54,11 @@ export function HeroSection(): ReactElement {
               Docs
             </Typography>
             <Typography
+              variant="body1Muted"
               component="a"
               href="#templates"
               sx={{
                 fontSize: 14,
-                color: "text.secondary",
                 textDecoration: "none",
                 "&:hover": { color: "text.primary" },
               }}
@@ -54,11 +66,11 @@ export function HeroSection(): ReactElement {
               Templates
             </Typography>
             <Typography
+              variant="body1Muted"
               component="a"
               href="#pricing"
               sx={{
                 fontSize: 14,
-                color: "text.secondary",
                 textDecoration: "none",
                 "&:hover": { color: "text.primary" },
               }}
@@ -109,8 +121,8 @@ export function HeroSection(): ReactElement {
           <Button href={ROUTES.register} variant="contained" size="large">
             Start for free
           </Button>
-          <Button href={ROUTES.docs} variant="outlined" size="large">
-            Read the docs
+          <Button href={ROUTES.audit} variant="outlined" size="large">
+            Audit your URL
           </Button>
         </Stack>
       </Container>

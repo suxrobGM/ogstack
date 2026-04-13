@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 import { Box } from "@mui/material";
+import { AuditPromoSection } from "@/components/features/landing/audit-promo-section";
 import { CodeSection } from "@/components/features/landing/code-section";
 import { FeaturesSection } from "@/components/features/landing/features-section";
 import { Footer } from "@/components/features/landing/footer";
@@ -13,6 +14,7 @@ export default function HomePage(): ReactElement {
     <Box sx={{ bgcolor: "surfaces.base", minHeight: "100vh" }}>
       <HeroSection />
       <SocialPreviewsSection />
+      <AuditPromoSection />
       <FeaturesSection />
       <CodeSection />
       <TemplateGallerySection />

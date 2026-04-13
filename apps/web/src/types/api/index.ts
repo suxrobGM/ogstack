@@ -7,3 +7,4 @@ export type * from "./billing";
 export type * from "./generation";
 export type * from "./image";
 export type * from "./admin";
+export type * from "./audit";

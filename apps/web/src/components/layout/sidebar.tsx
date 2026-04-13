@@ -11,6 +11,7 @@ import PaymentIcon from "@mui/icons-material/Payment";
 import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import SettingsIcon from "@mui/icons-material/Settings";
+import VerifiedIcon from "@mui/icons-material/Verified";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import { Box, Divider, IconButton, List, Stack, Typography } from "@mui/material";
 import { isAdminRole } from "@ogstack/shared";
@@ -33,6 +34,7 @@ const ICON_MAP: Record<string, ReactElement> = {
   playCircle: <PlayCircleIcon fontSize="small" />,
   library: <LibraryBooksIcon fontSize="small" />,
   photoLibrary: <PhotoLibraryIcon fontSize="small" />,
+  verified: <VerifiedIcon fontSize="small" />,
   vpnKey: <VpnKeyIcon fontSize="small" />,
   payment: <PaymentIcon fontSize="small" />,
   settings: <SettingsIcon fontSize="small" />,

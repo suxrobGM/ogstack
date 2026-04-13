@@ -53,6 +53,8 @@ export function Playground(props: PlaygroundProps): ReactElement {
   const initialTemplate =
     (searchParams.get("template") as PlaygroundFormValues["template"] | null) ?? DEFAULTS.template;
 
+  const initialUrl = searchParams.get("url") ?? DEFAULTS.url;
+
   const [selectedProjectId, setSelectedProjectId] = useState(
     () => initialProjects?.items[0]?.id ?? "",
   );
@@ -82,7 +84,7 @@ export function Playground(props: PlaygroundProps): ReactElement {
   );
 
   const form = useForm({
-    defaultValues: { ...DEFAULTS, template: initialTemplate },
+    defaultValues: { ...DEFAULTS, template: initialTemplate, url: initialUrl },
     onSubmit: ({ value }) => {
       setLastFormValues(value);
       generateMutation.mutate({

@@ -3,7 +3,7 @@ import type { PropsWithChildren, ReactElement } from "react";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
 import type { Metadata } from "next";
 import { IBM_Plex_Sans, JetBrains_Mono, Newsreader } from "next/font/google";
-import { ThemeProvider } from "@/providers";
+import { QueryProvider, ThemeProvider } from "@/providers";
 import { NotificationProvider } from "@/providers/notification-provider";
 
 const newsreader = Newsreader({
@@ -40,7 +40,9 @@ export default function RootLayout({ children }: PropsWithChildren): ReactElemen
       >
         <AppRouterCacheProvider>
           <ThemeProvider>
-            <NotificationProvider>{children}</NotificationProvider>
+            <QueryProvider>
+              <NotificationProvider>{children}</NotificationProvider>
+            </QueryProvider>
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>

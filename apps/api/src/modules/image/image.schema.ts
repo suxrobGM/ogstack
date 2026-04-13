@@ -103,10 +103,6 @@ export const ImageUpdateBodySchema = t.Object({
   description: t.Optional(t.String({ maxLength: 500 })),
 });
 
-export const ImageIdParamsSchema = t.Object({
-  id: t.String({ format: "uuid" }),
-});
-
 export type ApiGenerateBody = Static<typeof ApiGenerateBodySchema>;
 export type DashboardGenerateBody = Static<typeof DashboardGenerateBodySchema>;
 export type PublicGenerateParams = Static<typeof PublicGenerateParamsSchema>;

@@ -1,24 +1,17 @@
 model AuditReport {
-  id             String  @id @default(uuid()) @db.Uuid
-  userId         String? @map("user_id") @db.Uuid
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String?  @map("user_id") @db.Uuid
   url            String
-  overallScore   Int     @map("overall_score")
-  letterGrade    String  @map("letter_grade")
-  hasOgImage     Boolean @map("has_og_image")
-  ogImageUrl     String? @map("og_image_url")
-  ogImageWidth   Int?    @map("og_image_width")
-  ogImageHeight  Int?    @map("og_image_height")
-  ogImageSize    Int?    @map("og_image_size")
-  hasOgTitle     Boolean @map("has_og_title")
-  hasOgDesc      Boolean @map("has_og_desc")
-  hasTwitterCard Boolean @map("has_twitter_card")
+  overallScore   Int      @map("overall_score")
+  letterGrade    String   @map("letter_grade")
+  metadata       Json
   issues         Json
-  previews       Json
-
-  createdAt DateTime @default(now()) @map("created_at")
+  categoryScores Json     @map("category_scores")
+  createdAt      DateTime @default(now()) @map("created_at")
 
   user User? @relation(fields: [userId], references: [id])
 
   @@index([url])
+  @@index([userId, createdAt])
   @@map("audit_reports")
 }

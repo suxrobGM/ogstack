@@ -6,7 +6,6 @@ import { getServerClient } from "@/lib/api/server";
 import { ROUTES } from "@/lib/constants";
 import { AuthProvider } from "@/providers/auth-provider";
 import { ConfirmProvider } from "@/providers/confirm-provider";
-import { QueryProvider } from "@/providers/query-provider";
 
 async function getUser() {
   const client = await getServerClient();
@@ -37,12 +36,10 @@ async function AdminAuthenticatedShell(props: PropsWithChildren): Promise<ReactE
 export default function AdminLayout(props: PropsWithChildren): ReactElement {
   const { children } = props;
   return (
-    <QueryProvider>
-      <ConfirmProvider>
-        <Suspense>
-          <AdminAuthenticatedShell>{children}</AdminAuthenticatedShell>
-        </Suspense>
-      </ConfirmProvider>
-    </QueryProvider>
+    <ConfirmProvider>
+      <Suspense>
+        <AdminAuthenticatedShell>{children}</AdminAuthenticatedShell>
+      </Suspense>
+    </ConfirmProvider>
   );
 }

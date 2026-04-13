@@ -8,6 +8,7 @@ import { corsPlugin, swaggerPlugin, uploadsStaticPlugin } from "@/common/plugins
 import { validateEnv } from "@/env";
 import { adminController } from "@/modules/admin";
 import { apiKeyController, apiKeyDeleteController } from "@/modules/api-key";
+import { auditCleanupCron, auditController, auditUserController } from "@/modules/audit";
 import { authController } from "@/modules/auth";
 import {
   billingController,
@@ -34,12 +35,15 @@ const app = new Elysia()
   })
   .get("/health", () => ({ status: "ok", timestamp: new Date().toISOString() }))
   .use(imagePublicController)
+  .use(auditCleanupCron)
   .group("/api", (api) =>
     api
       .guard({ response: HttpErrorResponses })
       .use(authController)
       .use(apiKeyController)
       .use(apiKeyDeleteController)
+      .use(auditController)
+      .use(auditUserController)
       .use(imageApiController)
       .use(imageController)
       .use(projectController)
