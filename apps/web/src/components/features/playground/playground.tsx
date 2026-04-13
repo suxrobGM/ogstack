@@ -13,6 +13,7 @@ import type {
   ProjectListResponse,
   TemplateInfo,
 } from "@/types/api";
+import { buildOgImageUrl, buildOgMetaTag, OG_PRODUCTION_HOST } from "@/utils/og-image";
 import { ControlsPanel } from "./controls-panel";
 import { PreviewPane } from "./preview-pane";
 import type { PlaygroundFormValues } from "./schema";
@@ -32,7 +33,9 @@ interface PlaygroundProps {
   initialTemplates: TemplateInfo[] | null;
 }
 
-function buildMetaTag(publicId: string, values: PlaygroundFormValues): string {
+/** Serialize only the params that differ from backend defaults, so the meta
+ *  tag stays as short as possible in the customer's HTML. */
+function toOgParams(values: PlaygroundFormValues): URLSearchParams {
   const params = new URLSearchParams();
   params.set("url", values.url);
   if (values.template !== "gradient_dark") params.set("template", values.template);
@@ -41,8 +44,7 @@ function buildMetaTag(publicId: string, values: PlaygroundFormValues): string {
   if (values.font !== "inter") params.set("font", values.font);
   if (values.logoUrl) params.set("logoUrl", values.logoUrl);
   if (values.logoPosition !== "top-left") params.set("logoPosition", values.logoPosition);
-
-  return `<meta property="og:image" content="https://api.ogstack.dev/og/${publicId}?${params.toString()}" />`;
+  return params;
 }
 
 export function Playground(props: PlaygroundProps): ReactElement {
@@ -70,7 +72,9 @@ export function Playground(props: PlaygroundProps): ReactElement {
   const generateMutation = useApiMutation(
     (body: ImageGenerateBody) => client.api.images.post(body),
     {
-      errorMessage: "Failed to generate image. Please check the URL and try again.",
+      // Backend supplies user-friendly messages (see apps/api/src/common/errors
+      // and scraper.service.ts); surface them directly.
+      errorMessage: (err) => err.message,
       onSuccess: (data) => {
         setResult(data as GenerateDto);
       },
@@ -98,7 +102,9 @@ export function Playground(props: PlaygroundProps): ReactElement {
 
   const metaTag =
     result && lastFormValues && selectedProject
-      ? buildMetaTag(selectedProject.publicId, lastFormValues)
+      ? buildOgMetaTag(
+          buildOgImageUrl(selectedProject.publicId, toOgParams(lastFormValues), OG_PRODUCTION_HOST),
+        )
       : null;
 
   return (

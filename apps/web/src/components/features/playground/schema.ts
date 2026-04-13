@@ -1,15 +1,4 @@
-export const TEMPLATE_SLUGS = [
-  "gradient_dark",
-  "gradient_light",
-  "split_hero",
-  "centered_bold",
-  "blog_card",
-  "docs_page",
-  "product_launch",
-  "changelog",
-  "github_repo",
-  "minimal",
-] as const;
+import type { TemplateSlug } from "@ogstack/shared";
 
 export const FONT_FAMILIES = [
   "inter",
@@ -21,7 +10,6 @@ export const FONT_FAMILIES = [
 
 export const LOGO_POSITIONS = ["top-left", "top-right", "bottom-left", "bottom-right"] as const;
 
-export type TemplateSlug = (typeof TEMPLATE_SLUGS)[number];
 export type FontFamily = (typeof FONT_FAMILIES)[number];
 export type LogoPosition = (typeof LOGO_POSITIONS)[number];
 

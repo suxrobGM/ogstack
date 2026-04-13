@@ -1,12 +1,22 @@
+import type { TemplateCategorySlug, TemplateSlug } from "@ogstack/shared/constants";
 import { prisma } from "@/common/database";
 import { logger } from "@/common/logger";
 
-const builtInTemplates = [
+interface BuiltInTemplate {
+  slug: TemplateSlug;
+  name: string;
+  description: string;
+  category: TemplateCategorySlug;
+  darkMode: boolean;
+  lightMode: boolean;
+}
+
+const builtInTemplates: BuiltInTemplate[] = [
   {
     slug: "gradient_dark",
     name: "Dark Gradient",
     description: "Title on dark gradient with accent color border",
-    category: "MINIMAL" as const,
+    category: "MINIMAL",
     darkMode: true,
     lightMode: false,
   },
@@ -14,7 +24,7 @@ const builtInTemplates = [
     slug: "gradient_light",
     name: "Light Gradient",
     description: "Title on light gradient, clean and minimal",
-    category: "MINIMAL" as const,
+    category: "MINIMAL",
     darkMode: false,
     lightMode: true,
   },
@@ -22,7 +32,7 @@ const builtInTemplates = [
     slug: "split_hero",
     name: "Split Hero",
     description: "Left text, right image or pattern area",
-    category: "CREATIVE" as const,
+    category: "CREATIVE",
     darkMode: true,
     lightMode: true,
   },
@@ -30,7 +40,7 @@ const builtInTemplates = [
     slug: "centered_bold",
     name: "Centered Bold",
     description: "Large centered title with subtle background",
-    category: "MINIMAL" as const,
+    category: "MINIMAL",
     darkMode: true,
     lightMode: true,
   },
@@ -38,7 +48,7 @@ const builtInTemplates = [
     slug: "blog_card",
     name: "Blog Card",
     description: "Author avatar, title, reading time, and site name",
-    category: "SOCIAL" as const,
+    category: "SOCIAL",
     darkMode: true,
     lightMode: true,
   },
@@ -46,7 +56,7 @@ const builtInTemplates = [
     slug: "docs_page",
     name: "Documentation",
     description: "Sidebar-style layout with section breadcrumbs",
-    category: "DOCUMENTATION" as const,
+    category: "DOCUMENTATION",
     darkMode: true,
     lightMode: true,
   },
@@ -54,7 +64,7 @@ const builtInTemplates = [
     slug: "product_launch",
     name: "Product Launch",
     description: "Hero-style with tagline and call-to-action",
-    category: "MARKETING" as const,
+    category: "MARKETING",
     darkMode: true,
     lightMode: true,
   },
@@ -62,7 +72,7 @@ const builtInTemplates = [
     slug: "changelog",
     name: "Changelog",
     description: "Version badge, date, and update title",
-    category: "TECH" as const,
+    category: "TECH",
     darkMode: true,
     lightMode: true,
   },
@@ -70,7 +80,7 @@ const builtInTemplates = [
     slug: "github_repo",
     name: "Repository Card",
     description: "GitHub-style card with description and language indicator",
-    category: "TECH" as const,
+    category: "TECH",
     darkMode: true,
     lightMode: true,
   },
@@ -78,7 +88,7 @@ const builtInTemplates = [
     slug: "minimal",
     name: "Minimal",
     description: "Just the title with maximum whitespace",
-    category: "MINIMAL" as const,
+    category: "MINIMAL",
     darkMode: true,
     lightMode: true,
   },

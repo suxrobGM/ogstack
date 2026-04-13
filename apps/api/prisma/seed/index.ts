@@ -1,12 +1,22 @@
 import { prisma } from "@/common/database";
 import { seedAdmin } from "./admin";
+import { seedDemoProject } from "./demo-project";
 import { seedPlans } from "./plans";
+import { seedTemplateCategories } from "./template-categories";
 import { seedTemplates } from "./templates";
 
 const seeders = {
   admin: { fn: seedAdmin, description: "Seed admin user" },
+  "template-categories": {
+    fn: seedTemplateCategories,
+    description: "Seed built-in template categories",
+  },
   templates: { fn: seedTemplates, description: "Seed built-in templates" },
   plans: { fn: seedPlans, description: "Seed plan tiers and sync with Stripe" },
+  "demo-project": {
+    fn: seedDemoProject,
+    description: "Seed the public playground demo project",
+  },
 } as const;
 
 type SeederName = keyof typeof seeders;

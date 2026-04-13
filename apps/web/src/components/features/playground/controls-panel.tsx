@@ -22,6 +22,7 @@ import type { AnyReactForm } from "@/components/ui/form/types";
 import { Surface } from "@/components/ui/layout/surface";
 import { accent, line, radii } from "@/theme";
 import type { Project, TemplateInfo } from "@/types/api";
+import { normalizeUrlInput } from "@/utils/url";
 import { FONT_FAMILIES, FONT_LABELS, LOGO_POSITION_LABELS, LOGO_POSITIONS } from "./schema";
 import { TemplateSelector } from "./template-selector";
 
@@ -74,12 +75,7 @@ export function ControlsPanel(props: ControlsPanelProps): ReactElement {
           name="url"
           label="URL"
           placeholder="https://example.com/page"
-          transform={(v) => {
-            if (v && !v.startsWith("http://") && !v.startsWith("https://") && v.includes(".")) {
-              return `https://${v}`;
-            }
-            return v;
-          }}
+          transform={normalizeUrlInput}
         />
 
         {/* Template selection */}

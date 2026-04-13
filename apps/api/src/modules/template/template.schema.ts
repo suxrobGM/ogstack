@@ -1,19 +1,19 @@
+import {
+  DEFAULT_TEMPLATE_SLUG,
+  TEMPLATE_SLUGS,
+  type TemplateSlug as SharedTemplateSlug,
+} from "@ogstack/shared/constants";
 import { t, type Static } from "elysia";
 
-export const TemplateSlugSchema = t.Union(
-  [
-    t.Literal("gradient_dark"),
-    t.Literal("gradient_light"),
-    t.Literal("split_hero"),
-    t.Literal("centered_bold"),
-    t.Literal("blog_card"),
-    t.Literal("docs_page"),
-    t.Literal("product_launch"),
-    t.Literal("changelog"),
-    t.Literal("github_repo"),
-    t.Literal("minimal"),
-  ],
-  { default: "gradient_dark" },
+// `t.Unsafe<T>` wraps a runtime schema with a compile-time type override. We
+// build an enum-constrained string schema from the shared slug list, then
+// brand its Static type with `SharedTemplateSlug` so handlers and inferred
+// types get the narrow union without TypeBox's excessive tuple-inference cost.
+export const TemplateSlugSchema = t.Unsafe<SharedTemplateSlug>(
+  t.String({
+    enum: [...TEMPLATE_SLUGS],
+    default: DEFAULT_TEMPLATE_SLUG,
+  }),
 );
 
 export const FontFamilySchema = t.Union(
@@ -54,7 +54,7 @@ export const TemplateInfoSchema = t.Object({
 
 export const TemplateListResponseSchema = t.Array(TemplateInfoSchema);
 
-export type TemplateSlug = Static<typeof TemplateSlugSchema>;
+export type TemplateSlug = SharedTemplateSlug;
 export type FontFamily = Static<typeof FontFamilySchema>;
 export type LogoPosition = Static<typeof LogoPositionSchema>;
 export type RenderOptions = Static<typeof RenderOptionsSchema>;

@@ -5,7 +5,6 @@ import { getServerClient } from "@/lib/api/server";
 import { ROUTES } from "@/lib/constants";
 import { AuthProvider } from "@/providers/auth-provider";
 import { ConfirmProvider } from "@/providers/confirm-provider";
-import { NotificationProvider } from "@/providers/notification-provider";
 import { QueryProvider } from "@/providers/query-provider";
 
 async function getUser() {
@@ -34,13 +33,11 @@ export default function DashboardLayout(props: PropsWithChildren): ReactElement 
   const { children } = props;
   return (
     <QueryProvider>
-      <NotificationProvider>
-        <ConfirmProvider>
-          <Suspense>
-            <AuthenticatedShell>{children}</AuthenticatedShell>
-          </Suspense>
-        </ConfirmProvider>
-      </NotificationProvider>
+      <ConfirmProvider>
+        <Suspense>
+          <AuthenticatedShell>{children}</AuthenticatedShell>
+        </Suspense>
+      </ConfirmProvider>
     </QueryProvider>
   );
 }

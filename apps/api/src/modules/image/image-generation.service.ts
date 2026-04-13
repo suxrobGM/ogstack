@@ -4,7 +4,7 @@ import { logger } from "@/common/logger";
 import { ScraperService } from "@/common/services/scraper.service";
 import { ImageStorageService } from "@/common/services/storage";
 import { hashSha256 } from "@/common/utils/crypto";
-import { PrismaClient, type TemplateCategory } from "@/generated/prisma";
+import { PrismaClient } from "@/generated/prisma";
 import {
   getTemplate,
   TemplateService,
@@ -95,7 +95,7 @@ export class ImageGenerationService {
         fileSize: stored.size,
         generationMs,
         serveCount: 1,
-        category: getTemplate(template).info.category as TemplateCategory,
+        category: getTemplate(template).info.category,
       },
     });
 
@@ -169,7 +169,7 @@ export class ImageGenerationService {
         fileSize: stored.size,
         generationMs,
         serveCount: 1,
-        category: getTemplate(template).info.category as TemplateCategory,
+        category: getTemplate(template).info.category,
       },
     });
 

@@ -5,16 +5,12 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Box, Chip, Grid, Typography } from "@mui/material";
 import { accent, line, motion, radii, shadows, surfaces } from "@/theme";
 import type { TemplateInfo } from "@/types/api";
+import { templateThumbnailUrl } from "@/utils/og-image";
 
 interface TemplateSelectorProps {
   templates: TemplateInfo[];
   selected: string;
   onSelect: (slug: string) => void;
-}
-
-function getThumbnailSrc(slug: string): string {
-  const fileName = slug.replace(/_/g, "-");
-  return `/images/templates/${fileName}.webp`;
 }
 
 export function TemplateSelector(props: TemplateSelectorProps): ReactElement {
@@ -31,7 +27,7 @@ export function TemplateSelector(props: TemplateSelectorProps): ReactElement {
       <Grid container spacing={1.5}>
         {templates.map((template) => {
           const isSelected = selected === template.slug;
-          const thumbnailSrc = getThumbnailSrc(template.slug);
+          const thumbnailSrc = templateThumbnailUrl(template.slug);
 
           return (
             <Grid key={template.slug} size={6}>

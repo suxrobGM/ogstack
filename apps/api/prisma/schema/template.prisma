@@ -1,32 +1,32 @@
-enum TemplateCategory {
-  TECH
-  MARKETING
-  MINIMAL
-  CREATIVE
-  BUSINESS
-  DOCUMENTATION
-  SOCIAL
+model TemplateCategory {
+  slug      String   @id
+  label     String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("template_categories")
 }
 
 model Template {
-  id              String           @id @default(uuid()) @db.Uuid
-  slug            String           @unique
+  id              String  @id @default(uuid()) @db.Uuid
+  slug            String  @unique
   name            String
   description     String?
-  category        TemplateCategory
-  previewUrl      String?          @map("preview_url")
-  jsxCode         String           @map("jsx_code") @db.Text
-  isBuiltIn       Boolean          @default(false) @map("is_built_in")
-  isCommunity     Boolean          @default(false) @map("is_community")
-  contributorName String?          @map("contributor_name")
-  contributorUrl  String?          @map("contributor_url")
-  darkMode        Boolean          @default(true) @map("dark_mode")
-  lightMode       Boolean          @default(true) @map("light_mode")
+  category        String?
+  previewUrl      String? @map("preview_url")
+  jsxCode         String  @map("jsx_code") @db.Text
+  isBuiltIn       Boolean @default(false) @map("is_built_in")
+  isCommunity     Boolean @default(false) @map("is_community")
+  contributorName String? @map("contributor_name")
+  contributorUrl  String? @map("contributor_url")
+  darkMode        Boolean @default(true) @map("dark_mode")
+  lightMode       Boolean @default(true) @map("light_mode")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   images Image[]
 
+  @@index([category])
   @@map("templates")
 }

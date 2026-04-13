@@ -13,6 +13,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { TEMPLATE_CATEGORIES, type TemplateCategorySlug } from "@ogstack/shared";
 import Image from "next/image";
 import { EmptyState } from "@/components/ui/data/empty-state";
 import { Pagination } from "@/components/ui/data/pagination";
@@ -23,7 +24,6 @@ import { queryKeys } from "@/lib/query-keys";
 import { line, motion, radii, shadows, surfaces } from "@/theme";
 import type { ImageItem, ImageListResponse, Project } from "@/types/api";
 import { ImageDetailDialog } from "./image-detail-dialog";
-import { TEMPLATE_CATEGORIES, type TemplateCategoryValue } from "./schema";
 
 interface ImagesGalleryProps {
   initialData: ImageListResponse | null;
@@ -38,7 +38,7 @@ export function ImagesGallery(props: ImagesGalleryProps): ReactElement {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [projectId, setProjectId] = useState<string>("");
-  const [category, setCategory] = useState<TemplateCategoryValue | "">("");
+  const [category, setCategory] = useState<TemplateCategorySlug | "">("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [selected, setSelected] = useState<ImageItem | null>(null);
@@ -139,15 +139,15 @@ export function ImagesGallery(props: ImagesGalleryProps): ReactElement {
           label="Category"
           value={category}
           onChange={(e) => {
-            setCategory(e.target.value as TemplateCategoryValue | "");
+            setCategory(e.target.value as TemplateCategorySlug | "");
             resetPage();
           }}
           sx={{ minWidth: 180 }}
         >
           <MenuItem value="">All categories</MenuItem>
           {TEMPLATE_CATEGORIES.map((c) => (
-            <MenuItem key={c} value={c}>
-              {c.charAt(0) + c.slice(1).toLowerCase()}
+            <MenuItem key={c.slug} value={c.slug}>
+              {c.label}
             </MenuItem>
           ))}
         </TextField>

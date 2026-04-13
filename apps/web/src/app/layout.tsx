@@ -4,6 +4,7 @@ import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
 import type { Metadata } from "next";
 import { IBM_Plex_Sans, JetBrains_Mono, Newsreader } from "next/font/google";
 import { ThemeProvider } from "@/providers";
+import { NotificationProvider } from "@/providers/notification-provider";
 
 const newsreader = Newsreader({
   subsets: ["latin"],
@@ -38,7 +39,9 @@ export default function RootLayout({ children }: PropsWithChildren): ReactElemen
         className={`${newsreader.variable} ${ibmPlexSans.variable} ${jetbrainsMono.variable} antialiased`}
       >
         <AppRouterCacheProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            <NotificationProvider>{children}</NotificationProvider>
+          </ThemeProvider>
         </AppRouterCacheProvider>
       </body>
     </html>

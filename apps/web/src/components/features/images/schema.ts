@@ -6,15 +6,3 @@ export const imageEditFormSchema = z.object({
 });
 
 export type ImageEditFormValues = z.infer<typeof imageEditFormSchema>;
-
-export const TEMPLATE_CATEGORIES = [
-  "TECH",
-  "MARKETING",
-  "MINIMAL",
-  "CREATIVE",
-  "BUSINESS",
-  "DOCUMENTATION",
-  "SOCIAL",
-] as const;
-
-export type TemplateCategoryValue = (typeof TEMPLATE_CATEGORIES)[number];

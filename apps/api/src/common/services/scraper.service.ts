@@ -1,5 +1,5 @@
 import { singleton } from "tsyringe";
-import { BadRequestError } from "@/common/errors/http.error";
+import { BadRequestError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { decodeHtmlEntities } from "@/common/utils/html-entities";
 import { validateUrlForFetch } from "@/common/utils/url";
@@ -32,18 +32,25 @@ export class ScraperService {
     let currentUrl = url;
 
     for (let i = 0; i < MAX_REDIRECTS; i++) {
-      const response = await fetch(currentUrl, {
-        headers: {
-          "User-Agent": "OGStackBot/1.0 (+https://ogstack.dev)",
-          Accept: "text/html,application/xhtml+xml",
-        },
-        redirect: "manual",
-        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-      });
+      let response: Response;
+      try {
+        response = await fetch(currentUrl, {
+          headers: {
+            "User-Agent": "OGStackBot/1.0 (+https://ogstack.dev)",
+            Accept: "text/html,application/xhtml+xml",
+          },
+          redirect: "manual",
+          signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+        });
+      } catch {
+        throw new BadRequestError("We couldn't reach that URL. Make sure it's public and online.");
+      }
 
       if (response.status >= 300 && response.status < 400) {
         const location = response.headers.get("location");
-        if (!location) throw new BadRequestError("Redirect without Location header");
+        if (!location) {
+          throw new BadRequestError("That URL returned a broken redirect (no Location header).");
+        }
 
         const redirectUrl = new URL(location, currentUrl);
         await validateUrlForFetch(redirectUrl.toString());
@@ -52,28 +59,46 @@ export class ScraperService {
       }
 
       if (!response.ok) {
-        throw new BadRequestError(`Failed to fetch URL: HTTP ${response.status}`);
+        const status = response.status;
+        if (status === 404) {
+          throw new BadRequestError(
+            "We couldn't find that page (404). Check the URL and try again.",
+          );
+        }
+        if (status === 401 || status === 403) {
+          throw new BadRequestError(
+            "That page requires authentication and isn't publicly accessible.",
+          );
+        }
+        if (status >= 500) {
+          throw new BadRequestError(
+            `The target site returned an error (HTTP ${status}). Try again later.`,
+          );
+        }
+        throw new BadRequestError(`The target site returned HTTP ${status}.`);
       }
 
       const contentType = response.headers.get("content-type") ?? "";
       if (!contentType.includes("text/html") && !contentType.includes("application/xhtml")) {
-        throw new BadRequestError("URL does not return HTML content");
+        throw new BadRequestError(
+          "That URL doesn't return an HTML page — we can only preview web pages.",
+        );
       }
 
       const contentLength = response.headers.get("content-length");
       if (contentLength && parseInt(contentLength, 10) > MAX_BODY_SIZE) {
-        throw new BadRequestError("Response body too large");
+        throw new BadRequestError("That page is too large to preview (over 2 MB).");
       }
 
       const body = await response.text();
       if (body.length > MAX_BODY_SIZE) {
-        throw new BadRequestError("Response body too large");
+        throw new BadRequestError("That page is too large to preview (over 2 MB).");
       }
 
       return body;
     }
 
-    throw new BadRequestError("Too many redirects");
+    throw new BadRequestError("That URL redirects too many times.");
   }
 
   async parseMetadata(url: string, html: string): Promise<UrlMetadata> {

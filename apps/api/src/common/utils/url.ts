@@ -48,30 +48,38 @@ export async function validateUrlForFetch(rawUrl: string): Promise<URL> {
   try {
     url = new URL(rawUrl);
   } catch {
-    throw new BadRequestError("Invalid URL");
+    throw new BadRequestError("That URL isn't valid. Double-check the address and try again.");
   }
 
   if (url.protocol !== "http:" && url.protocol !== "https:") {
-    throw new BadRequestError("Only HTTP and HTTPS URLs are allowed");
+    throw new BadRequestError("Only http:// and https:// URLs are supported.");
   }
 
   const hostname = url.hostname;
 
   if (hostname === "localhost" || hostname === "[::1]") {
-    throw new BadRequestError("Requests to localhost are not allowed");
+    throw new BadRequestError("Localhost URLs can't be scraped. Use a publicly reachable address.");
   }
 
   if (net.isIP(hostname)) {
     if (isPrivateIP(hostname)) {
-      throw new BadRequestError("Requests to private IP addresses are not allowed");
+      throw new BadRequestError(
+        "Private IP addresses aren't allowed. Use a publicly reachable URL.",
+      );
     }
     return url;
   }
 
-  const { address } = await dns.lookup(hostname);
-  if (isPrivateIP(address)) {
-    throw new BadRequestError("URL resolves to a private IP address");
+  try {
+    const { address } = await dns.lookup(hostname);
+    if (isPrivateIP(address)) {
+      throw new BadRequestError(
+        "That URL resolves to a private network address and can't be scraped.",
+      );
+    }
+    return url;
+  } catch (err) {
+    if (err instanceof BadRequestError) throw err;
+    throw new BadRequestError("We couldn't resolve that domain. Check the URL and try again.");
   }
-
-  return url;
 }

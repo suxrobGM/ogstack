@@ -1,5 +1,6 @@
+import type { TemplateSlug } from "@ogstack/shared/constants";
 import type { ReactNode } from "react";
-import type { TemplateInfo, TemplateSlug } from "./template.schema";
+import type { TemplateInfo } from "./template.schema";
 import { BlogCard } from "./templates/blog-card";
 import { CenteredBold } from "./templates/centered-bold";
 import { Changelog } from "./templates/changelog";

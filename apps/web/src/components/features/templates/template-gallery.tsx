@@ -5,15 +5,12 @@ import { Box, Chip, Grid, Stack, Typography } from "@mui/material";
 import { PageHeader } from "@/components/ui/layout/page-header";
 import { accent, line, motion, radii, shadows, surfaces } from "@/theme";
 import type { Project, TemplateInfo } from "@/types/api";
+import { templateThumbnailUrl } from "@/utils/og-image";
 import { TemplatePreviewDialog } from "./template-preview-dialog";
 
 interface TemplateGalleryProps {
   initialTemplates: TemplateInfo[];
   projects: Project[];
-}
-
-function getThumbnailSrc(slug: string): string {
-  return `/images/templates/${slug.replace(/_/g, "-")}.webp`;
 }
 
 export function TemplateGallery(props: TemplateGalleryProps): ReactElement {
@@ -76,7 +73,7 @@ export function TemplateGallery(props: TemplateGalleryProps): ReactElement {
                   width: "100%",
                   aspectRatio: "1200 / 630",
                   backgroundColor: surfaces.elevated,
-                  backgroundImage: `url(${getThumbnailSrc(template.slug)})`,
+                  backgroundImage: `url(${templateThumbnailUrl(template.slug)})`,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                 }}

@@ -1,5 +1,5 @@
 import { t, type Static } from "elysia";
-import { ImageFormat, TemplateCategory } from "@/generated/prisma";
+import { ImageFormat } from "@/generated/prisma";
 import {
   FontFamilySchema,
   LogoPositionSchema,
@@ -8,7 +8,10 @@ import {
 import { PaginationQueryBaseSchema } from "@/types/pagination";
 import { PaginatedResponseSchema } from "@/types/response";
 
-const TemplateCategoryEnumSchema = t.Enum(TemplateCategory);
+// Category is a free-form string on the DB (backed by the `template_categories`
+// lookup table, not an enum). API-level validation is intentionally loose so
+// new categories can be added via seeding without a schema/API redeploy.
+const TemplateCategoryEnumSchema = t.String({ minLength: 1, maxLength: 64 });
 const ImageFormatSchema = t.Enum(ImageFormat);
 
 // --- Generation schemas ---
