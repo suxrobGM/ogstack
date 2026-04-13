@@ -6,6 +6,7 @@ export const FONT_FAMILIES = [
   "space-grotesk",
   "jetbrains-mono",
   "noto-sans",
+  "instrument-serif",
 ] as const;
 
 export const LOGO_POSITIONS = ["top-left", "top-right", "bottom-left", "bottom-right"] as const;
@@ -21,6 +22,7 @@ export const FONT_LABELS: Record<FontFamily, string> = {
   "space-grotesk": "Space Grotesk",
   "jetbrains-mono": "JetBrains Mono",
   "noto-sans": "Noto Sans",
+  "instrument-serif": "Instrument Serif",
 };
 
 export const LOGO_POSITION_LABELS: Record<LogoPosition, string> = {

@@ -24,8 +24,8 @@ const registry = new Map<TemplateSlug, TemplateEntry>([
     {
       info: {
         slug: "gradient_dark",
-        name: "Dark Gradient",
-        description: "Title on dark gradient with accent color border",
+        name: "Aurora",
+        description: "Atmospheric dark canvas with accent glow, dot grid, and hostname footer",
         category: "MINIMAL",
       },
       render: GradientDark,
@@ -36,8 +36,8 @@ const registry = new Map<TemplateSlug, TemplateEntry>([
     {
       info: {
         slug: "gradient_light",
-        name: "Light Gradient",
-        description: "Title on light gradient, clean and minimal",
+        name: "Editorial Paper",
+        description: "Warm off-white essay layout with serif display type and corner marks",
         category: "MINIMAL",
       },
       render: GradientLight,
@@ -48,8 +48,8 @@ const registry = new Map<TemplateSlug, TemplateEntry>([
     {
       info: {
         slug: "split_hero",
-        name: "Split Hero",
-        description: "Left text, right image or pattern area",
+        name: "Spotlight Split",
+        description: "Editorial left column with stacked tilted accent cards on the right",
         category: "CREATIVE",
       },
       render: SplitHero,
@@ -60,8 +60,8 @@ const registry = new Map<TemplateSlug, TemplateEntry>([
     {
       info: {
         slug: "centered_bold",
-        name: "Centered Bold",
-        description: "Large centered title with subtle background",
+        name: "Billboard",
+        description: "Oversized gradient display type with asymmetric accent blobs",
         category: "MINIMAL",
       },
       render: CenteredBold,
@@ -72,8 +72,8 @@ const registry = new Map<TemplateSlug, TemplateEntry>([
     {
       info: {
         slug: "blog_card",
-        name: "Blog Card",
-        description: "Author avatar, title, reading time, and site name",
+        name: "Magazine",
+        description: "Category pill, serif headline, author byline with avatar and read time",
         category: "SOCIAL",
       },
       render: BlogCard,
@@ -84,8 +84,8 @@ const registry = new Map<TemplateSlug, TemplateEntry>([
     {
       info: {
         slug: "docs_page",
-        name: "Documentation",
-        description: "Sidebar-style layout with section breadcrumbs",
+        name: "Docs IDE",
+        description: "Sidebar navigation mock with breadcrumb chips and monospace accents",
         category: "DOCUMENTATION",
       },
       render: DocsPage,
@@ -96,8 +96,8 @@ const registry = new Map<TemplateSlug, TemplateEntry>([
     {
       info: {
         slug: "product_launch",
-        name: "Product Launch",
-        description: "Hero-style with tagline and call-to-action",
+        name: "Launchpad",
+        description: "Radial glow, spark constellation, gradient headline, NEW ribbon, stat chips",
         category: "MARKETING",
       },
       render: ProductLaunch,
@@ -108,8 +108,8 @@ const registry = new Map<TemplateSlug, TemplateEntry>([
     {
       info: {
         slug: "changelog",
-        name: "Changelog",
-        description: "Version badge, date, and update title",
+        name: "Release Notes",
+        description: "Prominent version number with color-coded change rows and release metadata",
         category: "TECH",
       },
       render: Changelog,
@@ -120,8 +120,8 @@ const registry = new Map<TemplateSlug, TemplateEntry>([
     {
       info: {
         slug: "github_repo",
-        name: "Repository Card",
-        description: "GitHub-style card with description and language indicator",
+        name: "Open Source",
+        description: "Owner/name header, star/fork/issue stats, and language distribution bar",
         category: "TECH",
       },
       render: GithubRepo,
@@ -132,8 +132,8 @@ const registry = new Map<TemplateSlug, TemplateEntry>([
     {
       info: {
         slug: "minimal",
-        name: "Minimal",
-        description: "Just the title with maximum whitespace",
+        name: "Swiss Grid",
+        description: "Line-numbered gutter with restrained typographic composition",
         category: "MINIMAL",
       },
       render: Minimal,

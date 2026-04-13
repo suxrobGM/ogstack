@@ -1,44 +1,178 @@
 import type { LogoPosition } from "../template.schema";
 import type { TemplateProps } from "./types";
 
-/** Resolved colors from dark/light mode toggle. */
 export interface ThemeColors {
   bg: string;
+  bgElevated: string;
   fg: string;
+  fgSoft: string;
   muted: string;
   surface: string;
   border: string;
+  accent: string;
+  accentSoft: string;
+  accentGlow: string;
+  accentStrong: string;
+  accentOn: string;
 }
 
-export function resolveTheme(dark: boolean, _accent: string): ThemeColors {
-  return dark
-    ? { bg: "#0f172a", fg: "#f8fafc", muted: "#94a3b8", surface: "#1e293b", border: "#334155" }
-    : { bg: "#ffffff", fg: "#0f172a", muted: "#64748b", surface: "#f1f5f9", border: "#e2e8f0" };
+interface RGB {
+  r: number;
+  g: number;
+  b: number;
 }
 
-export function logoStyles(position: LogoPosition): Record<string, string> {
-  const base: Record<string, string> = { position: "absolute", width: "48px", height: "48px" };
+function hexToRgb(hex: string): RGB {
+  const clean = hex.replace("#", "");
+  const full =
+    clean.length === 3
+      ? clean
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : clean;
+  const r = Number.parseInt(full.slice(0, 2), 16);
+  const g = Number.parseInt(full.slice(2, 4), 16);
+  const b = Number.parseInt(full.slice(4, 6), 16);
+  return { r: r || 0, g: g || 0, b: b || 0 };
+}
+
+function rgbToHex({ r, g, b }: RGB): string {
+  const toHex = (n: number) =>
+    Math.max(0, Math.min(255, Math.round(n)))
+      .toString(16)
+      .padStart(2, "0");
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+export function withAlpha(hex: string, alpha: number): string {
+  const { r, g, b } = hexToRgb(hex);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+export function darken(hex: string, amount: number): string {
+  const { r, g, b } = hexToRgb(hex);
+  const factor = 1 - amount;
+  return rgbToHex({ r: r * factor, g: g * factor, b: b * factor });
+}
+
+export function lighten(hex: string, amount: number): string {
+  const { r, g, b } = hexToRgb(hex);
+  return rgbToHex({
+    r: r + (255 - r) * amount,
+    g: g + (255 - g) * amount,
+    b: b + (255 - b) * amount,
+  });
+}
+
+/** Perceived luminance — used to pick readable foreground over accent. */
+export function luminance(hex: string): number {
+  const { r, g, b } = hexToRgb(hex);
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+}
+
+export function readableOn(hex: string): string {
+  return luminance(hex) > 0.6 ? "#0b0b10" : "#ffffff";
+}
+
+export function resolveTheme(dark: boolean, accent: string): ThemeColors {
+  const accentSoft = withAlpha(accent, 0.14);
+  const accentGlow = withAlpha(accent, 0.35);
+  const accentStrong = darken(accent, 0.2);
+  const accentOn = readableOn(accent);
+
+  if (dark) {
+    return {
+      bg: "#0a0a0f",
+      bgElevated: "#13131a",
+      fg: "#f5f5f7",
+      fgSoft: "#c8c8d0",
+      muted: "#7a7a85",
+      surface: "#1a1a22",
+      border: "#2a2a35",
+      accent,
+      accentSoft,
+      accentGlow,
+      accentStrong,
+      accentOn,
+    };
+  }
+
+  return {
+    bg: "#ffffff",
+    bgElevated: "#fafafb",
+    fg: "#0a0a0f",
+    fgSoft: "#3f3f46",
+    muted: "#71717a",
+    surface: "#f4f4f5",
+    border: "#e4e4e7",
+    accent,
+    accentSoft,
+    accentGlow,
+    accentStrong,
+    accentOn,
+  };
+}
+
+export function logoStyles(position: LogoPosition): Record<string, string | number> {
+  const base: Record<string, string | number> = {
+    position: "absolute",
+    width: "44px",
+    height: "44px",
+    borderRadius: "10px",
+    zIndex: 10,
+  };
   switch (position) {
     case "top-left":
-      return { ...base, top: "40px", left: "60px" };
+      return { ...base, top: "44px", left: "60px" };
     case "top-right":
-      return { ...base, top: "40px", right: "60px" };
+      return { ...base, top: "44px", right: "60px" };
     case "bottom-left":
-      return { ...base, bottom: "40px", left: "60px" };
+      return { ...base, bottom: "44px", left: "60px" };
     case "bottom-right":
-      return { ...base, bottom: "40px", right: "60px" };
+      return { ...base, bottom: "44px", right: "60px" };
   }
 }
 
-export function truncate(text: string | null, max: number): string {
+export function truncate(text: string | null | undefined, max: number): string {
   if (!text) return "";
-  return text.length > max ? `${text.slice(0, max)}…` : text;
+  return text.length > max ? `${text.slice(0, max).trimEnd()}…` : text;
+}
+
+export function prettyHost(url: string): string {
+  try {
+    const host = new URL(url).hostname;
+    return host.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+}
+
+export function prettyPath(url: string): string {
+  try {
+    const path = new URL(url).pathname;
+    return path === "/" ? "" : path.replace(/\/$/, "");
+  } catch {
+    return "";
+  }
 }
 
 export function title(props: TemplateProps): string {
-  return props.metadata.ogTitle ?? props.metadata.title ?? props.metadata.url;
+  const fromMeta = props.metadata.ogTitle ?? props.metadata.title;
+  if (fromMeta) return fromMeta;
+  const host = prettyHost(props.metadata.url);
+  const path = prettyPath(props.metadata.url);
+  return path ? `${host}${path}` : host;
 }
 
-export function description(props: TemplateProps): string {
-  return truncate(props.metadata.ogDescription ?? props.metadata.description, 160);
+export function description(props: TemplateProps, max = 160): string {
+  return truncate(props.metadata.ogDescription ?? props.metadata.description, max);
+}
+
+export function formattedDate(): string {
+  return new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 }

@@ -14,20 +14,33 @@ const OG_HEIGHT = 630;
 const DEFAULT_ACCENT = "#3B82F6";
 const DEFAULT_LOGO_POSITION = "top-left" as const;
 
+/** Serif display family always registered so any template can opt into `fontFamily: "Instrument Serif"`. */
+const DISPLAY_SERIF_FAMILY = "Instrument Serif";
+/** Mono family always registered so templates can use monospace accents. */
+const ACCENT_MONO_FAMILY = "JetBrains Mono";
+
+type FontWeight = 400 | 500 | 700 | 800;
+
 interface FontData {
   name: string;
   data: ArrayBuffer;
-  weight: 400 | 700;
-  style: "normal";
+  weight: FontWeight;
+  style: "normal" | "italic";
 }
 
-/** Maps font slug to Google Fonts family name. */
+interface FontRequest {
+  family: string;
+  weight: FontWeight;
+  style?: "normal" | "italic";
+}
+
 const FONT_FAMILY_MAP: Record<FontFamily, string> = {
   inter: "Inter",
   "plus-jakarta-sans": "Plus Jakarta Sans",
   "space-grotesk": "Space Grotesk",
   "jetbrains-mono": "JetBrains Mono",
   "noto-sans": "Noto Sans",
+  "instrument-serif": "Instrument Serif",
 };
 
 @singleton()
@@ -75,38 +88,72 @@ export class TemplateService {
     return Buffer.from(pngData.asPng());
   }
 
+  /**
+   * Loads the requested primary family in 4 weights and always registers the
+   * display-serif and mono families so any template can reference them inline.
+   */
   private async loadFonts(family: FontFamily): Promise<FontData[]> {
-    const familyName = FONT_FAMILY_MAP[family];
-
-    const [regular, bold] = await Promise.all([
-      this.fetchFont(familyName, 400),
-      this.fetchFont(familyName, 700),
-    ]);
-
-    return [
-      { name: familyName, data: regular, weight: 400, style: "normal" as const },
-      { name: familyName, data: bold, weight: 700, style: "normal" as const },
+    const primaryName = FONT_FAMILY_MAP[family];
+    const requests: FontRequest[] = [
+      { family: primaryName, weight: 400 },
+      { family: primaryName, weight: 500 },
+      { family: primaryName, weight: 700 },
+      { family: primaryName, weight: 800 },
     ];
+
+    if (primaryName !== DISPLAY_SERIF_FAMILY) {
+      requests.push({ family: DISPLAY_SERIF_FAMILY, weight: 400 });
+      requests.push({ family: DISPLAY_SERIF_FAMILY, weight: 400, style: "italic" });
+    }
+    if (primaryName !== ACCENT_MONO_FAMILY) {
+      requests.push({ family: ACCENT_MONO_FAMILY, weight: 400 });
+      requests.push({ family: ACCENT_MONO_FAMILY, weight: 500 });
+    }
+
+    const loaded = await Promise.all(
+      requests.map(async (req) => {
+        try {
+          const data = await this.fetchFont(req.family, req.weight, req.style ?? "normal");
+          return {
+            name: req.family,
+            data,
+            weight: req.weight,
+            style: req.style ?? "normal",
+          } as FontData;
+        } catch (error) {
+          logger.warn(
+            { family: req.family, weight: req.weight, err: (error as Error).message },
+            "Skipping font weight",
+          );
+          return null;
+        }
+      }),
+    );
+
+    return loaded.filter((f): f is FontData => f !== null);
   }
 
-  private async fetchFont(family: string, weight: number): Promise<ArrayBuffer> {
-    const cacheKey = `${family}-${weight}`;
+  private async fetchFont(
+    family: string,
+    weight: FontWeight,
+    style: "normal" | "italic",
+  ): Promise<ArrayBuffer> {
+    const cacheKey = `${family}-${weight}-${style}`;
     const cached = this.fontCache.get(cacheKey);
     if (cached) return cached;
 
-    const url = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:wght@${weight}&display=swap`;
+    const italicAxis = style === "italic" ? "ital,wght@1," : "wght@";
+    const url = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:${italicAxis}${weight}&display=swap`;
 
     const cssResponse = await fetch(url, {
       headers: {
-        // Google Fonts returns woff2 for this UA; Satori supports it
         "User-Agent":
           "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; de-at) AppleWebKit/533.21.1 (KHTML, like Gecko) Version/5.0.5 Safari/533.21.1",
       },
     });
 
     if (!cssResponse.ok) {
-      logger.warn({ family, weight, status: cssResponse.status }, "Failed to fetch font CSS");
-      throw new Error(`Failed to fetch font CSS for ${family}`);
+      throw new Error(`Failed to fetch font CSS for ${family} ${weight} ${style}`);
     }
 
     const css = await cssResponse.text();

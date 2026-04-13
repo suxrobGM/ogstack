@@ -23,6 +23,7 @@ export const FontFamilySchema = t.Union(
     t.Literal("space-grotesk"),
     t.Literal("jetbrains-mono"),
     t.Literal("noto-sans"),
+    t.Literal("instrument-serif"),
   ],
   { default: "inter" },
 );
