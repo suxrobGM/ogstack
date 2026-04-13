@@ -83,11 +83,15 @@ export class UsageService {
     });
 
     const quota = PLAN_CONFIGS[user?.plan ?? Plan.FREE].quota;
-    if (quota < 0) return;
+    if (quota < 0) {
+      return;
+    }
 
     const usage = await this.findUsageRecord(userId, projectId, apiKeyId, period);
 
-    if (!usage || usage.imageCount < Math.floor(quota * 0.8)) return;
+    if (!usage || usage.imageCount < Math.floor(quota * 0.8)) {
+      return;
+    }
 
     const existing = await this.prisma.notification.findFirst({
       where: {
@@ -96,7 +100,9 @@ export class UsageService {
         createdAt: { gte: new Date(`${period}-01`) },
       },
     });
-    if (existing) return;
+    if (existing) {
+      return;
+    }
 
     const remaining = quota - usage.imageCount;
     await this.notificationService.create({

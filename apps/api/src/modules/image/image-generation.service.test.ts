@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { container } from "@/common/di";
 import { ScraperService, type UrlMetadata } from "@/common/services/scraper.service";
 import { ImageStorageService } from "@/common/services/storage";
+import { WatermarkService } from "@/common/services/watermark";
 import { PrismaClient } from "@/generated/prisma";
 import { TemplateService } from "@/modules/template/template.service";
 import { UsageService } from "@/modules/usage/usage.service";
@@ -51,7 +52,16 @@ function createMockPrisma() {
     template: {
       findUnique: mock(() => Promise.resolve({ id: "tmpl-1" })),
     },
+    user: {
+      findUnique: mock(() => Promise.resolve({ plan: "BUSINESS" })),
+    },
   } as unknown as PrismaClient;
+}
+
+function createMockWatermarkService() {
+  return {
+    apply: mock((buf: Buffer) => Promise.resolve(buf)),
+  } as unknown as WatermarkService;
 }
 
 function createMockScraper() {
@@ -89,6 +99,7 @@ describe("ImageGenerationService", () => {
   let mockTemplateService: ReturnType<typeof createMockTemplateService>;
   let mockUsageService: ReturnType<typeof createMockUsageService>;
   let mockStorage: ReturnType<typeof createMockStorageService>;
+  let mockWatermark: ReturnType<typeof createMockWatermarkService>;
 
   beforeEach(() => {
     container.clearInstances();
@@ -97,11 +108,13 @@ describe("ImageGenerationService", () => {
     mockTemplateService = createMockTemplateService();
     mockUsageService = createMockUsageService();
     mockStorage = createMockStorageService();
+    mockWatermark = createMockWatermarkService();
     container.registerInstance(PrismaClient, mockPrisma as unknown as PrismaClient);
     container.registerInstance(ScraperService, mockScraper as unknown as ScraperService);
     container.registerInstance(TemplateService, mockTemplateService as unknown as TemplateService);
     container.registerInstance(UsageService, mockUsageService as unknown as UsageService);
     container.registerInstance(ImageStorageService, mockStorage as unknown as ImageStorageService);
+    container.registerInstance(WatermarkService, mockWatermark as unknown as WatermarkService);
     service = container.resolve(ImageGenerationService);
   });
 
@@ -243,6 +256,26 @@ describe("ImageGenerationService", () => {
       await expect(
         service.generateByPublicId("unknown", "https://example.com", "gradient_dark"),
       ).rejects.toThrow("Project not found");
+    });
+
+    it("applies watermark for FREE plan owner", async () => {
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue({ plan: "FREE" });
+      await service.generateByPublicId("abc123", "https://example.com", "gradient_dark");
+      expect(mockWatermark.apply).toHaveBeenCalled();
+    });
+
+    it("applies watermark for PRO plan owner", async () => {
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue({ plan: "PRO" });
+      await service.generateByPublicId("abc123", "https://example.com", "gradient_dark");
+      expect(mockWatermark.apply).toHaveBeenCalled();
+    });
+
+    it("does not apply watermark for BUSINESS plan owner", async () => {
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue({
+        plan: "BUSINESS",
+      });
+      await service.generateByPublicId("abc123", "https://example.com", "gradient_dark");
+      expect(mockWatermark.apply).not.toHaveBeenCalled();
     });
 
     it("should reject URLs not matching project domains", async () => {
