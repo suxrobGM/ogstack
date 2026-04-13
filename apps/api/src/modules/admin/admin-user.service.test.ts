@@ -2,7 +2,7 @@ import { Plan } from "@ogstack/shared";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { container } from "@/common/di";
 import { PrismaClient } from "@/generated/prisma";
-import { AdminService } from "./admin.service";
+import { AdminUserService } from "./admin-user.service";
 
 function createMockUser(overrides = {}) {
   return {
@@ -41,15 +41,15 @@ function createMockPrisma() {
   } as unknown as PrismaClient;
 }
 
-describe("AdminService", () => {
-  let service: AdminService;
+describe("AdminUserService", () => {
+  let service: AdminUserService;
   let mockPrisma: ReturnType<typeof createMockPrisma>;
 
   beforeEach(() => {
     container.clearInstances();
     mockPrisma = createMockPrisma();
     container.registerInstance(PrismaClient, mockPrisma as unknown as PrismaClient);
-    service = container.resolve(AdminService);
+    service = container.resolve(AdminUserService);
   });
 
   describe("listUsers", () => {

@@ -96,6 +96,53 @@ export const AdminUserPlanResponseSchema = t.Object({
   updatedAt: t.Date(),
 });
 
+// ── Admin stats ──
+
+export const AdminStatsResponseSchema = t.Object({
+  totalUsers: t.Number(),
+  suspendedUsers: t.Number(),
+  signupsThisWeek: t.Number(),
+  imagesToday: t.Number(),
+  imagesThisMonth: t.Number(),
+  planDistribution: t.Object({
+    FREE: t.Number(),
+    PRO: t.Number(),
+    BUSINESS: t.Number(),
+    ENTERPRISE: t.Number(),
+  }),
+});
+
+// ── Admin image moderation ──
+
+export const AdminImageListQuerySchema = t.Composite([
+  PaginationQueryBaseSchema,
+  t.Object({
+    search: t.Optional(t.String({ description: "Search by source URL or title" })),
+    userId: t.Optional(t.String()),
+    projectId: t.Optional(t.String()),
+  }),
+]);
+
+export const AdminImageSchema = t.Object({
+  id: t.String(),
+  userId: t.String(),
+  userEmail: t.String(),
+  projectId: t.Nullable(t.String()),
+  projectName: t.String(),
+  sourceUrl: t.Nullable(t.String()),
+  cdnUrl: t.Nullable(t.String()),
+  title: t.Nullable(t.String()),
+  template: t.Nullable(t.String()),
+  serveCount: t.Number(),
+  createdAt: t.Date(),
+});
+
+export const AdminImageListResponseSchema = PaginatedResponseSchema(AdminImageSchema);
+
+export const AdminImageDeleteResponseSchema = t.Object({
+  success: t.Literal(true),
+});
+
 // ── Suspend / unsuspend ──
 
 export const SuspendUserBodySchema = t.Object({
@@ -117,3 +164,6 @@ export type UpdateUserPlanBody = Static<typeof UpdateUserPlanBodySchema>;
 export type SuspendUserBody = Static<typeof SuspendUserBodySchema>;
 export type AdminUserPlanResponse = Static<typeof AdminUserPlanResponseSchema>;
 export type AdminUserSuspendResponse = Static<typeof AdminUserSuspendResponseSchema>;
+export type AdminStatsResponse = Static<typeof AdminStatsResponseSchema>;
+export type AdminImageListQuery = Static<typeof AdminImageListQuerySchema>;
+export type AdminImage = Static<typeof AdminImageSchema>;

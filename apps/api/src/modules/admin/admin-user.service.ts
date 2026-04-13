@@ -13,7 +13,7 @@ import type {
 } from "./admin.schema";
 
 @singleton()
-export class AdminService {
+export class AdminUserService {
   constructor(private readonly prisma: PrismaClient) {}
 
   async listUsers(query: AdminUserListQuery): Promise<PaginatedResponse<AdminUser>> {
@@ -45,7 +45,7 @@ export class AdminService {
     ]);
 
     return {
-      items: items.map(this.toAdminUser),
+      items: items.map(toAdminUser),
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     };
   }
@@ -196,28 +196,28 @@ export class AdminService {
 
     return { id: updated.id, suspended: updated.suspended, updatedAt: updated.updatedAt };
   }
+}
 
-  private toAdminUser(user: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-    plan: string;
-    emailVerified: boolean;
-    suspended: boolean;
-    createdAt: Date;
-  }): AdminUser {
-    return {
-      id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      role: user.role,
-      plan: user.plan,
-      emailVerified: user.emailVerified,
-      suspended: user.suspended,
-      createdAt: user.createdAt,
-    };
-  }
+function toAdminUser(user: {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  plan: string;
+  emailVerified: boolean;
+  suspended: boolean;
+  createdAt: Date;
+}): AdminUser {
+  return {
+    id: user.id,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    role: user.role,
+    plan: user.plan,
+    emailVerified: user.emailVerified,
+    suspended: user.suspended,
+    createdAt: user.createdAt,
+  };
 }

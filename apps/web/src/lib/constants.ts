@@ -21,6 +21,10 @@ export const ROUTES = {
   templates: "/templates" as Route,
   images: "/images" as Route,
   pricing: "/pricing" as Route,
+  adminOverview: "/admin/overview" as Route,
+  adminUsers: "/admin/users" as Route,
+  adminUserDetail: (id: string) => `/admin/users/${id}` as Route,
+  adminImages: "/admin/images" as Route,
 } as const;
 
 export const PAGINATION_DEFAULTS = {
@@ -39,4 +43,10 @@ export const SIDEBAR_NAV_ITEMS = [
   { label: "API Keys", href: ROUTES.apiKeys, icon: "vpnKey" },
   { label: "Billing", href: ROUTES.billing, icon: "payment" },
   { label: "Settings", href: ROUTES.settings, icon: "settings" },
+] as const;
+
+export const ADMIN_NAV_ITEMS = [
+  { label: "Overview", href: ROUTES.adminOverview, icon: "dashboard" },
+  { label: "Users", href: ROUTES.adminUsers, icon: "groups" },
+  { label: "Images", href: ROUTES.adminImages, icon: "photoLibrary" },
 ] as const;

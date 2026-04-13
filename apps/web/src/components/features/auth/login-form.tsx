@@ -2,6 +2,7 @@
 
 import type { ReactElement } from "react";
 import { Button, Link, Stack } from "@mui/material";
+import { isAdminRole } from "@ogstack/shared";
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { FormTextField } from "@/components/ui/form";
@@ -23,7 +24,7 @@ export function LoginForm(): ReactElement {
     {
       onSuccess: (data) => {
         setUser(data.user);
-        router.push(ROUTES.overview);
+        router.push(isAdminRole(data.user.role) ? ROUTES.adminOverview : ROUTES.overview);
       },
       errorMessage: "Invalid email or password",
     },

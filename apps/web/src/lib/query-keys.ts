@@ -50,4 +50,16 @@ export const queryKeys = {
     all: ["users"] as const,
     me: () => [...queryKeys.users.all, "me"] as const,
   },
+
+  admin: {
+    all: ["admin"] as const,
+    stats: () => [...queryKeys.admin.all, "stats"] as const,
+    usersAll: () => [...queryKeys.admin.all, "users"] as const,
+    usersList: (params: { page: number; search: string; plan: string; status: string }) =>
+      [...queryKeys.admin.all, "users", "list", params] as const,
+    userDetail: (id: string) => [...queryKeys.admin.all, "users", id] as const,
+    imagesAll: () => [...queryKeys.admin.all, "images"] as const,
+    imagesList: (params: { page: number; search: string; userId: string; projectId: string }) =>
+      [...queryKeys.admin.all, "images", "list", params] as const,
+  },
 } as const;

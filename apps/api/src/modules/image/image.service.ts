@@ -110,16 +110,25 @@ export class ImageService {
     const existing = await this.prisma.image.findUnique({ where: { id } });
     if (!existing) throw new NotFoundError("Image not found");
     if (existing.userId !== userId) throw new ForbiddenError("Not allowed");
+    return this.deleteImageRow(existing.id, existing.cacheKey);
+  }
 
+  async deleteAsAdmin(id: string): Promise<{ success: true }> {
+    const existing = await this.prisma.image.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundError("Image not found");
+    return this.deleteImageRow(existing.id, existing.cacheKey);
+  }
+
+  private async deleteImageRow(id: string, cacheKey: string): Promise<{ success: true }> {
     const otherRefs = await this.prisma.image.count({
-      where: { cacheKey: existing.cacheKey, id: { not: id } },
+      where: { cacheKey, id: { not: id } },
     });
 
     if (otherRefs === 0) {
       try {
-        await this.storage.delete(existing.cacheKey);
+        await this.storage.delete(cacheKey);
       } catch (err) {
-        logger.warn({ err, cacheKey: existing.cacheKey }, "storage.delete failed — continuing");
+        logger.warn({ err, cacheKey }, "storage.delete failed — continuing");
       }
     }
 

@@ -1,53 +1,38 @@
 "use client";
 
 import type { ReactElement } from "react";
-import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import FolderIcon from "@mui/icons-material/Folder";
-import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
-import PaymentIcon from "@mui/icons-material/Payment";
+import GroupsIcon from "@mui/icons-material/Groups";
 import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
-import PlayCircleIcon from "@mui/icons-material/PlayCircle";
-import SettingsIcon from "@mui/icons-material/Settings";
-import VpnKeyIcon from "@mui/icons-material/VpnKey";
-import { Box, Divider, IconButton, List, Stack, Typography } from "@mui/material";
-import { isAdminRole } from "@ogstack/shared";
+import { Box, Button, Divider, IconButton, List, Stack, Tooltip, Typography } from "@mui/material";
+import NextLink from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/hooks";
-import { ROUTES, SIDEBAR_NAV_ITEMS } from "@/lib/constants";
+import { ADMIN_NAV_ITEMS, ROUTES } from "@/lib/constants";
 import { line } from "@/theme/palette";
 import { motion } from "@/theme/tokens";
 import { FeedbackMenu } from "./feedback-menu";
 import { NavItem } from "./nav-item";
 import { NotificationBell } from "./notification-bell";
+import { SIDEBAR_WIDTH_COLLAPSED, SIDEBAR_WIDTH_EXPANDED } from "./sidebar";
 import { UserMenu } from "./user-menu";
-
-export const SIDEBAR_WIDTH_EXPANDED = 260;
-export const SIDEBAR_WIDTH_COLLAPSED = 68;
 
 const ICON_MAP: Record<string, ReactElement> = {
   dashboard: <DashboardIcon fontSize="small" />,
-  folder: <FolderIcon fontSize="small" />,
-  playCircle: <PlayCircleIcon fontSize="small" />,
-  library: <LibraryBooksIcon fontSize="small" />,
+  groups: <GroupsIcon fontSize="small" />,
   photoLibrary: <PhotoLibraryIcon fontSize="small" />,
-  vpnKey: <VpnKeyIcon fontSize="small" />,
-  payment: <PaymentIcon fontSize="small" />,
-  settings: <SettingsIcon fontSize="small" />,
 };
 
-interface SidebarProps {
+interface AdminSidebarProps {
   collapsed: boolean;
   onToggle: () => void;
 }
 
-export function Sidebar(props: SidebarProps): ReactElement {
+export function AdminSidebar(props: AdminSidebarProps): ReactElement {
   const { collapsed, onToggle } = props;
   const pathname = usePathname();
-  const { user } = useAuth();
-  const isAdmin = isAdminRole(user?.role);
 
   return (
     <Box
@@ -76,7 +61,12 @@ export function Sidebar(props: SidebarProps): ReactElement {
           minHeight: 56,
         }}
       >
-        {!collapsed && <Typography variant="h5">OGStack</Typography>}
+        {!collapsed && (
+          <Stack spacing={0.25}>
+            <Typography variant="h5">OGStack</Typography>
+            <Typography variant="overlineMuted">Admin</Typography>
+          </Stack>
+        )}
         <IconButton
           onClick={onToggle}
           size="small"
@@ -86,30 +76,40 @@ export function Sidebar(props: SidebarProps): ReactElement {
         </IconButton>
       </Box>
       <Divider sx={{ borderColor: line.divider }} />
+
+      <Box sx={{ px: collapsed ? 1 : 2, py: 1.5 }}>
+        {collapsed ? (
+          <Tooltip title="Back to Dashboard" placement="right" arrow>
+            <IconButton component={NextLink} href={ROUTES.overview} size="small">
+              <ArrowBackIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <Button
+            component={NextLink}
+            href={ROUTES.overview}
+            size="small"
+            fullWidth
+            startIcon={<ArrowBackIcon fontSize="small" />}
+            sx={{ justifyContent: "flex-start", color: "text.secondary" }}
+          >
+            Back to Dashboard
+          </Button>
+        )}
+      </Box>
+      <Divider sx={{ borderColor: line.divider }} />
+
       <List sx={{ flex: 1, px: collapsed ? 1 : 1.5, py: 2, overflow: "auto" }}>
-        {SIDEBAR_NAV_ITEMS.map((item) => (
+        {ADMIN_NAV_ITEMS.map((item) => (
           <NavItem
             key={item.href}
             label={item.label}
             href={item.href}
             icon={ICON_MAP[item.icon]}
             collapsed={collapsed}
-            active={
-              item.label === "Settings"
-                ? pathname.startsWith("/settings")
-                : pathname === item.href || pathname.startsWith(item.href + "/")
-            }
+            active={pathname === item.href || pathname.startsWith(item.href + "/")}
           />
         ))}
-        {isAdmin && (
-          <NavItem
-            label="Admin Panel"
-            href={ROUTES.adminOverview}
-            icon={<AdminPanelSettingsIcon fontSize="small" />}
-            collapsed={collapsed}
-            active={false}
-          />
-        )}
       </List>
       <Divider sx={{ borderColor: line.divider }} />
       {collapsed ? (
