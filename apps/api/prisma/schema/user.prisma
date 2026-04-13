@@ -34,7 +34,6 @@ model User {
 
   projects      Project[]
   apiKeys       ApiKey[]
-  brandKits     BrandKit[]
   images        Image[]
   auditReports  AuditReport[]
   auditLogs     AuditLog[]
