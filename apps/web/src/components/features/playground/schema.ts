@@ -10,6 +10,8 @@ export const FONT_FAMILIES = [
 
 export const LOGO_POSITIONS = ["top-left", "top-right", "bottom-left", "bottom-right"] as const;
 
+export const AI_PROMPT_MAX_CHARS = 500;
+
 export type FontFamily = (typeof FONT_FAMILIES)[number];
 export type LogoPosition = (typeof LOGO_POSITIONS)[number];
 
@@ -36,4 +38,6 @@ export interface PlaygroundFormValues {
   font: FontFamily;
   logoUrl: string;
   logoPosition: LogoPosition;
+  aiGenerated: boolean;
+  aiPrompt: string;
 }

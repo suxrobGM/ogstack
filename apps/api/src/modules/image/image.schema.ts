@@ -23,6 +23,9 @@ const RenderOptionsBodySchema = t.Optional(
     font: t.Optional(FontFamilySchema),
     logoUrl: t.Optional(t.String({ format: "uri" })),
     logoPosition: t.Optional(LogoPositionSchema),
+    aiGenerated: t.Optional(t.Boolean()),
+    aiPrompt: t.Optional(t.String({ maxLength: 500 })),
+    force: t.Optional(t.Boolean()),
   }),
 );
 
@@ -50,12 +53,18 @@ export const PublicGenerateQuerySchema = t.Object({
   font: t.Optional(FontFamilySchema),
   logoUrl: t.Optional(t.String({ format: "uri" })),
   logoPosition: t.Optional(LogoPositionSchema),
+  aiGenerated: t.Optional(t.String()),
+  aiPrompt: t.Optional(t.String({ maxLength: 500 })),
 });
 
 export const GenerateResponseSchema = t.Object({
   imageUrl: t.String(),
   cached: t.Boolean(),
   generationMs: t.Optional(t.Number()),
+  aiEnabled: t.Optional(t.Boolean()),
+  aiFellBack: t.Optional(t.Boolean()),
+  aiModel: t.Optional(t.Nullable(t.String())),
+  aiPrompt: t.Optional(t.Nullable(t.String())),
   metadata: t.Object({
     title: t.Nullable(t.String()),
     description: t.Nullable(t.String()),

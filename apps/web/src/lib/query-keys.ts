@@ -27,6 +27,7 @@ export const queryKeys = {
 
   usage: {
     all: ["usage"] as const,
+    stats: (period?: string) => [...queryKeys.usage.all, "stats", period ?? "current"] as const,
   },
 
   templates: {

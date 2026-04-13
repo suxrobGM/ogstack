@@ -5,6 +5,7 @@ import { prisma } from "@/common/database";
 import { logger } from "@/common/logger";
 import { errorMiddleware } from "@/common/middleware";
 import { corsPlugin, swaggerPlugin, uploadsStaticPlugin } from "@/common/plugins";
+import { logAiServicesAtStartup } from "@/common/services/ai";
 import { validateEnv } from "@/env";
 import { adminController } from "@/modules/admin";
 import { apiKeyController, apiKeyDeleteController } from "@/modules/api-key";
@@ -60,6 +61,7 @@ const app = new Elysia()
 logger.info(`OGStack API running at http://${app.server?.hostname}:${app.server?.port}`);
 logger.info(`Swagger docs available at http://${app.server?.hostname}:${app.server?.port}/swagger`);
 
+logAiServicesAtStartup();
 syncStripeOnStartup();
 
 // Export app type for Eden Treaty

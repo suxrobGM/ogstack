@@ -9,6 +9,14 @@ function createErrorResponse(code: number, message: string, details?: unknown): 
   return details !== undefined ? { code, message, details } : { code, message };
 }
 
+function safeParseJson(value: string): unknown {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+}
+
 function getRouteInfo(request: Request): { method: string; path: string } {
   const url = new URL(request.url);
   return { method: request.method, path: url.pathname };
@@ -30,10 +38,12 @@ export const errorMiddleware = new Elysia({ name: "error-handler" }).onError(
     }
 
     switch (code) {
-      case "VALIDATION":
+      case "VALIDATION": {
         set.status = 400;
-        logger.warn({ statusCode: 400, ...route, message: error.message }, "Validation error");
-        return createErrorResponse(400, "Validation error", error.message);
+        const details = safeParseJson(error.message) ?? error.message;
+        logger.warn({ statusCode: 400, ...route, details }, "Validation error");
+        return createErrorResponse(400, "Validation error", details);
+      }
       case "PARSE":
         set.status = 400;
         logger.warn({ statusCode: 400, ...route }, "Malformed request body");

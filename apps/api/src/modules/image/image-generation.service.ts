@@ -1,7 +1,13 @@
 import { singleton } from "tsyringe";
-import { BadRequestError, NotFoundError } from "@/common/errors";
+import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
-import { ScraperService } from "@/common/services/scraper.service";
+import {
+  buildAiImagePrompt,
+  ImageProviderService,
+  PromptProviderService,
+  resolveFalModelForPlan,
+} from "@/common/services/ai";
+import { ScraperService, type UrlMetadata } from "@/common/services/scraper.service";
 import { ImageStorageService } from "@/common/services/storage";
 import { hashSha256 } from "@/common/utils/crypto";
 import { PrismaClient } from "@/generated/prisma";
@@ -23,6 +29,14 @@ interface GenerateParams {
   options?: RenderOptions;
 }
 
+interface AiRenderOutcome {
+  pngBuffer: Buffer;
+  aiEnabled: boolean;
+  aiFellBack: boolean;
+  aiModel: string | null;
+  aiPrompt: string | null;
+}
+
 @singleton()
 export class ImageGenerationService {
   constructor(
@@ -31,6 +45,8 @@ export class ImageGenerationService {
     private readonly templateService: TemplateService,
     private readonly usageService: UsageService,
     private readonly storage: ImageStorageService,
+    private readonly imageProvider: ImageProviderService,
+    private readonly promptProvider: PromptProviderService,
   ) {}
 
   async generate(params: GenerateParams): Promise<GenerateResponse> {
@@ -43,10 +59,15 @@ export class ImageGenerationService {
 
     await this.usageService.enforceQuota(userId, projectId, apiKeyId);
 
-    const cacheKey = await this.buildCacheKey(projectId, url, template, options);
+    const aiModel = await this.resolveAiModelOrThrow(userId, options);
+    const cacheKey = await this.buildCacheKey(projectId, url, template, options, aiModel);
     const cached = await this.prisma.image.findUnique({ where: { cacheKey } });
+    const force = options?.force === true;
 
-    if (cached) {
+    if (cached && force) {
+      logger.info({ imageId: cached.id, cacheKey }, "Force regenerate — evicting cached image");
+      await this.evictCached(cached.id, cacheKey);
+    } else if (cached) {
       await this.usageService.recordUsage(userId, projectId, true, apiKeyId);
       await this.prisma.image.update({
         where: { id: cached.id },
@@ -56,6 +77,9 @@ export class ImageGenerationService {
       return {
         imageUrl: cached.cdnUrl ?? cached.imageUrl,
         cached: true,
+        aiEnabled: cached.aiEnabled,
+        aiModel: cached.aiModel,
+        aiPrompt: cached.aiPrompt,
         metadata: {
           title: cached.title,
           description: cached.description,
@@ -67,7 +91,7 @@ export class ImageGenerationService {
     const startMs = performance.now();
 
     const metadata = await this.scraper.extractMetadata(url);
-    const pngBuffer = await this.templateService.render(template, metadata, options);
+    const outcome = await this.renderWithAiFallback(metadata, template, options, aiModel);
     const generationMs = Math.round(performance.now() - startMs);
 
     const templateRecord = await this.prisma.template.findUnique({
@@ -75,7 +99,7 @@ export class ImageGenerationService {
       select: { id: true },
     });
 
-    const stored = await this.storage.store(cacheKey, pngBuffer);
+    const stored = await this.storage.store(cacheKey, outcome.pngBuffer);
 
     const image = await this.prisma.image.create({
       data: {
@@ -96,17 +120,27 @@ export class ImageGenerationService {
         generationMs,
         serveCount: 1,
         category: getTemplate(template).info.category,
+        aiEnabled: outcome.aiEnabled,
+        aiModel: outcome.aiModel,
+        aiPrompt: outcome.aiPrompt,
       },
     });
 
     await this.usageService.recordUsage(userId, projectId, false, apiKeyId);
 
-    logger.info({ imageId: image.id, cacheKey, generationMs, template }, "OG image generated");
+    logger.info(
+      { imageId: image.id, cacheKey, generationMs, template, aiEnabled: outcome.aiEnabled },
+      "OG image generated",
+    );
 
     return {
       imageUrl: image.imageUrl,
       cached: false,
       generationMs,
+      aiEnabled: outcome.aiEnabled,
+      aiFellBack: outcome.aiFellBack || undefined,
+      aiModel: outcome.aiModel,
+      aiPrompt: outcome.aiPrompt,
       metadata: {
         title: image.title,
         description: image.description,
@@ -125,7 +159,8 @@ export class ImageGenerationService {
 
     await this.usageService.enforceQuota(project.user.id, project.id);
 
-    const cacheKey = await this.buildCacheKey(project.id, url, template, options);
+    const aiModel = await this.resolveAiModelOrThrow(project.user.id, options);
+    const cacheKey = await this.buildCacheKey(project.id, url, template, options, aiModel);
     const cached = await this.prisma.image.findUnique({ where: { cacheKey } });
 
     if (cached) {
@@ -142,7 +177,7 @@ export class ImageGenerationService {
     const startMs = performance.now();
 
     const metadata = await this.scraper.extractMetadata(url);
-    const pngBuffer = await this.templateService.render(template, metadata, options);
+    const outcome = await this.renderWithAiFallback(metadata, template, options, aiModel);
     const generationMs = Math.round(performance.now() - startMs);
 
     const templateRecord = await this.prisma.template.findUnique({
@@ -150,7 +185,7 @@ export class ImageGenerationService {
       select: { id: true },
     });
 
-    const stored = await this.storage.store(cacheKey, pngBuffer);
+    const stored = await this.storage.store(cacheKey, outcome.pngBuffer);
 
     await this.prisma.image.create({
       data: {
@@ -170,13 +205,99 @@ export class ImageGenerationService {
         generationMs,
         serveCount: 1,
         category: getTemplate(template).info.category,
+        aiEnabled: outcome.aiEnabled,
+        aiModel: outcome.aiModel,
+        aiPrompt: outcome.aiPrompt,
       },
     });
 
     await this.usageService.recordUsage(project.user.id, project.id, false);
 
-    logger.info({ cacheKey, generationMs, template }, "OG image generated (public)");
-    return pngBuffer;
+    logger.info(
+      { cacheKey, generationMs, template, aiEnabled: outcome.aiEnabled },
+      "OG image generated (public)",
+    );
+    return outcome.pngBuffer;
+  }
+
+  private async resolveAiModelOrThrow(
+    userId: string,
+    options?: RenderOptions,
+  ): Promise<string | null> {
+    if (!options?.aiGenerated) return null;
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { plan: true },
+    });
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+
+    const model = resolveFalModelForPlan(user.plan);
+    if (!model) {
+      throw new ForbiddenError("AI image generation requires a Pro plan or higher.");
+    }
+    return model;
+  }
+
+  private async renderWithAiFallback(
+    metadata: UrlMetadata,
+    template: TemplateSlug,
+    options: RenderOptions | undefined,
+    aiModel: string | null,
+  ): Promise<AiRenderOutcome> {
+    if (aiModel && this.imageProvider.isEnabledForModel(aiModel)) {
+      const override = options?.aiPrompt ?? null;
+      logger.info({ aiModel, hasOverride: Boolean(override) }, "AI image generation starting");
+      const enrichedKeywords = override ? null : await this.promptProvider.generate(metadata);
+      const prompt = buildAiImagePrompt(metadata, { override, enrichedKeywords });
+
+      try {
+        const pngBuffer = await this.imageProvider.generate({ model: aiModel, prompt });
+        return {
+          pngBuffer,
+          aiEnabled: true,
+          aiFellBack: false,
+          aiModel,
+          aiPrompt: prompt,
+        };
+      } catch (error) {
+        logger.warn(
+          { template, error: error instanceof Error ? error.message : String(error) },
+          "AI image generation failed, falling back to template render",
+        );
+        const pngBuffer = await this.templateService.render(template, metadata, options);
+        return {
+          pngBuffer,
+          aiEnabled: false,
+          aiFellBack: true,
+          aiModel: null,
+          aiPrompt: null,
+        };
+      }
+    }
+
+    const pngBuffer = await this.templateService.render(template, metadata, options);
+    return {
+      pngBuffer,
+      aiEnabled: false,
+      aiFellBack: false,
+      aiModel: null,
+      aiPrompt: null,
+    };
+  }
+
+  private async evictCached(imageId: string, cacheKey: string): Promise<void> {
+    try {
+      await this.storage.delete(cacheKey);
+    } catch (error) {
+      logger.warn(
+        { cacheKey, error: error instanceof Error ? error.message : String(error) },
+        "Failed to delete storage blob during force regenerate (continuing)",
+      );
+    }
+    await this.prisma.image.delete({ where: { id: imageId } });
   }
 
   private async resolveAndValidatePublicProject(publicId: string, url: string) {
@@ -204,9 +325,16 @@ export class ImageGenerationService {
     projectId: string,
     url: string,
     template: string,
-    options?: RenderOptions,
+    options: RenderOptions | undefined,
+    aiModel: string | null,
   ): Promise<string> {
-    const normalized = JSON.stringify({ projectId, url, template, ...options });
+    const normalized = JSON.stringify({
+      projectId,
+      url,
+      template,
+      ...options,
+      aiModel,
+    });
     return hashSha256(normalized);
   }
 }

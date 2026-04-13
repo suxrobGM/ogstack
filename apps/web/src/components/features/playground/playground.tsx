@@ -12,11 +12,14 @@ import type {
   ImageGenerateBody,
   ProjectListResponse,
   TemplateInfo,
+  UsageStatsResponse,
 } from "@/types/api";
 import { buildOgImageUrl, buildOgMetaTag, OG_PRODUCTION_HOST } from "@/utils/og-image";
 import { ControlsPanel } from "./controls-panel";
+import { OutputPanel } from "./output-panel";
 import { PreviewPane } from "./preview-pane";
 import type { PlaygroundFormValues } from "./schema";
+import { UsageMeter } from "./usage-meter";
 
 const DEFAULTS: PlaygroundFormValues = {
   url: "",
@@ -26,6 +29,8 @@ const DEFAULTS: PlaygroundFormValues = {
   font: "inter",
   logoUrl: "",
   logoPosition: "top-left",
+  aiGenerated: false,
+  aiPrompt: "",
 };
 
 interface PlaygroundProps {
@@ -44,6 +49,8 @@ function toOgParams(values: PlaygroundFormValues): URLSearchParams {
   if (values.font !== "inter") params.set("font", values.font);
   if (values.logoUrl) params.set("logoUrl", values.logoUrl);
   if (values.logoPosition !== "top-left") params.set("logoPosition", values.logoPosition);
+  if (values.aiGenerated) params.set("aiGenerated", "true");
+  if (values.aiPrompt) params.set("aiPrompt", values.aiPrompt);
   return params;
 }
 
@@ -71,36 +78,49 @@ export function Playground(props: PlaygroundProps): ReactElement {
   const projects = initialProjects?.items ?? [];
   const selectedProject = projects.find((p) => p.id === selectedProjectId);
 
+  const { data: usageStats, refetch: refetchUsage } = useApiQuery<UsageStatsResponse>(
+    queryKeys.usage.stats(),
+    () => client.api.usage.stats.get({ query: {} }),
+  );
+
   const generateMutation = useApiMutation(
     (body: ImageGenerateBody) => client.api.images.post(body),
     {
-      // Backend supplies user-friendly messages (see apps/api/src/common/errors
-      // and scraper.service.ts); surface them directly.
       errorMessage: (err) => err.message,
       onSuccess: (data) => {
         setResult(data as GenerateDto);
+        refetchUsage();
       },
     },
   );
 
+  const submit = (values: PlaygroundFormValues, force: boolean) => {
+    setLastFormValues(values);
+    generateMutation.mutate({
+      url: values.url,
+      template: values.template,
+      projectId: selectedProjectId,
+      options: {
+        accent: values.accent,
+        dark: values.dark,
+        font: values.font,
+        logoUrl: values.logoUrl || undefined,
+        logoPosition: values.logoPosition,
+        aiGenerated: values.aiGenerated,
+        aiPrompt: values.aiPrompt,
+        force: force,
+      },
+    });
+  };
+
   const form = useForm({
     defaultValues: { ...DEFAULTS, template: initialTemplate, url: initialUrl },
-    onSubmit: ({ value }) => {
-      setLastFormValues(value);
-      generateMutation.mutate({
-        url: value.url,
-        template: value.template,
-        projectId: selectedProjectId,
-        options: {
-          accent: value.accent,
-          dark: value.dark,
-          font: value.font,
-          logoUrl: value.logoUrl,
-          logoPosition: value.logoPosition,
-        },
-      });
-    },
+    onSubmit: ({ value }) => submit(value, false),
   });
+
+  const handleRegenerate = () => {
+    submit(form.state.values, true);
+  };
 
   const metaTag =
     result && lastFormValues && selectedProject
@@ -111,6 +131,12 @@ export function Playground(props: PlaygroundProps): ReactElement {
 
   return (
     <Grid container spacing={3}>
+      {usageStats && (
+        <Grid size={{ xs: 12 }}>
+          <UsageMeter stats={usageStats} />
+        </Grid>
+      )}
+
       <Grid size={{ xs: 12, md: 5 }}>
         <ControlsPanel
           form={form}
@@ -124,8 +150,18 @@ export function Playground(props: PlaygroundProps): ReactElement {
       </Grid>
 
       <Grid size={{ xs: 12, md: 7 }}>
-        <PreviewPane result={result} isGenerating={generateMutation.isPending} metaTag={metaTag} />
+        <PreviewPane
+          result={result}
+          isGenerating={generateMutation.isPending}
+          onRegenerate={handleRegenerate}
+        />
       </Grid>
+
+      {result && (
+        <Grid size={{ xs: 12 }}>
+          <OutputPanel result={result} metaTag={metaTag} />
+        </Grid>
+      )}
     </Grid>
   );
 }

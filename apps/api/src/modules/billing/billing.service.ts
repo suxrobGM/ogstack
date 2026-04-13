@@ -168,8 +168,8 @@ export class BillingService {
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
       allow_promotion_codes: true,
-      success_url: `${WEBSITE_URL}/settings/billing?success=true`,
-      cancel_url: `${WEBSITE_URL}/settings/billing?canceled=true`,
+      success_url: `${WEBSITE_URL}/billing?success=true`,
+      cancel_url: `${WEBSITE_URL}/billing?canceled=true`,
       metadata: { userId: user.id },
     });
 
@@ -184,7 +184,7 @@ export class BillingService {
 
     const session = await this.stripe.billingPortal.sessions.create({
       customer: sub.stripeCustomerId,
-      return_url: `${WEBSITE_URL}/settings/billing`,
+      return_url: `${WEBSITE_URL}/billing`,
     });
 
     return { url: session.url };
@@ -265,7 +265,7 @@ export class BillingService {
 
     const session = await this.stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${WEBSITE_URL}/settings/billing?success=true`,
+      return_url: `${WEBSITE_URL}/billing?success=true`,
     });
 
     return { sessionId: stripeSubscriptionId, url: session.url };

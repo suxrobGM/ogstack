@@ -1,11 +1,10 @@
 "use client";
 
-import { Suspense, type ReactElement } from "react";
+import type { ReactElement } from "react";
 import DownloadIcon from "@mui/icons-material/Download";
 import ImageIcon from "@mui/icons-material/Image";
-import LanguageIcon from "@mui/icons-material/Language";
-import { Box, Button, Skeleton, Stack, Typography } from "@mui/material";
-import { CodeBlock } from "@/components/ui/display/code-block";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import { Alert, Box, Button, Skeleton, Stack, Typography } from "@mui/material";
 import { Surface } from "@/components/ui/layout/surface";
 import { line, radii, surfaces, textColors } from "@/theme";
 import type { GenerateDto } from "@/types/api";
@@ -13,7 +12,7 @@ import type { GenerateDto } from "@/types/api";
 interface PreviewPaneProps {
   result: GenerateDto | null;
   isGenerating: boolean;
-  metaTag: string | null;
+  onRegenerate: () => void;
 }
 
 function PreviewSkeleton(): ReactElement {
@@ -48,113 +47,73 @@ function EmptyPreview(): ReactElement {
 }
 
 export function PreviewPane(props: PreviewPaneProps): ReactElement {
-  const { result, isGenerating, metaTag } = props;
+  const { result, isGenerating, onRegenerate } = props;
 
   return (
-    <Stack spacing={3} sx={{ position: "sticky", top: 24 }}>
-      {/* Image preview */}
-      <Surface variant="expressive">
-        <Stack spacing={2}>
-          <Typography variant="h6">Preview</Typography>
+    <Surface variant="expressive" sx={{ height: "100%" }}>
+      <Stack spacing={2}>
+        <Typography variant="h6">Preview</Typography>
 
-          {isGenerating ? (
-            <PreviewSkeleton />
-          ) : result ? (
-            <Box
-              component="img"
-              src={result.imageUrl}
-              alt="Generated OG image"
-              sx={{
-                width: "100%",
-                aspectRatio: "1200 / 630",
-                objectFit: "cover",
-                borderRadius: `${radii.sm}px`,
-                border: `1px solid ${line.border}`,
-              }}
-            />
-          ) : (
-            <EmptyPreview />
-          )}
+        {isGenerating ? (
+          <PreviewSkeleton />
+        ) : result ? (
+          <Box
+            component="img"
+            src={result.imageUrl}
+            alt="Generated OG image"
+            sx={{
+              width: "100%",
+              aspectRatio: "1200 / 630",
+              objectFit: "cover",
+              borderRadius: `${radii.sm}px`,
+              border: `1px solid ${line.border}`,
+            }}
+          />
+        ) : (
+          <EmptyPreview />
+        )}
 
-          {/* Generation stats */}
-          {result && (
-            <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap" }}>
-              {result.cached && (
-                <Typography variant="caption" color="text.secondary">
-                  Served from cache
-                </Typography>
-              )}
-              {result.generationMs != null && (
-                <Typography variant="caption" color="text.secondary">
-                  Generated in {result.generationMs}ms
-                </Typography>
-              )}
-            </Stack>
-          )}
-        </Stack>
-      </Surface>
+        {result?.aiFellBack && (
+          <Alert severity="warning" variant="outlined">
+            AI generation unavailable — rendered template fallback.
+          </Alert>
+        )}
 
-      {/* Metadata */}
-      {result?.metadata && (result.metadata.title || result.metadata.description) && (
-        <Surface>
-          <Stack spacing={1}>
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              Extracted Metadata
-            </Typography>
-            {result.metadata.favicon && (
-              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                <Box
-                  component="img"
-                  src={result.metadata.favicon}
-                  alt=""
-                  sx={{ width: 16, height: 16 }}
-                />
-                <Typography variant="caption" color="text.secondary">
-                  Favicon
-                </Typography>
-              </Stack>
-            )}
-            {result.metadata.title && (
-              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                <LanguageIcon sx={{ fontSize: 16, color: textColors.secondary }} />
-                <Typography variant="body2">{result.metadata.title}</Typography>
-              </Stack>
-            )}
-            {result.metadata.description && (
-              <Typography variant="body2Muted" sx={{ pl: 3 }}>
-                {result.metadata.description}
-              </Typography>
+        {result && (
+          <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap" }}>
+            {result.cached && <Typography variant="captionMuted">Served from cache</Typography>}
+            {result.generationMs != null && (
+              <Typography variant="captionMuted">Generated in {result.generationMs}ms</Typography>
             )}
           </Stack>
-        </Surface>
-      )}
+        )}
 
-      {/* Meta tag output */}
-      {metaTag && (
-        <Stack spacing={1}>
-          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-            Meta Tag
-          </Typography>
-          <Suspense fallback={<Skeleton variant="rectangular" height={80} />}>
-            <CodeBlock code={metaTag} language="html" />
-          </Suspense>
-        </Stack>
-      )}
-
-      {/* Download button */}
-      {result && (
-        <Button
-          variant="outlined"
-          startIcon={<DownloadIcon />}
-          component="a"
-          href={result.imageUrl}
-          download="og-image.png"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Download Image
-        </Button>
-      )}
-    </Stack>
+        {result && (
+          <Stack direction="row" spacing={1.5}>
+            <Button
+              variant="outlined"
+              startIcon={<RefreshIcon />}
+              onClick={onRegenerate}
+              disabled={isGenerating}
+              fullWidth
+            >
+              Regenerate
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<DownloadIcon />}
+              component="a"
+              href={result.imageUrl}
+              download="og-image.png"
+              target="_blank"
+              rel="noopener noreferrer"
+              fullWidth
+            >
+              Download
+            </Button>
+          </Stack>
+        )}
+      </Stack>
+    </Surface>
   );
 }

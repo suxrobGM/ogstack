@@ -22,6 +22,8 @@ export const imagePublicController = new Elysia({ prefix: "/og", tags: ["Images"
           font: query.font,
           logoUrl: query.logoUrl,
           logoPosition: query.logoPosition,
+          aiGenerated: query.aiGenerated === "true",
+          aiPrompt: query.aiPrompt,
         },
       );
 

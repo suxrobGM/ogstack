@@ -43,6 +43,9 @@ export const RenderOptionsSchema = t.Object({
   font: t.Optional(FontFamilySchema),
   logoUrl: t.Optional(t.String({ format: "uri" })),
   logoPosition: t.Optional(LogoPositionSchema),
+  aiGenerated: t.Optional(t.Boolean({ default: false })),
+  aiPrompt: t.Optional(t.String({ maxLength: 500 })),
+  force: t.Optional(t.Boolean({ default: false })),
 });
 
 export const TemplateInfoSchema = t.Object({
