@@ -3,4 +3,3 @@ export * from "./use-api-mutation";
 export * from "./use-debounced-value";
 export * from "./use-scroll-to";
 export * from "./use-notifications";
-export * from "./use-page-analysis";

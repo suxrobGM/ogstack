@@ -132,7 +132,9 @@ describe("ImageGenerationService", () => {
       expect(result.cached).toBe(false);
       expect(result.imageUrl).toBeDefined();
       expect(result.metadata.title).toBe("OG Title");
-      expect(mockScraper.extractMetadata).toHaveBeenCalledWith("https://example.com");
+      expect(mockScraper.extractMetadata).toHaveBeenCalledWith("https://example.com", {
+        allowHeadless: true,
+      });
       expect(mockTemplateService.render).toHaveBeenCalled();
       expect(mockStorage.store).toHaveBeenCalled();
       expect(mockPrisma.image.create).toHaveBeenCalled();

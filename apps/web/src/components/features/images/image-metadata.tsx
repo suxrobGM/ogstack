@@ -1,11 +1,11 @@
 "use client";
 
 import type { ReactElement, ReactNode } from "react";
-import { Box, Stack, Typography } from "@mui/material";
-import { CodeBlock } from "@/components/ui/display/code-block";
+import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
+import { Box, Chip, Stack, Typography } from "@mui/material";
+import { AiChip } from "@/components/ui/display/ai-chip";
 import { CopyButton } from "@/components/ui/display/copy-button";
 import type { ImageItem } from "@/types/api";
-import { buildOgImageUrl, buildOgMetaTag } from "@/utils/og-image";
 
 interface ImageMetadataProps {
   image: ImageItem;
@@ -13,7 +13,6 @@ interface ImageMetadataProps {
 
 export function ImageMetadata(props: ImageMetadataProps): ReactElement {
   const { image } = props;
-  const snippet = buildIntegrationSnippet(image);
   const imageUrl = image.cdnUrl ?? image.imageUrl;
 
   return (
@@ -33,6 +32,9 @@ export function ImageMetadata(props: ImageMetadataProps): ReactElement {
           </Typography>
           <CopyButton text={imageUrl} />
         </Stack>
+      </MetaRow>
+      <MetaRow label="Generation">
+        <GenerationChip image={image} />
       </MetaRow>
       <MetaRow label="Template">
         <Typography variant="body2">
@@ -68,25 +70,23 @@ export function ImageMetadata(props: ImageMetadataProps): ReactElement {
           <Typography variant="body2">{image.description}</Typography>
         </MetaRow>
       )}
-      {snippet && <IntegrationSnippet code={snippet} />}
     </Stack>
   );
 }
 
-function IntegrationSnippet(props: { code: string }): ReactElement {
+function GenerationChip(props: { image: ImageItem }): ReactElement {
+  const { image } = props;
+  if (image.aiModel) {
+    return <AiChip label={`AI · ${image.aiModel}`} />;
+  }
+
   return (
-    <Stack spacing={1} sx={{ mt: 2 }}>
-      <Typography
-        variant="captionMuted"
-        sx={{ textTransform: "uppercase", letterSpacing: "0.05em" }}
-      >
-        Integration
-      </Typography>
-      <Typography variant="body2Muted">
-        Drop this meta tag into the page&apos;s &lt;head&gt; to serve this image.
-      </Typography>
-      <CodeBlock code={props.code} language="html" />
-    </Stack>
+    <Chip
+      size="small"
+      variant="outlined"
+      icon={<DashboardCustomizeIcon fontSize="small" />}
+      label={`Template${image.template ? ` · ${image.template.name}` : ""}`}
+    />
   );
 }
 
@@ -102,19 +102,4 @@ function MetaRow(props: { label: string; children: ReactNode }): ReactElement {
       <Box sx={{ flex: 1, minWidth: 0 }}>{props.children}</Box>
     </Stack>
   );
-}
-
-function buildIntegrationSnippet(image: ImageItem): string | null {
-  if (!image.publicProjectId) {
-    return null;
-  }
-  const sourceUrl = image.sourceUrl ?? "https://yoursite.com/page";
-  const params = new URLSearchParams({ url: sourceUrl });
-
-  if (image.aiModel) {
-    params.set("aiGenerated", "true");
-  } else if (image.template?.slug) {
-    params.set("template", image.template.slug);
-  }
-  return buildOgMetaTag(buildOgImageUrl(image.publicProjectId, params));
 }

@@ -18,6 +18,7 @@ import { queryKeys } from "@/lib/query-keys";
 import { useConfirm } from "@/providers/confirm-provider";
 import type { AuditPreviewMetadata, ImageItem } from "@/types/api";
 import { ImageEditForm } from "./image-edit-form";
+import { ImageIntegrationSnippet } from "./image-integration-snippet";
 import { ImageMetadata } from "./image-metadata";
 import { ImagePreview } from "./image-preview";
 
@@ -75,23 +76,25 @@ export function ImageDetail(props: ImageDetailProps): ReactElement {
         </Box>
       </Stack>
 
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 7 }}>
-          <Surface>
-            <Stack spacing={3}>
-              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                <Typography variant="h6" sx={{ flex: 1 }}>
-                  Image
-                </Typography>
-                {mode === "view" && (
-                  <Tooltip title="Edit">
-                    <IconButton size="small" onClick={() => setMode("edit")}>
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                )}
-              </Stack>
+      <Surface>
+        <Stack spacing={3}>
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+            <Typography variant="h6" sx={{ flex: 1 }}>
+              Image
+            </Typography>
+            {mode === "view" && (
+              <Tooltip title="Edit">
+                <IconButton size="small" onClick={() => setMode("edit")}>
+                  <EditIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+          </Stack>
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, md: 7 }}>
               <ImagePreview image={image} alt={title} />
+            </Grid>
+            <Grid size={{ xs: 12, md: 5 }}>
               {mode === "view" ? (
                 <ImageMetadata image={image} />
               ) : (
@@ -101,50 +104,52 @@ export function ImageDetail(props: ImageDetailProps): ReactElement {
                   onSuccess={() => setMode("view")}
                 />
               )}
-              {mode === "view" && (
-                <Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end" }}>
-                  <Button
-                    color="error"
-                    startIcon={<DeleteIcon />}
-                    onClick={handleDelete}
-                    loading={deleteMutation.isPending}
-                  >
-                    Delete
-                  </Button>
-                  <Button
-                    startIcon={<OpenInNewIcon />}
-                    href={image.cdnUrl ?? image.imageUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Open
-                  </Button>
-                </Stack>
-              )}
+            </Grid>
+          </Grid>
+          {mode === "view" && (
+            <Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end" }}>
+              <Button
+                color="error"
+                startIcon={<DeleteIcon />}
+                onClick={handleDelete}
+                loading={deleteMutation.isPending}
+              >
+                Delete
+              </Button>
+              <Button
+                startIcon={<OpenInNewIcon />}
+                href={image.cdnUrl ?? image.imageUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open
+              </Button>
             </Stack>
-          </Surface>
-        </Grid>
+          )}
+        </Stack>
+      </Surface>
 
-        <Grid size={{ xs: 12, md: 5 }}>
-          <Surface>
-            <Stack spacing={2}>
-              <Typography variant="h6">Platform previews</Typography>
-              <Typography variant="body2Muted">
-                How this image appears when shared across networks.
-              </Typography>
-              <Stack spacing={2}>
-                {PLATFORMS.map((platform) => (
-                  <PlatformPreviewCard
-                    key={platform.id}
-                    platform={platform}
-                    metadata={previewMetadata}
-                  />
-                ))}
-              </Stack>
-            </Stack>
-          </Surface>
-        </Grid>
-      </Grid>
+      <Surface>
+        <ImageIntegrationSnippet image={image} />
+      </Surface>
+
+      <Surface>
+        <Stack spacing={2}>
+          <Box>
+            <Typography variant="h6">Platform previews</Typography>
+            <Typography variant="body2Muted">
+              How this image appears when shared across networks.
+            </Typography>
+          </Box>
+          <Grid container spacing={2}>
+            {PLATFORMS.map((platform) => (
+              <Grid key={platform.id} size={{ xs: 12, sm: 6, lg: 4 }}>
+                <PlatformPreviewCard platform={platform} metadata={previewMetadata} />
+              </Grid>
+            ))}
+          </Grid>
+        </Stack>
+      </Surface>
     </Stack>
   );
 }

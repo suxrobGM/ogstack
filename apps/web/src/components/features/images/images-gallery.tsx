@@ -217,7 +217,7 @@ export function ImagesGallery(props: ImagesGalleryProps): ReactElement {
           {items.map((item) => (
             <Grid key={item.id} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
               <Link
-                href={{ pathname: "/images/[id]", query: { id: item.id } }}
+                href={`/images/${item.id}`}
                 style={{ textDecoration: "none", color: "inherit" }}
               >
                 <Box

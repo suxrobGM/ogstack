@@ -48,12 +48,6 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.images.all, id] as const,
   },
 
-  pageAnalysis: {
-    all: ["page-analysis"] as const,
-    analyze: (params: { url: string; userPrompt: string; fullOverride: boolean }) =>
-      [...queryKeys.pageAnalysis.all, "analyze", params] as const,
-  },
-
   users: {
     all: ["users"] as const,
     me: () => [...queryKeys.users.all, "me"] as const,

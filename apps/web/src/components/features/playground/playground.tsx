@@ -10,6 +10,7 @@ import { queryKeys } from "@/lib/query-keys";
 import type {
   GenerateDto,
   ImageGenerateBody,
+  PageAnalysisResponse,
   ProjectListResponse,
   TemplateInfo,
   UsageStatsResponse,
@@ -34,6 +35,13 @@ const DEFAULTS: PlaygroundFormValues = {
   aiPrompt: "",
   fullOverride: false,
 };
+
+interface AnalyzeVariables {
+  url: string;
+  userPrompt?: string;
+  fullOverride: boolean;
+  skipAi: boolean;
+}
 
 interface PlaygroundProps {
   initialProjects: ProjectListResponse | null;
@@ -69,6 +77,7 @@ export function Playground(props: PlaygroundProps): ReactElement {
   );
   const [result, setResult] = useState<GenerateDto | null>(null);
   const [lastFormValues, setLastFormValues] = useState<PlaygroundFormValues | null>(null);
+  const [analyzed, setAnalyzed] = useState(false);
 
   const { data: templatesData } = useApiQuery<TemplateInfo[]>(
     queryKeys.templates.list(),
@@ -90,14 +99,29 @@ export function Playground(props: PlaygroundProps): ReactElement {
     {
       errorMessage: (err) => err.message,
       onSuccess: (data) => {
-        setResult(data as GenerateDto);
+        setResult(data);
         refetchUsage();
       },
     },
   );
 
+  const analyzeMutation = useApiMutation<PageAnalysisResponse, AnalyzeVariables>((variables) =>
+    client.api["page-analysis"].analyze.post(variables),
+  );
+
   const submit = (values: PlaygroundFormValues, force: boolean) => {
     setLastFormValues(values);
+    setAnalyzed(true);
+
+    if (values.url.trim() && !values.fullOverride) {
+      analyzeMutation.mutate({
+        url: values.url,
+        userPrompt: values.aiPrompt,
+        fullOverride: values.fullOverride,
+        skipAi: !values.aiGenerated,
+      });
+    }
+
     generateMutation.mutate({
       url: values.url,
       template: values.template,
@@ -160,18 +184,16 @@ export function Playground(props: PlaygroundProps): ReactElement {
         />
       </Grid>
 
-      <Grid size={{ xs: 12 }}>
-        <form.Subscribe selector={(s: { values: PlaygroundFormValues }) => s.values}>
-          {(values: PlaygroundFormValues) => (
-            <PageContentPanel
-              url={values.url}
-              userPrompt={values.aiPrompt}
-              fullOverride={values.fullOverride}
-              onApplyAccent={(hex) => form.setFieldValue("accent", hex)}
-            />
-          )}
-        </form.Subscribe>
-      </Grid>
+      {analyzed && (
+        <Grid size={{ xs: 12 }}>
+          <PageContentPanel
+            data={analyzeMutation.data}
+            isLoading={analyzeMutation.isPending}
+            isError={analyzeMutation.isError}
+            onApplyAccent={(hex) => form.setFieldValue("accent", hex)}
+          />
+        </Grid>
+      )}
 
       {result && (
         <Grid size={{ xs: 12 }}>

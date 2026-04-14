@@ -5,6 +5,13 @@ import { Text } from "../text";
 import type { TemplateProps } from "../types";
 import { description, logoStyles, prettyHost, resolveTheme, title, withAlpha } from "../utils";
 
+const RIGHT_COL_WIDTH = 504;
+const CANVAS_HEIGHT = 630;
+const IMAGE_CARD_WIDTH = 420;
+const IMAGE_CARD_HEIGHT = 300;
+const FALLBACK_CARD_WIDTH = 300;
+const FALLBACK_CARD_HEIGHT = 360;
+
 export function SplitHero(props: TemplateProps): ReactElement {
   const { dark, accent, logoUrl, logoPosition, metadata } = props;
   const theme = resolveTheme(dark, accent);
@@ -22,7 +29,8 @@ export function SplitHero(props: TemplateProps): ReactElement {
         justify="between"
         padding="64px 56px"
         bg={theme.bg}
-        style={{ width: "58%", position: "relative" }}
+        flex={1}
+        style={{ position: "relative" }}
       >
         <Kicker color={accent}>{eyebrow}</Kicker>
 
@@ -45,9 +53,10 @@ export function SplitHero(props: TemplateProps): ReactElement {
         </Row>
       </Stack>
 
-      {/* Right — spotlight composition */}
+      {/* Right — spotlight composition (explicit pixel dims to keep resvg happy) */}
       <Box
-        width="42%"
+        width={RIGHT_COL_WIDTH}
+        height={CANVAS_HEIGHT}
         style={{
           alignItems: "center",
           justifyContent: "center",
@@ -63,62 +72,39 @@ export function SplitHero(props: TemplateProps): ReactElement {
 
         {metadata.ogImage ? (
           <Box
-            width="82%"
-            height="72%"
+            width={IMAGE_CARD_WIDTH}
+            height={IMAGE_CARD_HEIGHT}
             radius={18}
             border={`1px solid ${theme.border}`}
-            style={{
-              overflow: "hidden",
-              boxShadow: `0 32px 80px ${withAlpha(accent, 0.3)}`,
-              transform: "rotate(-3deg)",
-              position: "relative",
-            }}
+            style={{ overflow: "hidden", transform: "rotate(-3deg)" }}
           >
             <img
               src={metadata.ogImage}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              width={IMAGE_CARD_WIDTH}
+              height={IMAGE_CARD_HEIGHT}
+              style={{
+                display: "flex",
+                width: `${IMAGE_CARD_WIDTH}px`,
+                height: `${IMAGE_CARD_HEIGHT}px`,
+                objectFit: "cover",
+              }}
             />
           </Box>
         ) : (
           <Box
-            width={340}
-            height={340}
-            style={{ alignItems: "center", justifyContent: "center", position: "relative" }}
+            width={FALLBACK_CARD_WIDTH}
+            height={FALLBACK_CARD_HEIGHT}
+            radius={22}
+            style={{
+              background: `linear-gradient(150deg, ${accent} 0%, ${theme.accentStrong} 100%)`,
+              alignItems: "center",
+              justifyContent: "center",
+              transform: "rotate(-4deg)",
+            }}
           >
-            <Box
-              absolute
-              width={260}
-              height={320}
-              radius={22}
-              bg={withAlpha(accent, 0.18)}
-              border={`1px solid ${withAlpha(accent, 0.3)}`}
-              style={{ transform: "rotate(-10deg) translateX(-40px)" }}
-            />
-            <Box
-              absolute
-              width={260}
-              height={320}
-              radius={22}
-              bg={theme.bgElevated}
-              border={`1px solid ${theme.border}`}
-              style={{ transform: "rotate(4deg) translateX(30px)" }}
-            />
-            <Box
-              absolute
-              width={260}
-              height={320}
-              radius={22}
-              style={{
-                background: `linear-gradient(150deg, ${accent} 0%, ${theme.accentStrong} 100%)`,
-                alignItems: "center",
-                justifyContent: "center",
-                transform: "rotate(-2deg)",
-              }}
-            >
-              <Text serif italic size={120} color={theme.accentOn} weight={400}>
-                {eyebrow.charAt(0).toUpperCase()}
-              </Text>
-            </Box>
+            <Text serif italic size={160} color={theme.accentOn} weight={400}>
+              {eyebrow.charAt(0).toUpperCase()}
+            </Text>
           </Box>
         )}
       </Box>

@@ -83,26 +83,28 @@ describe("validateUrlForFetch", () => {
     expect(url.hostname).toBe("example.com");
   });
 
-  it("should reject invalid URLs", () => {
-    expect(validateUrlForFetch("not-a-url")).rejects.toThrow("Invalid URL");
+  it("should reject invalid URLs", async () => {
+    await expect(validateUrlForFetch("not-a-url")).rejects.toThrow("isn't valid");
   });
 
-  it("should reject non-HTTP schemes", () => {
-    expect(validateUrlForFetch("ftp://example.com")).rejects.toThrow("Only HTTP and HTTPS");
-    expect(validateUrlForFetch("file:///etc/passwd")).rejects.toThrow("Only HTTP and HTTPS");
-    expect(validateUrlForFetch("javascript:alert(1)")).rejects.toThrow("Only HTTP and HTTPS");
+  it("should reject non-HTTP schemes", async () => {
+    await expect(validateUrlForFetch("ftp://example.com")).rejects.toThrow("http:// and https://");
+    await expect(validateUrlForFetch("file:///etc/passwd")).rejects.toThrow("http:// and https://");
+    await expect(validateUrlForFetch("javascript:alert(1)")).rejects.toThrow(
+      "http:// and https://",
+    );
   });
 
-  it("should reject localhost", () => {
-    expect(validateUrlForFetch("http://localhost")).rejects.toThrow("localhost");
-    expect(validateUrlForFetch("http://localhost:3000")).rejects.toThrow("localhost");
+  it("should reject localhost", async () => {
+    await expect(validateUrlForFetch("http://localhost")).rejects.toThrow("Localhost");
+    await expect(validateUrlForFetch("http://localhost:3000")).rejects.toThrow("Localhost");
   });
 
-  it("should reject private IP addresses directly in URL", () => {
-    expect(validateUrlForFetch("http://10.0.0.1")).rejects.toThrow("private IP");
-    expect(validateUrlForFetch("http://192.168.1.1")).rejects.toThrow("private IP");
-    expect(validateUrlForFetch("http://127.0.0.1")).rejects.toThrow("private IP");
-    expect(validateUrlForFetch("http://172.16.0.1")).rejects.toThrow("private IP");
+  it("should reject private IP addresses directly in URL", async () => {
+    await expect(validateUrlForFetch("http://10.0.0.1")).rejects.toThrow("Private IP addresses");
+    await expect(validateUrlForFetch("http://192.168.1.1")).rejects.toThrow("Private IP addresses");
+    await expect(validateUrlForFetch("http://127.0.0.1")).rejects.toThrow("Private IP addresses");
+    await expect(validateUrlForFetch("http://172.16.0.1")).rejects.toThrow("Private IP addresses");
   });
 
   it("should reject URLs that resolve to private IPs via DNS", async () => {
@@ -112,7 +114,7 @@ describe("validateUrlForFetch", () => {
     });
 
     await expect(validateUrlForFetch("https://evil.example.com")).rejects.toThrow(
-      "resolves to a private IP",
+      "resolves to a private network address",
     );
   });
 

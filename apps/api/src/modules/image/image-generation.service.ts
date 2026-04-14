@@ -209,9 +209,11 @@ export class ImageGenerationService {
     const { metadata, ai } = await this.pageAnalysis.getForImageGeneration({
       url: ctx.url,
       userId: ctx.userId,
-      plan: ctx.plan,
       userPrompt: ctx.options?.aiPrompt,
       fullOverride: ctx.fullOverride,
+      // AI seeds are only consumed by AI-image rendering. Template-only flows
+      // skip the LLM entirely to keep token usage off the hot path.
+      skipAi: !ctx.aiModel,
     });
     const outcome = await this.renderWithAiFallback(
       metadata,

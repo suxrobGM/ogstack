@@ -6,6 +6,7 @@ export const AnalyzeRequestSchema = t.Object({
   url: t.String({ format: "uri" }),
   userPrompt: t.Optional(t.String({ maxLength: USER_PROMPT_MAX_CHARS })),
   fullOverride: t.Optional(t.Boolean()),
+  skipAi: t.Optional(t.Boolean()),
 });
 
 const PageAnalysisImagePromptSchema = t.Object({
@@ -63,7 +64,6 @@ export const PageAnalysisResultSchema = t.Object({
   metadata: PageAnalysisMetadataSchema,
   ai: t.Nullable(PageAnalysisAiSchema),
   cached: t.Boolean(),
-  upgradeRequired: t.Optional(t.Boolean()),
 });
 
 export type AnalyzeRequest = Static<typeof AnalyzeRequestSchema>;

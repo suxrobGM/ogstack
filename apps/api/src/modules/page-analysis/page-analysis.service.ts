@@ -9,52 +9,23 @@ import {
 import { ScraperService, type UrlMetadata } from "@/common/services/scraper";
 import { hashSha256 } from "@/common/utils/crypto";
 import { Plan, PrismaClient } from "@/generated/prisma";
-import type {
-  PageAnalysisAi,
-  PageAnalysisMetadata,
-  PageAnalysisResult,
-} from "./page-analysis.types";
+import { toPublicMetadata } from "./page-analysis.mapper";
+import type { PageAnalysisAi, PageAnalysisResult } from "./page-analysis.types";
 
 const BODY_EXCERPT_CHARS = 3000;
-
-function buildAnalyzeUserMessage(metadata: UrlMetadata, userPrompt: string | undefined): string {
-  const page = {
-    url: metadata.url,
-    title: metadata.ogTitle ?? metadata.title,
-    description: metadata.ogDescription ?? metadata.description,
-    siteName: metadata.siteName,
-    lang: metadata.lang,
-    h1: metadata.h1,
-    h2s: metadata.h2s.slice(0, 4),
-    tags: metadata.tags.slice(0, 10),
-    publishedTime: metadata.publishedTime,
-    author: metadata.author,
-    bodyText: metadata.bodyText?.slice(0, BODY_EXCERPT_CHARS) ?? null,
-    isThinHtml: metadata.isThinHtml,
-  };
-
-  const directive = sanitizeUserPrompt(userPrompt);
-  const parts = [`page: ${JSON.stringify(page)}`];
-  if (directive) {
-    parts.push(
-      `userDirective: ${JSON.stringify(directive)} (apply ONLY to imagePrompt.backgroundKeywords, mood, and suggestedAccent)`,
-    );
-  }
-  return parts.join("\n\n");
-}
 
 interface AnalyzeParams {
   url: string;
   userId: string | null;
-  plan: Plan;
   userPrompt?: string;
   fullOverride?: boolean;
+  skipAi?: boolean;
 }
 
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24h in ms
 
 // Max time to wait for the LLM analysis before falling back to classic metadata.
-const ANALYSIS_TIMEOUT = 6000;
+const ANALYSIS_TIMEOUT = 30_000;
 
 /**
  * Analyzes a page for its title, description, summary, key points, topics,
@@ -72,14 +43,16 @@ export class PageAnalysisService {
   ) {}
 
   async analyze(params: AnalyzeParams): Promise<PageAnalysisResult> {
-    const { url, userId, plan, userPrompt, fullOverride } = params;
+    const { url, userId, userPrompt, fullOverride, skipAi } = params;
+    const plan = await this.resolvePlan(userId);
 
     const allowHeadless = plan !== Plan.FREE;
     const metadata = await this.scraper.extractMetadata(url, { allowHeadless });
+    const canUseAi = plan !== Plan.FREE && this.promptProvider.isEnabled() && !skipAi;
 
-    // Full override: user's prompt is the truth, don't spend tokens on AI analysis.
-    // Return classic metadata; image gen will apply the override later.
-    if (fullOverride) {
+    // Full override or caller skipAi: user's prompt is the truth, or the caller
+    // explicitly opted out — don't spend tokens on AI analysis.
+    if (fullOverride || !canUseAi) {
       return {
         mode: "classic",
         metadata: toPublicMetadata(metadata),
@@ -88,18 +61,7 @@ export class PageAnalysisService {
       };
     }
 
-    const canUseAi = plan !== Plan.FREE && this.promptProvider.isEnabled();
-    if (!canUseAi) {
-      return {
-        mode: "classic",
-        metadata: toPublicMetadata(metadata),
-        ai: null,
-        cached: false,
-        upgradeRequired: plan === Plan.FREE,
-      };
-    }
-
-    const cacheKey = await buildCacheKey(url, metadata, userPrompt);
+    const cacheKey = await this.buildCacheKey(url, metadata, userPrompt);
     const cached = await this.findCached(cacheKey);
     if (cached) {
       return {
@@ -144,18 +106,23 @@ export class PageAnalysisService {
     metadata: UrlMetadata;
     ai: PageAnalysisAi | null;
   }> {
-    const { url, userId, plan, userPrompt, fullOverride } = params;
+    const { url, userId, userPrompt, fullOverride, skipAi } = params;
+    const plan = await this.resolvePlan(userId);
     const metadata = await this.scraper.extractMetadata(url, {
       allowHeadless: plan !== Plan.FREE,
     });
 
-    if (fullOverride || plan === Plan.FREE || !this.promptProvider.isEnabled()) {
+    const canUseAi = plan !== Plan.FREE && this.promptProvider.isEnabled() && !skipAi;
+
+    if (fullOverride || !canUseAi) {
       return { metadata, ai: null };
     }
 
-    const cacheKey = await buildCacheKey(url, metadata, userPrompt);
+    const cacheKey = await this.buildCacheKey(url, metadata, userPrompt);
     const cached = await this.findCached(cacheKey);
-    if (cached) return { metadata, ai: cached };
+    if (cached) {
+      return { metadata, ai: cached };
+    }
 
     const ai = await this.runAnalysis(metadata, userPrompt);
     if (ai) {
@@ -171,6 +138,15 @@ export class PageAnalysisService {
     return { metadata, ai };
   }
 
+  private async resolvePlan(userId: string | null): Promise<Plan> {
+    if (!userId) return Plan.FREE;
+    const record = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { plan: true },
+    });
+    return record?.plan ?? Plan.FREE;
+  }
+
   private async runAnalysis(
     metadata: UrlMetadata,
     userPrompt: string | undefined,
@@ -178,14 +154,22 @@ export class PageAnalysisService {
     const raw = await this.promptProvider.chat(
       {
         system: PAGE_ANALYSIS_SYSTEM_PROMPT,
-        user: buildAnalyzeUserMessage(metadata, userPrompt),
+        user: this.buildAnalyzeUserMessage(metadata, userPrompt),
         json: true,
         temperature: 0.3,
-        maxTokens: 1500,
+        maxTokens: 5000,
       },
       { timeoutMs: ANALYSIS_TIMEOUT },
     );
-    return raw ? parseJsonResponse<PageAnalysisAi>(raw) : null;
+    if (!raw) return null;
+    const parsed = parseJsonResponse<PageAnalysisAi>(raw);
+    if (!parsed) {
+      logger.warn(
+        { sample: raw.slice(0, 200) },
+        "Page analysis LLM response was not valid JSON — falling back to classic",
+      );
+    }
+    return parsed;
   }
 
   private async findCached(cacheKey: string): Promise<PageAnalysisAi | null> {
@@ -246,33 +230,40 @@ export class PageAnalysisService {
       );
     }
   }
-}
 
-async function buildCacheKey(
-  url: string,
-  metadata: UrlMetadata,
-  userPrompt?: string,
-): Promise<string> {
-  const bodyHash = await hashSha256(metadata.bodyText ?? "");
-  const promptHash = await hashSha256(sanitizeUserPrompt(userPrompt));
-  return hashSha256(`${url}|${bodyHash}|${promptHash}`);
-}
+  private async buildCacheKey(
+    url: string,
+    metadata: UrlMetadata,
+    userPrompt?: string,
+  ): Promise<string> {
+    const bodyHash = await hashSha256(metadata.bodyText ?? "");
+    const promptHash = await hashSha256(sanitizeUserPrompt(userPrompt));
+    return hashSha256(`${url}|${bodyHash}|${promptHash}`);
+  }
 
-export function toPublicMetadata(metadata: UrlMetadata): PageAnalysisMetadata {
-  return {
-    url: metadata.url,
-    title: metadata.ogTitle ?? metadata.title,
-    description: metadata.ogDescription ?? metadata.description,
-    image: metadata.ogImage ?? metadata.twitterImage,
-    siteName: metadata.siteName,
-    favicon: metadata.favicon,
-    author: metadata.author,
-    canonicalUrl: metadata.canonicalUrl,
-    lang: metadata.lang,
-    publishedTime: metadata.publishedTime,
-    modifiedTime: metadata.modifiedTime,
-    tags: metadata.tags,
-    isThinHtml: metadata.isThinHtml,
-    renderedWithJs: metadata.renderedWithJs,
-  };
+  private buildAnalyzeUserMessage(metadata: UrlMetadata, userPrompt: string | undefined): string {
+    const page = {
+      url: metadata.url,
+      title: metadata.ogTitle ?? metadata.title,
+      description: metadata.ogDescription ?? metadata.description,
+      siteName: metadata.siteName,
+      lang: metadata.lang,
+      h1: metadata.h1,
+      h2s: metadata.h2s.slice(0, 4),
+      tags: metadata.tags.slice(0, 10),
+      publishedTime: metadata.publishedTime,
+      author: metadata.author,
+      bodyText: metadata.bodyText?.slice(0, BODY_EXCERPT_CHARS) ?? null,
+      isThinHtml: metadata.isThinHtml,
+    };
+
+    const directive = sanitizeUserPrompt(userPrompt);
+    const parts = [`page: ${JSON.stringify(page)}`];
+    if (directive) {
+      parts.push(
+        `userDirective: ${JSON.stringify(directive)} (apply ONLY to imagePrompt.backgroundKeywords, mood, and suggestedAccent)`,
+      );
+    }
+    return parts.join("\n\n");
+  }
 }

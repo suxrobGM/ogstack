@@ -2,7 +2,6 @@ import { Elysia } from "elysia";
 import { container } from "@/common/di";
 import { authGuard } from "@/common/middleware";
 import { resolveUserPlan, tieredRateLimiter } from "@/common/middleware/tiered-rate-limiter";
-import { Plan } from "@/generated/prisma";
 import { AnalyzeRequestSchema, PageAnalysisResultSchema } from "./page-analysis.schema";
 import { PageAnalysisService } from "./page-analysis.service";
 
@@ -21,8 +20,8 @@ export const pageAnalysisController = new Elysia({
         url: body.url,
         userPrompt: body.userPrompt,
         fullOverride: body.fullOverride ?? false,
+        skipAi: body.skipAi ?? false,
         userId: user.id,
-        plan: user.plan as Plan,
       }),
     {
       body: AnalyzeRequestSchema,

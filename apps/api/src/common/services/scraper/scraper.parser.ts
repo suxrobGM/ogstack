@@ -200,7 +200,10 @@ export async function parseHtml(url: string, html: string): Promise<ParseResult>
         }
       },
     })
-    .on("p, li, span, div", {
+    // Match any element so we pick up text from custom elements too (Angular
+    // `<app-*>`, Web Components, Lit, etc.). The `skipTextDepth` guard above
+    // keeps script/style/nav/etc. out.
+    .on("*", {
       text(text) {
         if (skipTextDepth > 0) return;
         if (totalBodyTextLen >= BODY_TEXT_LIMIT) return;
@@ -238,12 +241,12 @@ function compactWhitespace(text: string): string {
 
 function detectThinHtml(bodyText: string, html: string): boolean {
   if (bodyText.length < THIN_HTML_THRESHOLD) return true;
+  // Only use hard SPA-shell markers. <noscript> hints are too noisy — modern SSR
+  // stacks (Angular, Next, Nuxt, SvelteKit) still emit them as a safety net.
   const markers = [
     /<div[^>]+id=["']root["']/i,
     /<div[^>]+id=["']__next["']/i,
     /<div[^>]+id=["']app["']/i,
-    /<noscript>[^<]*enable\s+javascript/i,
-    /<noscript>[^<]*requires\s+javascript/i,
   ];
   if (markers.some((rx) => rx.test(html))) {
     // SPA shell markers + short body => thin. If body is long, SSR likely filled

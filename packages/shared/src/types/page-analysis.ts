@@ -48,5 +48,4 @@ export interface PageAnalysisResult {
   metadata: PageAnalysisMetadata;
   ai: PageAnalysisAi | null;
   cached: boolean;
-  upgradeRequired?: boolean;
 }

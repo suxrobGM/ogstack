@@ -81,8 +81,9 @@ describe("ScraperService", () => {
       const html = `<html><head></head><body></body></html>`;
 
       const result = await service.parseMetadata("https://example.com", html);
-      expect(result.title).toBeNull();
-      expect(result.ogTitle).toBeNull();
+      // Domain-derived title fallback kicks in when no meta/og title exists.
+      expect(result.title).toBe("Example");
+      expect(result.ogTitle).toBe("Example");
       expect(result.ogDescription).toBeNull();
       expect(result.ogImage).toBeNull();
       expect(result.author).toBeNull();
@@ -99,7 +100,8 @@ describe("ScraperService", () => {
     it("should handle empty HTML", async () => {
       const result = await service.parseMetadata("https://example.com", "");
       expect(result.url).toBe("https://example.com");
-      expect(result.title).toBeNull();
+      // No <title>, so the domain-derived fallback fills it in.
+      expect(result.title).toBe("Example");
     });
 
     it("should trim whitespace from meta tag content", async () => {
@@ -118,7 +120,8 @@ describe("ScraperService", () => {
       </head></html>`;
 
       const result = await service.parseMetadata("https://example.com", html);
-      expect(result.ogTitle).toBeNull();
+      // Empty og:title content is ignored; fallback derives from domain.
+      expect(result.ogTitle).toBe("Example");
       expect(result.description).toBeNull();
     });
   });
@@ -134,7 +137,9 @@ describe("ScraperService", () => {
     });
 
     it("should reject private IPs via SSRF validation", async () => {
-      await expect(service.extractMetadata("http://10.0.0.1")).rejects.toThrow("private IP");
+      await expect(service.extractMetadata("http://10.0.0.1")).rejects.toThrow(
+        "Private IP addresses",
+      );
       expect(mockFetch).not.toHaveBeenCalled();
     });
 
@@ -147,16 +152,14 @@ describe("ScraperService", () => {
       );
 
       await expect(service.extractMetadata("https://example.com/api")).rejects.toThrow(
-        "does not return HTML",
+        "doesn't return an HTML page",
       );
     });
 
     it("should reject HTTP error responses", async () => {
       mockFetch.mockResolvedValue(htmlResponse("Not Found", 404));
 
-      await expect(service.extractMetadata("https://example.com/missing")).rejects.toThrow(
-        "HTTP 404",
-      );
+      await expect(service.extractMetadata("https://example.com/missing")).rejects.toThrow("(404)");
     });
 
     it("should follow redirects and validate each hop", async () => {
@@ -181,7 +184,7 @@ describe("ScraperService", () => {
       mockFetch.mockResolvedValue(redirect);
 
       await expect(service.extractMetadata("https://example.com/loop")).rejects.toThrow(
-        "Too many redirects",
+        "redirects too many times",
       );
     });
 

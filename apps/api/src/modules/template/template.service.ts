@@ -6,6 +6,7 @@ import { logger } from "@/common/logger";
 import type { UrlMetadata } from "@/common/services/scraper.service";
 import { getTemplate, hasTemplate, listTemplates } from "./template.registry";
 import type { FontFamily, RenderOptions, TemplateInfo, TemplateSlug } from "./template.schema";
+import { safeFetchImageDataUrl } from "./template.utils";
 import type { TemplateProps } from "./templates/types";
 
 const OG_WIDTH = 1200;
@@ -62,13 +63,17 @@ export class TemplateService {
 
     const template = getTemplate(slug);
     const fontFamily = options.font ?? "inter";
-    const fonts = await this.loadFonts(fontFamily);
+    const [fonts, ogImageDataUrl, logoDataUrl] = await Promise.all([
+      this.loadFonts(fontFamily),
+      safeFetchImageDataUrl(metadata.ogImage),
+      safeFetchImageDataUrl(options.logoUrl),
+    ]);
 
     const props: TemplateProps = {
-      metadata,
+      metadata: { ...metadata, ogImage: ogImageDataUrl },
       accent: options.accent ?? DEFAULT_ACCENT,
       dark: options.dark ?? true,
-      logoUrl: options.logoUrl,
+      logoUrl: logoDataUrl ?? undefined,
       logoPosition: options.logoPosition ?? DEFAULT_LOGO_POSITION,
     };
 
