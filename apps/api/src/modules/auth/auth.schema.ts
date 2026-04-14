@@ -1,4 +1,5 @@
 import { t, type Static } from "elysia";
+import { Plan } from "@/generated/prisma";
 
 export const RegisterBodySchema = t.Object({
   email: t.String({ format: "email" }),
@@ -22,6 +23,7 @@ export const AuthUserSchema = t.Object({
   firstName: t.String(),
   lastName: t.String(),
   role: t.String(),
+  plan: t.Enum(Plan),
 });
 
 export const AuthResponseSchema = t.Object({

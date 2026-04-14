@@ -71,6 +71,7 @@ describe("buildAuthResponse", () => {
       firstName: "Test",
       lastName: "User",
       role: "USER",
+      plan: Plan.FREE,
     });
     expect(typeof result.accessToken).toBe("string");
     expect(typeof result.refreshToken).toBe("string");

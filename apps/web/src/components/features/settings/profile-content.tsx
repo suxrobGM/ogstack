@@ -40,6 +40,7 @@ export function ProfileContent(props: ProfileContentProps): ReactElement {
           firstName: data.firstName,
           lastName: data.lastName,
           role: data.role,
+          plan: data.plan,
         });
       },
     },
@@ -58,6 +59,7 @@ export function ProfileContent(props: ProfileContentProps): ReactElement {
           firstName: data.firstName,
           lastName: data.lastName,
           role: data.role,
+          plan: data.plan,
         });
         setShowEmailForm(false);
       },

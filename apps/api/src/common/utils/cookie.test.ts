@@ -75,7 +75,14 @@ describe("setAuthCookies", () => {
   it("should set access_token and refresh_token cookies", () => {
     const cookie = createMockCookieJar();
     const result = {
-      user: { id: "1", email: "a@b.c", firstName: "A", lastName: "B", role: "USER" },
+      user: {
+        id: "1",
+        email: "a@b.c",
+        firstName: "A",
+        lastName: "B",
+        role: "USER",
+        plan: "FREE" as const,
+      },
       accessToken: "at",
       refreshToken: "rt",
     };

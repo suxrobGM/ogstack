@@ -11,7 +11,7 @@ import {
 import { EmailService } from "@/common/services/email.service";
 import { generateRandomToken } from "@/common/utils/crypto";
 import { hashPassword, verifyPassword } from "@/common/utils/password";
-import { PrismaClient } from "@/generated/prisma";
+import { Plan, PrismaClient } from "@/generated/prisma";
 import type {
   ChangeEmailBody,
   ChangePasswordBody,
@@ -174,6 +174,7 @@ export class UserService {
     firstName: string;
     lastName: string;
     role: string;
+    plan: Plan;
     avatarUrl: string | null;
     emailVerified: boolean;
     passwordHash?: string | null;
@@ -187,6 +188,7 @@ export class UserService {
       firstName: user.firstName,
       lastName: user.lastName,
       role: user.role,
+      plan: user.plan,
       avatarUrl: user.avatarUrl,
       emailVerified: user.emailVerified,
       hasPassword: !!user.passwordHash,

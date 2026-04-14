@@ -1,4 +1,5 @@
 import { jwtVerify, SignJWT, type JWTPayload } from "jose";
+import type { Plan } from "@/generated/prisma";
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET ?? "dev-secret");
 const ACCESS_TOKEN_EXPIRY = process.env.JWT_EXPIRY ?? "1d";
@@ -41,7 +42,7 @@ export interface AuthTokenUser {
   firstName: string;
   lastName: string;
   role: string;
-  plan: string;
+  plan: Plan;
 }
 
 /** Build a standard auth response with access and refresh tokens. */
@@ -58,6 +59,7 @@ export async function buildAuthResponse(user: AuthTokenUser) {
       firstName: user.firstName,
       lastName: user.lastName,
       role: user.role,
+      plan: user.plan,
     },
     accessToken,
     refreshToken,

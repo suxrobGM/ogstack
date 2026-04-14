@@ -1,4 +1,5 @@
 import { t, type Static } from "elysia";
+import { Plan } from "@/generated/prisma";
 
 export const UserProfileSchema = t.Object({
   id: t.String(),
@@ -6,6 +7,7 @@ export const UserProfileSchema = t.Object({
   firstName: t.String(),
   lastName: t.String(),
   role: t.String(),
+  plan: t.Enum(Plan),
   avatarUrl: t.Nullable(t.String()),
   emailVerified: t.Boolean(),
   hasPassword: t.Boolean(),

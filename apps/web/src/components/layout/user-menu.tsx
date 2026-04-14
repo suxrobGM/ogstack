@@ -7,11 +7,13 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import {
   Box,
+  Chip,
   Divider,
   ListItemIcon,
   ListItemText,
   Menu,
   MenuItem,
+  Stack,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -21,6 +23,22 @@ import { UserAvatar } from "@/components/ui/display/user-avatar";
 import { useAuth } from "@/hooks";
 import { ROUTES } from "@/lib/constants";
 import { iconSizes, motion, radii } from "@/theme/tokens";
+import type { AuthUser } from "@/types/api";
+
+type PlanChipColor = "default" | "primary" | "secondary" | "warning";
+
+function planChipColor(plan: AuthUser["plan"]): PlanChipColor {
+  switch (plan) {
+    case "PRO":
+      return "primary";
+    case "BUSINESS":
+      return "secondary";
+    case "ENTERPRISE":
+      return "warning";
+    default:
+      return "default";
+  }
+}
 
 interface UserMenuProps {
   collapsed?: boolean;
@@ -67,9 +85,20 @@ export function UserMenu(props: UserMenuProps): ReactElement {
       {!collapsed && (
         <>
           <Box sx={{ minWidth: 0, flex: 1 }}>
-            <Typography variant="body2" noWrap sx={{ fontSize: "0.8125rem" }}>
-              {fullName}
-            </Typography>
+            <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+              <Typography variant="body2" noWrap sx={{ flex: 1, fontSize: "0.8125rem" }}>
+                {fullName}
+              </Typography>
+              {user?.plan && (
+                <Chip
+                  label={user.plan}
+                  size="small"
+                  color={planChipColor(user.plan)}
+                  variant="filled"
+                  sx={{ fontSize: "0.6rem", height: 18 }}
+                />
+              )}
+            </Stack>
             <Typography variant="captionMuted" noWrap>
               {user?.email}
             </Typography>
