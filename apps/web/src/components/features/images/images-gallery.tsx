@@ -28,16 +28,18 @@ import { ImageDetailDialog } from "./image-detail-dialog";
 interface ImagesGalleryProps {
   initialData: ImageListResponse | null;
   projects: Project[];
+  projectId?: string;
+  hideHeader?: boolean;
 }
 
 const PAGE_SIZE = 24;
 
 export function ImagesGallery(props: ImagesGalleryProps): ReactElement {
-  const { initialData, projects } = props;
+  const { initialData, projects, projectId: fixedProjectId, hideHeader = false } = props;
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [projectId, setProjectId] = useState<string>("");
+  const [projectId, setProjectId] = useState<string>(fixedProjectId ?? "");
   const [category, setCategory] = useState<TemplateCategorySlug | "">("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -45,7 +47,9 @@ export function ImagesGallery(props: ImagesGalleryProps): ReactElement {
 
   const debouncedSearch = useDebouncedValue(search, 400);
 
-  const hasFilters = Boolean(debouncedSearch || projectId || category || from || to);
+  const hasFilters = Boolean(
+    debouncedSearch || (!fixedProjectId && projectId) || category || from || to,
+  );
 
   const { data, isLoading } = useApiQuery<ImageListResponse>(
     queryKeys.images.list({
@@ -81,7 +85,7 @@ export function ImagesGallery(props: ImagesGalleryProps): ReactElement {
 
   const clearFilters = () => {
     setSearch("");
-    setProjectId("");
+    setProjectId(fixedProjectId ?? "");
     setCategory("");
     setFrom("");
     setTo("");
@@ -90,10 +94,12 @@ export function ImagesGallery(props: ImagesGalleryProps): ReactElement {
 
   return (
     <Stack spacing={3}>
-      <PageHeader
-        title="Generated Images"
-        description="Every OG image you or your API has generated."
-      />
+      {!hideHeader && (
+        <PageHeader
+          title="Generated Images"
+          description="Every OG image you or your API has generated."
+        />
+      )}
 
       <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", gap: 2 }}>
         <TextField
@@ -115,24 +121,26 @@ export function ImagesGallery(props: ImagesGalleryProps): ReactElement {
           }}
           sx={{ minWidth: 240 }}
         />
-        <TextField
-          select
-          size="small"
-          label="Project"
-          value={projectId}
-          onChange={(e) => {
-            setProjectId(e.target.value);
-            resetPage();
-          }}
-          sx={{ minWidth: 180 }}
-        >
-          <MenuItem value="">All projects</MenuItem>
-          {projects.map((p) => (
-            <MenuItem key={p.id} value={p.id}>
-              {p.name}
-            </MenuItem>
-          ))}
-        </TextField>
+        {!fixedProjectId && (
+          <TextField
+            select
+            size="small"
+            label="Project"
+            value={projectId}
+            onChange={(e) => {
+              setProjectId(e.target.value);
+              resetPage();
+            }}
+            sx={{ minWidth: 180 }}
+          >
+            <MenuItem value="">All projects</MenuItem>
+            {projects.map((p) => (
+              <MenuItem key={p.id} value={p.id}>
+                {p.name}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
         <TextField
           select
           size="small"

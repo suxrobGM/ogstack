@@ -21,7 +21,7 @@ import { NotificationBell } from "./notification-bell";
 import type { ShellConfig } from "./shell-config";
 import { UserMenu } from "./user-menu";
 
-export const SIDEBAR_WIDTH_EXPANDED = 224;
+export const SIDEBAR_WIDTH_EXPANDED = 240;
 export const SIDEBAR_WIDTH_COLLAPSED = 64;
 
 interface SidebarProps {
@@ -109,7 +109,7 @@ export function Sidebar(props: SidebarProps): ReactElement {
         </>
       )}
 
-      <List sx={{ flex: 1, px: 1, py: 1.5, overflow: "auto" }}>
+      <List sx={{ flex: 1, px: collapsed ? 0.5 : 1, py: 1, overflow: "auto" }}>
         {config.navItems.map((item) => {
           if (isNavGroup(item)) {
             return (

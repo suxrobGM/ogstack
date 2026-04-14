@@ -97,6 +97,8 @@ export const ImageItemSchema = t.Object({
   template: t.Nullable(t.Object({ slug: t.String(), name: t.String() })),
   projectId: t.Nullable(t.String()),
   projectName: t.Nullable(t.String()),
+  publicProjectId: t.Nullable(t.String()),
+  aiModel: t.Nullable(t.String()),
   width: t.Number(),
   height: t.Number(),
   format: ImageFormatSchema,

@@ -50,11 +50,9 @@ export function NavGroupItem(props: NavGroupProps): ReactElement {
             selected={hasActiveChild}
             sx={{
               borderRadius: `${radii.md}px`,
-              py: 0.5,
-              px: 1.25,
-              mb: 0.25,
+              px: 1.5,
+              mb: 0.5,
               justifyContent: "center",
-              minHeight: 34,
               "&.Mui-selected": {
                 bgcolor: "rgba(180,83,9,0.08)",
                 "&:hover": { bgcolor: "rgba(180,83,9,0.12)" },
@@ -67,7 +65,7 @@ export function NavGroupItem(props: NavGroupProps): ReactElement {
             {icon && (
               <ListItemIcon
                 sx={{
-                  minWidth: 0,
+                  minWidth: "auto",
                   color: hasActiveChild ? "accent.primary" : "text.secondary",
                   justifyContent: "center",
                 }}
@@ -113,17 +111,15 @@ export function NavGroupItem(props: NavGroupProps): ReactElement {
         onClick={() => setExpanded((prev) => !prev)}
         sx={{
           borderRadius: `${radii.md}px`,
-          py: 0.5,
-          px: 1.5,
-          mb: 0.25,
-          minHeight: 34,
+          px: 2,
+          mb: 0.5,
           "&:hover": { bgcolor: "rgba(44,40,37,0.04)" },
         }}
       >
         {icon && (
           <ListItemIcon
             sx={{
-              minWidth: 30,
+              minWidth: 40,
               color: hasActiveChild ? "accent.primary" : "text.secondary",
             }}
           >

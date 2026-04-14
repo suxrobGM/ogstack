@@ -8,7 +8,7 @@ import type { ImageItem, ImageListQuery, ImageListResponse, ImageUpdateBody } fr
 type ImageWithRelations = Prisma.ImageGetPayload<{
   include: {
     template: { select: { slug: true; name: true } };
-    project: { select: { name: true } };
+    project: { select: { name: true; publicId: true } };
   };
 }>;
 
@@ -25,6 +25,8 @@ function toImageItem(row: ImageWithRelations): ImageItem {
     template: row.template ? { slug: row.template.slug, name: row.template.name } : null,
     projectId: row.projectId,
     projectName: row.project?.name ?? null,
+    publicProjectId: row.project?.publicId ?? null,
+    aiModel: row.aiModel,
     width: row.width,
     height: row.height,
     format: row.format,
@@ -73,7 +75,7 @@ export class ImageService {
         orderBy: { createdAt: "desc" },
         include: {
           template: { select: { slug: true, name: true } },
-          project: { select: { name: true } },
+          project: { select: { name: true, publicId: true } },
         },
       }),
       this.prisma.image.count({ where }),
@@ -100,7 +102,7 @@ export class ImageService {
       data: { title: body.title, description: body.description },
       include: {
         template: { select: { slug: true, name: true } },
-        project: { select: { name: true } },
+        project: { select: { name: true, publicId: true } },
       },
     });
     return toImageItem(updated);
