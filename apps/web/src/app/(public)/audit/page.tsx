@@ -25,7 +25,9 @@ export default function PublicAuditPage(): ReactElement {
           Instagram.
         </Typography>
       </Box>
-      <AuditLanding />
+      <Box sx={{ width: "100%", maxWidth: 640, mx: "auto", alignSelf: "center" }}>
+        <AuditLanding />
+      </Box>
     </Stack>
   );
 }
