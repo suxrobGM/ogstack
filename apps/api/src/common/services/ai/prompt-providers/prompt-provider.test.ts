@@ -1,20 +1,9 @@
 import { describe, expect, it } from "bun:test";
-import type { UrlMetadata } from "@/common/services/scraper.service";
+import { createEmptyMetadata, type UrlMetadata } from "@/common/services/scraper";
 import { buildPromptUserMessage, sanitizePromptOutput } from "./prompt-provider";
 
 function meta(partial: Partial<UrlMetadata>): UrlMetadata {
-  return {
-    url: "https://example.com",
-    title: null,
-    description: null,
-    ogTitle: null,
-    ogDescription: null,
-    ogImage: null,
-    favicon: null,
-    author: null,
-    siteName: null,
-    ...partial,
-  };
+  return { ...createEmptyMetadata("https://example.com"), ...partial };
 }
 
 describe("sanitizePromptOutput", () => {

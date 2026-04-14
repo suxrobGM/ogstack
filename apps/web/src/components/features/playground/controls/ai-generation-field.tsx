@@ -2,7 +2,15 @@
 
 import type { ReactElement } from "react";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
-import { Collapse, Stack, Switch, TextField, Typography } from "@mui/material";
+import {
+  Checkbox,
+  Collapse,
+  FormControlLabel,
+  Stack,
+  Switch,
+  TextField,
+  Typography,
+} from "@mui/material";
 import type { AnyReactForm } from "@/components/ui/form/types";
 import { accent, line, radii } from "@/theme";
 import { AI_PROMPT_MAX_CHARS } from "../schema";
@@ -51,7 +59,10 @@ export function AiGenerationField(props: AiGenerationFieldProps): ReactElement {
           </form.Field>
 
           <Collapse in={aiGenerated} timeout="auto" unmountOnExit>
-            <AiPromptField form={form} />
+            <Stack spacing={1.5}>
+              <AiPromptField form={form} />
+              <FullOverrideField form={form} />
+            </Stack>
           </Collapse>
         </Stack>
       )}
@@ -59,9 +70,38 @@ export function AiGenerationField(props: AiGenerationFieldProps): ReactElement {
   );
 }
 
-function AiPromptField(props: { form: AnyReactForm }): ReactElement {
+function FullOverrideField(props: { form: AnyReactForm }): ReactElement {
+  const { form } = props;
   return (
-    <props.form.Field name="aiPrompt">
+    <form.Field name="fullOverride">
+      {(field) => (
+        <FormControlLabel
+          control={
+            <Checkbox
+              size="small"
+              checked={Boolean(field.state.value)}
+              onChange={(_, checked) => field.handleChange(checked)}
+            />
+          }
+          label={
+            <Stack spacing={0}>
+              <Typography variant="body2">Use prompt as full override</Typography>
+              <Typography variant="caption" color="text.secondary">
+                Ignore page content — use your prompt as-is for the image.
+              </Typography>
+            </Stack>
+          }
+          sx={{ alignItems: "flex-start", mx: 0 }}
+        />
+      )}
+    </form.Field>
+  );
+}
+
+function AiPromptField(props: { form: AnyReactForm }): ReactElement {
+  const { form } = props;
+  return (
+    <form.Field name="aiPrompt">
       {(field) => {
         const len = (field.state.value as string | undefined)?.length ?? 0;
         const overLimit = len > AI_PROMPT_MAX_CHARS;
@@ -82,6 +122,6 @@ function AiPromptField(props: { form: AnyReactForm }): ReactElement {
           />
         );
       }}
-    </props.form.Field>
+    </form.Field>
   );
 }

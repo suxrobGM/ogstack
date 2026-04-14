@@ -10,7 +10,7 @@ import "reflect-metadata";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import sharp from "sharp";
-import type { UrlMetadata } from "@/common/services/scraper.service";
+import { createEmptyMetadata, type UrlMetadata } from "@/common/services/scraper";
 import { listTemplates } from "@/modules/template/template.registry";
 import type { TemplateSlug } from "@/modules/template/template.schema";
 import { TemplateService } from "@/modules/template/template.service";
@@ -18,13 +18,9 @@ import { TemplateService } from "@/modules/template/template.service";
 const OUTPUT_DIR = resolve(__dirname, "../../../apps/web/public/images/templates");
 
 const SAMPLE_METADATA: UrlMetadata = {
-  url: "https://example.com",
+  ...createEmptyMetadata("https://example.com"),
   title: "Your Page Title",
   description: "A brief description of your page content for social previews.",
-  ogTitle: null,
-  ogDescription: null,
-  ogImage: null,
-  favicon: null,
   author: "John Doe",
   siteName: "example.com",
 };

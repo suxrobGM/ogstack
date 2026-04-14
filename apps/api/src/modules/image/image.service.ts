@@ -43,6 +43,19 @@ export class ImageService {
     private readonly storage: ImageStorageService,
   ) {}
 
+  async findById(userId: string, id: string): Promise<ImageItem> {
+    const row = await this.prisma.image.findUnique({
+      where: { id },
+      include: {
+        template: { select: { slug: true, name: true } },
+        project: { select: { name: true, publicId: true } },
+      },
+    });
+    if (!row) throw new NotFoundError("Image not found");
+    if (row.userId !== userId) throw new ForbiddenError("Not allowed");
+    return toImageItem(row);
+  }
+
   async list(userId: string, query: ImageListQuery): Promise<ImageListResponse> {
     const { page, limit, projectId, category, from, to, search } = query;
     const skip = (page - 1) * limit;

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { container } from "@/common/di";
-import { ScraperService, type UrlMetadata } from "@/common/services/scraper.service";
+import { createEmptyMetadata, ScraperService, type UrlMetadata } from "@/common/services/scraper";
 import { ImageStorageService } from "@/common/services/storage";
 import { WatermarkService } from "@/common/services/watermark";
 import { PrismaClient } from "@/generated/prisma";
@@ -9,7 +9,7 @@ import { UsageService } from "@/modules/usage/usage.service";
 import { ImageGenerationService } from "./image-generation.service";
 
 const MOCK_METADATA: UrlMetadata = {
-  url: "https://example.com",
+  ...createEmptyMetadata("https://example.com"),
   title: "Example Page",
   description: "A sample page",
   ogTitle: "OG Title",

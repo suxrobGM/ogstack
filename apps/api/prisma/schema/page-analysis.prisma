@@ -1,0 +1,27 @@
+model PageAnalysis {
+  id       String  @id @default(uuid()) @db.Uuid
+  cacheKey String  @unique @map("cache_key")
+  url      String
+  userId   String? @map("user_id") @db.Uuid
+
+  mode     String
+  metadata Json
+  ai       Json?
+
+  bodyHash       String  @map("body_hash")
+  promptHash     String? @map("prompt_hash")
+  provider       String?
+  model          String?
+  renderedWithJs Boolean @default(false) @map("rendered_with_js")
+
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([url])
+  @@index([userId, createdAt])
+  @@index([expiresAt])
+  @@map("page_analyses")
+}

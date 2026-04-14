@@ -1,11 +1,5 @@
 import { singleton } from "tsyringe";
-import {
-  buildPromptUserMessage,
-  PROMPT_PROVIDER_SYSTEM_PROMPT,
-  sanitizePromptOutput,
-  type PromptGenerateContext,
-  type PromptProvider,
-} from "./prompt-provider";
+import type { ChatRequest, PromptProvider } from "./prompt-provider";
 
 interface OllamaChatResponse {
   message?: { content?: string };
@@ -17,27 +11,31 @@ interface OllamaChatResponse {
 @singleton()
 export class OllamaPromptProvider implements PromptProvider {
   readonly id = "ollama";
+  readonly model: string = process.env.OLLAMA_MODEL || "llama3.2";
   private readonly baseUrl: string = process.env.OLLAMA_BASE_URL || "";
-  private readonly model: string = process.env.OLLAMA_MODEL || "llama3.2";
 
   isEnabled(): boolean {
     return Boolean(this.baseUrl);
   }
 
-  async generate(ctx: PromptGenerateContext): Promise<string> {
+  async chat(req: ChatRequest): Promise<string> {
     if (!this.baseUrl) throw new Error("Ollama base URL is not configured");
 
     const response = await fetch(`${this.baseUrl.replace(/\/$/, "")}/api/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      signal: ctx.signal,
+      signal: req.signal,
       body: JSON.stringify({
         model: this.model,
         stream: false,
-        options: { temperature: 0.4, num_predict: 512 },
+        ...(req.json ? { format: "json" } : {}),
+        options: {
+          temperature: req.temperature ?? 0.3,
+          num_predict: req.maxTokens ?? 1500,
+        },
         messages: [
-          { role: "system", content: PROMPT_PROVIDER_SYSTEM_PROMPT },
-          { role: "user", content: buildPromptUserMessage(ctx.metadata) },
+          { role: "system", content: req.system },
+          { role: "user", content: req.user },
         ],
       }),
     });
@@ -47,6 +45,6 @@ export class OllamaPromptProvider implements PromptProvider {
     }
 
     const data = (await response.json()) as OllamaChatResponse;
-    return sanitizePromptOutput(data.message?.content ?? "");
+    return data.message?.content ?? "";
   }
 }

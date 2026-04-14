@@ -4,13 +4,14 @@ import { logger } from "@/common/logger";
 import {
   buildAiImagePrompt,
   ImageProviderService,
-  PromptProviderService,
   resolveFalModelForPlan,
+  type BuildPromptOptions,
 } from "@/common/services/ai";
-import { ScraperService, type UrlMetadata } from "@/common/services/scraper.service";
+import { type UrlMetadata } from "@/common/services/scraper";
 import { ImageStorageService } from "@/common/services/storage";
 import { shouldWatermark, WatermarkService } from "@/common/services/watermark";
 import { PrismaClient, type Image, type Plan } from "@/generated/prisma";
+import { PageAnalysisService, type PageAnalysisAi } from "@/modules/page-analysis";
 import {
   getTemplate,
   TemplateService,
@@ -29,6 +30,9 @@ interface GenerateParams {
   url: string;
   template: TemplateSlug;
   options?: RenderOptions;
+  /** When true, `options.aiPrompt` is used as-is as the full Flux prompt and
+   *  no AI content extraction runs. Defaults to false (blend mode). */
+  fullOverride?: boolean;
 }
 
 /** Everything the pipeline needs, resolved once at the start of a request. */
@@ -43,6 +47,7 @@ interface RenderContext {
   aiModel: string | null;
   watermark: boolean;
   cacheKey: string;
+  fullOverride: boolean;
 }
 
 interface PipelineResult {
@@ -55,18 +60,17 @@ interface PipelineResult {
 export class ImageGenerationService {
   constructor(
     private readonly prisma: PrismaClient,
-    private readonly scraper: ScraperService,
     private readonly templateService: TemplateService,
     private readonly usageService: UsageService,
     private readonly storage: ImageStorageService,
     private readonly imageProvider: ImageProviderService,
-    private readonly promptProvider: PromptProviderService,
+    private readonly pageAnalysis: PageAnalysisService,
     private readonly watermarkService: WatermarkService,
     private readonly cache: ImageCacheService,
   ) {}
 
   async generate(params: GenerateParams): Promise<GenerateResponse> {
-    const { userId, projectId, apiKeyId, url, template, options } = params;
+    const { userId, projectId, apiKeyId, url, template, options, fullOverride } = params;
 
     const project = await this.prisma.project.findUnique({ where: { id: projectId } });
     if (!project || project.userId !== userId) {
@@ -82,6 +86,7 @@ export class ImageGenerationService {
       url,
       template,
       options,
+      fullOverride: fullOverride ?? false,
     });
 
     const cached = await this.lookupCached(ctx, options?.force === true);
@@ -125,6 +130,7 @@ export class ImageGenerationService {
       url,
       template,
       options,
+      fullOverride: false,
     });
 
     const cached = await this.lookupCached(ctx, false);
@@ -162,6 +168,27 @@ export class ImageGenerationService {
     return { ...input, plan, aiModel, watermark, cacheKey };
   }
 
+  private resolveHeadlineBuildOptions(
+    ai: PageAnalysisAi | null,
+    options: RenderOptions | undefined,
+    fullOverride: boolean,
+  ): BuildPromptOptions {
+    if (fullOverride) {
+      return {
+        override: options?.aiPrompt ?? null,
+        enrichedKeywords: null,
+        overrideHeadline: null,
+        overrideTagline: null,
+      };
+    }
+    return {
+      override: null,
+      enrichedKeywords: ai?.imagePrompt.backgroundKeywords ?? null,
+      overrideHeadline: ai?.imagePrompt.headline ?? null,
+      overrideTagline: ai?.imagePrompt.tagline ?? null,
+    };
+  }
+
   /** Returns a cached image or null; evicts when `force` is true. */
   private async lookupCached(ctx: RenderContext, force: boolean): Promise<Image | null> {
     const cached = await this.cache.find(ctx.cacheKey);
@@ -179,13 +206,21 @@ export class ImageGenerationService {
   /** Core render pipeline: scrape, render (AI + fallback + watermark), store, persist. */
   private async runGenerationPipeline(ctx: RenderContext): Promise<PipelineResult> {
     const startMs = performance.now();
-    const metadata = await this.scraper.extractMetadata(ctx.url);
+    const { metadata, ai } = await this.pageAnalysis.getForImageGeneration({
+      url: ctx.url,
+      userId: ctx.userId,
+      plan: ctx.plan,
+      userPrompt: ctx.options?.aiPrompt,
+      fullOverride: ctx.fullOverride,
+    });
     const outcome = await this.renderWithAiFallback(
       metadata,
+      ai,
       ctx.template,
       ctx.options,
       ctx.aiModel,
       ctx.watermark,
+      ctx.fullOverride,
     );
     const generationMs = Math.round(performance.now() - startMs);
 
@@ -248,19 +283,27 @@ export class ImageGenerationService {
 
   private async renderWithAiFallback(
     metadata: UrlMetadata,
+    ai: PageAnalysisAi | null,
     template: TemplateSlug,
     options: RenderOptions | undefined,
     aiModel: string | null,
     watermark: boolean,
+    fullOverride: boolean,
   ): Promise<AiRenderOutcome> {
     const finalize = async (buf: Buffer): Promise<Buffer> =>
       watermark ? this.watermarkService.apply(buf) : buf;
 
     if (aiModel && this.imageProvider.isEnabledForModel(aiModel)) {
-      const override = options?.aiPrompt ?? null;
-      logger.info({ aiModel, hasOverride: Boolean(override) }, "AI image generation starting");
-      const enrichedKeywords = override ? null : await this.promptProvider.generate(metadata);
-      const prompt = buildAiImagePrompt(metadata, { override, enrichedKeywords });
+      const promptOptions = this.resolveHeadlineBuildOptions(ai, options, fullOverride);
+      logger.info(
+        {
+          aiModel,
+          hasOverride: Boolean(promptOptions.override),
+          hasAiExtraction: Boolean(ai),
+        },
+        "AI image generation starting",
+      );
+      const prompt = buildAiImagePrompt(metadata, promptOptions);
 
       try {
         const rawBuffer = await this.imageProvider.generate({ model: aiModel, prompt });

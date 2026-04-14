@@ -17,6 +17,7 @@ import type {
 import { buildOgImageUrl, buildOgMetaTag, OG_PRODUCTION_HOST } from "@/utils/og-image";
 import { ControlsPanel } from "./controls-panel";
 import { OutputPanel } from "./output-panel";
+import { PageContentPanel } from "./page-content-panel";
 import { PreviewPane } from "./preview-pane";
 import type { PlaygroundFormValues } from "./schema";
 import { UsageMeter } from "./usage-meter";
@@ -31,6 +32,7 @@ const DEFAULTS: PlaygroundFormValues = {
   logoPosition: "top-left",
   aiGenerated: false,
   aiPrompt: "",
+  fullOverride: false,
 };
 
 interface PlaygroundProps {
@@ -108,6 +110,7 @@ export function Playground(props: PlaygroundProps): ReactElement {
         logoPosition: values.logoPosition,
         aiGenerated: values.aiGenerated,
         aiPrompt: values.aiPrompt,
+        fullOverride: values.fullOverride,
         force: force,
       },
     });
@@ -155,6 +158,19 @@ export function Playground(props: PlaygroundProps): ReactElement {
           isGenerating={generateMutation.isPending}
           onRegenerate={handleRegenerate}
         />
+      </Grid>
+
+      <Grid size={{ xs: 12 }}>
+        <form.Subscribe selector={(s: { values: PlaygroundFormValues }) => s.values}>
+          {(values: PlaygroundFormValues) => (
+            <PageContentPanel
+              url={values.url}
+              userPrompt={values.aiPrompt}
+              fullOverride={values.fullOverride}
+              onApplyAccent={(hex) => form.setFieldValue("accent", hex)}
+            />
+          )}
+        </form.Subscribe>
       </Grid>
 
       {result && (

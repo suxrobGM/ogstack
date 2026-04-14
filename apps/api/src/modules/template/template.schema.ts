@@ -46,6 +46,7 @@ export const RenderOptionsSchema = t.Object({
   logoPosition: t.Optional(LogoPositionSchema),
   aiGenerated: t.Optional(t.Boolean({ default: false })),
   aiPrompt: t.Optional(t.String({ maxLength: 500 })),
+  fullOverride: t.Optional(t.Boolean({ default: false })),
   force: t.Optional(t.Boolean({ default: false })),
 });
 

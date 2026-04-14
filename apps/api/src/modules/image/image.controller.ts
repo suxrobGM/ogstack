@@ -35,6 +35,7 @@ export const imageController = new Elysia({ prefix: "/images", tags: ["Images"] 
         url: body.url,
         template: body.template ?? "gradient_dark",
         options: body.options,
+        fullOverride: body.options?.fullOverride,
       }),
     {
       body: DashboardGenerateBodySchema,
@@ -46,6 +47,11 @@ export const imageController = new Elysia({ prefix: "/images", tags: ["Images"] 
     query: ImageListQuerySchema,
     response: ImageListResponseSchema,
     detail: { summary: "List images for the authenticated user" },
+  })
+  .get("/:id", ({ user, params }) => imageService.findById(user.id, params.id), {
+    params: UuidIdParamSchema,
+    response: ImageItemSchema,
+    detail: { summary: "Fetch an image by id" },
   })
   .patch("/:id", ({ user, params, body }) => imageService.update(user.id, params.id, body), {
     params: UuidIdParamSchema,
@@ -72,6 +78,7 @@ export const imageApiController = new Elysia({ prefix: "/images/generate", tags:
         url: body.url,
         template: body.template ?? "gradient_dark",
         options: body.options,
+        fullOverride: body.options?.fullOverride,
       }),
     {
       body: ApiGenerateBodySchema,

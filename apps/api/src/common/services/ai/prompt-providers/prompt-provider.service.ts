@@ -1,15 +1,24 @@
 import { container, singleton } from "tsyringe";
 import { logger } from "@/common/logger";
 import type { UrlMetadata } from "@/common/services/scraper.service";
-import { PROMPT_PROVIDER_TOKEN, type PromptProvider } from "./prompt-provider";
+import {
+  buildPromptUserMessage,
+  IMAGE_KEYWORDS_SYSTEM_PROMPT,
+  PROMPT_PROVIDER_TOKEN,
+  sanitizePromptOutput,
+  type ChatRequest,
+  type PromptProvider,
+} from "./prompt-provider";
 
 const PROMPT_TIMEOUT_MS = Number.parseInt(process.env.PROMPT_PROVIDER_TIMEOUT_MS ?? "2500") || 2500;
 
-/** Facade that picks an enabled `PromptProvider` and returns its keyword
- *  output. Preference order:
+/**
+ * Facade that picks an enabled `PromptProvider` and dispatches chat calls.
+ * Preference order:
  *   1. Provider whose `id` matches `PROMPT_PROVIDER` env var.
  *   2. First provider that reports `isEnabled()`.
- *  On timeout or error the caller receives `null` and should fall back. */
+ * On timeout or error the caller receives `null` and should fall back.
+ */
 @singleton()
 export class PromptProviderService {
   private resolveAll(): PromptProvider[] {
@@ -35,41 +44,69 @@ export class PromptProviderService {
     return this.pick() !== null;
   }
 
-  async generate(metadata: UrlMetadata): Promise<string | null> {
+  getActiveProvider(): { id: string; model: string } | null {
+    const picked = this.pick();
+    return picked ? { id: picked.id, model: picked.model } : null;
+  }
+
+  /** Generic chat call with caller-supplied timeout. Returns the raw assistant
+   *  text or null on timeout/error. Callers handle parsing (JSON, keywords). */
+  async chat(
+    req: Omit<ChatRequest, "signal">,
+    options: { timeoutMs?: number } = {},
+  ): Promise<string | null> {
     const provider = this.pick();
     if (!provider) return null;
 
+    const timeoutMs = options.timeoutMs ?? PROMPT_TIMEOUT_MS;
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), PROMPT_TIMEOUT_MS);
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
     const startMs = performance.now();
 
     try {
-      const keywords = await provider.generate({ metadata, signal: controller.signal });
+      const text = await provider.chat({ ...req, signal: controller.signal });
       const elapsedMs = Math.round(performance.now() - startMs);
-      if (!keywords) {
-        logger.warn(
-          { provider: provider.id, elapsedMs },
-          "Prompt provider returned empty output — falling back to title-only prompt",
-        );
-        return null;
-      }
-
       logger.info(
-        { provider: provider.id, elapsedMs, keywordsLength: keywords.length, keywords },
-        "Prompt provider produced keywords",
+        { provider: provider.id, model: provider.model, elapsedMs },
+        "Prompt provider chat succeeded",
       );
-      return keywords;
+      return text;
     } catch (error) {
       logger.warn(
         {
           provider: provider.id,
           error: error instanceof Error ? error.message : String(error),
         },
-        "Prompt provider failed, falling back to title-only prompt",
+        "Prompt provider chat failed",
       );
       return null;
     } finally {
       clearTimeout(timer);
     }
+  }
+
+  /** Turns page metadata into a short line of visual keywords for the image
+   *  prompt builder. Returns null on error; callers fall back to a static
+   *  background prompt. */
+  async generate(metadata: UrlMetadata): Promise<string | null> {
+    const raw = await this.chat({
+      system: IMAGE_KEYWORDS_SYSTEM_PROMPT,
+      user: buildPromptUserMessage(metadata),
+      maxTokens: 512,
+      temperature: 0.4,
+    });
+
+    if (!raw) {
+      return null;
+    }
+
+    const keywords = sanitizePromptOutput(raw);
+
+    if (!keywords) {
+      logger.warn("Prompt provider returned empty keywords output");
+      return null;
+    }
+
+    return keywords;
   }
 }

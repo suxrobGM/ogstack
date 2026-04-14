@@ -42,4 +42,5 @@ export interface PlaygroundFormValues {
   logoPosition: LogoPosition;
   aiGenerated: boolean;
   aiPrompt: string;
+  fullOverride: boolean;
 }

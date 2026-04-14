@@ -18,6 +18,7 @@ import {
 } from "@/modules/billing";
 import { imageApiController, imageController, imagePublicController } from "@/modules/image";
 import { notificationController } from "@/modules/notification";
+import { pageAnalysisController } from "@/modules/page-analysis";
 import { projectController } from "@/modules/project";
 import { templateController } from "@/modules/template";
 import { usageController } from "@/modules/usage";
@@ -45,6 +46,7 @@ const app = new Elysia()
       .use(apiKeyDeleteController)
       .use(auditController)
       .use(auditUserController)
+      .use(pageAnalysisController)
       .use(imageApiController)
       .use(imageController)
       .use(projectController)

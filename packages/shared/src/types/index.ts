@@ -1,1 +1,2 @@
-export type { SortOrder, PaginationQuery, PaginationResult, PaginationInfo } from "./pagination";
+export type * from "./pagination";
+export type * from "./page-analysis";

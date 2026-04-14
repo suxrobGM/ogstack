@@ -87,6 +87,27 @@ CREATE TABLE "notifications" (
 );
 
 -- CreateTable
+CREATE TABLE "page_analyses" (
+    "id" UUID NOT NULL,
+    "cache_key" TEXT NOT NULL,
+    "url" TEXT NOT NULL,
+    "user_id" UUID,
+    "mode" TEXT NOT NULL,
+    "metadata" JSONB NOT NULL,
+    "ai" JSONB,
+    "body_hash" TEXT NOT NULL,
+    "prompt_hash" TEXT,
+    "provider" TEXT,
+    "model" TEXT,
+    "rendered_with_js" BOOLEAN NOT NULL DEFAULT false,
+    "expires_at" TIMESTAMP(3) NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "page_analyses_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "plans" (
     "id" UUID NOT NULL,
     "key" TEXT NOT NULL,
@@ -189,7 +210,8 @@ CREATE TABLE "usage_records" (
     "user_id" UUID NOT NULL,
     "project_id" UUID,
     "api_key_id" UUID,
-    "period" TEXT NOT NULL,
+    "period_start" TIMESTAMP(3) NOT NULL,
+    "period_end" TIMESTAMP(3) NOT NULL,
     "image_count" INTEGER NOT NULL DEFAULT 0,
     "ai_image_count" INTEGER NOT NULL DEFAULT 0,
     "cache_hits" INTEGER NOT NULL DEFAULT 0,
@@ -264,6 +286,18 @@ CREATE INDEX "notifications_user_id_read_at_idx" ON "notifications"("user_id", "
 CREATE INDEX "notifications_created_at_idx" ON "notifications"("created_at");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "page_analyses_cache_key_key" ON "page_analyses"("cache_key");
+
+-- CreateIndex
+CREATE INDEX "page_analyses_url_idx" ON "page_analyses"("url");
+
+-- CreateIndex
+CREATE INDEX "page_analyses_user_id_created_at_idx" ON "page_analyses"("user_id", "created_at");
+
+-- CreateIndex
+CREATE INDEX "page_analyses_expires_at_idx" ON "page_analyses"("expires_at");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "plans_key_key" ON "plans"("key");
 
 -- CreateIndex
@@ -327,10 +361,10 @@ CREATE UNIQUE INDEX "templates_slug_key" ON "templates"("slug");
 CREATE INDEX "templates_category_idx" ON "templates"("category");
 
 -- CreateIndex
-CREATE INDEX "usage_records_user_id_period_idx" ON "usage_records"("user_id", "period");
+CREATE INDEX "usage_records_user_id_period_start_idx" ON "usage_records"("user_id", "period_start");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "usage_records_user_id_project_id_api_key_id_period_key" ON "usage_records"("user_id", "project_id", "api_key_id", "period");
+CREATE UNIQUE INDEX "usage_records_user_id_project_id_api_key_id_period_start_key" ON "usage_records"("user_id", "project_id", "api_key_id", "period_start");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
@@ -373,6 +407,9 @@ ALTER TABLE "images" ADD CONSTRAINT "images_template_id_fkey" FOREIGN KEY ("temp
 
 -- AddForeignKey
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "page_analyses" ADD CONSTRAINT "page_analyses_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "projects" ADD CONSTRAINT "projects_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

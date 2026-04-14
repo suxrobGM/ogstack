@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { TEMPLATE_CATEGORIES, type TemplateCategorySlug } from "@ogstack/shared";
 import Image from "next/image";
+import Link from "next/link";
 import { EmptyState } from "@/components/ui/data/empty-state";
 import { Pagination } from "@/components/ui/data/pagination";
 import { PageHeader } from "@/components/ui/layout/page-header";
@@ -22,8 +23,7 @@ import { useApiQuery, useDebouncedValue } from "@/hooks";
 import { client } from "@/lib/api/client";
 import { queryKeys } from "@/lib/query-keys";
 import { line, motion, radii, shadows, surfaces } from "@/theme";
-import type { ImageItem, ImageListResponse, Project } from "@/types/api";
-import { ImageDetailDialog } from "./image-detail-dialog";
+import type { ImageListResponse, Project } from "@/types/api";
 
 interface ImagesGalleryProps {
   initialData: ImageListResponse | null;
@@ -43,7 +43,6 @@ export function ImagesGallery(props: ImagesGalleryProps): ReactElement {
   const [category, setCategory] = useState<TemplateCategorySlug | "">("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const [selected, setSelected] = useState<ImageItem | null>(null);
 
   const debouncedSearch = useDebouncedValue(search, 400);
 
@@ -217,60 +216,65 @@ export function ImagesGallery(props: ImagesGalleryProps): ReactElement {
         <Grid container spacing={2}>
           {items.map((item) => (
             <Grid key={item.id} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-              <Box
-                onClick={() => setSelected(item)}
-                sx={{
-                  cursor: "pointer",
-                  borderRadius: `${radii.sm}px`,
-                  border: `1px solid ${line.border}`,
-                  backgroundColor: surfaces.card,
-                  overflow: "hidden",
-                  transition: `all ${motion.fast}`,
-                  "&:hover": { boxShadow: shadows.md },
-                }}
+              <Link
+                href={{ pathname: "/images/[id]", query: { id: item.id } }}
+                style={{ textDecoration: "none", color: "inherit" }}
               >
                 <Box
                   sx={{
-                    position: "relative",
-                    width: "100%",
-                    aspectRatio: "1200 / 630",
+                    display: "block",
+                    cursor: "pointer",
+                    borderRadius: `${radii.sm}px`,
+                    border: `1px solid ${line.border}`,
+                    backgroundColor: surfaces.card,
                     overflow: "hidden",
+                    transition: `all ${motion.fast}`,
+                    "&:hover": { boxShadow: shadows.md },
                   }}
                 >
-                  <Image
-                    src={item.cdnUrl ?? item.imageUrl}
-                    alt={item.title ?? item.sourceUrl ?? "OG image"}
-                    fill
-                    sizes="(max-width: 600px) 100vw, (max-width: 1200px) 33vw, 25vw"
-                    style={{ objectFit: "cover" }}
-                    unoptimized
-                  />
-                </Box>
-                <Box sx={{ px: 1.5, py: 1 }}>
-                  <Typography
-                    variant="body2"
+                  <Box
                     sx={{
-                      fontWeight: 500,
+                      position: "relative",
+                      width: "100%",
+                      aspectRatio: "1200 / 630",
                       overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
                     }}
                   >
-                    {item.title ?? item.sourceUrl ?? "Untitled"}
-                  </Typography>
-                  <Typography
-                    variant="captionMuted"
-                    sx={{
-                      display: "block",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {item.template?.name ?? item.category ?? "—"}
-                  </Typography>
+                    <Image
+                      src={item.cdnUrl ?? item.imageUrl}
+                      alt={item.title ?? item.sourceUrl ?? "OG image"}
+                      fill
+                      sizes="(max-width: 600px) 100vw, (max-width: 1200px) 33vw, 25vw"
+                      style={{ objectFit: "cover" }}
+                      unoptimized
+                    />
+                  </Box>
+                  <Box sx={{ px: 1.5, py: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: 500,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {item.title ?? item.sourceUrl ?? "Untitled"}
+                    </Typography>
+                    <Typography
+                      variant="captionMuted"
+                      sx={{
+                        display: "block",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {item.template?.name ?? item.category ?? "—"}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
+              </Link>
             </Grid>
           ))}
         </Grid>
@@ -279,8 +283,6 @@ export function ImagesGallery(props: ImagesGalleryProps): ReactElement {
       {pagination && (
         <Pagination page={page} totalPages={pagination.totalPages} onPageChange={setPage} />
       )}
-
-      <ImageDetailDialog image={selected} onClose={() => setSelected(null)} />
     </Stack>
   );
 }

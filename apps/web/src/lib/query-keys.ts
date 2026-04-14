@@ -45,6 +45,13 @@ export const queryKeys = {
       from: string;
       to: string;
     }) => [...queryKeys.images.all, "list", params] as const,
+    detail: (id: string) => [...queryKeys.images.all, id] as const,
+  },
+
+  pageAnalysis: {
+    all: ["page-analysis"] as const,
+    analyze: (params: { url: string; userPrompt: string; fullOverride: boolean }) =>
+      [...queryKeys.pageAnalysis.all, "analyze", params] as const,
   },
 
   users: {

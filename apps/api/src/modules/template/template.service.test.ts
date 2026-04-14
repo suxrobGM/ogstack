@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { container } from "@/common/di";
-import type { UrlMetadata } from "@/common/services/scraper.service";
+import { createEmptyMetadata, type UrlMetadata } from "@/common/services/scraper";
 import { TemplateService } from "./template.service";
 
 const MOCK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"></svg>';
@@ -20,7 +20,7 @@ mock.module("@resvg/resvg-js", () => ({
 
 function createMockMetadata(overrides: Partial<UrlMetadata> = {}): UrlMetadata {
   return {
-    url: "https://example.com",
+    ...createEmptyMetadata("https://example.com"),
     title: "Example Page",
     description: "A sample page",
     ogTitle: "OG Title",

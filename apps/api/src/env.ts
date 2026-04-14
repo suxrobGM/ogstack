@@ -61,6 +61,11 @@ const EnvSchema = t.Object({
   LLAMACPP_BASE_URL: t.Optional(t.String()),
   LLAMACPP_API_KEY: t.Optional(t.String()),
   LLAMACPP_MODEL: t.Optional(t.String()),
+
+  RENDER_PROVIDER: t.Optional(t.String()),
+  BROWSERLESS_URL: t.Optional(t.String()),
+  BROWSERLESS_TOKEN: t.Optional(t.String()),
+  SCRAPINGBEE_API_KEY: t.Optional(t.String()),
 });
 
 export type Env = Static<typeof EnvSchema>;

@@ -22,6 +22,7 @@ const MAX_SUBJECT_CHARS = 400;
 const MAX_HEADLINE_CHARS = 60;
 const MAX_TAGLINE_CHARS = 90;
 
+/** Clips a string to the specified length, adding an ellipsis if it was too long. */
 function clip(value: string, max: number): string {
   const trimmed = value.trim();
   return trimmed.length > max ? `${trimmed.slice(0, max - 1).trimEnd()}…` : trimmed;
@@ -51,12 +52,18 @@ function extractTagline(description: string): string | null {
   return clip(firstSentence, MAX_TAGLINE_CHARS);
 }
 
-interface BuildPromptOptions {
+export interface BuildPromptOptions {
   /** User-supplied prompt that fully replaces the auto-derived subject. */
   override?: string | null;
   /** Visual keywords produced by a `PromptEnricher` (LLM pre-step) — used
    *  strictly as the background layer, not the focal subject. */
   enrichedKeywords?: string | null;
+  /** Precomputed headline from AI content extraction — replaces the
+   *  `extractHeadline` heuristic when provided. */
+  overrideHeadline?: string | null;
+  /** Precomputed tagline from AI content extraction — replaces the
+   *  `extractTagline` heuristic when provided. */
+  overrideTagline?: string | null;
 }
 
 /** Builds a Flux prompt that leads with the exact headline text and typography
@@ -67,7 +74,7 @@ export function buildAiImagePrompt(
   metadata: UrlMetadata,
   options: BuildPromptOptions = {},
 ): string {
-  const { override, enrichedKeywords } = options;
+  const { override, enrichedKeywords, overrideHeadline, overrideTagline } = options;
 
   if (override && override.trim()) {
     return clip(override, MAX_SUBJECT_CHARS).slice(0, MAX_PROMPT_CHARS);
@@ -75,16 +82,26 @@ export function buildAiImagePrompt(
 
   const title = metadata.ogTitle ?? metadata.title;
   const description = metadata.ogDescription ?? metadata.description;
+
   const background = enrichedKeywords?.trim()
     ? clip(enrichedKeywords, MAX_SUBJECT_CHARS)
     : "abstract modern tech composition, soft gradient backdrop, subtle geometric motifs";
 
-  if (!title) {
+  const headlineSource = overrideHeadline?.trim() || title;
+
+  if (!headlineSource) {
     return `${background}. ${STYLE_SUFFIX}`.slice(0, MAX_PROMPT_CHARS);
   }
 
-  const headline = extractHeadline(title);
-  const tagline = description ? extractTagline(description) : null;
+  const headline = overrideHeadline?.trim()
+    ? clip(overrideHeadline, MAX_HEADLINE_CHARS)
+    : extractHeadline(headlineSource);
+
+  const tagline = overrideTagline?.trim()
+    ? clip(overrideTagline, MAX_TAGLINE_CHARS)
+    : description
+      ? extractTagline(description)
+      : null;
 
   const lines: string[] = [];
   lines.push(

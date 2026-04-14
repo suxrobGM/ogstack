@@ -25,6 +25,7 @@ const RenderOptionsBodySchema = t.Optional(
     logoPosition: t.Optional(LogoPositionSchema),
     aiGenerated: t.Optional(t.Boolean()),
     aiPrompt: t.Optional(t.String({ maxLength: 500 })),
+    fullOverride: t.Optional(t.Boolean()),
     force: t.Optional(t.Boolean()),
   }),
 );

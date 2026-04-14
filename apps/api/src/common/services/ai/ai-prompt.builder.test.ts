@@ -1,22 +1,11 @@
 import { describe, expect, it } from "bun:test";
-import type { UrlMetadata } from "@/common/services/scraper.service";
+import { createEmptyMetadata, type UrlMetadata } from "@/common/services/scraper";
 import { Plan } from "@/generated/prisma";
 import { buildAiImagePrompt, resolveFalModelForPlan } from "./ai-prompt.builder";
 import { FAL_MODELS } from "./image-providers";
 
 function meta(partial: Partial<UrlMetadata>): UrlMetadata {
-  return {
-    url: "https://example.com",
-    title: null,
-    description: null,
-    ogTitle: null,
-    ogDescription: null,
-    ogImage: null,
-    favicon: null,
-    author: null,
-    siteName: null,
-    ...partial,
-  };
+  return { ...createEmptyMetadata("https://example.com"), ...partial };
 }
 
 const STYLE_SUFFIX_FRAGMENT = "1200x630 landscape social media preview";
