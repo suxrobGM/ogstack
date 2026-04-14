@@ -1,19 +1,21 @@
 import type { ReactElement } from "react";
 import { Box, Container, Grid, Typography } from "@mui/material";
+import Image from "next/image";
 import { radii } from "@/theme/tokens";
 import { fontFamilies } from "@/theme/typography";
+import { templateThumbnailUrl } from "@/utils/og-image";
 
 const TEMPLATES = [
-  { name: "gradient_dark", bg: "linear-gradient(135deg, #0f172a, #1e293b)" },
-  { name: "gradient_light", bg: "linear-gradient(135deg, #fafaf8, #e2e8f0)" },
-  { name: "split_hero", bg: "linear-gradient(135deg, #7c3aed, #2563eb)" },
-  { name: "centered_bold", bg: "linear-gradient(135deg, #059669, #0d9488)" },
-  { name: "blog_card", bg: "linear-gradient(135deg, #dc2626, #ea580c)" },
-  { name: "docs_page", bg: "linear-gradient(135deg, #1e1b4b, #312e81)" },
-  { name: "product_launch", bg: "linear-gradient(135deg, #0c4a6e, #0369a1)" },
-  { name: "changelog", bg: "linear-gradient(135deg, #365314, #4d7c0f)" },
-  { name: "github_repo", bg: "linear-gradient(135deg, #78350f, #a16207)" },
-  { name: "minimal", bg: "linear-gradient(135deg, #1c1917, #292524)" },
+  "gradient_dark",
+  "gradient_light",
+  "split_hero",
+  "centered_bold",
+  "blog_card",
+  "docs_page",
+  "product_launch",
+  "changelog",
+  "github_repo",
+  "minimal",
 ];
 
 export function TemplateGallerySection(): ReactElement {
@@ -27,8 +29,8 @@ export function TemplateGallerySection(): ReactElement {
           Pick a style. Or let us choose.
         </Typography>
         <Grid container spacing={1.5}>
-          {TEMPLATES.map((t) => (
-            <Grid key={t.name} size={{ xs: 6, sm: 4, md: 2.4 }}>
+          {TEMPLATES.map((slug) => (
+            <Grid key={slug} size={{ xs: 6, sm: 4, md: 2.4 }}>
               <Box
                 sx={{
                   aspectRatio: "1200/630",
@@ -44,7 +46,13 @@ export function TemplateGallerySection(): ReactElement {
                   },
                 }}
               >
-                <Box sx={{ width: "100%", height: "100%", background: t.bg }} />
+                <Image
+                  src={templateThumbnailUrl(slug)}
+                  alt={slug}
+                  fill
+                  sizes="(max-width: 600px) 50vw, (max-width: 900px) 33vw, 20vw"
+                  style={{ objectFit: "cover" }}
+                />
                 <Box
                   sx={{
                     position: "absolute",
@@ -59,7 +67,7 @@ export function TemplateGallerySection(): ReactElement {
                     color: "rgba(255,255,255,0.7)",
                   }}
                 >
-                  {t.name}
+                  {slug}
                 </Box>
               </Box>
             </Grid>

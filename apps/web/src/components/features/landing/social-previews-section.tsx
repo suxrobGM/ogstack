@@ -1,13 +1,30 @@
 import type { ReactElement } from "react";
 import { Box, Container, Grid, Typography } from "@mui/material";
+import Image from "next/image";
 import { line } from "@/theme/palette";
 import { radii, shadows } from "@/theme/tokens";
 import { fontFamilies } from "@/theme/typography";
+import { templateThumbnailUrl } from "@/utils/og-image";
 
 const PLATFORMS = [
-  { name: "Twitter / X", url: "my-blog.com" },
-  { name: "LinkedIn", url: "my-blog.com" },
-  { name: "Slack", url: "my-blog.com" },
+  {
+    name: "Twitter / X",
+    url: "my-blog.com",
+    title: "Building with Bun: A Practical Guide",
+    template: "gradient_dark",
+  },
+  {
+    name: "LinkedIn",
+    url: "my-blog.com",
+    title: "Scaling Postgres for the next 10×",
+    template: "split_hero",
+  },
+  {
+    name: "Slack",
+    url: "my-blog.com",
+    title: "Shipping faster with preview deploys",
+    template: "centered_bold",
+  },
 ];
 
 export function SocialPreviewsSection(): ReactElement {
@@ -29,12 +46,15 @@ export function SocialPreviewsSection(): ReactElement {
                   overflow: "hidden",
                 }}
               >
-                <Box
-                  sx={{
-                    aspectRatio: "2/1",
-                    background: "linear-gradient(135deg, #1a1a2e, #16213e, #0f3460)",
-                  }}
-                />
+                <Box sx={{ position: "relative", aspectRatio: "2/1" }}>
+                  <Image
+                    src={templateThumbnailUrl(p.template)}
+                    alt={`${p.title} — ${p.template}`}
+                    fill
+                    sizes="(max-width: 900px) 100vw, 33vw"
+                    style={{ objectFit: "cover" }}
+                  />
+                </Box>
                 <Box sx={{ px: 1.75, py: 1.5 }}>
                   <Typography
                     variant="body1Muted"
@@ -49,7 +69,7 @@ export function SocialPreviewsSection(): ReactElement {
                     {p.name}
                   </Typography>
                   <Typography sx={{ fontSize: 13, fontWeight: 500, mb: 0.25 }}>
-                    Building with Bun: A Practical Guide
+                    {p.title}
                   </Typography>
                   <Typography variant="body1Muted" sx={{ fontSize: 11 }}>
                     {p.url}
