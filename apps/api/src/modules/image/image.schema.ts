@@ -5,7 +5,7 @@ import {
   LogoPositionSchema,
   TemplateSlugSchema,
 } from "@/modules/template/template.schema";
-import { PaginationQueryBaseSchema } from "@/types/pagination";
+import { DateRangeQuerySchema, PaginationQueryBaseSchema } from "@/types/pagination";
 import { PaginatedResponseSchema } from "@/types/response";
 
 // Category is a free-form string on the DB (backed by the `template_categories`
@@ -76,11 +76,10 @@ export const GenerateResponseSchema = t.Object({
 
 export const ImageListQuerySchema = t.Composite([
   PaginationQueryBaseSchema,
+  DateRangeQuerySchema,
   t.Object({
     projectId: t.Optional(t.String({ format: "uuid" })),
     category: t.Optional(TemplateCategoryEnumSchema),
-    from: t.Optional(t.String({ format: "date-time" })),
-    to: t.Optional(t.String({ format: "date-time" })),
     search: t.Optional(t.String()),
   }),
 ]);

@@ -1,9 +1,18 @@
 import { Plan, PLAN_CONFIGS, UNLIMITED_QUOTA } from "@ogstack/shared";
 import { singleton } from "tsyringe";
-import { ForbiddenError } from "@/common/errors/http.error";
+import { PlanLimitError } from "@/common/errors/http.error";
+import {
+  rangeOrLastDays,
+  rangeOrLastMonths,
+  startOfMonth,
+  startOfNextMonth,
+  toIsoDate,
+  toYearMonth,
+} from "@/common/utils/date";
 import { PrismaClient } from "@/generated/prisma";
 import { NotificationService } from "@/modules/notification";
-import type { UsageStats } from "./usage.schema";
+import type { DateRange } from "@/types/pagination";
+import type { UsageDailyEntry, UsageHistoryEntry, UsageStats } from "./usage.schema";
 
 @singleton()
 export class UsageService {
@@ -21,8 +30,8 @@ export class UsageService {
     const quota = PLAN_CONFIGS[user?.plan ?? Plan.FREE].quota;
     if (quota < 0) return;
 
-    const period = this.currentPeriod();
-    const usage = await this.findUsageRecord(userId, projectId, apiKeyId, period);
+    const periodStart = startOfMonth(new Date());
+    const usage = await this.findUsageRecord(userId, projectId, apiKeyId, periodStart);
 
     if (usage && usage.imageCount >= quota) {
       await this.notificationService.create({
@@ -33,7 +42,7 @@ export class UsageService {
         actionUrl: "/billing",
       });
 
-      throw new ForbiddenError(
+      throw new PlanLimitError(
         `Monthly quota of ${quota} images exceeded. Upgrade your plan for more.`,
       );
     }
@@ -45,8 +54,8 @@ export class UsageService {
     cacheHit: boolean,
     apiKeyId?: string,
   ): Promise<void> {
-    const period = this.currentPeriod();
-    const existing = await this.findUsageRecord(userId, projectId, apiKeyId, period);
+    const periodStart = startOfMonth(new Date());
+    const existing = await this.findUsageRecord(userId, projectId, apiKeyId, periodStart);
 
     if (existing) {
       await this.prisma.usageRecord.update({
@@ -59,7 +68,8 @@ export class UsageService {
           userId,
           projectId,
           apiKeyId: apiKeyId ?? null,
-          period,
+          periodStart,
+          periodEnd: startOfNextMonth(periodStart),
           imageCount: cacheHit ? 0 : 1,
           cacheHits: cacheHit ? 1 : 0,
         },
@@ -67,7 +77,7 @@ export class UsageService {
     }
 
     if (!cacheHit) {
-      await this.checkUsageThreshold(userId, projectId, apiKeyId, period);
+      await this.checkUsageThreshold(userId, projectId, apiKeyId, periodStart);
     }
   }
 
@@ -75,7 +85,7 @@ export class UsageService {
     userId: string,
     projectId: string,
     apiKeyId: string | undefined,
-    period: string,
+    periodStart: Date,
   ): Promise<void> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -87,7 +97,7 @@ export class UsageService {
       return;
     }
 
-    const usage = await this.findUsageRecord(userId, projectId, apiKeyId, period);
+    const usage = await this.findUsageRecord(userId, projectId, apiKeyId, periodStart);
 
     if (!usage || usage.imageCount < Math.floor(quota * 0.8)) {
       return;
@@ -97,7 +107,7 @@ export class UsageService {
       where: {
         userId,
         type: "USAGE_ALERT",
-        createdAt: { gte: new Date(`${period}-01`) },
+        createdAt: { gte: periodStart },
       },
     });
     if (existing) {
@@ -114,8 +124,8 @@ export class UsageService {
     });
   }
 
-  async getUsageStats(userId: string, period?: string): Promise<UsageStats> {
-    const billingPeriod = period ?? this.currentPeriod();
+  async getUsageStats(userId: string, range: DateRange = {}): Promise<UsageStats> {
+    const { from, to } = rangeOrLastMonths(range, 1);
 
     const [user, records] = await Promise.all([
       this.prisma.user.findUnique({
@@ -123,7 +133,7 @@ export class UsageService {
         select: { plan: true },
       }),
       this.prisma.usageRecord.findMany({
-        where: { userId, period: billingPeriod },
+        where: { userId, periodStart: { gte: from, lte: to } },
       }),
     ]);
 
@@ -140,7 +150,7 @@ export class UsageService {
     );
 
     return {
-      period: billingPeriod,
+      period: toYearMonth(from),
       plan,
       quota,
       used: totals.imageCount,
@@ -150,19 +160,88 @@ export class UsageService {
     };
   }
 
-  private currentPeriod(): string {
-    const now = new Date();
-    return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+  async getUsageHistory(userId: string, range: DateRange = {}): Promise<UsageHistoryEntry[]> {
+    const { from, to } = rangeOrLastMonths(range, 6);
+
+    const records = await this.prisma.usageRecord.findMany({
+      where: { userId, periodStart: { gte: from, lte: to } },
+      select: { periodStart: true, imageCount: true, aiImageCount: true, cacheHits: true },
+    });
+
+    const byPeriod = new Map<
+      string,
+      { imageCount: number; aiImageCount: number; cacheHits: number }
+    >();
+
+    for (const r of records) {
+      const key = toYearMonth(r.periodStart);
+      const existing = byPeriod.get(key);
+      if (existing) {
+        existing.imageCount += r.imageCount;
+        existing.aiImageCount += r.aiImageCount;
+        existing.cacheHits += r.cacheHits;
+      } else {
+        byPeriod.set(key, {
+          imageCount: r.imageCount,
+          aiImageCount: r.aiImageCount,
+          cacheHits: r.cacheHits,
+        });
+      }
+    }
+
+    const result: UsageHistoryEntry[] = [];
+    const cursor = startOfMonth(from);
+    const end = startOfMonth(to);
+
+    while (cursor <= end) {
+      const period = toYearMonth(cursor);
+      const agg = byPeriod.get(period) ?? { imageCount: 0, aiImageCount: 0, cacheHits: 0 };
+      result.push({ period, ...agg });
+      cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+    }
+    return result;
+  }
+
+  async getDailyUsage(userId: string, range: DateRange = {}): Promise<UsageDailyEntry[]> {
+    const { from, to } = rangeOrLastDays(range, 30);
+
+    const images = await this.prisma.image.findMany({
+      where: { userId, createdAt: { gte: from, lt: to } },
+      select: { createdAt: true, aiEnabled: true },
+    });
+
+    const byDate = new Map<string, { imageCount: number; aiImageCount: number }>();
+    for (const img of images) {
+      const key = toIsoDate(img.createdAt);
+      const existing = byDate.get(key);
+      if (existing) {
+        existing.imageCount += 1;
+        if (img.aiEnabled) existing.aiImageCount += 1;
+      } else {
+        byDate.set(key, { imageCount: 1, aiImageCount: img.aiEnabled ? 1 : 0 });
+      }
+    }
+
+    const result: UsageDailyEntry[] = [];
+    const days = Math.round((to.getTime() - from.getTime()) / (24 * 60 * 60 * 1000));
+
+    for (let i = 0; i < days; i++) {
+      const bucketFrom = new Date(from.getTime() + i * 24 * 60 * 60 * 1000);
+      const key = toIsoDate(bucketFrom);
+      const agg = byDate.get(key) ?? { imageCount: 0, aiImageCount: 0 };
+      result.push({ date: bucketFrom, ...agg });
+    }
+    return result;
   }
 
   private findUsageRecord(
     userId: string,
     projectId: string,
     apiKeyId: string | undefined,
-    period: string,
+    periodStart: Date,
   ) {
     return this.prisma.usageRecord.findFirst({
-      where: { userId, projectId, apiKeyId: apiKeyId ?? null, period },
+      where: { userId, projectId, apiKeyId: apiKeyId ?? null, periodStart },
     });
   }
 }

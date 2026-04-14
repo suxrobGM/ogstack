@@ -94,7 +94,6 @@ export function Sidebar(props: SidebarProps): ReactElement {
               </Tooltip>
             ) : (
               <Button
-                component={NextLink}
                 href={config.headerAction.href as never}
                 size="small"
                 fullWidth

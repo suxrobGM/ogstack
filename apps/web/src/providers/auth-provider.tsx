@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState, type PropsWithChildren, type ReactElement } from "react";
+import { createContext, use, useState, type PropsWithChildren, type ReactElement } from "react";
 import { useRouter } from "next/navigation";
 import { client } from "@/lib/api/client";
 import { ROUTES } from "@/lib/constants";
@@ -46,4 +46,12 @@ export function AuthProvider(props: AuthProviderProps): ReactElement {
   };
 
   return <AuthContext value={value}>{children}</AuthContext>;
+}
+
+export function useAuth(): AuthContextValue {
+  const context = use(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 }

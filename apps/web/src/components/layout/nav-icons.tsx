@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import BarChartIcon from "@mui/icons-material/BarChart";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import FolderIcon from "@mui/icons-material/Folder";
 import GroupsIcon from "@mui/icons-material/Groups";
@@ -13,6 +14,7 @@ import VpnKeyIcon from "@mui/icons-material/VpnKey";
 
 export const NAV_ICON_MAP: Record<string, ReactElement> = {
   dashboard: <DashboardIcon fontSize="small" />,
+  barChart: <BarChartIcon fontSize="small" />,
   folder: <FolderIcon fontSize="small" />,
   playCircle: <PlayCircleIcon fontSize="small" />,
   library: <LibraryBooksIcon fontSize="small" />,

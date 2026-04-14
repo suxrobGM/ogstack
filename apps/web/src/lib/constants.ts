@@ -18,6 +18,7 @@ export const ROUTES = {
   settingsProfile: "/settings/profile" as Route,
   settingsSecurity: "/settings/security" as Route,
   playground: "/playground" as Route,
+  analytics: "/analytics" as Route,
   templates: "/templates" as Route,
   images: "/images" as Route,
   audit: "/audit" as Route,

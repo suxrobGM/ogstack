@@ -1,6 +1,8 @@
 "use client";
 
+import { ERROR_CODES } from "@ogstack/shared";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSubscriptionPlanLimit } from "@/providers/subscription-provider";
 import { useToast } from "./use-toast";
 
 type MutationFn<TData, TVariables> = (variables: TVariables) => Promise<{
@@ -9,7 +11,7 @@ type MutationFn<TData, TVariables> = (variables: TVariables) => Promise<{
 }>;
 
 interface EdenError extends Error {
-  value: { message: string };
+  value: { message: string; code?: string };
 }
 
 interface UseApiMutationOptions<TData, TVariables> {
@@ -22,7 +24,7 @@ interface UseApiMutationOptions<TData, TVariables> {
 
 /**
  * Wraps `useMutation` with Eden Treaty response unwrapping, query invalidation, and toast notifications.
- * Automatically detects plan limit errors (403) and shows the upgrade dialog instead of a generic error toast.
+ * Detects plan limit errors (code: PLAN_LIMIT_EXCEEDED) and shows the upgrade dialog instead of a generic toast.
  */
 export function useApiMutation<TData, TVariables = void>(
   mutationFn: MutationFn<TData, TVariables>,
@@ -30,12 +32,16 @@ export function useApiMutation<TData, TVariables = void>(
 ) {
   const queryClient = useQueryClient();
   const notification = useToast();
+  const { showUpgradePrompt } = useSubscriptionPlanLimit();
 
   return useMutation<TData, EdenError, TVariables>({
     mutationFn: async (variables) => {
       const { data, error } = await mutationFn(variables);
       if (error) {
-        throw new Error((error as EdenError)?.value?.message);
+        const body = (error as { value?: { message?: string; code?: string } }).value;
+        const err = new Error(body?.message ?? "Request failed") as EdenError;
+        err.value = { message: body?.message ?? "", code: body?.code };
+        throw err;
       }
       return data as TData;
     },
@@ -55,6 +61,11 @@ export function useApiMutation<TData, TVariables = void>(
       options?.onSuccess?.(data, variables);
     },
     onError: (error) => {
+      if (error.value?.code === ERROR_CODES.PLAN_LIMIT_EXCEEDED) {
+        showUpgradePrompt(error.message);
+        return;
+      }
+
       if (options?.onError) {
         options.onError(error);
       } else if (options?.errorMessage) {

@@ -68,8 +68,8 @@ export function ImagesGallery(props: ImagesGalleryProps): ReactElement {
           ...(debouncedSearch && { search: debouncedSearch }),
           ...(projectId && { projectId }),
           ...(category && { category }),
-          ...(from && { from: new Date(from).toISOString() }),
-          ...(to && { to: new Date(to).toISOString() }),
+          ...(from && { from: new Date(from) }),
+          ...(to && { to: new Date(to) }),
         },
       }),
     {

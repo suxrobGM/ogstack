@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState, type PropsWithChildren, type ReactElement } from "react";
+import { createContext, use, useState, type PropsWithChildren, type ReactElement } from "react";
 import { Alert, Snackbar } from "@mui/material";
 
 type Severity = "success" | "error" | "warning" | "info";
@@ -60,4 +60,14 @@ export function NotificationProvider(props: PropsWithChildren): ReactElement {
       </Snackbar>
     </NotificationContext>
   );
+}
+
+export function useToast(): ToastApi {
+  const api = use(NotificationContext);
+
+  if (!api) {
+    throw new Error("useToast must be used within a NotificationProvider");
+  }
+
+  return api;
 }

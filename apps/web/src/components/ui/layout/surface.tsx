@@ -34,17 +34,6 @@ export function Surface(props: SurfaceProps): ReactElement {
             padding,
             overflow: "hidden",
             boxShadow: shadows.lg,
-            borderTopColor: surfaces.card,
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 2,
-              background: `linear-gradient(90deg, ${line.borderHi}, ${line.border})`,
-              pointerEvents: "none",
-            },
           },
           ...(Array.isArray(sx) ? sx : [sx]),
         ]}

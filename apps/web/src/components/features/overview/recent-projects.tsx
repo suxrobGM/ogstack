@@ -2,7 +2,7 @@
 
 import type { ReactElement } from "react";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
-import { Button, Typography } from "@mui/material";
+import { Button, Chip, Link, Stack, Typography } from "@mui/material";
 import { DataTable } from "@/components/ui/data/data-table";
 import { EmptyState } from "@/components/ui/data/empty-state";
 import { MonoId } from "@/components/ui/display/mono-id";
@@ -18,8 +18,17 @@ export function RecentProjects(props: RecentProjectsProps): ReactElement {
   const { projects } = props;
 
   return (
-    <>
-      <SectionHeader title="Recent projects" />
+    <Stack spacing={2.5}>
+      <SectionHeader
+        title="Recent projects"
+        actions={
+          projects.length > 0 ? (
+            <Link href={ROUTES.projects} variant="body2" underline="hover">
+              View all
+            </Link>
+          ) : undefined
+        }
+      />
       {projects.length === 0 ? (
         <EmptyState
           icon={<FolderOpenIcon />}
@@ -37,7 +46,12 @@ export function RecentProjects(props: RecentProjectsProps): ReactElement {
             {
               key: "name",
               header: "Name",
-              render: (row) => <Typography variant="body2">{row.name}</Typography>,
+              render: (row) => (
+                <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                  <Typography variant="body2">{row.name}</Typography>
+                  {!row.isActive && <Chip label="inactive" size="small" />}
+                </Stack>
+              ),
             },
             {
               key: "publicId",
@@ -54,10 +68,10 @@ export function RecentProjects(props: RecentProjectsProps): ReactElement {
               ),
             },
           ]}
-          rows={projects}
+          rows={projects.slice(0, 3)}
           rowKey={(row) => row.id}
         />
       )}
-    </>
+    </Stack>
   );
 }

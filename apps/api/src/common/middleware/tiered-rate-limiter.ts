@@ -79,7 +79,7 @@ export function tieredRateLimiter(options: TieredRateLimitOptions) {
         const retryAfter = Math.ceil((minuteEntry.resetAt - Date.now()) / 1000);
         set.headers["retry-after"] = String(retryAfter);
         set.status = 429;
-        return { code: 429, message: "Too many requests, please try again later" };
+        return { code: "RATE_LIMITED", message: "Too many requests, please try again later" };
       }
 
       if (perDay > 0) {
@@ -88,7 +88,10 @@ export function tieredRateLimiter(options: TieredRateLimitOptions) {
           const retryAfter = Math.ceil((dayEntry.resetAt - Date.now()) / 1000);
           set.headers["retry-after"] = String(retryAfter);
           set.status = 429;
-          return { code: 429, message: "Daily rate limit exceeded, please try again tomorrow" };
+          return {
+            code: "RATE_LIMITED",
+            message: "Daily rate limit exceeded, please try again tomorrow",
+          };
         }
       }
     },

@@ -23,22 +23,7 @@ import { UserAvatar } from "@/components/ui/display/user-avatar";
 import { useAuth } from "@/hooks";
 import { ROUTES } from "@/lib/constants";
 import { iconSizes, motion, radii } from "@/theme/tokens";
-import type { AuthUser } from "@/types/api";
-
-type PlanChipColor = "default" | "primary" | "secondary" | "warning";
-
-function planChipColor(plan: AuthUser["plan"]): PlanChipColor {
-  switch (plan) {
-    case "PRO":
-      return "primary";
-    case "BUSINESS":
-      return "secondary";
-    case "ENTERPRISE":
-      return "warning";
-    default:
-      return "default";
-  }
-}
+import { planChipColor } from "@/utils/plan";
 
 interface UserMenuProps {
   collapsed?: boolean;

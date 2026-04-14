@@ -6,15 +6,10 @@ import { UNLIMITED_QUOTA } from "@ogstack/shared";
 import { Surface } from "@/components/ui/layout/surface";
 import { fontFamilies } from "@/theme";
 import type { UsageStatsResponse } from "@/types/api";
+import { getProgressColor } from "@/utils/usage";
 
 interface UsageQuotasProps {
   usage: UsageStatsResponse;
-}
-
-function getProgressColor(percent: number): "success" | "warning" | "error" {
-  if (percent >= 90) return "error";
-  if (percent >= 70) return "warning";
-  return "success";
 }
 
 export function UsageQuotas(props: UsageQuotasProps): ReactElement {
@@ -27,9 +22,9 @@ export function UsageQuotas(props: UsageQuotasProps): ReactElement {
       <Typography variant="overlineMuted" sx={{ mb: 2, display: "block" }}>
         Current Usage
       </Typography>
-      <Grid container spacing={2}>
+      <Grid container spacing={2} sx={{ alignItems: "stretch" }}>
         <Grid size={{ xs: 12, md: 4 }}>
-          <Surface padding={3}>
+          <Surface padding={3} sx={{ height: "100%" }}>
             <Typography variant="body2Muted" sx={{ mb: 1 }}>
               Images Generated
             </Typography>
@@ -64,7 +59,7 @@ export function UsageQuotas(props: UsageQuotasProps): ReactElement {
           </Surface>
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
-          <Surface padding={3}>
+          <Surface padding={3} sx={{ height: "100%" }}>
             <Typography variant="body2Muted" sx={{ mb: 1 }}>
               AI Images
             </Typography>
@@ -81,7 +76,7 @@ export function UsageQuotas(props: UsageQuotasProps): ReactElement {
           </Surface>
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
-          <Surface padding={3}>
+          <Surface padding={3} sx={{ height: "100%" }}>
             <Typography variant="body2Muted" sx={{ mb: 1 }}>
               Cache Hits
             </Typography>

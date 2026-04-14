@@ -1,4 +1,5 @@
 import type { Components, Theme } from "@mui/material/styles";
+import NextLink from "next/link";
 import { accent, line, textColors } from "../palette";
 import { motion, radii } from "../tokens";
 
@@ -6,6 +7,7 @@ export const buttonOverrides: Components<Theme>["MuiButton"] = {
   defaultProps: {
     disableElevation: true,
     disableRipple: false,
+    LinkComponent: NextLink,
   },
   styleOverrides: {
     root: {

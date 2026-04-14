@@ -6,3 +6,5 @@ export type PlanResponse = PlansResponse[number];
 
 export type SubscriptionResponse = Data<(typeof client)["api"]["billing"]["subscription"]["get"]>;
 export type UsageStatsResponse = Data<(typeof client)["api"]["usage"]["stats"]["get"]>;
+export type UsageHistoryResponse = Data<(typeof client)["api"]["usage"]["history"]["get"]>;
+export type UsageDailyResponse = Data<(typeof client)["api"]["usage"]["daily"]["get"]>;

@@ -1,12 +1,13 @@
 model UsageRecord {
-  id           String  @id @default(uuid()) @db.Uuid
-  userId       String  @map("user_id") @db.Uuid
-  projectId    String? @map("project_id") @db.Uuid
-  apiKeyId     String? @map("api_key_id") @db.Uuid
-  period       String
-  imageCount   Int     @default(0) @map("image_count")
-  aiImageCount Int     @default(0) @map("ai_image_count")
-  cacheHits    Int     @default(0) @map("cache_hits")
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  projectId    String?  @map("project_id") @db.Uuid
+  apiKeyId     String?  @map("api_key_id") @db.Uuid
+  periodStart  DateTime @map("period_start")
+  periodEnd    DateTime @map("period_end")
+  imageCount   Int      @default(0) @map("image_count")
+  aiImageCount Int      @default(0) @map("ai_image_count")
+  cacheHits    Int      @default(0) @map("cache_hits")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -15,7 +16,7 @@ model UsageRecord {
   project Project? @relation(fields: [projectId], references: [id])
   apiKey  ApiKey?  @relation(fields: [apiKeyId], references: [id])
 
-  @@unique([userId, projectId, apiKeyId, period])
-  @@index([userId, period])
+  @@unique([userId, projectId, apiKeyId, periodStart])
+  @@index([userId, periodStart])
   @@map("usage_records")
 }

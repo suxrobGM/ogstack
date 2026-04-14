@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { IBM_Plex_Sans, JetBrains_Mono, Newsreader } from "next/font/google";
 import { QueryProvider, ThemeProvider } from "@/providers";
 import { NotificationProvider } from "@/providers/notification-provider";
+import { PlanLimitProvider } from "@/providers/subscription-provider";
 
 const newsreader = Newsreader({
   subsets: ["latin"],
@@ -41,7 +42,9 @@ export default function RootLayout({ children }: PropsWithChildren): ReactElemen
         <AppRouterCacheProvider>
           <ThemeProvider>
             <QueryProvider>
-              <NotificationProvider>{children}</NotificationProvider>
+              <PlanLimitProvider>
+                <NotificationProvider>{children}</NotificationProvider>
+              </PlanLimitProvider>
             </QueryProvider>
           </ThemeProvider>
         </AppRouterCacheProvider>

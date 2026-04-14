@@ -88,8 +88,8 @@ describe("ImageService", () => {
       await service.list("user-1", {
         page: 1,
         limit: 20,
-        from: "2026-01-01T00:00:00.000Z",
-        to: "2026-02-01T00:00:00.000Z",
+        from: new Date("2026-01-01T00:00:00.000Z"),
+        to: new Date("2026-02-01T00:00:00.000Z"),
       });
       const call = (mockPrisma.image.findMany as ReturnType<typeof mock>).mock.calls[0];
       const args = (call as unknown[])[0] as { where: { createdAt?: Record<string, Date> } };

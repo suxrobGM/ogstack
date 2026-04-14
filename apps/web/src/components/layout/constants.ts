@@ -20,6 +20,7 @@ export function isNavGroup(entry: NavEntry): entry is NavGroup {
 
 export const SIDEBAR_NAV_ITEMS: readonly NavEntry[] = [
   { label: "Overview", href: ROUTES.overview, icon: "dashboard" },
+  { label: "Analytics", href: ROUTES.analytics, icon: "barChart" },
   { label: "Projects", href: ROUTES.projects, icon: "folder" },
   { label: "Playground", href: ROUTES.playground, icon: "playCircle" },
   {

@@ -1,5 +1,6 @@
 import { singleton } from "tsyringe";
 import { BadRequestError, NotFoundError } from "@/common/errors";
+import { toYearMonth } from "@/common/utils/date";
 import { Plan, PrismaClient, type UserRole } from "@/generated/prisma";
 import type { PaginatedResponse } from "@/types/response";
 import type {
@@ -71,9 +72,14 @@ export class AdminUserService {
           },
         },
         usageRecords: {
-          orderBy: { period: "desc" },
+          orderBy: { periodStart: "desc" },
           take: 12,
-          select: { period: true, imageCount: true, aiImageCount: true, cacheHits: true },
+          select: {
+            periodStart: true,
+            imageCount: true,
+            aiImageCount: true,
+            cacheHits: true,
+          },
         },
       },
     });
@@ -95,7 +101,12 @@ export class AdminUserService {
       updatedAt: user.updatedAt,
       projects: user.projects,
       apiKeys: user.apiKeys,
-      usage: user.usageRecords,
+      usage: user.usageRecords.map((r) => ({
+        period: toYearMonth(r.periodStart),
+        imageCount: r.imageCount,
+        aiImageCount: r.aiImageCount,
+        cacheHits: r.cacheHits,
+      })),
     };
   }
 

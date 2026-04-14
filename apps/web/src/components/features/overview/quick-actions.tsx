@@ -3,9 +3,9 @@
 import type { ReactElement } from "react";
 import ArticleIcon from "@mui/icons-material/Article";
 import FolderIcon from "@mui/icons-material/Folder";
+import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
-import { Box, Grid, Stack, Typography } from "@mui/material";
-import NextLink from "next/link";
+import { Box, Grid, Link, Stack, Typography } from "@mui/material";
 import { SectionHeader } from "@/components/ui/layout/section-header";
 import { Surface } from "@/components/ui/layout/surface";
 import { ROUTES } from "@/lib/constants";
@@ -14,6 +14,12 @@ import { motion } from "@/theme/tokens";
 
 const ACTIONS = [
   {
+    icon: <PlayCircleIcon />,
+    title: "Playground",
+    description: "Preview templates against any URL",
+    href: ROUTES.playground,
+  },
+  {
     icon: <FolderIcon />,
     title: "Projects",
     description: "Create and manage your projects",
@@ -21,7 +27,7 @@ const ACTIONS = [
   },
   {
     icon: <VpnKeyIcon />,
-    title: "API Keys",
+    title: "API keys",
     description: "Generate and manage API keys",
     href: ROUTES.apiKeys,
   },
@@ -35,20 +41,20 @@ const ACTIONS = [
 
 export function QuickActions(): ReactElement {
   return (
-    <>
+    <Stack spacing={2.5}>
       <SectionHeader title="Quick actions" />
       <Grid container spacing={3}>
         {ACTIONS.map((action) => (
-          <Grid key={action.title} size={{ xs: 12, sm: 4 }}>
-            <Box
-              component={NextLink}
+          <Grid key={action.title} size={{ xs: 12, sm: 6, md: 3 }}>
+            <Link
               href={action.href}
-              sx={{ textDecoration: "none", display: "block" }}
+              sx={{ textDecoration: "none", display: "block", height: "100%" }}
             >
               <Surface
                 variant="quiet"
                 padding={3}
                 sx={{
+                  height: "100%",
                   cursor: "pointer",
                   transition: motion.standard,
                   "&:hover": {
@@ -65,10 +71,10 @@ export function QuickActions(): ReactElement {
                   <Typography variant="body2Muted">{action.description}</Typography>
                 </Stack>
               </Surface>
-            </Box>
+            </Link>
           </Grid>
         ))}
       </Grid>
-    </>
+    </Stack>
   );
 }

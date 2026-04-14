@@ -135,7 +135,7 @@ export function rateLimiter(options: RateLimitOptions) {
       if (count > max) {
         set.headers["retry-after"] = String(retryAfterSeconds);
         set.status = 429;
-        return { code: 429, message: "Too many requests, please try again later" };
+        return { code: "RATE_LIMITED", message: "Too many requests, please try again later" };
       }
     },
   );

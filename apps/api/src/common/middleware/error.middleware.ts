@@ -1,3 +1,4 @@
+import { ERROR_CODES } from "@ogstack/shared";
 import { Elysia } from "elysia";
 import { HttpError } from "@/common/errors";
 import { logger } from "@/common/logger";
@@ -5,7 +6,7 @@ import type { ErrorResponse } from "@/types/response";
 
 const isProduction = process.env.NODE_ENV === "production";
 
-function createErrorResponse(code: number, message: string, details?: unknown): ErrorResponse {
+function createErrorResponse(code: string, message: string, details?: unknown): ErrorResponse {
   return details !== undefined ? { code, message, details } : { code, message };
 }
 
@@ -33,8 +34,11 @@ export const errorMiddleware = new Elysia({ name: "error-handler" }).onError(
 
     if (error instanceof HttpError) {
       set.status = error.statusCode;
-      logger.warn({ statusCode: error.statusCode, message: error.message, ...route }, "HTTP error");
-      return createErrorResponse(error.statusCode, error.message);
+      logger.warn(
+        { statusCode: error.statusCode, code: error.code, message: error.message, ...route },
+        "HTTP error",
+      );
+      return createErrorResponse(error.code, error.message);
     }
 
     switch (code) {
@@ -42,15 +46,15 @@ export const errorMiddleware = new Elysia({ name: "error-handler" }).onError(
         set.status = 400;
         const details = safeParseJson(error.message) ?? error.message;
         logger.warn({ statusCode: 400, ...route, details }, "Validation error");
-        return createErrorResponse(400, "Validation error", details);
+        return createErrorResponse(ERROR_CODES.VALIDATION_ERROR, "Validation error", details);
       }
       case "PARSE":
         set.status = 400;
         logger.warn({ statusCode: 400, ...route }, "Malformed request body");
-        return createErrorResponse(400, "Malformed request body");
+        return createErrorResponse(ERROR_CODES.MALFORMED_BODY, "Malformed request body");
       case "NOT_FOUND":
         set.status = 404;
-        return createErrorResponse(404, "Not found");
+        return createErrorResponse(ERROR_CODES.NOT_FOUND, "Not found");
       default: {
         const errorMessage = error instanceof Error ? error.message : String(error);
 
@@ -65,7 +69,7 @@ export const errorMiddleware = new Elysia({ name: "error-handler" }).onError(
         );
 
         set.status = 500;
-        return createErrorResponse(500, "Internal server error");
+        return createErrorResponse(ERROR_CODES.INTERNAL_SERVER_ERROR, "Internal server error");
       }
     }
   },

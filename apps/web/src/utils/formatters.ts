@@ -22,6 +22,14 @@ export function formatDate(date: Date | string): string {
   });
 }
 
+/** Formats a YYYY-MM billing period as "Month YYYY" (e.g. "2026-04" → "April 2026"). */
+export function formatPeriod(period: string): string {
+  const [year, month] = period.split("-");
+  if (!year || !month) return period;
+  const date = new Date(Number(year), Number(month) - 1);
+  return date.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+}
+
 /** Formats a date with time (e.g., "Jan 1, 2024, 02:30 PM"), or "Never" if null. */
 export function formatDateTime(date: Date | string | null): string {
   if (!date) {

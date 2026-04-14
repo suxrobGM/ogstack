@@ -54,8 +54,8 @@ export class ImageService {
       ...(from || to
         ? {
             createdAt: {
-              ...(from && { gte: new Date(from) }),
-              ...(to && { lte: new Date(to) }),
+              ...(from && { gte: from }),
+              ...(to && { lte: to }),
             },
           }
         : {}),

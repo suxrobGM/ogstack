@@ -1,5 +1,6 @@
 import type { ReactElement, ReactNode } from "react";
 import { Box, Stack, Typography } from "@mui/material";
+import type { SxProps, Theme } from "@mui/material/styles";
 import { fontFamilies } from "@/theme";
 import { Surface } from "../layout/surface";
 
@@ -10,6 +11,7 @@ interface StatCardProps {
   trend?: "up" | "down" | "neutral";
   icon?: ReactNode;
   variant?: "quiet" | "expressive";
+  sx?: SxProps<Theme>;
 }
 
 /**
@@ -17,10 +19,10 @@ interface StatCardProps {
  * Used for overview dashboards, billing summaries, analytics.
  */
 export function StatCard(props: StatCardProps): ReactElement {
-  const { label, value, delta, trend = "neutral", icon, variant = "quiet" } = props;
+  const { label, value, delta, trend = "neutral", icon, variant = "quiet", sx } = props;
 
   return (
-    <Surface variant={variant} padding={3}>
+    <Surface variant={variant} padding={3} sx={sx}>
       <Stack
         direction="row"
         sx={{ justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}

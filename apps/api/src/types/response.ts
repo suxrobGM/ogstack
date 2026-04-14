@@ -4,7 +4,7 @@ import { t, type Static, type TSchema } from "elysia";
  * Error response schema for API error responses
  */
 export const ErrorResponseSchema = t.Object({
-  code: t.Number(),
+  code: t.String(),
   message: t.String(),
   details: t.Optional(t.Unknown()),
 });
@@ -44,37 +44,37 @@ export const MessageResponseSchema = t.Object({
  */
 export const HttpErrorResponses = {
   400: t.Object(
-    { code: t.Number(), message: t.String(), details: t.Optional(t.Unknown()) },
+    { code: t.String(), message: t.String(), details: t.Optional(t.Unknown()) },
     { description: "Bad Request" },
   ),
   401: t.Object(
-    { code: t.Number(), message: t.String(), details: t.Optional(t.Unknown()) },
+    { code: t.String(), message: t.String(), details: t.Optional(t.Unknown()) },
     { description: "Unauthorized" },
   ),
   403: t.Object(
-    { code: t.Number(), message: t.String(), details: t.Optional(t.Unknown()) },
+    { code: t.String(), message: t.String(), details: t.Optional(t.Unknown()) },
     { description: "Forbidden" },
   ),
   404: t.Object(
-    { code: t.Number(), message: t.String(), details: t.Optional(t.Unknown()) },
+    { code: t.String(), message: t.String(), details: t.Optional(t.Unknown()) },
     { description: "Not Found" },
   ),
   409: t.Object(
-    { code: t.Number(), message: t.String(), details: t.Optional(t.Unknown()) },
+    { code: t.String(), message: t.String(), details: t.Optional(t.Unknown()) },
     { description: "Conflict" },
   ),
 };
 
 export const GoneErrorSchema = {
   410: t.Object(
-    { code: t.Number(), message: t.String(), details: t.Optional(t.Unknown()) },
+    { code: t.String(), message: t.String(), details: t.Optional(t.Unknown()) },
     { description: "Gone" },
   ),
 };
 
 export const TooManyRequestsErrorSchema = {
   429: t.Object(
-    { code: t.Number(), message: t.String(), details: t.Optional(t.Unknown()) },
+    { code: t.String(), message: t.String(), details: t.Optional(t.Unknown()) },
     { description: "Too Many Requests" },
   ),
 };

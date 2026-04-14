@@ -26,11 +26,18 @@ export const SortOrderSchema = t.Union([t.Literal("asc"), t.Literal("desc")]);
 export type SortOrder = Static<typeof SortOrderSchema>;
 
 /**
- * Reusable date range filter (from/to as ISO 8601 timestamps)
+ * Reusable date range filter. Accepts ISO 8601 strings and coerces them
+ * into Date objects at the validation boundary.
  */
 export const DateRangeQuerySchema = t.Object({
-  from: t.Optional(
-    t.String({ format: "date-time", description: "Start of date range (ISO 8601)" }),
-  ),
-  to: t.Optional(t.String({ format: "date-time", description: "End of date range (ISO 8601)" })),
+  from: t.Optional(t.Date({ description: "Start of date range (ISO 8601)" })),
+  to: t.Optional(t.Date({ description: "End of date range (ISO 8601)" })),
 });
+
+export const DateRangeRequiredQuerySchema = t.Object({
+  from: t.Date({ description: "Start of date range (ISO 8601)" }),
+  to: t.Date({ description: "End of date range (ISO 8601)" }),
+});
+
+export type DateRange = Static<typeof DateRangeQuerySchema>;
+export type RequiredDateRange = Static<typeof DateRangeRequiredQuerySchema>;
