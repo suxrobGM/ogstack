@@ -2,7 +2,7 @@
 
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { useToast } from "./use-toast";
+import { useToast } from "@/providers/notification-provider";
 
 type QueryFn<T> = () => Promise<{ data: T | null; error: unknown }>;
 

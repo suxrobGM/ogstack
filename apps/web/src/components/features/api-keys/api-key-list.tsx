@@ -16,9 +16,10 @@ import {
 import { DataTable, type Column } from "@/components/ui/data/data-table";
 import { EmptyState } from "@/components/ui/data/empty-state";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { useApiMutation, useApiQuery, useConfirm } from "@/hooks";
+import { useApiMutation, useApiQuery } from "@/hooks";
 import { client } from "@/lib/api/client";
 import { queryKeys } from "@/lib/query-keys";
+import { useConfirm } from "@/providers";
 import { iconSizes } from "@/theme";
 import type { ApiKey, ApiKeyListResponse, Project } from "@/types/api";
 import { CreateApiKeyDialog } from "./create-api-key-dialog";

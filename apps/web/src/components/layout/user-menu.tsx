@@ -20,8 +20,8 @@ import {
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { UserAvatar } from "@/components/ui/display/user-avatar";
-import { useAuth } from "@/hooks";
 import { ROUTES } from "@/lib/constants";
+import { useAuth } from "@/providers/auth-provider";
 import { iconSizes, motion, radii } from "@/theme/tokens";
 import { planChipColor } from "@/utils/plan";
 

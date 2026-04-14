@@ -3,7 +3,7 @@
 import type { ReactElement } from "react";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { IconButton, Tooltip } from "@mui/material";
-import { useToast } from "@/hooks";
+import { useToast } from "@/providers/notification-provider";
 
 interface CopyButtonProps {
   text: string;

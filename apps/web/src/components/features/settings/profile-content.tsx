@@ -9,9 +9,9 @@ import { UserAvatar } from "@/components/ui/display/user-avatar";
 import { FormTextField } from "@/components/ui/form";
 import { SectionHeader } from "@/components/ui/layout/section-header";
 import { Surface } from "@/components/ui/layout/surface";
-import { useAuth } from "@/hooks";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api/client";
+import { useAuth } from "@/providers/auth-provider";
 import type { UserProfile } from "@/types/api";
 import { changeEmailSchema, profileSchema } from "./schema";
 

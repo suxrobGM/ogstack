@@ -6,9 +6,10 @@ import { Box, Button, Chip, IconButton, Tooltip, Typography } from "@mui/materia
 import { CreateApiKeyDialog } from "@/components/features/api-keys/create-api-key-dialog";
 import { DataTable, type Column } from "@/components/ui/data/data-table";
 import { SectionHeader } from "@/components/ui/layout/section-header";
-import { useApiMutation, useApiQuery, useConfirm } from "@/hooks";
+import { useApiMutation, useApiQuery } from "@/hooks";
 import { client } from "@/lib/api/client";
 import { queryKeys } from "@/lib/query-keys";
+import { useConfirm } from "@/providers/confirm-provider";
 import { iconSizes } from "@/theme";
 import type { ApiKey, ApiKeyListResponse } from "@/types/api";
 

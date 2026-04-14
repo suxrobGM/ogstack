@@ -2,9 +2,10 @@
 
 import type { ReactElement } from "react";
 import { Alert, Box, Button, Chip, Stack, Typography } from "@mui/material";
-import { useApiMutation, useConfirm } from "@/hooks";
+import { useApiMutation } from "@/hooks";
 import { client } from "@/lib/api/client";
 import { queryKeys } from "@/lib/query-keys";
+import { useConfirm } from "@/providers/confirm-provider";
 import { fontFamilies } from "@/theme";
 import type { SubscriptionResponse } from "@/types/api";
 import { formatDate } from "@/utils/formatters";

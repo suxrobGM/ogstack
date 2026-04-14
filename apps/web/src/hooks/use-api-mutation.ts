@@ -2,8 +2,8 @@
 
 import { ERROR_CODES } from "@ogstack/shared";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/providers/notification-provider";
 import { useSubscriptionPlanLimit } from "@/providers/subscription-provider";
-import { useToast } from "./use-toast";
 
 type MutationFn<TData, TVariables> = (variables: TVariables) => Promise<{
   data: TData | null;

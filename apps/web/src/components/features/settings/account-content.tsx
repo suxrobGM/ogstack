@@ -5,10 +5,10 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { Alert, Box, Button, Stack, Typography } from "@mui/material";
 import { SectionHeader } from "@/components/ui/layout/section-header";
 import { Surface } from "@/components/ui/layout/surface";
-import { useAuth } from "@/hooks";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api/client";
+import { useAuth } from "@/providers/auth-provider";
+import { useConfirm } from "@/providers/confirm-provider";
 
 export function AccountContent(): ReactElement {
   const { logout } = useAuth();

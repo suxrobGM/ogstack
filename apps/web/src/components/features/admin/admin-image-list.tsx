@@ -17,9 +17,10 @@ import {
 import { DataTable, type Column } from "@/components/ui/data/data-table";
 import { Pagination } from "@/components/ui/data/pagination";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { useApiMutation, useApiQuery, useConfirm, useDebouncedValue } from "@/hooks";
+import { useApiMutation, useApiQuery, useDebouncedValue } from "@/hooks";
 import { client } from "@/lib/api/client";
 import { queryKeys } from "@/lib/query-keys";
+import { useConfirm } from "@/providers/confirm-provider";
 import { iconSizes } from "@/theme";
 import type { AdminImageItem, AdminImageListResponse } from "@/types/api";
 

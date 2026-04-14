@@ -16,9 +16,10 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { useApiMutation, useConfirm } from "@/hooks";
+import { useApiMutation } from "@/hooks";
 import { client } from "@/lib/api/client";
 import { queryKeys } from "@/lib/query-keys";
+import { useConfirm } from "@/providers/confirm-provider";
 import type { ImageItem } from "@/types/api";
 import { ImageEditForm } from "./image-edit-form";
 import { ImageMetadata } from "./image-metadata";

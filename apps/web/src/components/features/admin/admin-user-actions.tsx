@@ -7,9 +7,10 @@ import { useRouter } from "next/navigation";
 import { SelectInput } from "@/components/ui/form/select-input";
 import { SectionHeader } from "@/components/ui/layout/section-header";
 import { Surface } from "@/components/ui/layout/surface";
-import { useApiMutation, useConfirm } from "@/hooks";
+import { useApiMutation } from "@/hooks";
 import { client } from "@/lib/api/client";
 import { queryKeys } from "@/lib/query-keys";
+import { useConfirm } from "@/providers/confirm-provider";
 
 interface AdminUserActionsProps {
   userId: string;
