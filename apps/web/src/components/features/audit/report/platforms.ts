@@ -39,15 +39,6 @@ export const PLATFORMS: PlatformConfig[] = [
     hintColor: "#0A66C2",
   },
   {
-    id: "instagram",
-    name: "Instagram",
-    layout: "square",
-    titleMax: 60,
-    descMax: 120,
-    imageAspect: "1 / 1",
-    hintColor: "#E4405F",
-  },
-  {
     id: "slack",
     name: "Slack",
     layout: "compact",
@@ -73,6 +64,15 @@ export const PLATFORMS: PlatformConfig[] = [
     descMax: 350,
     imageAspect: "1.91 / 1",
     hintColor: "#5865F2",
+  },
+  {
+    id: "instagram",
+    name: "Instagram",
+    layout: "square",
+    titleMax: 60,
+    descMax: 120,
+    imageAspect: "1 / 1",
+    hintColor: "#E4405F",
   },
 ];
 
