@@ -8,10 +8,11 @@ import { accent } from "@/theme";
 interface GenerateButtonProps {
   isGenerating: boolean;
   onClick: () => void;
+  disabled?: boolean;
 }
 
 export function GenerateButton(props: GenerateButtonProps): ReactElement {
-  const { isGenerating, onClick } = props;
+  const { isGenerating, onClick, disabled } = props;
 
   return (
     <Button
@@ -19,7 +20,7 @@ export function GenerateButton(props: GenerateButtonProps): ReactElement {
       size="large"
       fullWidth
       onClick={onClick}
-      disabled={isGenerating}
+      disabled={isGenerating || disabled}
       startIcon={<PlayArrowIcon />}
       sx={{
         mt: 1,

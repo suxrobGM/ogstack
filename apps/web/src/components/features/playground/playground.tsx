@@ -2,6 +2,7 @@
 
 import { useState, type ReactElement } from "react";
 import { Grid } from "@mui/material";
+import { ERROR_CODES } from "@ogstack/shared";
 import { useForm } from "@tanstack/react-form";
 import { useSearchParams } from "next/navigation";
 import { useApiMutation, useApiQuery } from "@/hooks";
@@ -18,6 +19,7 @@ import type {
 import { buildOgImageUrl, buildOgMetaTag, OG_PRODUCTION_HOST } from "@/utils/og-image";
 import { ControlsPanel } from "./controls-panel";
 import { OutputPanel } from "./output-panel";
+import { OverrideDialog } from "./override-dialog";
 import { PageContentPanel } from "./page-content-panel";
 import { PreviewPane } from "./preview-pane";
 import type { PlaygroundFormValues } from "./schema";
@@ -78,6 +80,7 @@ export function Playground(props: PlaygroundProps): ReactElement {
   const [result, setResult] = useState<GenerateDto | null>(null);
   const [lastFormValues, setLastFormValues] = useState<PlaygroundFormValues | null>(null);
   const [analyzed, setAnalyzed] = useState(false);
+  const [overridePrompt, setOverridePrompt] = useState(false);
 
   const { data: templatesData } = useApiQuery<TemplateInfo[]>(
     queryKeys.templates.list(),
@@ -97,10 +100,15 @@ export function Playground(props: PlaygroundProps): ReactElement {
   const generateMutation = useApiMutation(
     (body: ImageGenerateBody) => client.api.images.post(body),
     {
-      errorMessage: (err) => err.message,
       onSuccess: (data) => {
         setResult(data);
         refetchUsage();
+      },
+      onError: (err) => {
+        if (err.value?.code === ERROR_CODES.IMAGE_EXISTS) {
+          setOverridePrompt(true);
+          return;
+        }
       },
     },
   );
@@ -109,7 +117,7 @@ export function Playground(props: PlaygroundProps): ReactElement {
     client.api["page-analysis"].analyze.post(variables),
   );
 
-  const submit = (values: PlaygroundFormValues, force: boolean) => {
+  const submit = (values: PlaygroundFormValues, force: boolean, override = false) => {
     setLastFormValues(values);
     setAnalyzed(true);
 
@@ -126,6 +134,7 @@ export function Playground(props: PlaygroundProps): ReactElement {
       url: values.url,
       template: values.template,
       projectId: selectedProjectId,
+      override,
       options: {
         accent: values.accent,
         dark: values.dark,
@@ -138,6 +147,11 @@ export function Playground(props: PlaygroundProps): ReactElement {
         force: force,
       },
     });
+  };
+
+  const confirmOverride = (): void => {
+    setOverridePrompt(false);
+    if (lastFormValues) submit(lastFormValues, false, true);
   };
 
   const form = useForm({
@@ -200,6 +214,13 @@ export function Playground(props: PlaygroundProps): ReactElement {
           <OutputPanel result={result} metaTag={metaTag} />
         </Grid>
       )}
+
+      <OverrideDialog
+        open={overridePrompt}
+        isLoading={generateMutation.isPending}
+        onConfirm={confirmOverride}
+        onClose={() => setOverridePrompt(false)}
+      />
     </Grid>
   );
 }

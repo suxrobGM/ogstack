@@ -10,13 +10,13 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { parseDomainList } from "@ogstack/shared";
 import { useForm } from "@tanstack/react-form";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks";
 import { client } from "@/lib/api/client";
 import type { Project } from "@/types/api";
-import { parseDomains } from "@/utils/parse-domains";
-import { projectFormSchema, type ProjectFormValues } from "./schema";
+import { projectFormSchema } from "./schema";
 
 interface EditProjectDialogProps {
   project: Project | null;
@@ -41,10 +41,10 @@ export function EditProjectDialog(props: EditProjectDialogProps): ReactElement {
     defaultValues: {
       name: project?.name ?? "",
       domains: project?.domains.join(", ") ?? "",
-    } as ProjectFormValues,
+    },
     validators: { onSubmit: projectFormSchema },
     onSubmit: async ({ value }) => {
-      mutation.mutate({ name: value.name, domains: parseDomains(value.domains) });
+      mutation.mutate({ name: value.name, domains: parseDomainList(value.domains) });
     },
   });
 

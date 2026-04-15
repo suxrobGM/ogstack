@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import BoltIcon from "@mui/icons-material/Bolt";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { LinearProgress, Stack, Typography } from "@mui/material";
 import { accent, line, radii } from "@/theme";
 import type { UsageStatsResponse } from "@/types/api";
@@ -10,11 +10,11 @@ interface UsageMeterProps {
 
 export function UsageMeter(props: UsageMeterProps): ReactElement {
   const { stats } = props;
-  const unlimited = stats.aiImageLimit === -1;
-  const percent = unlimited
-    ? 0
-    : Math.min(100, Math.round((stats.aiImageCount / Math.max(stats.aiImageLimit, 1)) * 100));
-  const warning = !unlimited && percent >= 80;
+  const hasAiLimit = stats.aiImageLimit > 0;
+  const percent = hasAiLimit
+    ? Math.min(100, Math.round((stats.aiImageCount / Math.max(stats.aiImageLimit, 1)) * 100))
+    : 0;
+  const warning = hasAiLimit && percent >= 80;
 
   return (
     <Stack
@@ -31,19 +31,17 @@ export function UsageMeter(props: UsageMeterProps): ReactElement {
         sx={{ alignItems: "center", justifyContent: "space-between" }}
       >
         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <BoltIcon sx={{ fontSize: 18, color: accent.primary }} />
+          <AutoAwesomeIcon sx={{ fontSize: 18, color: accent.primary }} />
           <Typography variant="body2" sx={{ fontWeight: 500 }}>
-            This month
+            AI this month
           </Typography>
           <Typography variant="captionMuted">{stats.plan}</Typography>
         </Stack>
         <Typography variant="caption" sx={{ fontFamily: "monospace" }}>
-          {unlimited
-            ? `${stats.aiImageCount} used`
-            : `${stats.aiImageCount} / ${stats.aiImageLimit}`}
+          {hasAiLimit ? `${stats.aiImageCount} / ${stats.aiImageLimit}` : "—"}
         </Typography>
       </Stack>
-      {!unlimited && (
+      {hasAiLimit && (
         <LinearProgress
           variant="determinate"
           value={percent}
@@ -52,7 +50,9 @@ export function UsageMeter(props: UsageMeterProps): ReactElement {
         />
       )}
       <Typography variant="captionMuted">
-        {stats.aiImageCount} AI · {stats.cacheHits} cache hits
+        {stats.used} images generated · {stats.cacheHits} cache hits
+        {stats.aiProImageLimit > 0 &&
+          ` · Pro model: ${stats.aiProImageCount}/${stats.aiProImageLimit}`}
       </Typography>
     </Stack>
   );

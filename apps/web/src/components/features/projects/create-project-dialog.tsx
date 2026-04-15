@@ -10,12 +10,12 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { parseDomainList } from "@ogstack/shared";
 import { useForm } from "@tanstack/react-form";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks";
 import { client } from "@/lib/api/client";
-import { parseDomains } from "@/utils/parse-domains";
-import { projectFormSchema, type ProjectFormValues } from "./schema";
+import { projectFormSchema } from "./schema";
 
 interface CreateProjectDialogProps {
   open: boolean;
@@ -35,10 +35,10 @@ export function CreateProjectDialog(props: CreateProjectDialogProps): ReactEleme
   );
 
   const form = useForm({
-    defaultValues: { name: "", domains: "" } as ProjectFormValues,
+    defaultValues: { name: "", domains: "" },
     validators: { onSubmit: projectFormSchema },
     onSubmit: async ({ value }) => {
-      mutation.mutate({ name: value.name, domains: parseDomains(value.domains) });
+      mutation.mutate({ name: value.name, domains: parseDomainList(value.domains) });
     },
   });
 
@@ -64,10 +64,11 @@ export function CreateProjectDialog(props: CreateProjectDialogProps): ReactEleme
               name="domains"
               label="Allowed Domains"
               placeholder="example.com, app.example.com"
+              required
             />
             <Typography variant="caption" sx={{ color: "text.secondary", mt: -1 }}>
-              Comma-separated list of domains allowed to use the public OG endpoint. Leave empty to
-              allow all.
+              At least one domain is required. Requests to the public OG endpoint for URLs outside
+              this list will be blocked.
             </Typography>
           </Stack>
         </DialogContent>

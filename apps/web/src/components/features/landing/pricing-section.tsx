@@ -1,8 +1,10 @@
 import type { ReactElement } from "react";
 import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
 import {
   Box,
   Button,
+  Chip,
   Container,
   Grid,
   List,
@@ -12,68 +14,46 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { Plan, PLAN_CONFIGS, PLANS, UNLIMITED, type PlanConfig } from "@ogstack/shared";
 import { Surface } from "@/components/ui/layout/surface";
 import { ROUTES } from "@/lib/constants";
 import { iconSizes } from "@/theme/tokens";
 import { fontFamilies } from "@/theme/typography";
 
-const TIERS = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "forever",
-    quota: "50 images/mo",
-    features: ["5 templates", "GET meta tag mode", "Community support", "Watermark on images"],
-    cta: "Get started",
-    highlighted: false,
-  },
-  {
-    name: "Pro",
-    price: "$12",
-    period: "/month",
-    quota: "500 images/mo",
-    features: [
-      "All templates",
-      "Brand Kit",
-      "AI backgrounds (Flux Schnell)",
-      "No watermark",
-      "Priority support",
-    ],
-    cta: "Start free trial",
-    highlighted: true,
-  },
-  {
-    name: "Business",
-    price: "$29",
-    period: "/month",
-    quota: "5,000 images/mo",
-    features: [
-      "Everything in Pro",
-      "A/B testing",
-      "Analytics dashboard",
-      "AI backgrounds (Flux Pro)",
-      "Team access",
-    ],
-    cta: "Start free trial",
-    highlighted: false,
-  },
-  {
-    name: "Enterprise",
-    price: "$79",
-    period: "/month",
-    quota: "Unlimited images",
-    features: [
-      "Everything in Business",
-      "Custom domain",
-      "SLA guarantee",
-      "SSO",
-      "All AI models",
-      "Dedicated support",
-    ],
-    cta: "Contact sales",
-    highlighted: false,
-  },
-];
+interface Feature {
+  label: string;
+  included: boolean;
+}
+
+function describeProjects(config: PlanConfig): string {
+  if (config.projectLimit === UNLIMITED) return "Unlimited projects";
+  return `${config.projectLimit} project${config.projectLimit === 1 ? "" : "s"}`;
+}
+
+function describeDomains(config: PlanConfig): string {
+  if (config.domainsPerProject === UNLIMITED) return "Unlimited domains per project";
+  return `${config.domainsPerProject} domain${config.domainsPerProject === 1 ? "" : "s"} per project`;
+}
+
+function buildFeatures(plan: Plan): Feature[] {
+  const config = PLAN_CONFIGS[plan];
+  return [
+    { label: "Unlimited non-AI images", included: true },
+    {
+      label: `${config.aiImageLimit} AI images / month${plan === Plan.PRO ? " (Pro + standard models)" : " (standard model)"}`,
+      included: true,
+    },
+    {
+      label: `${config.aiAuditLimit} AI audit recommendations / month`,
+      included: config.aiAuditLimit > 0,
+    },
+    { label: "All templates", included: true },
+    { label: describeProjects(config), included: true },
+    { label: describeDomains(config), included: true },
+    { label: "No watermark", included: !config.watermark },
+    { label: "Priority support", included: config.prioritySupport },
+  ];
+}
 
 export function PricingSection(): ReactElement {
   return (
@@ -84,88 +64,114 @@ export function PricingSection(): ReactElement {
         </Typography>
         <Typography
           variant="body1Muted"
-          sx={{ textAlign: "center", mb: 6, maxWidth: 400, mx: "auto" }}
+          sx={{ textAlign: "center", mb: 6, maxWidth: 520, mx: "auto" }}
         >
-          Start free. Upgrade when you need more.
+          Start free. Non-AI OG images are unlimited on every plan — only AI generation and audit
+          recommendations are metered.
         </Typography>
-        <Grid container spacing={2} sx={{ alignItems: "stretch" }}>
-          {TIERS.map((tier) => (
-            <Grid key={tier.name} size={{ xs: 12, sm: 6, lg: 3 }}>
-              <Surface
-                variant="quiet"
-                padding={3.5}
-                sx={{
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  ...(tier.highlighted && {
-                    borderColor: "accent.primary",
-                    boxShadow:
-                      "0 2px 8px rgba(44,40,37,0.08), 0 16px 40px rgba(44,40,37,0.06), 0 0 0 1px rgba(180,83,9,0.15)",
-                  }),
-                }}
-              >
-                <Typography
+        <Grid container spacing={2} sx={{ alignItems: "stretch", justifyContent: "center" }}>
+          {PLANS.map((key) => {
+            const config = PLAN_CONFIGS[key];
+            const features = buildFeatures(key);
+            const highlighted = key === Plan.PLUS;
+            const cta = config.price === 0 ? "Get started" : `Start with ${config.name}`;
+
+            return (
+              <Grid key={key} size={{ xs: 12, md: 4 }}>
+                <Surface
+                  variant="quiet"
+                  padding={3.5}
                   sx={{
-                    fontSize: 12,
-                    fontWeight: 500,
-                    color: "text.secondary",
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                    mb: 1,
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    ...(highlighted && {
+                      borderColor: "accent.primary",
+                      boxShadow:
+                        "0 2px 8px rgba(44,40,37,0.08), 0 16px 40px rgba(44,40,37,0.06), 0 0 0 1px rgba(180,83,9,0.15)",
+                    }),
                   }}
                 >
-                  {tier.name}
-                </Typography>
-                <Stack direction="row" sx={{ alignItems: "baseline", mb: 0.5 }}>
+                  <Stack direction="row" sx={{ alignItems: "center", gap: 1, mb: 1 }}>
+                    <Typography
+                      sx={{
+                        fontSize: 12,
+                        fontWeight: 500,
+                        color: "text.secondary",
+                        textTransform: "uppercase",
+                        letterSpacing: "1px",
+                      }}
+                    >
+                      {config.name}
+                    </Typography>
+                    {highlighted && <Chip label="Most popular" size="small" color="primary" />}
+                  </Stack>
+                  <Stack direction="row" sx={{ alignItems: "baseline", mb: 2.5 }}>
+                    <Typography
+                      sx={{
+                        fontSize: "2.5rem",
+                        fontWeight: 700,
+                        lineHeight: 1,
+                        letterSpacing: "-0.02em",
+                      }}
+                    >
+                      ${config.price}
+                    </Typography>
+                    <Typography variant="body2Muted" sx={{ ml: 0.5 }}>
+                      {config.price === 0 ? "forever" : "/month"}
+                    </Typography>
+                  </Stack>
                   <Typography
                     sx={{
-                      fontSize: "2.25rem",
-                      fontWeight: 700,
-                      lineHeight: 1,
-                      letterSpacing: "-0.02em",
+                      fontFamily: fontFamilies.mono,
+                      fontSize: "0.72rem",
+                      color: "accent.secondary",
+                      mb: 1.5,
                     }}
                   >
-                    {tier.price}
+                    {config.aiImageLimit} AI images/mo · Unlimited non-AI
                   </Typography>
-                  <Typography variant="body2Muted" sx={{ ml: 0.5 }}>
-                    {tier.period}
-                  </Typography>
-                </Stack>
-                <Typography
-                  sx={{
-                    fontFamily: fontFamilies.mono,
-                    fontSize: "0.72rem",
-                    color: "accent.secondary",
-                    mb: 2.5,
-                  }}
-                >
-                  {tier.quota}
-                </Typography>
-                <List dense sx={{ flex: 1, py: 0 }}>
-                  {tier.features.map((feature) => (
-                    <ListItem key={feature} disableGutters sx={{ py: 0.5 }}>
-                      <ListItemIcon sx={{ minWidth: 28, color: "success.main" }}>
-                        <CheckIcon sx={{ fontSize: iconSizes.xs }} />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={feature}
-                        slotProps={{ primary: { sx: { fontSize: 14 } } }}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-                <Button
-                  href={ROUTES.pricing}
-                  variant={tier.highlighted ? "contained" : "outlined"}
-                  fullWidth
-                  sx={{ mt: 2.5 }}
-                >
-                  {tier.cta}
-                </Button>
-              </Surface>
-            </Grid>
-          ))}
+                  <List dense sx={{ flex: 1, py: 0 }}>
+                    {features.map((feature) => (
+                      <ListItem key={feature.label} disableGutters sx={{ py: 0.5 }}>
+                        <ListItemIcon
+                          sx={{
+                            minWidth: 28,
+                            color: feature.included ? "success.main" : "text.disabled",
+                          }}
+                        >
+                          {feature.included ? (
+                            <CheckIcon sx={{ fontSize: iconSizes.xs }} />
+                          ) : (
+                            <CloseIcon sx={{ fontSize: iconSizes.xs }} />
+                          )}
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={feature.label}
+                          slotProps={{
+                            primary: {
+                              sx: {
+                                fontSize: 14,
+                                color: feature.included ? "text.primary" : "text.disabled",
+                              },
+                            },
+                          }}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                  <Button
+                    href={ROUTES.pricing}
+                    variant={highlighted ? "contained" : "outlined"}
+                    fullWidth
+                    sx={{ mt: 2.5 }}
+                  >
+                    {cta}
+                  </Button>
+                </Surface>
+              </Grid>
+            );
+          })}
         </Grid>
       </Container>
     </Box>

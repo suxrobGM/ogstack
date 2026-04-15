@@ -1,9 +1,12 @@
 "use client";
 
 import type { ReactElement } from "react";
-import { Box, Checkbox, Typography } from "@mui/material";
+import LockIcon from "@mui/icons-material/Lock";
+import { Box, Checkbox, Stack, Tooltip, Typography } from "@mui/material";
+import { isPlanAtLeast, Plan } from "@ogstack/shared";
 import Image from "next/image";
 import Link from "next/link";
+import { useAuth } from "@/providers/auth-provider";
 import { line, motion, radii, shadows, surfaces } from "@/theme";
 import type { ImageItem } from "@/types/api";
 import { ImageGenerationChip } from "./image-generation-chip";
@@ -16,9 +19,14 @@ interface ImageCardProps {
 
 export function ImageCard(props: ImageCardProps): ReactElement {
   const { item, selected, onToggleSelect } = props;
+  const { user } = useAuth();
   const isAi = Boolean(item.aiModel);
   const title = item.title ?? item.sourceUrl ?? "Untitled";
   const caption = item.template?.name ?? item.category ?? "—";
+
+  const generatedOnPlan = (item.generatedOnPlan ?? Plan.FREE) as Plan;
+  const currentPlan = (user?.plan ?? Plan.FREE) as Plan;
+  const tierLocked = !isPlanAtLeast(currentPlan, generatedOnPlan);
 
   return (
     <Box
@@ -76,9 +84,35 @@ export function ImageCard(props: ImageCardProps): ReactElement {
             alt={title}
             fill
             sizes="(max-width: 600px) 100vw, (max-width: 1200px) 33vw, 25vw"
-            style={{ objectFit: "cover" }}
+            style={{
+              objectFit: "cover",
+              filter: tierLocked ? "grayscale(1)" : undefined,
+              opacity: tierLocked ? 0.4 : 1,
+            }}
             unoptimized
           />
+          {tierLocked && (
+            <Tooltip
+              title={`Generated on ${generatedOnPlan} tier. Re-subscribe to ${generatedOnPlan} to serve and download this image.`}
+            >
+              <Stack
+                spacing={0.5}
+                sx={{
+                  position: "absolute",
+                  inset: 0,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "rgba(0,0,0,0.35)",
+                  color: "#fff",
+                }}
+              >
+                <LockIcon />
+                <Typography variant="caption" sx={{ fontWeight: 500 }}>
+                  Locked · {generatedOnPlan}
+                </Typography>
+              </Stack>
+            </Tooltip>
+          )}
         </Box>
         <Box sx={{ px: 1.5, py: 1 }}>
           <Typography

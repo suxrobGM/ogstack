@@ -1,4 +1,4 @@
-import { isPlanAtLeast, Plan, PLAN_CONFIGS, UNLIMITED } from "@ogstack/shared";
+import { isPlanAtLeast, isValidDomain, Plan, PLAN_CONFIGS, UNLIMITED } from "@ogstack/shared";
 import { singleton } from "tsyringe";
 import { BadRequestError, NotFoundError, PlanLimitError } from "@/common/errors";
 import { generatePublicId } from "@/common/utils/crypto";
@@ -11,19 +11,15 @@ import type {
   UpdateProjectBody,
 } from "./project.schema";
 
-// Accepts labels + dots only (no protocol, no path, no IPs).
-const DOMAIN_RE = /^(?!-)[a-z0-9-]{1,63}(?:\.(?!-)[a-z0-9-]{1,63})+$/i;
-
 function validateDomains(domains: string[]): string[] {
   const normalized = domains.map((d) => d.trim().toLowerCase()).filter(Boolean);
   for (const domain of normalized) {
-    if (!DOMAIN_RE.test(domain)) {
+    if (!isValidDomain(domain)) {
       throw new BadRequestError(
         `Invalid domain "${domain}". Use bare hostnames like example.com or sub.example.com.`,
       );
     }
   }
-  // De-duplicate while preserving order
   return Array.from(new Set(normalized));
 }
 

@@ -31,7 +31,7 @@ const FEATURES = [
     icon: "AI",
     title: "AI backgrounds",
     description:
-      "Flux Schnell and Flux Pro generate contextual backgrounds from your page content.",
+      "Best-in-class vision models generate contextual backgrounds from your page content.",
   },
   {
     icon: "\u2261",

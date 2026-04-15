@@ -10,14 +10,14 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { parseDomainList } from "@ogstack/shared";
 import { useForm } from "@tanstack/react-form";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks";
 import { client } from "@/lib/api/client";
 import { queryKeys } from "@/lib/query-keys";
 import type { Project } from "@/types/api";
-import { parseDomains } from "@/utils/parse-domains";
-import { projectFormSchema, type ProjectFormValues } from "./schema";
+import { projectFormSchema } from "./schema";
 
 interface ProjectDialogProps {
   project?: Project | null;
@@ -47,10 +47,10 @@ export function ProjectDialog(props: ProjectDialogProps): ReactElement {
     defaultValues: {
       name: project?.name ?? "",
       domains: project?.domains.join(", ") ?? "",
-    } as ProjectFormValues,
+    },
     validators: { onSubmit: projectFormSchema },
     onSubmit: async ({ value }) => {
-      mutation.mutate({ name: value.name, domains: parseDomains(value.domains) });
+      mutation.mutate({ name: value.name, domains: parseDomainList(value.domains) });
     },
   });
 
@@ -85,10 +85,11 @@ export function ProjectDialog(props: ProjectDialogProps): ReactElement {
               name="domains"
               label="Allowed Domains"
               placeholder="example.com, app.example.com"
+              required
             />
             <Typography variant="captionMuted" sx={{ mt: -1 }}>
-              Comma-separated list of domains allowed to use the public OG endpoint. Leave empty to
-              allow all.
+              Comma-separated list of domains allowed to use the public OG endpoint. Your plan caps
+              how many domains you can add per project — upgrade to fit more.
             </Typography>
           </Stack>
         </DialogContent>

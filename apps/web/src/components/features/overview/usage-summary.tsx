@@ -1,9 +1,10 @@
 "use client";
 
 import type { ReactElement } from "react";
-import BoltIcon from "@mui/icons-material/Bolt";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import CachedIcon from "@mui/icons-material/Cached";
 import ImageIcon from "@mui/icons-material/Image";
-import InsightsIcon from "@mui/icons-material/Insights";
+import RateReviewIcon from "@mui/icons-material/RateReview";
 import { Box, Grid, LinearProgress, Link, Stack, Typography } from "@mui/material";
 import { StatCard } from "@/components/ui/data/stat-card";
 import { SectionHeader } from "@/components/ui/layout/section-header";
@@ -19,15 +20,14 @@ interface UsageSummaryProps {
 
 export function UsageSummary(props: UsageSummaryProps): ReactElement {
   const { usage } = props;
-  const isUnlimited = true;
-  const percent =
+  const aiPercent =
     usage.aiImageLimit > 0 ? Math.min(100, (usage.aiImageCount / usage.aiImageLimit) * 100) : 0;
 
   return (
     <Stack spacing={2.5}>
       <SectionHeader
         title="Usage this period"
-        description="Images generated against your plan quota"
+        description="Non-AI images are unmetered; AI images and audits count against your plan."
         actions={
           <Link href={ROUTES.analytics} variant="body2" underline="hover">
             View analytics
@@ -35,50 +35,68 @@ export function UsageSummary(props: UsageSummaryProps): ReactElement {
         }
       />
       <Grid container spacing={3} sx={{ alignItems: "stretch" }}>
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Surface padding={3} sx={{ height: "100%" }}>
             <Stack
               direction="row"
-              sx={{ justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}
+              sx={{ justifyContent: "space-between", alignItems: "flex-start", mb: 1.5 }}
             >
-              <Typography variant="overlineMuted">Images generated</Typography>
-              <Box sx={{ color: "text.secondary" }}>
-                <ImageIcon />
+              <Typography variant="overlineMuted">AI images</Typography>
+              <Box sx={{ color: "text.secondary", display: "flex" }}>
+                <AutoAwesomeIcon fontSize="small" />
               </Box>
             </Stack>
-            <Stack direction="row" sx={{ alignItems: "baseline", gap: 0.75, mb: 1.5 }}>
+            <Stack direction="row" sx={{ alignItems: "baseline", gap: 0.5, mb: 1 }}>
               <Typography
                 sx={{
                   fontFamily: fontFamilies.mono,
-                  fontSize: "2.25rem",
+                  fontSize: "1.75rem",
                   fontWeight: 500,
                   lineHeight: 1,
-                  letterSpacing: "-0.02em",
                 }}
               >
-                {usage.used.toLocaleString()}
+                {usage.aiImageCount.toLocaleString()}
               </Typography>
-              <Typography variant="body2Muted">/ Unlimited</Typography>
+              <Typography variant="body2Muted">
+                / {usage.aiImageLimit > 0 ? usage.aiImageLimit.toLocaleString() : "—"}
+              </Typography>
             </Stack>
-            {isUnlimited ? (
-              <Typography variant="caption" sx={{ color: "accent.primary" }}>
-                Unlimited plan
-              </Typography>
-            ) : (
+            {usage.aiImageLimit > 0 ? (
               <LinearProgress
                 variant="determinate"
-                value={percent}
-                color={getProgressColor(percent)}
-                sx={{ height: 6, borderRadius: 3 }}
+                value={aiPercent}
+                color={getProgressColor(aiPercent)}
+                sx={{ height: 4, borderRadius: 3 }}
               />
+            ) : (
+              <Typography variant="caption" sx={{ color: "text.disabled" }}>
+                Not available
+              </Typography>
+            )}
+            {usage.aiProImageLimit > 0 && (
+              <Typography
+                variant="caption"
+                sx={{ color: "text.disabled", mt: 1, display: "block" }}
+              >
+                Pro: {usage.aiProImageCount.toLocaleString()}/
+                {usage.aiProImageLimit.toLocaleString()}
+              </Typography>
             )}
           </Surface>
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard
-            label="AI images"
-            value={usage.aiImageCount.toLocaleString()}
-            icon={<BoltIcon />}
+            label="Images generated"
+            value={usage.used.toLocaleString()}
+            icon={<ImageIcon />}
+            sx={{ height: "100%" }}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <StatCard
+            label={`AI audits (${usage.aiAuditLimit})`}
+            value={`${usage.aiAuditCount.toLocaleString()} / ${usage.aiAuditLimit > 0 ? usage.aiAuditLimit.toLocaleString() : "—"}`}
+            icon={<RateReviewIcon />}
             sx={{ height: "100%" }}
           />
         </Grid>
@@ -86,7 +104,7 @@ export function UsageSummary(props: UsageSummaryProps): ReactElement {
           <StatCard
             label="Cache hits"
             value={usage.cacheHits.toLocaleString()}
-            icon={<InsightsIcon />}
+            icon={<CachedIcon />}
             sx={{ height: "100%" }}
           />
         </Grid>

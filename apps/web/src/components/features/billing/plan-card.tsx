@@ -17,24 +17,44 @@ import { Surface } from "@/components/ui/layout/surface";
 import { fontFamilies, iconSizes } from "@/theme";
 import type { PlanResponse } from "@/types/api";
 
+type DowngradeTarget = "FREE" | "PLUS";
+
 interface PlanCardProps {
   plan: PlanResponse;
   currentPlanKey: string;
-  onSelect: (priceId: string) => void;
+  onUpgrade: (priceId: string) => void;
+  onDowngrade: (target: DowngradeTarget) => void;
   isLoading?: boolean;
 }
 
+const TIER_ORDER: string[] = [Plan.FREE, Plan.PLUS, Plan.PRO];
+
 export function PlanCard(props: PlanCardProps): ReactElement {
-  const { plan, currentPlanKey, onSelect, isLoading } = props;
+  const { plan, currentPlanKey, onUpgrade, onDowngrade, isLoading } = props;
 
   const isCurrentPlan = plan.key === currentPlanKey;
-  const tierOrder: string[] = [Plan.FREE, Plan.PLUS, Plan.PRO];
-  const currentSortOrder = tierOrder.indexOf(currentPlanKey);
-  const planSortOrder = tierOrder.indexOf(plan.key);
+  const currentSortOrder = TIER_ORDER.indexOf(currentPlanKey);
+  const planSortOrder = TIER_ORDER.indexOf(plan.key);
   const isUpgrade = planSortOrder > currentSortOrder;
   const isDowngrade = planSortOrder < currentSortOrder;
 
-  const quotaLabel = "Unlimited images";
+  const handleClick = () => {
+    if (isUpgrade && plan.stripePriceId) {
+      onUpgrade(plan.stripePriceId);
+      return;
+    }
+    if (isDowngrade && (plan.key === Plan.FREE || plan.key === Plan.PLUS)) {
+      onDowngrade(plan.key);
+    }
+  };
+
+  const buttonLabel = isCurrentPlan
+    ? "Current Plan"
+    : isUpgrade
+      ? `Upgrade to ${plan.name}`
+      : `Downgrade to ${plan.name}`;
+
+  const disabled = isCurrentPlan || isLoading || (isUpgrade && !plan.stripePriceId);
 
   return (
     <Surface
@@ -48,7 +68,7 @@ export function PlanCard(props: PlanCardProps): ReactElement {
         </Typography>
         {isCurrentPlan && <Chip label="Current" size="small" color="success" />}
       </Stack>
-      <Stack direction="row" sx={{ alignItems: "baseline", mt: 1, mb: 0.5 }}>
+      <Stack direction="row" sx={{ alignItems: "baseline", mt: 1, mb: 3 }}>
         <Typography
           sx={{
             fontFamily: fontFamilies.mono,
@@ -63,9 +83,6 @@ export function PlanCard(props: PlanCardProps): ReactElement {
           {plan.price === 0 ? "forever" : "/month"}
         </Typography>
       </Stack>
-      <Typography variant="caption" sx={{ color: "accent.secondary", mb: 3 }}>
-        {quotaLabel}
-      </Typography>
       <List dense sx={{ flex: 1, py: 0 }}>
         {plan.features.map((feature) => (
           <ListItem key={feature} disableGutters sx={{ py: 0.5 }}>
@@ -76,25 +93,15 @@ export function PlanCard(props: PlanCardProps): ReactElement {
           </ListItem>
         ))}
       </List>
-      {isCurrentPlan ? (
-        <Button variant="outlined" fullWidth disabled sx={{ mt: 3 }}>
-          Current Plan
-        </Button>
-      ) : plan.key === "FREE" ? (
-        <Button variant="outlined" fullWidth disabled sx={{ mt: 3 }}>
-          Free
-        </Button>
-      ) : (
-        <Button
-          variant={isUpgrade ? "contained" : "outlined"}
-          fullWidth
-          sx={{ mt: 3 }}
-          onClick={() => plan.stripePriceId && onSelect(plan.stripePriceId)}
-          disabled={isLoading || !plan.stripePriceId}
-        >
-          {isUpgrade ? "Upgrade" : isDowngrade ? "Downgrade" : "Select"}
-        </Button>
-      )}
+      <Button
+        variant={isUpgrade || isCurrentPlan ? "contained" : "outlined"}
+        fullWidth
+        sx={{ mt: 3 }}
+        onClick={handleClick}
+        disabled={disabled}
+      >
+        {buttonLabel}
+      </Button>
     </Surface>
   );
 }

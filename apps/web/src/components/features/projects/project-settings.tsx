@@ -2,6 +2,7 @@
 
 import type { ReactElement } from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
+import { parseDomainList } from "@ogstack/shared";
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { FormTextField } from "@/components/ui/form";
@@ -13,8 +14,7 @@ import { ROUTES } from "@/lib/constants";
 import { queryKeys } from "@/lib/query-keys";
 import { useConfirm } from "@/providers/confirm-provider";
 import type { Project } from "@/types/api";
-import { parseDomains } from "@/utils/parse-domains";
-import { projectFormSchema, type ProjectFormValues } from "./schema";
+import { projectFormSchema } from "./schema";
 
 interface ProjectSettingsProps {
   project: Project;
@@ -44,10 +44,10 @@ export function ProjectSettings(props: ProjectSettingsProps): ReactElement {
     defaultValues: {
       name: project.name,
       domains: project.domains.join(", "),
-    } as ProjectFormValues,
+    },
     validators: { onSubmit: projectFormSchema },
-    onSubmit: async ({ value }) => {
-      updateMutation.mutate({ name: value.name, domains: parseDomains(value.domains) });
+    onSubmit: ({ value }) => {
+      updateMutation.mutate({ name: value.name, domains: parseDomainList(value.domains) });
     },
   });
 

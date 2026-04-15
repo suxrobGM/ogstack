@@ -21,20 +21,20 @@ The platform combines template-based rendering (Satori) with optional AI-generat
 **Tagline:** _"Beautiful social previews. Zero effort."_
 **Positioning:** Developer-first infrastructure for instant, automated Open Graph image generation — with optional AI-powered artwork.
 
-| Touchpoint           | Value                                                                                                                              |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Primary domain       | `ogstack.dev`                                                                                                                      |
-| API endpoint         | `api.ogstack.dev`                                                                                                                  |
-| CDN domain           | `cdn.ogstack.dev`                                                                                                                  |
-| Dashboard            | `ogstack.dev/dashboard`                                                                                                            |
-| Documentation        | `ogstack.dev/docs`                                                                                                                 |
-| Audit tool           | `ogstack.dev/audit`                                                                                                                |
-| Admin panel          | `ogstack.dev/admin`                                                                                                                |
-| npm packages         | `@ogstack/nextjs`, `@ogstack/astro`, `@ogstack/wordpress`                                                                          |
-| GitHub Action        | `ogstack/generate-action@v1`                                                                                                       |
-| CLI tool             | `npx ogstack generate --url <url>`                                                                                                 |
-| Free tier watermark  | `⚡ ogstack.dev` (small, bottom-right corner)                                                                                      |
-| Meta tag integration | `<meta property="og:image" content="https://cdn.ogstack.dev/p/{projectId}/generate?url=https://myblog.com/post-title&style=gradient_dark" />`  |
+| Touchpoint           | Value                                                                                                                                         |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Primary domain       | `ogstack.dev`                                                                                                                                 |
+| API endpoint         | `api.ogstack.dev`                                                                                                                             |
+| CDN domain           | `cdn.ogstack.dev`                                                                                                                             |
+| Dashboard            | `ogstack.dev/dashboard`                                                                                                                       |
+| Documentation        | `ogstack.dev/docs`                                                                                                                            |
+| Audit tool           | `ogstack.dev/audit`                                                                                                                           |
+| Admin panel          | `ogstack.dev/admin`                                                                                                                           |
+| npm packages         | `@ogstack/nextjs`, `@ogstack/astro`, `@ogstack/wordpress`                                                                                     |
+| GitHub Action        | `ogstack/generate-action@v1`                                                                                                                  |
+| CLI tool             | `npx ogstack generate --url <url>`                                                                                                            |
+| Free tier watermark  | `⚡ ogstack.dev` (small, bottom-right corner)                                                                                                 |
+| Meta tag integration | `<meta property="og:image" content="https://cdn.ogstack.dev/p/{projectId}/generate?url=https://myblog.com/post-title&style=gradient_dark" />` |
 
 ---
 
@@ -88,18 +88,18 @@ OGStack evolves from an OG image API into the **visual identity layer for the in
 
 ## 4. Tech Stack
 
-| Layer                    | Technology                                           | Rationale                                                                                                            |
-| ------------------------ | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **API Server**           | ElysiaJS (on Bun)                                    | Sub-100ms response times for template rendering; Bun's speed advantage for URL scraping and image processing         |
-| **Frontend / Dashboard** | Next.js 15 (App Router)                              | SSR for SEO on landing pages, marketing pages, and public gallery; React Server Components for dashboard performance |
-| **Database / ORM**       | Prisma + PostgreSQL                                  | Relational model for users ↔ API keys ↔ templates ↔ usage ↔ cached images; type-safe queries                         |
-| **AI Image Generation**  | Flux Schnell (via FAL.ai), Flux 2 Pro, Ideogram 3.0  | Contextual background artwork; tiered quality by plan                                                                |
-| **AI Prompt Generation** | Claude Haiku / GPT-4o Mini                           | Converts page metadata into optimized image generation prompts                                                       |
-| **Template Rendering**   | Satori + @resvg/resvg-js                             | JSX → SVG → PNG pipeline; edge-compatible, no browser dependency                                                     |
-| **CDN / Image Storage**  | Cloudflare R2 + Cloudflare CDN                       | Global edge caching for generated images; R2 for persistent storage (S3-compatible, zero egress fees)                |
-| **Authentication**       | Public project IDs (GET endpoint), API keys (POST endpoint), NextAuth.js (dashboard) | Zero-friction meta tag integration via public project ID; API keys for server-side only; OAuth for dashboard          |
-| **Payments**             | Stripe                                               | Subscription billing, usage-based metering, checkout                                                                 |
-| **Monitoring**           | Upstash (rate limiting), Axiom (logging)             | Redis-based rate limiting per API key; structured logging                                                            |
+| Layer                    | Technology                                                                           | Rationale                                                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| **API Server**           | ElysiaJS (on Bun)                                                                    | Sub-100ms response times for template rendering; Bun's speed advantage for URL scraping and image processing         |
+| **Frontend / Dashboard** | Next.js 15 (App Router)                                                              | SSR for SEO on landing pages, marketing pages, and public gallery; React Server Components for dashboard performance |
+| **Database / ORM**       | Prisma + PostgreSQL                                                                  | Relational model for users ↔ API keys ↔ templates ↔ usage ↔ cached images; type-safe queries                         |
+| **AI Image Generation**  | Flux Schnell (via FAL.ai), Flux 2 Pro, Ideogram 3.0                                  | Contextual background artwork; tiered quality by plan                                                                |
+| **AI Prompt Generation** | Claude Haiku / GPT-4o Mini                                                           | Converts page metadata into optimized image generation prompts                                                       |
+| **Template Rendering**   | Satori + @resvg/resvg-js                                                             | JSX → SVG → PNG pipeline; edge-compatible, no browser dependency                                                     |
+| **CDN / Image Storage**  | Cloudflare R2 + Cloudflare CDN                                                       | Global edge caching for generated images; R2 for persistent storage (S3-compatible, zero egress fees)                |
+| **Authentication**       | Public project IDs (GET endpoint), API keys (POST endpoint), NextAuth.js (dashboard) | Zero-friction meta tag integration via public project ID; API keys for server-side only; OAuth for dashboard         |
+| **Payments**             | Stripe                                                                               | Subscription billing, usage-based metering, checkout                                                                 |
+| **Monitoring**           | Upstash (rate limiting), Axiom (logging)                                             | Redis-based rate limiting per API key; structured logging                                                            |
 
 ---
 
@@ -252,11 +252,11 @@ This mode is for server-side / build-time usage where developers need programmat
 
 OGStack uses a split authentication model optimized for the two primary use cases:
 
-| Use Case | Auth Method | Visibility |
-| --- | --- | --- |
-| Meta tag integration (GET) | Public project ID in URL path | Public — safe to expose in HTML source |
-| Programmatic API (POST) | API key via `Authorization: Bearer` header | Secret — server-side only |
-| Dashboard | GitHub OAuth, Google OAuth, email + password (NextAuth.js) | Session-based |
+| Use Case                   | Auth Method                                                | Visibility                             |
+| -------------------------- | ---------------------------------------------------------- | -------------------------------------- |
+| Meta tag integration (GET) | Public project ID in URL path                              | Public — safe to expose in HTML source |
+| Programmatic API (POST)    | API key via `Authorization: Bearer` header                 | Secret — server-side only              |
+| Dashboard                  | GitHub OAuth, Google OAuth, email + password (NextAuth.js) | Session-based                          |
 
 **Projects:**
 
@@ -298,16 +298,27 @@ OGStack uses a split authentication model optimized for the two primary use case
 
 ### 5.6 Pricing & Billing
 
-| Tier           | Price  | Image Quota        | AI Backgrounds      | Features                                                                                        |
-| -------------- | ------ | ------------------ | ------------------- | ----------------------------------------------------------------------------------------------- |
-| **Free**       | $0/mo  | 50 images/month    | No                  | 5 templates, "⚡ ogstack.dev" watermark, community support                                      |
-| **Pro**        | $12/mo | 500 images/month   | Flux Schnell        | All templates, Brand Kit, custom fonts, no watermark, email support                             |
-| **Business**   | $29/mo | 5,000 images/month | Flux Pro + Ideogram | Everything in Pro + Smart Style Matching, A/B testing, priority CDN, analytics, bulk generation |
-| **Enterprise** | $79/mo | Unlimited          | All models          | Everything in Business + custom domain CNAME, SLA guarantee, dedicated support, SSO, team seats |
+Three tiers. Non-AI image generation is **unmetered on every tier** — render cost is trivial and cache absorbs repeats. The real cost drivers (AI image generation via FAL, AI audit recommendations via DeepSeek) are capped per-plan.
 
-**Overage:** $0.02/image beyond quota (auto-billed or hard cap, user-configurable).
+| Tier     | Price  | Non-AI Images | AI Images/mo                    | AI Audits/mo | Watermark | Projects  | Domains/project | Rate (req/min) |
+| -------- | ------ | ------------- | ------------------------------- | ------------ | --------- | --------- | --------------- | -------------- |
+| **Free** | $0     | Unlimited     | 3 (Flux 2)                      | —            | Yes       | 1         | 1               | 20             |
+| **Plus** | $10/mo | Unlimited     | 100 (Flux 2)                    | 100          | Yes       | 5         | 3               | 100            |
+| **Pro**  | $30/mo | Unlimited     | 1,000 (300 Flux 2 Pro + Flux 2) | 1,000        | No        | Unlimited | Unlimited       | 500            |
 
-**Implementation:** Stripe Subscriptions with usage-based metering. Stripe webhooks handle plan changes, cancellations, and failed payments.
+All plans include unlimited API keys, all 10 templates, and AI page analysis bundled with AI image generation. Pro adds priority support and the Flux 2 Pro model (sub-capped at 300/mo within the 1,000 AI image allowance).
+
+**Promo codes:** Created in the Stripe dashboard. Customers enter them on the Stripe-hosted checkout page, or the dashboard pre-applies them via `promotionCode` on the checkout request.
+
+**Upgrades** apply prorated immediately. **Downgrades** are end-of-period: downgrade to Free uses `cancel_at_period_end`; downgrade Pro→Plus uses a Stripe `subscription_schedule`. The user retains their current tier until the period rolls.
+
+**Anti-abuse:**
+
+- Every `Image` row is stamped with `generatedOnPlan` at render time.
+- After a downgrade, the public `/og/:publicId` endpoint returns **402 TIER_LOCKED** for images generated on a higher tier, and the gallery UI shows them as locked until the user re-subscribes.
+- Domains are mandatory on projects and re-validated on every public request, preventing one domain from being split across multiple Free accounts.
+
+**Implementation:** Stripe Subscriptions; webhooks handle plan changes, cancellations, and failed payments.
 
 ---
 
@@ -482,9 +493,8 @@ model User {
 
 enum Plan {
   FREE
+  PLUS
   PRO
-  BUSINESS
-  ENTERPRISE
 }
 
 enum Role {
@@ -501,7 +511,7 @@ model Project {
   name           String
   userId         String    @map("user_id")
   user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  allowedDomains String[]  @default([]) @map("allowed_domains") // Domain allowlist for abuse prevention
+  domains        String[]  @map("domains") // Required (minItems: 1). Re-validated on every public OG request.
   isActive       Boolean   @default(true) @map("is_active")
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
@@ -616,9 +626,10 @@ model GeneratedImage {
   format       ImageFormat @default(PNG)
   fileSize     Int?        @map("file_size")
 
-  aiModel      String?     @map("ai_model")
-  aiPrompt     String?     @db.Text @map("ai_prompt")
-  aiEnabled    Boolean     @default(false) @map("ai_enabled")
+  aiModel         String?  @map("ai_model")
+  aiPrompt        String?  @db.Text @map("ai_prompt")
+  aiEnabled       Boolean  @default(false) @map("ai_enabled")
+  generatedOnPlan Plan     @default(FREE) @map("generated_on_plan") // Tier-gate check on serve
 
   generationMs Int?        @map("generation_ms")
   serveCount   Int         @default(0) @map("serve_count")
@@ -673,10 +684,12 @@ model UsageRecord {
   project      Project? @relation(fields: [projectId], references: [id])
   apiKeyId     String?  @map("api_key_id")
   apiKey       ApiKey?  @relation(fields: [apiKeyId], references: [id])
-  period       String
-  imageCount   Int      @default(0) @map("image_count")
-  aiImageCount Int      @default(0) @map("ai_image_count")
-  cacheHits    Int      @default(0) @map("cache_hits")
+  period          String
+  imageCount      Int @default(0) @map("image_count")       // Tracked for analytics; NOT capped
+  aiImageCount    Int @default(0) @map("ai_image_count")    // Capped by plan.aiImageLimit
+  aiProImageCount Int @default(0) @map("ai_pro_image_count") // Capped by plan.aiImageProLimit (Pro only)
+  aiAuditCount    Int @default(0) @map("ai_audit_count")    // Capped by plan.aiAuditLimit
+  cacheHits       Int @default(0) @map("cache_hits")        // Never counted toward quota
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
@@ -733,18 +746,18 @@ GET https://cdn.ogstack.dev/p/{projectId}/generate?url={url}&template={template}
 
 This is the primary integration point. Developers copy this URL from the dashboard and paste it into their `<meta og:image>` tag. No API key needed — the project ID identifies the account.
 
-| Parameter  | Type              | Required | Default         | Description                     |
-| ---------- | ----------------- | -------- | --------------- | ------------------------------- |
+| Parameter  | Type              | Required | Default         | Description                                                            |
+| ---------- | ----------------- | -------- | --------------- | ---------------------------------------------------------------------- |
 | `url`      | string            | Yes      | —               | URL to generate OG image for (must match project's registered domains) |
-| `template` | string            | No       | User's default  | Template slug                   |
-| `theme`    | `dark` \| `light` | No       | `dark`          | Color theme                     |
-| `ai`       | boolean           | No       | `false`         | Enable AI background            |
-| `accent`   | string            | No       | Brand Kit color | Hex color code                  |
-| `font`     | string            | No       | Brand Kit font  | Font family name                |
-| `format`   | `png` \| `jpeg`   | No       | `png`           | Output format                   |
-| `width`    | number            | No       | `1200`          | Image width                     |
-| `height`   | number            | No       | `630`           | Image height                    |
-| `cache`    | boolean           | No       | `true`          | Use cached version if available |
+| `template` | string            | No       | User's default  | Template slug                                                          |
+| `theme`    | `dark` \| `light` | No       | `dark`          | Color theme                                                            |
+| `ai`       | boolean           | No       | `false`         | Enable AI background                                                   |
+| `accent`   | string            | No       | Brand Kit color | Hex color code                                                         |
+| `font`     | string            | No       | Brand Kit font  | Font family name                                                       |
+| `format`   | `png` \| `jpeg`   | No       | `png`           | Output format                                                          |
+| `width`    | number            | No       | `1200`          | Image width                                                            |
+| `height`   | number            | No       | `630`           | Image height                                                           |
+| `cache`    | boolean           | No       | `true`          | Use cached version if available                                        |
 
 **Response:** `200 OK` with `Content-Type: image/png` (binary image data)
 
@@ -877,17 +890,17 @@ X-RateLimit-Reset: 1711036800
 
 ### 10.4 Error Codes
 
-| Code                  | Status | Description                                     |
-| --------------------- | ------ | ----------------------------------------------- |
+| Code                  | Status | Description                                                   |
+| --------------------- | ------ | ------------------------------------------------------------- |
 | `invalid_api_key`     | 401    | API key is missing, invalid, or revoked (POST endpoints only) |
-| `invalid_project`     | 404    | Project ID not found or inactive                |
-| `rate_limit_exceeded` | 429    | Too many requests                               |
-| `quota_exceeded`      | 402    | Monthly image quota exceeded                    |
-| `invalid_url`         | 400    | URL is malformed or unreachable                 |
-| `scrape_failed`       | 422    | Could not extract metadata from URL             |
-| `template_not_found`  | 404    | Template slug does not exist                    |
-| `generation_failed`   | 500    | Image generation failed (AI or rendering error) |
-| `domain_not_allowed`  | 403    | URL domain not in project's registered domains  |
+| `invalid_project`     | 404    | Project ID not found or inactive                              |
+| `rate_limit_exceeded` | 429    | Too many requests                                             |
+| `quota_exceeded`      | 402    | Monthly image quota exceeded                                  |
+| `invalid_url`         | 400    | URL is malformed or unreachable                               |
+| `scrape_failed`       | 422    | Could not extract metadata from URL                           |
+| `template_not_found`  | 404    | Template slug does not exist                                  |
+| `generation_failed`   | 500    | Image generation failed (AI or rendering error)               |
+| `domain_not_allowed`  | 403    | URL domain not in project's registered domains                |
 
 ---
 

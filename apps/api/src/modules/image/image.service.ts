@@ -27,6 +27,7 @@ function toImageItem(row: ImageWithRelations): ImageItem {
     projectName: row.project?.name ?? null,
     publicProjectId: row.project?.publicId ?? null,
     aiModel: row.aiModel,
+    generatedOnPlan: row.generatedOnPlan,
     width: row.width,
     height: row.height,
     format: row.format,

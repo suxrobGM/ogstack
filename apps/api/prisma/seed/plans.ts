@@ -6,17 +6,16 @@ import { logger } from "@/common/logger";
 const PLAN_FEATURES: Record<Plan, string[]> = {
   FREE: [
     "Unlimited non-AI images",
-    "3 AI images / month",
-    "All 10 templates",
+    "3 AI images / month (standard model)",
+    "All templates",
     "1 project, 1 domain",
-    "Unlimited API keys",
-    "AI page analysis (with AI image gen)",
+    "AI page analysis",
     "20 requests / minute",
     "Watermark on images",
   ],
   PLUS: [
     "Everything in Free",
-    "100 AI images / month (Flux 2)",
+    "100 AI images / month (standard model)",
     "100 AI audit recommendations / month",
     "5 projects, 3 domains per project",
     "100 requests / minute",
@@ -24,7 +23,7 @@ const PLAN_FEATURES: Record<Plan, string[]> = {
   ],
   PRO: [
     "Everything in Plus",
-    "1,000 AI images / month (300 Flux 2 Pro + 700 Flux 2)",
+    "1,000 AI images / month (300 Pro + 700 standard)",
     "1,000 AI audit recommendations / month",
     "Unlimited projects and domains",
     "No watermark",

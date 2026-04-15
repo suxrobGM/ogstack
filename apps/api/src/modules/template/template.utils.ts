@@ -1,3 +1,4 @@
+import { isValidHttpUrl } from "@ogstack/shared/utils";
 import { logger } from "@/common/logger";
 
 const FETCH_TIMEOUT_MS = 5_000;
@@ -24,12 +25,7 @@ export async function safeFetchImageDataUrl(
   if (!url) return null;
   if (url.startsWith("data:")) return url;
 
-  try {
-    const protocol = new URL(url).protocol;
-    if (protocol !== "http:" && protocol !== "https:") return null;
-  } catch {
-    return null;
-  }
+  if (!isValidHttpUrl(url)) return null;
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);

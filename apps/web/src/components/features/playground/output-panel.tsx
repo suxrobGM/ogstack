@@ -3,6 +3,7 @@
 import { Suspense, useState, type ReactElement, type SyntheticEvent } from "react";
 import LanguageIcon from "@mui/icons-material/Language";
 import { Box, Skeleton, Stack, Tab, Tabs, Typography } from "@mui/material";
+import { aiModelLabel } from "@ogstack/shared";
 import { CodeBlock } from "@/components/ui/display/code-block";
 import { Surface } from "@/components/ui/layout/surface";
 import { textColors } from "@/theme";
@@ -42,7 +43,7 @@ export function OutputPanel(props: OutputPanelProps): ReactElement {
           {hasAiPrompt && (
             <Tab
               value="ai-prompt"
-              label={`AI Prompt${result.aiModel ? ` · ${result.aiModel}` : ""}`}
+              label={`AI Prompt${aiModelLabel(result.aiModel) ? ` · ${aiModelLabel(result.aiModel)}` : ""}`}
             />
           )}
         </Tabs>

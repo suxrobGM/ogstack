@@ -2,6 +2,7 @@
 
 import type { ReactElement } from "react";
 import { Stack, Typography } from "@mui/material";
+import { isValidHttpUrl } from "@ogstack/shared/utils";
 import { FormTextField } from "@/components/ui/form/form-text-field";
 import type { AnyReactForm } from "@/components/ui/form/types";
 import { Surface } from "@/components/ui/layout/surface";
@@ -43,12 +44,14 @@ export function ControlsPanel(props: ControlsPanelProps): ReactElement {
           projects={projects}
           selectedProjectId={selectedProjectId}
           onChange={onProjectChange}
+          required
         />
 
         <FormTextField
           form={form}
           name="url"
           label="URL"
+          required
           placeholder="https://example.com/page"
           transform={normalizeUrlInput}
         />
@@ -73,7 +76,15 @@ export function ControlsPanel(props: ControlsPanelProps): ReactElement {
           }
         </form.Subscribe>
 
-        <GenerateButton isGenerating={isGenerating} onClick={onGenerate} />
+        <form.Subscribe selector={(s: { values: { url: string } }) => s.values.url}>
+          {(url: string) => (
+            <GenerateButton
+              isGenerating={isGenerating}
+              onClick={onGenerate}
+              disabled={!selectedProjectId || !isValidHttpUrl(url)}
+            />
+          )}
+        </form.Subscribe>
       </Stack>
     </Surface>
   );

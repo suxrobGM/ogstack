@@ -101,6 +101,7 @@ export const ImageItemSchema = t.Object({
   projectName: t.Nullable(t.String()),
   publicProjectId: t.Nullable(t.String()),
   aiModel: t.Nullable(t.String()),
+  generatedOnPlan: t.String(),
   width: t.Number(),
   height: t.Number(),
   format: ImageFormatSchema,

@@ -3,6 +3,7 @@
 import type { ReactElement, ReactNode } from "react";
 import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 import { Box, Chip, Stack, Typography } from "@mui/material";
+import { aiModelLabel } from "@ogstack/shared";
 import { AiChip } from "@/components/ui/display/ai-chip";
 import { CopyButton } from "@/components/ui/display/copy-button";
 import type { ImageItem } from "@/types/api";
@@ -76,8 +77,9 @@ export function ImageMetadata(props: ImageMetadataProps): ReactElement {
 
 function GenerationChip(props: { image: ImageItem }): ReactElement {
   const { image } = props;
-  if (image.aiModel) {
-    return <AiChip label={`AI · ${image.aiModel}`} />;
+  const label = aiModelLabel(image.aiModel);
+  if (label) {
+    return <AiChip label={`AI · ${label}`} />;
   }
 
   return (
