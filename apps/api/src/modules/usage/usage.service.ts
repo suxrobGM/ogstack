@@ -21,7 +21,7 @@ export class UsageService {
     private readonly notificationService: NotificationService,
   ) {}
 
-  async enforceQuota(userId: string, projectId: string, apiKeyId?: string): Promise<void> {
+  async enforceQuota(userId: string, projectId: string, apiKeyId?: string | null): Promise<void> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { plan: true },
@@ -31,7 +31,7 @@ export class UsageService {
     if (quota < 0) return;
 
     const periodStart = startOfMonth(new Date());
-    const usage = await this.findUsageRecord(userId, projectId, apiKeyId, periodStart);
+    const usage = await this.findUsageRecord(userId, projectId, apiKeyId ?? null, periodStart);
 
     if (usage && usage.imageCount >= quota) {
       await this.notificationService.create({
@@ -52,15 +52,22 @@ export class UsageService {
     userId: string,
     projectId: string,
     cacheHit: boolean,
-    apiKeyId?: string,
+    apiKeyId?: string | null,
+    aiEnabled = false,
   ): Promise<void> {
     const periodStart = startOfMonth(new Date());
-    const existing = await this.findUsageRecord(userId, projectId, apiKeyId, periodStart);
+    const existing = await this.findUsageRecord(userId, projectId, apiKeyId ?? null, periodStart);
+    const countsAsAi = !cacheHit && aiEnabled;
 
     if (existing) {
       await this.prisma.usageRecord.update({
         where: { id: existing.id },
-        data: cacheHit ? { cacheHits: { increment: 1 } } : { imageCount: { increment: 1 } },
+        data: cacheHit
+          ? { cacheHits: { increment: 1 } }
+          : {
+              imageCount: { increment: 1 },
+              ...(countsAsAi && { aiImageCount: { increment: 1 } }),
+            },
       });
     } else {
       await this.prisma.usageRecord.create({
@@ -71,20 +78,21 @@ export class UsageService {
           periodStart,
           periodEnd: startOfNextMonth(periodStart),
           imageCount: cacheHit ? 0 : 1,
+          aiImageCount: countsAsAi ? 1 : 0,
           cacheHits: cacheHit ? 1 : 0,
         },
       });
     }
 
     if (!cacheHit) {
-      await this.checkUsageThreshold(userId, projectId, apiKeyId, periodStart);
+      await this.checkUsageThreshold(userId, projectId, apiKeyId ?? null, periodStart);
     }
   }
 
   private async checkUsageThreshold(
     userId: string,
     projectId: string,
-    apiKeyId: string | undefined,
+    apiKeyId: string | null,
     periodStart: Date,
   ): Promise<void> {
     const user = await this.prisma.user.findUnique({
@@ -237,7 +245,7 @@ export class UsageService {
   private findUsageRecord(
     userId: string,
     projectId: string,
-    apiKeyId: string | undefined,
+    apiKeyId: string | null,
     periodStart: Date,
   ) {
     return this.prisma.usageRecord.findFirst({

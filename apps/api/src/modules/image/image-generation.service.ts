@@ -98,7 +98,7 @@ export class ImageGenerationService {
 
     const { image, outcome, generationMs } = await this.runGenerationPipeline(ctx);
 
-    await this.usageService.recordUsage(userId, projectId, false, apiKeyId);
+    await this.usageService.recordUsage(userId, projectId, false, apiKeyId, outcome.aiEnabled);
     logger.info(
       {
         imageId: image.id,
@@ -143,7 +143,13 @@ export class ImageGenerationService {
 
     const { outcome, generationMs } = await this.runGenerationPipeline(ctx);
 
-    await this.usageService.recordUsage(project.user.id, project.id, false);
+    await this.usageService.recordUsage(
+      project.user.id,
+      project.id,
+      false,
+      null,
+      outcome.aiEnabled,
+    );
     logger.info(
       { cacheKey: ctx.cacheKey, generationMs, template, aiEnabled: outcome.aiEnabled },
       "OG image generated (public)",
