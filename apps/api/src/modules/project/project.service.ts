@@ -1,5 +1,6 @@
+import { isPlanAtLeast, Plan, PLAN_CONFIGS, UNLIMITED } from "@ogstack/shared";
 import { singleton } from "tsyringe";
-import { NotFoundError } from "@/common/errors";
+import { BadRequestError, NotFoundError, PlanLimitError } from "@/common/errors";
 import { generatePublicId } from "@/common/utils/crypto";
 import { PrismaClient } from "@/generated/prisma";
 import type { PaginatedResponse } from "@/types/response";
@@ -10,11 +11,26 @@ import type {
   UpdateProjectBody,
 } from "./project.schema";
 
+// Accepts labels + dots only (no protocol, no path, no IPs).
+const DOMAIN_RE = /^(?!-)[a-z0-9-]{1,63}(?:\.(?!-)[a-z0-9-]{1,63})+$/i;
+
+function validateDomains(domains: string[]): string[] {
+  const normalized = domains.map((d) => d.trim().toLowerCase()).filter(Boolean);
+  for (const domain of normalized) {
+    if (!DOMAIN_RE.test(domain)) {
+      throw new BadRequestError(
+        `Invalid domain "${domain}". Use bare hostnames like example.com or sub.example.com.`,
+      );
+    }
+  }
+  // De-duplicate while preserving order
+  return Array.from(new Set(normalized));
+}
+
 @singleton()
 export class ProjectService {
   constructor(private readonly prisma: PrismaClient) {}
 
-  /** List projects owned by the authenticated user, with pagination and optional search. */
   async list(userId: string, query: ProjectListQuery): Promise<PaginatedResponse<Project>> {
     const { page, limit, search } = query;
     const skip = (page - 1) * limit;
@@ -40,62 +56,88 @@ export class ProjectService {
     };
   }
 
-  /** Get a single project by ID, ensuring it belongs to the authenticated user. */
   async getById(userId: string, projectId: string): Promise<Project> {
-    const project = await this.prisma.project.findUnique({
-      where: { id: projectId },
-    });
-
+    const project = await this.prisma.project.findUnique({ where: { id: projectId } });
     if (!project || project.userId !== userId) {
       throw new NotFoundError("Project not found");
     }
-
     return this.toResponse(project);
   }
 
-  /** Create a new project with an auto-generated publicId. */
   async create(userId: string, data: CreateProjectBody): Promise<Project> {
+    const plan = await this.getUserPlan(userId);
+    const config = PLAN_CONFIGS[plan];
+
+    if (config.projectLimit !== UNLIMITED) {
+      const count = await this.prisma.project.count({ where: { userId } });
+      if (count >= config.projectLimit) {
+        throw new PlanLimitError(
+          `Your plan allows up to ${config.projectLimit} project${config.projectLimit === 1 ? "" : "s"}. Upgrade for more.`,
+        );
+      }
+    }
+
+    const domains = validateDomains(data.domains);
+    this.enforceDomainLimit(plan, domains);
+
     const project = await this.prisma.project.create({
       data: {
         userId,
         publicId: generatePublicId(),
         name: data.name,
-        domains: data.domains ?? [],
+        domains,
       },
     });
 
     return this.toResponse(project);
   }
 
-  /** Update a project's name and/or domains. Owner only. */
   async update(userId: string, projectId: string, data: UpdateProjectBody): Promise<Project> {
-    const project = await this.prisma.project.findUnique({
-      where: { id: projectId },
-    });
-
+    const project = await this.prisma.project.findUnique({ where: { id: projectId } });
     if (!project || project.userId !== userId) {
       throw new NotFoundError("Project not found");
     }
 
-    const updated = await this.prisma.project.update({
-      where: { id: projectId },
-      data,
-    });
+    const patch: { name?: string; domains?: string[] } = {};
+    if (data.name !== undefined) patch.name = data.name;
+    if (data.domains !== undefined) {
+      const domains = validateDomains(data.domains);
+      const plan = await this.getUserPlan(userId);
+      this.enforceDomainLimit(plan, domains);
+      patch.domains = domains;
+    }
 
+    const updated = await this.prisma.project.update({ where: { id: projectId }, data: patch });
     return this.toResponse(updated);
   }
 
-  /** Delete a project. Owner only. */
   async delete(userId: string, projectId: string): Promise<void> {
-    const project = await this.prisma.project.findUnique({
-      where: { id: projectId },
-    });
-
+    const project = await this.prisma.project.findUnique({ where: { id: projectId } });
     if (!project || project.userId !== userId) {
       throw new NotFoundError("Project not found");
     }
-
     await this.prisma.project.delete({ where: { id: projectId } });
+  }
+
+  private enforceDomainLimit(plan: Plan, domains: string[]): void {
+    const config = PLAN_CONFIGS[plan];
+    if (config.domainsPerProject === UNLIMITED) return;
+    if (domains.length > config.domainsPerProject) {
+      const upgradeHint = isPlanAtLeast(plan, Plan.PRO)
+        ? ""
+        : " Upgrade for more domains per project.";
+      throw new PlanLimitError(
+        `Your plan allows up to ${config.domainsPerProject} domain${config.domainsPerProject === 1 ? "" : "s"} per project.${upgradeHint}`,
+      );
+    }
+  }
+
+  private async getUserPlan(userId: string): Promise<Plan> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { plan: true },
+    });
+    return user?.plan ?? Plan.FREE;
   }
 
   private toResponse(project: {

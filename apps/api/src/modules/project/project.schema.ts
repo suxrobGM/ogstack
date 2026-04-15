@@ -19,14 +19,23 @@ export const ProjectListQuerySchema = t.Composite([
   }),
 ]);
 
+const DomainStringSchema = t.String({
+  minLength: 3,
+  maxLength: 253,
+  description: "Bare hostname, e.g. example.com or sub.example.com",
+});
+
 export const CreateProjectBodySchema = t.Object({
   name: t.String({ minLength: 1, maxLength: 100 }),
-  domains: t.Optional(t.Array(t.String(), { default: [] })),
+  domains: t.Array(DomainStringSchema, {
+    minItems: 1,
+    description: "At least one domain is required. Used to authorize public OG requests.",
+  }),
 });
 
 export const UpdateProjectBodySchema = t.Object({
   name: t.Optional(t.String({ minLength: 1, maxLength: 100 })),
-  domains: t.Optional(t.Array(t.String())),
+  domains: t.Optional(t.Array(DomainStringSchema, { minItems: 1 })),
 });
 
 export const ProjectListResponseSchema = PaginatedResponseSchema(ProjectSchema);

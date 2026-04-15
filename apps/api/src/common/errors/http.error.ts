@@ -46,3 +46,18 @@ export class PlanLimitError extends HttpError {
     super(403, ERROR_CODES.PLAN_LIMIT_EXCEEDED, message);
   }
 }
+
+export class ImageConflictError extends HttpError {
+  constructor(
+    message: string,
+    public readonly existingId: string,
+  ) {
+    super(409, ERROR_CODES.IMAGE_EXISTS, message);
+  }
+}
+
+export class TierLockedError extends HttpError {
+  constructor(message = "Image is locked — current plan tier is lower than generation tier") {
+    super(402, ERROR_CODES.TIER_LOCKED, message);
+  }
+}

@@ -26,7 +26,7 @@ export function CreateProjectDialog(props: CreateProjectDialogProps): ReactEleme
   const { open, onClose } = props;
 
   const mutation = useApiMutation(
-    (data: { name: string; domains?: string[] }) => client.api.projects.post(data),
+    (data: { name: string; domains: string[] }) => client.api.projects.post(data),
     {
       successMessage: "Project created.",
       invalidateKeys: [["projects"]],

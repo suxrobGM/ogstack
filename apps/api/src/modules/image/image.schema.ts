@@ -35,6 +35,7 @@ export const ApiGenerateBodySchema = t.Object({
   template: t.Optional(TemplateSlugSchema),
   projectId: t.String({ format: "uuid" }),
   options: RenderOptionsBodySchema,
+  override: t.Optional(t.Boolean()),
 });
 
 export const DashboardGenerateBodySchema = t.Object({
@@ -42,6 +43,7 @@ export const DashboardGenerateBodySchema = t.Object({
   template: t.Optional(TemplateSlugSchema),
   projectId: t.String({ format: "uuid" }),
   options: RenderOptionsBodySchema,
+  override: t.Optional(t.Boolean()),
 });
 
 export const PublicGenerateParamsSchema = t.Object({ publicId: t.String() });

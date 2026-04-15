@@ -1,8 +1,8 @@
 import { container } from "@/common/di";
 import { logger } from "@/common/logger";
-import { BillingService } from "./billing.service";
+import { BillingSyncService } from "./billing-sync.service";
 
-export { billingController, billingWebhookController } from "./billing.controller";
+export * from "./billing.controller";
 
 export function syncStripeOnStartup(): void {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -10,7 +10,7 @@ export function syncStripeOnStartup(): void {
   }
 
   container
-    .resolve(BillingService)
+    .resolve(BillingSyncService)
     .syncStripeData()
     .catch((err) => {
       logger.error({ err }, "Failed to sync Stripe data on startup");

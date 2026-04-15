@@ -4,6 +4,25 @@ import { t, type Static } from "elysia";
 
 export const CreateCheckoutBodySchema = t.Object({
   priceId: t.String({ description: "Stripe price ID of the plan to subscribe to" }),
+  promotionCode: t.Optional(
+    t.String({
+      minLength: 3,
+      maxLength: 64,
+      description: "Optional Stripe promotion code to pre-apply at checkout",
+    }),
+  ),
+});
+
+export const DowngradeBodySchema = t.Object({
+  targetPlan: t.Union([t.Literal("FREE"), t.Literal("PLUS")], {
+    description: "Plan to downgrade to. Effective at end of current Stripe period.",
+  }),
+});
+
+export const DowngradeResponseSchema = t.Object({
+  id: t.String(),
+  targetPlan: t.String(),
+  effectiveAt: t.Date(),
 });
 
 // ── Response schemas ──
@@ -76,3 +95,5 @@ export type PlanResponse = Static<typeof PlanSchema>;
 export type SubscriptionResponse = Static<typeof SubscriptionResponseSchema>;
 export type CancelResponse = Static<typeof CancelResponseSchema>;
 export type ResumeResponse = Static<typeof ResumeResponseSchema>;
+export type DowngradeBody = Static<typeof DowngradeBodySchema>;
+export type DowngradeResponse = Static<typeof DowngradeResponseSchema>;

@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di";
 import { authGuard, optionalAuthGuard, rateLimiter } from "@/common/middleware";
-import { resolveUserPlan, tieredRateLimiter } from "@/common/middleware/tiered-rate-limiter";
+import { tieredRateLimiter } from "@/common/middleware/tiered-rate-limiter";
 import { UuidIdParamSchema } from "@/types/request";
 import {
   AuditCreateBodySchema,
@@ -42,7 +42,7 @@ export const auditController = new Elysia({ prefix: "/audit", tags: ["Audit"] })
 /** /api/audit — authenticated companion for dashboard history. */
 export const auditUserController = new Elysia({ prefix: "/audit", tags: ["Audit"] })
   .use(authGuard)
-  .use(tieredRateLimiter({ resolvePlan: resolveUserPlan, keyPrefix: "audit-user" }))
+  .use(tieredRateLimiter({ resolvePlan: "user", keyPrefix: "audit-user" }))
   .get("/history", ({ user, query }) => auditService.listForUser(user.id, query), {
     query: AuditHistoryQuerySchema,
     response: AuditHistoryResponseSchema,

@@ -1,0 +1,148 @@
+import { singleton } from "tsyringe";
+import { logger } from "@/common/logger";
+import { buildAiImagePrompt, ImageProviderService } from "@/common/services/ai";
+import { type UrlMetadata } from "@/common/services/scraper";
+import { ImageStorageService } from "@/common/services/storage";
+import { WatermarkService } from "@/common/services/watermark";
+import { PrismaClient, type Image } from "@/generated/prisma";
+import { PageAnalysisService, type PageAnalysisAi } from "@/modules/page-analysis";
+import {
+  getTemplate,
+  TemplateService,
+  type RenderOptions,
+  type TemplateSlug,
+} from "@/modules/template";
+import { RenderContextBuilder, type RenderContext } from "./image-context.builder";
+import type { AiRenderOutcome } from "./image.mapper";
+
+export interface PipelineResult {
+  image: Image;
+  outcome: AiRenderOutcome;
+  generationMs: number;
+}
+
+@singleton()
+export class ImagePipelineService {
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly templateService: TemplateService,
+    private readonly imageProvider: ImageProviderService,
+    private readonly storage: ImageStorageService,
+    private readonly watermarkService: WatermarkService,
+    private readonly pageAnalysis: PageAnalysisService,
+    private readonly contextBuilder: RenderContextBuilder,
+  ) {}
+
+  /** Scrape → (optional LLM) → render → store → persist. */
+  async run(ctx: RenderContext): Promise<PipelineResult> {
+    const startMs = performance.now();
+    const { metadata, ai } = await this.pageAnalysis.getForImageGeneration({
+      url: ctx.url,
+      userId: ctx.userId,
+      userPrompt: ctx.options?.aiPrompt,
+      fullOverride: ctx.fullOverride,
+      // AI seeds are only consumed by AI-image rendering. Template-only flows
+      // skip the LLM to keep token usage off the hot path.
+      skipAi: !ctx.aiModel,
+    });
+
+    const outcome = await this.renderWithAiFallback(metadata, ai, ctx);
+    const generationMs = Math.round(performance.now() - startMs);
+
+    const stored = await this.storage.store(ctx.cacheKey, outcome.pngBuffer);
+    const templateRecord = await this.prisma.template.findUnique({
+      where: { slug: ctx.template },
+      select: { id: true },
+    });
+
+    const image = await this.prisma.image.create({
+      data: {
+        userId: ctx.userId,
+        projectId: ctx.projectId,
+        apiKeyId: ctx.apiKeyId ?? null,
+        templateId: templateRecord?.id ?? null,
+        sourceUrl: ctx.url,
+        cacheKey: ctx.cacheKey,
+        imageUrl: stored.url,
+        title: metadata.ogTitle ?? metadata.title,
+        description: metadata.ogDescription ?? metadata.description,
+        faviconUrl: metadata.favicon,
+        width: 1200,
+        height: 630,
+        format: "PNG",
+        fileSize: stored.size,
+        generationMs,
+        serveCount: 1,
+        category: getTemplate(ctx.template).info.category,
+        aiEnabled: outcome.aiEnabled,
+        aiModel: outcome.aiModel,
+        aiPrompt: outcome.aiPrompt,
+        generatedOnPlan: ctx.plan,
+      },
+    });
+
+    return { image, outcome, generationMs };
+  }
+
+  private async renderWithAiFallback(
+    metadata: UrlMetadata,
+    ai: PageAnalysisAi | null,
+    ctx: RenderContext,
+  ): Promise<AiRenderOutcome> {
+    const finalize = async (buf: Buffer): Promise<Buffer> =>
+      ctx.watermark ? this.watermarkService.apply(buf) : buf;
+
+    if (ctx.aiModel && this.imageProvider.isEnabledForModel(ctx.aiModel)) {
+      const promptOptions = this.contextBuilder.resolveHeadlineOptions(
+        ai,
+        ctx.options,
+        ctx.fullOverride,
+      );
+      logger.info(
+        {
+          aiModel: ctx.aiModel,
+          hasOverride: Boolean(promptOptions.override),
+          hasAiExtraction: Boolean(ai),
+        },
+        "AI image generation starting",
+      );
+      const prompt = buildAiImagePrompt(metadata, promptOptions);
+
+      try {
+        const rawBuffer = await this.imageProvider.generate({ model: ctx.aiModel, prompt });
+        return {
+          pngBuffer: await finalize(rawBuffer),
+          aiEnabled: true,
+          aiFellBack: false,
+          aiModel: ctx.aiModel,
+          aiPrompt: prompt,
+        };
+      } catch (error) {
+        logger.warn(
+          { template: ctx.template, error: error instanceof Error ? error.message : String(error) },
+          "AI image generation failed, falling back to template render",
+        );
+        return this.renderTemplate(ctx.template, metadata, ctx.options, finalize, true);
+      }
+    }
+
+    return this.renderTemplate(ctx.template, metadata, ctx.options, finalize, false);
+  }
+
+  private async renderTemplate(
+    template: TemplateSlug,
+    metadata: UrlMetadata,
+    options: RenderOptions | undefined,
+    finalize: (buf: Buffer) => Promise<Buffer>,
+    aiFellBack: boolean,
+  ): Promise<AiRenderOutcome> {
+    const rawBuffer = await this.templateService.render(template, metadata, options);
+    return {
+      pngBuffer: await finalize(rawBuffer),
+      aiEnabled: false,
+      aiFellBack,
+      aiModel: null,
+      aiPrompt: null,
+    };
+  }
+}

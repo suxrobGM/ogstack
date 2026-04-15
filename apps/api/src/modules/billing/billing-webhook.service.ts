@@ -4,7 +4,7 @@ import { BadRequestError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { Plan, PrismaClient } from "@/generated/prisma";
 import { NotificationService } from "@/modules/notification";
-import { BillingService } from "./billing.service";
+import { StripeClient } from "./stripe.client";
 
 const SubscriptionStatus = {
   ACTIVE: "active",
@@ -25,12 +25,12 @@ function getItemPeriod(stripeSub: Stripe.Subscription) {
 export class BillingWebhookService {
   constructor(
     private readonly prisma: PrismaClient,
-    private readonly billing: BillingService,
+    private readonly stripeClient: StripeClient,
     private readonly notificationService: NotificationService,
   ) {}
 
   async handleEvent(rawBody: string, signature: string): Promise<void> {
-    const stripe = this.billing.getStripe();
+    const stripe = this.stripeClient.sdk;
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
     if (!webhookSecret) {

@@ -2,11 +2,7 @@ import { Elysia, t } from "elysia";
 import { container } from "@/common/di";
 import { ForbiddenError } from "@/common/errors";
 import { apiKeyGuard, authGuard } from "@/common/middleware";
-import {
-  resolveApiKeyPlan,
-  resolveUserPlan,
-  tieredRateLimiter,
-} from "@/common/middleware/tiered-rate-limiter";
+import { tieredRateLimiter } from "@/common/middleware/tiered-rate-limiter";
 import { UuidIdParamSchema } from "@/types/request";
 import { ImageGenerationService } from "./image-generation.service";
 import {
@@ -28,7 +24,7 @@ const imageGenerationService = container.resolve(ImageGenerationService);
 /** /api/images — JWT-authenticated CRUD + dashboard generate. */
 export const imageController = new Elysia({ prefix: "/images", tags: ["Images"] })
   .use(authGuard)
-  .use(tieredRateLimiter({ resolvePlan: resolveUserPlan, keyPrefix: "img-dashboard" }))
+  .use(tieredRateLimiter({ resolvePlan: "user", keyPrefix: "img-dashboard" }))
   .post(
     "/",
     ({ user, body }) =>
@@ -39,6 +35,7 @@ export const imageController = new Elysia({ prefix: "/images", tags: ["Images"] 
         template: body.template ?? "gradient_dark",
         options: body.options,
         fullOverride: body.options?.fullOverride,
+        override: body.override,
       }),
     {
       body: DashboardGenerateBodySchema,
@@ -76,7 +73,7 @@ export const imageController = new Elysia({ prefix: "/images", tags: ["Images"] 
 /** /api/images/generate — API-key-authenticated programmatic generation. */
 export const imageApiController = new Elysia({ prefix: "/images/generate", tags: ["Images"] })
   .use(apiKeyGuard)
-  .use(tieredRateLimiter({ resolvePlan: resolveApiKeyPlan, keyPrefix: "img-api" }))
+  .use(tieredRateLimiter({ resolvePlan: "apiKey", keyPrefix: "img-api" }))
   .post(
     "/",
     ({ apiKeyContext, body }) => {
@@ -91,6 +88,7 @@ export const imageApiController = new Elysia({ prefix: "/images/generate", tags:
         template: body.template ?? "gradient_dark",
         options: body.options,
         fullOverride: body.options?.fullOverride,
+        override: body.override,
       });
     },
     {

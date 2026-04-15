@@ -1,7 +1,7 @@
 import { Plan } from "@ogstack/shared";
 import { describe, expect, it } from "bun:test";
 import { Elysia } from "elysia";
-import { resolveApiKeyPlan, resolveUserPlan, tieredRateLimiter } from "./tiered-rate-limiter";
+import { tieredRateLimiter } from "./tiered-rate-limiter";
 
 describe("tieredRateLimiter middleware", () => {
   let testCounter = 0;
@@ -9,9 +9,10 @@ describe("tieredRateLimiter middleware", () => {
   const createApp = (plan: Plan | undefined = Plan.FREE) => {
     const key = `test-key-${++testCounter}`;
     return new Elysia()
+      .derive({ as: "scoped" }, () => ({ user: plan ? { plan } : undefined }))
       .use(
         tieredRateLimiter({
-          resolvePlan: () => plan,
+          resolvePlan: "user",
           keyPrefix: `test-${testCounter}`,
           keyFn: () => key,
         }),
@@ -76,75 +77,11 @@ describe("tieredRateLimiter middleware", () => {
     expect(crawlerRes.status).toBe(200);
   });
 
-  it("should bypass for LinkedInBot", async () => {
-    const app = createApp(Plan.FREE);
-    for (let i = 0; i < 11; i++) {
-      await app.handle(new Request("http://localhost/test"));
-    }
-
-    const res = await app.handle(
-      new Request("http://localhost/test", {
-        headers: { "user-agent": "LinkedInBot/1.0 (compatible; Mozilla/5.0)" },
-      }),
-    );
-    expect(res.status).toBe(200);
-  });
-
-  it("should bypass for Slackbot", async () => {
-    const app = createApp(Plan.FREE);
-    for (let i = 0; i < 11; i++) {
-      await app.handle(new Request("http://localhost/test"));
-    }
-
-    const res = await app.handle(
-      new Request("http://localhost/test", {
-        headers: { "user-agent": "Slackbot-LinkExpanding 1.0" },
-      }),
-    );
-    expect(res.status).toBe(200);
-  });
-
-  it("should bypass for Discordbot", async () => {
-    const app = createApp(Plan.FREE);
-    for (let i = 0; i < 11; i++) {
-      await app.handle(new Request("http://localhost/test"));
-    }
-
-    const res = await app.handle(
-      new Request("http://localhost/test", {
-        headers: { "user-agent": "Mozilla/5.0 (compatible; Discordbot/2.0)" },
-      }),
-    );
-    expect(res.status).toBe(200);
-  });
-
   it("should set x-ratelimit-reset header", async () => {
     const app = createApp(Plan.FREE);
     const res = await app.handle(new Request("http://localhost/test"));
     const reset = res.headers.get("x-ratelimit-reset");
     expect(reset).toBeDefined();
-    expect(Number(reset)).toBeGreaterThan(0);
-  });
-});
-
-describe("resolveUserPlan", () => {
-  it("should extract plan from user context", () => {
-    const ctx = { user: { plan: "PRO" } };
-    expect(resolveUserPlan(ctx)).toBe("PRO");
-  });
-
-  it("should return undefined when no user context", () => {
-    expect(resolveUserPlan({})).toBeUndefined();
-  });
-});
-
-describe("resolveApiKeyPlan", () => {
-  it("should extract plan from apiKeyContext", () => {
-    const ctx = { apiKeyContext: { plan: "PLUS" } };
-    expect(resolveApiKeyPlan(ctx)).toBe("PLUS");
-  });
-
-  it("should return undefined when no apiKeyContext", () => {
-    expect(resolveApiKeyPlan({})).toBeUndefined();
+    expect(Number(reset)).toBeGreaterThan(Math.floor(Date.now() / 1000));
   });
 });

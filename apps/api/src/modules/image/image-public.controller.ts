@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di";
-import { rateLimiter } from "@/common/middleware";
+import { tieredRateLimiter } from "@/common/middleware/tiered-rate-limiter";
 import { ImageGenerationService } from "./image-generation.service";
 import { PublicGenerateParamsSchema, PublicGenerateQuerySchema } from "./image.schema";
 
@@ -8,7 +8,16 @@ const imageGenerationService = container.resolve(ImageGenerationService);
 
 /** /og/:publicId — unauthenticated CDN endpoint, returns a PNG directly. */
 export const imagePublicController = new Elysia({ prefix: "/og", tags: ["Images"] })
-  .use(rateLimiter({ max: 10, windowMs: 60_000 }))
+  .use(
+    tieredRateLimiter({
+      resolvePlan: "publicId",
+      keyPrefix: "og-public",
+      keyFn: (ctx) => {
+        const params = ctx.params as { publicId?: string } | undefined;
+        return params?.publicId ?? "unknown";
+      },
+    }),
+  )
   .get(
     "/:publicId",
     async ({ params, query, set }) => {
@@ -36,7 +45,8 @@ export const imagePublicController = new Elysia({ prefix: "/og", tags: ["Images"
       query: PublicGenerateQuerySchema,
       detail: {
         summary: "Generate OG image (public)",
-        description: "Public meta-tag mode. Returns the PNG directly with long cache headers.",
+        description:
+          "Public meta-tag mode. Returns the PNG directly with long cache headers. Rate-limited per publicId by project owner's plan.",
       },
     },
   );

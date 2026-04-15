@@ -19,10 +19,13 @@ function createMockProject(overrides = {}) {
 
 function createMockPrisma() {
   return {
+    user: {
+      findUnique: mock(() => Promise.resolve({ plan: "PRO" })),
+    },
     project: {
       findMany: mock(() => Promise.resolve([createMockProject()])),
       findUnique: mock(() => Promise.resolve(createMockProject())),
-      count: mock(() => Promise.resolve(1)),
+      count: mock(() => Promise.resolve(0)),
       create: mock(() => Promise.resolve(createMockProject())),
       update: mock(() => Promise.resolve(createMockProject({ name: "Updated" }))),
       delete: mock(() => Promise.resolve(createMockProject())),
@@ -103,12 +106,15 @@ describe("ProjectService", () => {
       expect(mockPrisma.project.create).toHaveBeenCalled();
     });
 
-    it("should default domains to empty array", async () => {
-      await service.create("user-uuid-1", { name: "No Domains" });
+    it("should normalize and de-duplicate domains", async () => {
+      await service.create("user-uuid-1", {
+        name: "Dedup",
+        domains: ["Example.COM", "example.com", "other.com"],
+      });
 
       const createCall = (mockPrisma.project.create as ReturnType<typeof mock>).mock.calls[0];
       const data = (createCall as unknown[])[0] as { data: { domains: string[] } };
-      expect(data.data.domains).toEqual([]);
+      expect(data.data.domains).toEqual(["example.com", "other.com"]);
     });
   });
 

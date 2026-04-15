@@ -3,6 +3,7 @@ import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors"
 import { logger } from "@/common/logger";
 import { ScraperService } from "@/common/services/scraper.service";
 import { AuditAiStatus, Plan, PrismaClient } from "@/generated/prisma";
+import { UsageService } from "@/modules/usage";
 import { AuditAnalysisService } from "./audit-analysis.service";
 import { extractAuditMetadata, probeOgImage, type AuditMetadata } from "./audit.extractor";
 import type {
@@ -30,6 +31,7 @@ export class AuditService {
     private readonly prisma: PrismaClient,
     private readonly scraper: ScraperService,
     private readonly auditAnalysis: AuditAnalysisService,
+    private readonly usageService: UsageService,
   ) {}
 
   async create(params: CreateAuditParams): Promise<AuditReportDto> {
@@ -74,7 +76,7 @@ export class AuditService {
     });
 
     if (shouldEnrich && userId) {
-      void this.enrichWithAi(saved.id, meta, issues);
+      void this.enrichWithAi(saved.id, userId, meta, issues);
     }
 
     return {
@@ -166,8 +168,9 @@ export class AuditService {
 
   /**
    * Checks whether the requester may enrich this audit with AI. Anonymous
-   * requests silently fall through to `skipped` — only authenticated FREE
-   * users opting in get a 403 so the UI can surface the upgrade path.
+   * requests silently fall through to `skipped`. FREE users get a 403 so the UI
+   * can surface the upgrade path. Paid users additionally hit the monthly audit
+   * quota — throws PlanLimitError when exhausted.
    */
   private async checkAiEligibility(userId: string | null, includeAi = false): Promise<boolean> {
     if (!includeAi) return false;
@@ -178,13 +181,16 @@ export class AuditService {
       select: { plan: true },
     });
     if (!user || user.plan === Plan.FREE) {
-      throw new ForbiddenError("AI audit recommendations require a Pro plan or higher.");
+      throw new ForbiddenError("AI audit recommendations require a Plus plan or higher.");
     }
+
+    await this.usageService.enforceAiAuditQuota(userId);
     return true;
   }
 
   private async enrichWithAi(
     reportId: string,
+    userId: string,
     metadata: AuditMetadata,
     issues: AuditIssue[],
   ): Promise<void> {
@@ -204,6 +210,7 @@ export class AuditService {
           aiError: null,
         },
       });
+      await this.usageService.recordUsage(userId, null, { isAudit: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       logger.warn({ reportId, message }, "Audit AI enrichment failed");

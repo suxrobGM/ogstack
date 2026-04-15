@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di";
 import { authGuard } from "@/common/middleware";
-import { resolveUserPlan, tieredRateLimiter } from "@/common/middleware/tiered-rate-limiter";
+import { tieredRateLimiter } from "@/common/middleware/tiered-rate-limiter";
 import { AnalyzeRequestSchema, PageAnalysisResultSchema } from "./page-analysis.schema";
 import { PageAnalysisService } from "./page-analysis.service";
 
@@ -12,7 +12,7 @@ export const pageAnalysisController = new Elysia({
   tags: ["Page Analysis"],
 })
   .use(authGuard)
-  .use(tieredRateLimiter({ resolvePlan: resolveUserPlan, keyPrefix: "page-analysis" }))
+  .use(tieredRateLimiter({ resolvePlan: "user", keyPrefix: "page-analysis" }))
   .post(
     "/analyze",
     ({ body, user }) =>

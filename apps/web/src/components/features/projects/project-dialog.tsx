@@ -34,7 +34,7 @@ export function ProjectDialog(props: ProjectDialogProps): ReactElement {
   const isEdit = !!project;
 
   const mutation = useApiMutation(
-    (data: { name: string; domains?: string[] }) =>
+    (data: { name: string; domains: string[] }) =>
       isEdit ? client.api.projects({ id: project.id }).patch(data) : client.api.projects.post(data),
     {
       successMessage: isEdit ? "Project updated." : "Project created.",
