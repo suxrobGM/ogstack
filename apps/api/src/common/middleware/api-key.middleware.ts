@@ -3,10 +3,12 @@ import { container } from "@/common/di";
 import { UnauthorizedError } from "@/common/errors";
 import { ApiKeyService } from "@/modules/api-key/api-key.service";
 
+const apiKeyService = container.resolve(ApiKeyService);
+
 /**
  * API key auth guard for the POST generation endpoint.
  * Expects `Authorization: Bearer og_live_...` and derives `apiKeyContext`
- * (userId, projectId) into the request context.
+ * (userId, projectId?) into the request context.
  */
 export const apiKeyGuard = new Elysia({ name: "api-key-guard" }).derive(
   { as: "scoped" },
@@ -17,7 +19,6 @@ export const apiKeyGuard = new Elysia({ name: "api-key-guard" }).derive(
     }
 
     const rawKey = authorization.slice(7);
-    const apiKeyService = container.resolve(ApiKeyService);
     const result = await apiKeyService.validate(rawKey);
 
     if (!result) {

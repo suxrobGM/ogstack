@@ -1,5 +1,6 @@
 import { Elysia, t } from "elysia";
 import { container } from "@/common/di";
+import { ForbiddenError } from "@/common/errors";
 import { apiKeyGuard, authGuard } from "@/common/middleware";
 import {
   resolveApiKeyPlan,
@@ -12,6 +13,8 @@ import {
   ApiGenerateBodySchema,
   DashboardGenerateBodySchema,
   GenerateResponseSchema,
+  ImageBulkDeleteBodySchema,
+  ImageBulkDeleteResponseSchema,
   ImageItemSchema,
   ImageListQuerySchema,
   ImageListResponseSchema,
@@ -63,6 +66,11 @@ export const imageController = new Elysia({ prefix: "/images", tags: ["Images"] 
     params: UuidIdParamSchema,
     response: t.Object({ success: t.Boolean() }),
     detail: { summary: "Delete an image" },
+  })
+  .delete("/", ({ user, body }) => imageService.bulkDelete(user.id, body.ids), {
+    body: ImageBulkDeleteBodySchema,
+    response: ImageBulkDeleteResponseSchema,
+    detail: { summary: "Bulk delete images" },
   });
 
 /** /api/images/generate — API-key-authenticated programmatic generation. */
@@ -71,21 +79,27 @@ export const imageApiController = new Elysia({ prefix: "/images/generate", tags:
   .use(tieredRateLimiter({ resolvePlan: resolveApiKeyPlan, keyPrefix: "img-api" }))
   .post(
     "/",
-    ({ apiKeyContext, body }) =>
-      imageGenerationService.generate({
+    ({ apiKeyContext, body }) => {
+      if (apiKeyContext.projectId && apiKeyContext.projectId !== body.projectId) {
+        throw new ForbiddenError("API key is scoped to a different project.");
+      }
+
+      return imageGenerationService.generate({
         userId: apiKeyContext.userId,
-        projectId: apiKeyContext.projectId,
+        projectId: body.projectId,
         url: body.url,
         template: body.template ?? "gradient_dark",
         options: body.options,
         fullOverride: body.options?.fullOverride,
-      }),
+      });
+    },
     {
       body: ApiGenerateBodySchema,
       response: GenerateResponseSchema,
       detail: {
         summary: "Generate OG image (API key)",
-        description: "Programmatic generation using an API key.",
+        description:
+          "Programmatic generation using an API key. `projectId` must be supplied in the body. Scoped keys may only target the project they were created for; global keys may target any of the user's projects.",
       },
     },
   );

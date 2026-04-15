@@ -5,41 +5,35 @@ import { StringIdParamSchema } from "@/types/request";
 import { MessageResponseSchema } from "@/types/response";
 import {
   ApiKeyCreatedSchema,
+  ApiKeyListQuerySchema,
   ApiKeyListResponseSchema,
   CreateApiKeyBodySchema,
-  ProjectIdParamSchema,
 } from "./api-key.schema";
 import { ApiKeyService } from "./api-key.service";
 
 const apiKeyService = container.resolve(ApiKeyService);
 
-export const apiKeyController = new Elysia({ prefix: "/projects", tags: ["API Keys"] })
+/** Global API key management. Keys may be scoped to a project or apply to all of the user's projects. */
+export const apiKeyController = new Elysia({ prefix: "/api-keys", tags: ["API Keys"] })
   .use(authGuard)
-  .post(
-    "/:id/api-keys",
-    ({ user, params, body }) => apiKeyService.create(user.id, params.id, body),
-    {
-      params: ProjectIdParamSchema,
-      body: CreateApiKeyBodySchema,
-      response: ApiKeyCreatedSchema,
-      detail: {
-        summary: "Create API key",
-        description:
-          "Generate a new API key for a project. The full key is returned once and never stored — save it immediately.",
-      },
+  .post("/", ({ user, body }) => apiKeyService.create(user.id, body), {
+    body: CreateApiKeyBodySchema,
+    response: ApiKeyCreatedSchema,
+    detail: {
+      summary: "Create API key",
+      description:
+        "Generate a new API key. When `projectId` is omitted, the key applies to all of your projects. The full key is returned once and never stored.",
     },
-  )
-  .get("/:id/api-keys", ({ user, params }) => apiKeyService.list(user.id, params.id), {
-    params: ProjectIdParamSchema,
+  })
+  .get("/", ({ user, query }) => apiKeyService.list(user.id, query.projectId), {
+    query: ApiKeyListQuerySchema,
     response: ApiKeyListResponseSchema,
     detail: {
       summary: "List API keys",
-      description: "List all API keys for a project. Only the prefix is shown, not the full key.",
+      description:
+        "List all API keys for the authenticated user. Pass `projectId` to scope to a single project.",
     },
-  });
-
-export const apiKeyDeleteController = new Elysia({ prefix: "/api-keys", tags: ["API Keys"] })
-  .use(authGuard)
+  })
   .delete(
     "/:id",
     async ({ user, params }) => {

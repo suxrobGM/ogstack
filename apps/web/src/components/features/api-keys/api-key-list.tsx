@@ -3,18 +3,10 @@
 import { useState, type ReactElement } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
-import {
-  Button,
-  Chip,
-  IconButton,
-  MenuItem,
-  Select,
-  Stack,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Button, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { DataTable, type Column } from "@/components/ui/data/data-table";
 import { EmptyState } from "@/components/ui/data/empty-state";
+import { SelectInput } from "@/components/ui/form/select-input";
 import { PageHeader } from "@/components/ui/layout/page-header";
 import { useApiMutation, useApiQuery } from "@/hooks";
 import { client } from "@/lib/api/client";
@@ -24,32 +16,42 @@ import { iconSizes } from "@/theme";
 import type { ApiKey, ApiKeyListResponse, Project } from "@/types/api";
 import { CreateApiKeyDialog } from "./create-api-key-dialog";
 
+const ALL_PROJECTS = "__all__";
+
 interface ApiKeyListProps {
   projects: Project[];
-  initialProjectId?: string;
   initialData?: ApiKeyListResponse | null;
 }
 
 export function ApiKeyList(props: ApiKeyListProps): ReactElement {
-  const { projects, initialProjectId, initialData } = props;
+  const { projects, initialData } = props;
   const confirm = useConfirm();
 
-  const [selectedProjectId, setSelectedProjectId] = useState(initialProjectId ?? "");
+  const [filter, setFilter] = useState<string>(ALL_PROJECTS);
   const [createOpen, setCreateOpen] = useState(false);
 
+  const projectIdQuery = filter === ALL_PROJECTS ? undefined : filter;
+
+  const filterItems = [
+    { value: ALL_PROJECTS, label: "All projects" },
+    ...projects.map((p) => ({ value: p.id, label: p.name })),
+  ];
+
   const { data, isLoading } = useApiQuery<ApiKeyListResponse>(
-    queryKeys.apiKeys.byProject(selectedProjectId),
-    () => client.api.projects({ id: selectedProjectId })["api-keys"].get(),
+    queryKeys.apiKeys.list(filter),
+    () =>
+      client.api["api-keys"].get({
+        query: projectIdQuery ? { projectId: projectIdQuery } : {},
+      }),
     {
-      initialData: selectedProjectId === initialProjectId ? initialData! : undefined,
+      initialData: filter === ALL_PROJECTS ? (initialData ?? undefined) : undefined,
       errorMessage: "Failed to load API keys.",
-      enabled: !!selectedProjectId,
     },
   );
 
   const deleteMutation = useApiMutation((id: string) => client.api["api-keys"]({ id }).delete(), {
     successMessage: "API key revoked.",
-    invalidateKeys: [queryKeys.apiKeys.byProject(selectedProjectId)],
+    invalidateKeys: [queryKeys.apiKeys.all],
   });
 
   const items = Array.isArray(data) ? data : [];
@@ -92,12 +94,22 @@ export function ApiKeyList(props: ApiKeyListProps): ReactElement {
     {
       key: "name",
       header: "Name",
-      width: "30%",
+      width: "25%",
     },
     {
       key: "prefix",
       header: "Key Prefix",
       render: (row) => <Chip label={`${row.prefix}...`} size="small" variant="outlined" />,
+    },
+    {
+      key: "scope",
+      header: "Scope",
+      render: (row) =>
+        row.projectName ? (
+          <Chip label={row.projectName} size="small" variant="outlined" />
+        ) : (
+          <Chip label="All projects" size="small" color="success" variant="outlined" />
+        ),
     },
     {
       key: "lastUsedAt",
@@ -134,30 +146,20 @@ export function ApiKeyList(props: ApiKeyListProps): ReactElement {
     },
   ];
 
-  const projectSelector =
-    projects.length > 1 ? (
-      <Select
-        size="small"
-        value={selectedProjectId}
-        onChange={(e) => setSelectedProjectId(e.target.value)}
-        sx={{ minWidth: 200 }}
-      >
-        {projects.map((p) => (
-          <MenuItem key={p.id} value={p.id}>
-            {p.name}
-          </MenuItem>
-        ))}
-      </Select>
-    ) : null;
-
   return (
     <Stack spacing={3}>
       <PageHeader
         title="API Keys"
-        description="Manage API keys for programmatic access to your projects."
+        description="Manage API keys for programmatic access. Keys can be scoped to a single project or apply to all of your projects."
         actions={
           <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-            {projectSelector}
+            <SelectInput
+              label="Scope"
+              value={filter}
+              onChange={setFilter}
+              items={filterItems}
+              minWidth={200}
+            />
             <Button variant="contained" onClick={() => setCreateOpen(true)}>
               New API Key
             </Button>
@@ -172,7 +174,7 @@ export function ApiKeyList(props: ApiKeyListProps): ReactElement {
         loading={isLoading}
         empty={{
           title: "No API keys",
-          description: "Create an API key to access this project programmatically.",
+          description: "Create an API key to access your projects programmatically.",
           action: (
             <Button variant="contained" onClick={() => setCreateOpen(true)}>
               New API Key
@@ -182,7 +184,8 @@ export function ApiKeyList(props: ApiKeyListProps): ReactElement {
       />
 
       <CreateApiKeyDialog
-        projectId={selectedProjectId}
+        projects={projects}
+        defaultProjectId={projectIdQuery}
         open={createOpen}
         onClose={() => setCreateOpen(false)}
       />

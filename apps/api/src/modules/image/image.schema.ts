@@ -33,7 +33,7 @@ const RenderOptionsBodySchema = t.Optional(
 export const ApiGenerateBodySchema = t.Object({
   url: t.String({ format: "uri" }),
   template: t.Optional(TemplateSlugSchema),
-  projectId: t.Optional(t.String({ format: "uuid" })),
+  projectId: t.String({ format: "uuid" }),
   options: RenderOptionsBodySchema,
 });
 
@@ -114,6 +114,15 @@ export const ImageUpdateBodySchema = t.Object({
   description: t.Optional(t.String({ maxLength: 500 })),
 });
 
+export const ImageBulkDeleteBodySchema = t.Object({
+  ids: t.Array(t.String({ format: "uuid" }), { minItems: 1, maxItems: 200 }),
+});
+
+export const ImageBulkDeleteResponseSchema = t.Object({
+  success: t.Boolean(),
+  deleted: t.Number(),
+});
+
 export type ApiGenerateBody = Static<typeof ApiGenerateBodySchema>;
 export type DashboardGenerateBody = Static<typeof DashboardGenerateBodySchema>;
 export type PublicGenerateParams = Static<typeof PublicGenerateParamsSchema>;
@@ -123,3 +132,5 @@ export type ImageListQuery = Static<typeof ImageListQuerySchema>;
 export type ImageItem = Static<typeof ImageItemSchema>;
 export type ImageListResponse = Static<typeof ImageListResponseSchema>;
 export type ImageUpdateBody = Static<typeof ImageUpdateBodySchema>;
+export type ImageBulkDeleteBody = Static<typeof ImageBulkDeleteBodySchema>;
+export type ImageBulkDeleteResponse = Static<typeof ImageBulkDeleteResponseSchema>;

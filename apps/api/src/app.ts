@@ -8,7 +8,7 @@ import { corsPlugin, swaggerPlugin, uploadsStaticPlugin } from "@/common/plugins
 import { logAiServicesAtStartup } from "@/common/services/ai";
 import { validateEnv } from "@/env";
 import { adminController } from "@/modules/admin";
-import { apiKeyController, apiKeyDeleteController } from "@/modules/api-key";
+import { apiKeyController } from "@/modules/api-key";
 import { auditCleanupCron, auditController, auditUserController } from "@/modules/audit";
 import { authController } from "@/modules/auth";
 import {
@@ -43,7 +43,6 @@ const app = new Elysia()
       .guard({ response: HttpErrorResponses })
       .use(authController)
       .use(apiKeyController)
-      .use(apiKeyDeleteController)
       .use(auditController)
       .use(auditUserController)
       .use(pageAnalysisController)

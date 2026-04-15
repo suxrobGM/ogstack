@@ -8,35 +8,35 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  InputAdornment,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
-import { z } from "zod/v4";
-import { FormTextField } from "@/components/ui/form";
+import { CopyButton } from "@/components/ui/display/copy-button";
+import { FormSelectField, FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks";
 import { client } from "@/lib/api/client";
 import { queryKeys } from "@/lib/query-keys";
+import type { Project } from "@/types/api";
+import { createApiKeySchema, type CreateApiKeyForm } from "./schema";
+
+const ALL_PROJECTS = "__all__";
 
 interface CreateApiKeyDialogProps {
-  projectId: string;
+  projects: Project[];
+  defaultProjectId?: string;
   open: boolean;
   onClose: () => void;
 }
 
-const schema = z.object({
-  name: z.string().min(1, "Name is required"),
-});
-
-type FormValues = z.infer<typeof schema>;
-
 export function CreateApiKeyDialog(props: CreateApiKeyDialogProps): ReactElement {
-  const { projectId, open, onClose } = props;
+  const { projects, defaultProjectId, open, onClose } = props;
   const [createdKey, setCreatedKey] = useState<string | null>(null);
 
   const mutation = useApiMutation(
-    (data: FormValues) => client.api.projects({ id: projectId })["api-keys"].post(data),
+    (data: { name: string; projectId: string | null }) => client.api["api-keys"].post(data),
     {
       successMessage: "API key created.",
       invalidateKeys: [queryKeys.apiKeys.all],
@@ -49,9 +49,16 @@ export function CreateApiKeyDialog(props: CreateApiKeyDialogProps): ReactElement
   );
 
   const form = useForm({
-    defaultValues: { name: "" } as FormValues,
-    validators: { onSubmit: schema },
-    onSubmit: async ({ value }) => mutation.mutate(value),
+    defaultValues: {
+      name: "",
+      projectId: defaultProjectId ?? ALL_PROJECTS,
+    } as CreateApiKeyForm,
+    validators: { onSubmit: createApiKeySchema },
+    onSubmit: ({ value }) =>
+      mutation.mutate({
+        name: value.name,
+        projectId: value.projectId === ALL_PROJECTS ? null : value.projectId,
+      }),
   });
 
   const handleClose = () => {
@@ -71,7 +78,16 @@ export function CreateApiKeyDialog(props: CreateApiKeyDialogProps): ReactElement
               <TextField
                 value={createdKey}
                 fullWidth
-                slotProps={{ input: { readOnly: true } }}
+                slotProps={{
+                  input: {
+                    readOnly: true,
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <CopyButton text={createdKey} tooltip="Copy API key" />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
                 label="Your API Key"
                 size="small"
               />
@@ -97,6 +113,15 @@ export function CreateApiKeyDialog(props: CreateApiKeyDialogProps): ReactElement
           <DialogContent>
             <Stack spacing={2} sx={{ mt: 1 }}>
               <FormTextField form={form} name="name" label="Key Name" required />
+              <FormSelectField
+                form={form}
+                name="projectId"
+                label="Scope"
+                items={[
+                  { value: ALL_PROJECTS, label: "All projects" },
+                  ...projects.map((p) => ({ value: p.id, label: p.name })),
+                ]}
+              />
             </Stack>
           </DialogContent>
           <DialogActions>

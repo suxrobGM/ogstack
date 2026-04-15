@@ -8,9 +8,14 @@ import type { ApiKey, ApiKeyCreated, CreateApiKeyBody } from "./api-key.schema";
 export class ApiKeyService {
   constructor(private readonly prisma: PrismaClient) {}
 
-  /** Create a new API key. Returns the raw key once — it is never stored. */
-  async create(userId: string, projectId: string, data: CreateApiKeyBody): Promise<ApiKeyCreated> {
-    await this.assertProjectOwner(userId, projectId);
+  /**
+   * Create a new API key. Returns the raw key once — it is never stored.
+   */
+  async create(userId: string, data: CreateApiKeyBody): Promise<ApiKeyCreated> {
+    const projectId = data.projectId ?? null;
+    if (projectId) {
+      await this.assertProjectOwner(userId, projectId);
+    }
 
     const { raw, prefix } = generateApiKey();
     const keyHash = await hashSha256(raw);
@@ -30,16 +35,23 @@ export class ApiKeyService {
       key: raw,
       prefix: apiKey.prefix,
       name: apiKey.name,
+      projectId: apiKey.projectId,
       createdAt: apiKey.createdAt,
     };
   }
 
-  /** List all API keys for a project (prefix only, no raw key). */
-  async list(userId: string, projectId: string): Promise<ApiKey[]> {
-    await this.assertProjectOwner(userId, projectId);
+  /** List API keys for the user, optionally scoped to a project. */
+  async list(userId: string, projectId?: string): Promise<ApiKey[]> {
+    if (projectId) {
+      await this.assertProjectOwner(userId, projectId);
+    }
 
     const keys = await this.prisma.apiKey.findMany({
-      where: { projectId },
+      where: {
+        userId,
+        ...(projectId && { projectId }),
+      },
+      include: { project: { select: { name: true } } },
       orderBy: { createdAt: "desc" },
     });
 
@@ -47,6 +59,8 @@ export class ApiKeyService {
       id: k.id,
       prefix: k.prefix,
       name: k.name,
+      projectId: k.projectId,
+      projectName: k.project?.name ?? null,
       lastUsedAt: k.lastUsedAt,
       createdAt: k.createdAt,
     }));
@@ -65,10 +79,10 @@ export class ApiKeyService {
     await this.prisma.apiKey.delete({ where: { id: apiKeyId } });
   }
 
-  /** Validate a raw API key. Returns the key record with project and user plan info, or null. */
+  /** Validate a raw API key. `projectId` is null when the key applies to all projects. */
   async validate(
     rawKey: string,
-  ): Promise<{ userId: string; projectId: string; plan: string } | null> {
+  ): Promise<{ userId: string; projectId: string | null; plan: string } | null> {
     const keyHash = await hashSha256(rawKey);
 
     const apiKey = await this.prisma.apiKey.findUnique({

@@ -128,6 +128,20 @@ export class ImageService {
     return this.deleteImageRow(existing.id, existing.cacheKey);
   }
 
+  async bulkDelete(userId: string, ids: string[]): Promise<{ success: true; deleted: number }> {
+    const rows = await this.prisma.image.findMany({
+      where: { id: { in: ids }, userId },
+      select: { id: true, cacheKey: true },
+    });
+
+    let deleted = 0;
+    for (const row of rows) {
+      await this.deleteImageRow(row.id, row.cacheKey);
+      deleted += 1;
+    }
+    return { success: true, deleted };
+  }
+
   async deleteAsAdmin(id: string): Promise<{ success: true }> {
     const existing = await this.prisma.image.findUnique({ where: { id } });
     if (!existing) throw new NotFoundError("Image not found");

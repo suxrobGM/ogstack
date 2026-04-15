@@ -62,8 +62,9 @@ describe("ApiKeyService", () => {
 
   describe("create", () => {
     it("should create an API key and return the raw key", async () => {
-      const result = await service.create("user-uuid-1", "proj-uuid-1", {
+      const result = await service.create("user-uuid-1", {
         name: "Production Key",
+        projectId: "proj-uuid-1",
       });
 
       expect(result).toHaveProperty("key");
@@ -74,7 +75,7 @@ describe("ApiKeyService", () => {
     });
 
     it("should store a hash, not the raw key", async () => {
-      await service.create("user-uuid-1", "proj-uuid-1", { name: "Test" });
+      await service.create("user-uuid-1", { name: "Test", projectId: "proj-uuid-1" });
 
       const createCall = (mockPrisma.apiKey.create as ReturnType<typeof mock>).mock.calls[0];
       const data = (createCall as unknown[])[0] as { data: { keyHash: string } };
@@ -86,17 +87,17 @@ describe("ApiKeyService", () => {
         createMockProject({ userId: "other-user" }),
       );
 
-      expect(service.create("user-uuid-1", "proj-uuid-1", { name: "Test" })).rejects.toThrow(
-        "Project not found",
-      );
+      expect(
+        service.create("user-uuid-1", { name: "Test", projectId: "proj-uuid-1" }),
+      ).rejects.toThrow("Project not found");
     });
 
     it("should throw NotFoundError if project does not exist", () => {
       (mockPrisma.project.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      expect(service.create("user-uuid-1", "nonexistent", { name: "Test" })).rejects.toThrow(
-        "Project not found",
-      );
+      expect(
+        service.create("user-uuid-1", { name: "Test", projectId: "nonexistent" }),
+      ).rejects.toThrow("Project not found");
     });
   });
 

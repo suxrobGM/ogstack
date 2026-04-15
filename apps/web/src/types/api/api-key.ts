@@ -1,14 +1,6 @@
-/**
- * API key types — defined manually because Eden Treaty cannot resolve
- * the hyphenated "api-keys" route segment via type-level property access.
- * Mirrors ApiKeySchema / ApiKeyListResponseSchema from the backend.
- */
-export interface ApiKey {
-  id: string;
-  prefix: string;
-  name: string;
-  lastUsedAt: Date | null;
-  createdAt: Date;
-}
+import type { client } from "@/lib/api/client";
+import type { Data } from "./utils";
 
-export type ApiKeyListResponse = ApiKey[];
+export type ApiKeyListResponse = Data<(typeof client)["api"]["api-keys"]["get"]>;
+export type ApiKey = ApiKeyListResponse[number];
+export type ApiKeyCreated = Data<(typeof client)["api"]["api-keys"]["post"]>;

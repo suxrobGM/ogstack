@@ -53,7 +53,7 @@ export const AdminUserApiKeySchema = t.Object({
   id: t.String(),
   prefix: t.String(),
   name: t.String(),
-  projectId: t.String(),
+  projectId: t.Nullable(t.String()),
   lastUsedAt: t.Nullable(t.Date()),
   revokedAt: t.Nullable(t.Date()),
   createdAt: t.Date(),

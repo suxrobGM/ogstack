@@ -17,7 +17,6 @@ export function ProjectTabs(props: ProjectTabsProps): ReactElement {
   const base = `/projects/${projectId}`;
   const tabs = [
     { label: "Images", href: base },
-    { label: "API Keys", href: `${base}/api-keys` },
     { label: "Settings", href: `${base}/settings` },
   ] as const;
 
