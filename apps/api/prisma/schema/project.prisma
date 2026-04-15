@@ -3,7 +3,7 @@ model Project {
   userId   String   @map("user_id") @db.Uuid
   publicId String   @unique @map("public_id")
   name     String
-  domains  String[] @default([])
+  domains  String[]
   isActive Boolean  @default(true) @map("is_active")
 
   createdAt DateTime @default(now()) @map("created_at")

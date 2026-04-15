@@ -6,9 +6,9 @@ import { logger } from "@/common/logger";
 import { Plan } from "@/generated/prisma";
 import { WatermarkBadge } from "./watermark-badge";
 
-/** Free + Pro get a watermark. Business + Enterprise are clean. */
+/** Free and Plus get a watermark. Pro is clean. */
 export function shouldWatermark(plan: Plan): boolean {
-  return plan === Plan.FREE || plan === Plan.PRO;
+  return plan === Plan.FREE || plan === Plan.PLUS;
 }
 
 const WATERMARK_WIDTH = 96;

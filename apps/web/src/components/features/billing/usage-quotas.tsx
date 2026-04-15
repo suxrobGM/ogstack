@@ -2,7 +2,6 @@
 
 import type { ReactElement } from "react";
 import { Box, Grid, LinearProgress, Stack, Typography } from "@mui/material";
-import { UNLIMITED_QUOTA } from "@ogstack/shared";
 import { Surface } from "@/components/ui/layout/surface";
 import { fontFamilies } from "@/theme";
 import type { UsageStatsResponse } from "@/types/api";
@@ -14,8 +13,9 @@ interface UsageQuotasProps {
 
 export function UsageQuotas(props: UsageQuotasProps): ReactElement {
   const { usage } = props;
-  const isUnlimited = usage.quota === UNLIMITED_QUOTA;
-  const percent = isUnlimited ? 0 : Math.min(100, (usage.used / usage.quota) * 100);
+  const isUnlimited = true;
+  const percent =
+    usage.aiImageLimit > 0 ? Math.min(100, (usage.aiImageCount / usage.aiImageLimit) * 100) : 0;
 
   return (
     <Box>
@@ -39,9 +39,7 @@ export function UsageQuotas(props: UsageQuotasProps): ReactElement {
               >
                 {usage.used.toLocaleString()}
               </Typography>
-              <Typography variant="body2Muted">
-                / {isUnlimited ? "Unlimited" : usage.quota.toLocaleString()}
-              </Typography>
+              <Typography variant="body2Muted">/ Unlimited</Typography>
             </Stack>
             {!isUnlimited && (
               <LinearProgress

@@ -5,7 +5,6 @@ import BoltIcon from "@mui/icons-material/Bolt";
 import ImageIcon from "@mui/icons-material/Image";
 import InsightsIcon from "@mui/icons-material/Insights";
 import { Box, Grid, LinearProgress, Link, Stack, Typography } from "@mui/material";
-import { UNLIMITED_QUOTA } from "@ogstack/shared";
 import { StatCard } from "@/components/ui/data/stat-card";
 import { SectionHeader } from "@/components/ui/layout/section-header";
 import { Surface } from "@/components/ui/layout/surface";
@@ -20,8 +19,9 @@ interface UsageSummaryProps {
 
 export function UsageSummary(props: UsageSummaryProps): ReactElement {
   const { usage } = props;
-  const isUnlimited = usage.quota === UNLIMITED_QUOTA;
-  const percent = isUnlimited ? 0 : Math.min(100, (usage.used / usage.quota) * 100);
+  const isUnlimited = true;
+  const percent =
+    usage.aiImageLimit > 0 ? Math.min(100, (usage.aiImageCount / usage.aiImageLimit) * 100) : 0;
 
   return (
     <Stack spacing={2.5}>
@@ -58,9 +58,7 @@ export function UsageSummary(props: UsageSummaryProps): ReactElement {
               >
                 {usage.used.toLocaleString()}
               </Typography>
-              <Typography variant="body2Muted">
-                / {isUnlimited ? "Unlimited" : usage.quota.toLocaleString()}
-              </Typography>
+              <Typography variant="body2Muted">/ Unlimited</Typography>
             </Stack>
             {isUnlimited ? (
               <Typography variant="caption" sx={{ color: "accent.primary" }}>

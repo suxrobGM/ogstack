@@ -10,10 +10,10 @@ interface UsageMeterProps {
 
 export function UsageMeter(props: UsageMeterProps): ReactElement {
   const { stats } = props;
-  const unlimited = stats.quota === -1;
+  const unlimited = stats.aiImageLimit === -1;
   const percent = unlimited
     ? 0
-    : Math.min(100, Math.round((stats.used / Math.max(stats.quota, 1)) * 100));
+    : Math.min(100, Math.round((stats.aiImageCount / Math.max(stats.aiImageLimit, 1)) * 100));
   const warning = !unlimited && percent >= 80;
 
   return (
@@ -38,7 +38,9 @@ export function UsageMeter(props: UsageMeterProps): ReactElement {
           <Typography variant="captionMuted">{stats.plan}</Typography>
         </Stack>
         <Typography variant="caption" sx={{ fontFamily: "monospace" }}>
-          {unlimited ? `${stats.used} used` : `${stats.used} / ${stats.quota}`}
+          {unlimited
+            ? `${stats.aiImageCount} used`
+            : `${stats.aiImageCount} / ${stats.aiImageLimit}`}
         </Typography>
       </Stack>
       {!unlimited && (

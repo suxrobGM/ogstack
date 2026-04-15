@@ -6,15 +6,11 @@ describe("shouldWatermark", () => {
     expect(shouldWatermark("FREE")).toBe(true);
   });
 
-  it("watermarks PRO plan", () => {
-    expect(shouldWatermark("PRO")).toBe(true);
+  it("watermarks PLUS plan", () => {
+    expect(shouldWatermark("PLUS")).toBe(true);
   });
 
-  it("does not watermark BUSINESS plan", () => {
-    expect(shouldWatermark("BUSINESS")).toBe(false);
-  });
-
-  it("does not watermark ENTERPRISE plan", () => {
-    expect(shouldWatermark("ENTERPRISE")).toBe(false);
+  it("does not watermark PRO plan", () => {
+    expect(shouldWatermark("PRO")).toBe(false);
   });
 });

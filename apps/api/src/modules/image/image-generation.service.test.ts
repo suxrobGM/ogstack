@@ -78,7 +78,8 @@ function createMockTemplateService() {
 
 function createMockUsageService() {
   return {
-    enforceQuota: mock(() => Promise.resolve()),
+    enforceAiImageQuota: mock(() => Promise.resolve()),
+    enforceAiAuditQuota: mock(() => Promise.resolve()),
     recordUsage: mock(() => Promise.resolve()),
   } as unknown as UsageService;
 }
@@ -179,20 +180,13 @@ describe("ImageGenerationService", () => {
       await expect(service.generate(baseParams)).rejects.toThrow("Project not found");
     });
 
-    it("should call enforceQuota before generating", async () => {
-      await service.generate(baseParams);
-
-      expect(mockUsageService.enforceQuota).toHaveBeenCalledWith("user-1", "proj-1", undefined);
-    });
-
     it("should record usage for cache misses", async () => {
       await service.generate(baseParams);
 
       expect(mockUsageService.recordUsage).toHaveBeenCalledWith(
         "user-1",
         "proj-1",
-        false,
-        undefined,
+        expect.objectContaining({ cacheHit: false }),
       );
     });
 
@@ -212,8 +206,7 @@ describe("ImageGenerationService", () => {
       expect(mockUsageService.recordUsage).toHaveBeenCalledWith(
         "user-1",
         "proj-1",
-        true,
-        undefined,
+        expect.objectContaining({ cacheHit: true }),
       );
     });
   });

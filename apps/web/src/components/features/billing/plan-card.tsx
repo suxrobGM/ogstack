@@ -12,7 +12,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { UNLIMITED_QUOTA } from "@ogstack/shared";
+import { Plan } from "@ogstack/shared";
 import { Surface } from "@/components/ui/layout/surface";
 import { fontFamilies, iconSizes } from "@/theme";
 import type { PlanResponse } from "@/types/api";
@@ -28,15 +28,13 @@ export function PlanCard(props: PlanCardProps): ReactElement {
   const { plan, currentPlanKey, onSelect, isLoading } = props;
 
   const isCurrentPlan = plan.key === currentPlanKey;
-  const currentSortOrder = ["FREE", "PRO", "BUSINESS", "ENTERPRISE"].indexOf(currentPlanKey);
-  const planSortOrder = ["FREE", "PRO", "BUSINESS", "ENTERPRISE"].indexOf(plan.key);
+  const tierOrder: string[] = [Plan.FREE, Plan.PLUS, Plan.PRO];
+  const currentSortOrder = tierOrder.indexOf(currentPlanKey);
+  const planSortOrder = tierOrder.indexOf(plan.key);
   const isUpgrade = planSortOrder > currentSortOrder;
   const isDowngrade = planSortOrder < currentSortOrder;
 
-  const quotaLabel =
-    plan.quota === UNLIMITED_QUOTA
-      ? "Unlimited images"
-      : `${plan.quota.toLocaleString()} images/mo`;
+  const quotaLabel = "Unlimited images";
 
   return (
     <Surface

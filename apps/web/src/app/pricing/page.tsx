@@ -12,7 +12,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { PLAN_CONFIGS, PLANS, UNLIMITED_QUOTA } from "@ogstack/shared";
+import { PLAN_CONFIGS, PLANS } from "@ogstack/shared";
 import { Surface } from "@/components/ui/layout/surface";
 import { ROUTES } from "@/lib/constants";
 import { line } from "@/theme/palette";
@@ -20,28 +20,27 @@ import { iconSizes } from "@/theme/tokens";
 import { fontFamilies } from "@/theme/typography";
 
 const PLAN_FEATURES: Record<string, string[]> = {
-  FREE: ["5 templates", "GET meta tag mode", "Community support", "Watermark on images"],
+  FREE: [
+    "Unlimited non-AI images",
+    "3 AI images / month (Flux 2)",
+    "All 10 templates",
+    "1 project, 1 domain",
+    "Watermark on images",
+  ],
+  PLUS: [
+    "Everything in Free",
+    "100 AI images / month (Flux 2)",
+    "100 AI audit recommendations / month",
+    "5 projects, 3 domains each",
+    "Email support",
+  ],
   PRO: [
-    "All templates",
-    "Brand Kit",
-    "AI backgrounds (Flux Schnell)",
+    "Everything in Plus",
+    "1,000 AI images / month (300 Flux 2 Pro + 700 Flux 2)",
+    "1,000 AI audit recommendations / month",
+    "Unlimited projects and domains",
     "No watermark",
     "Priority support",
-  ],
-  BUSINESS: [
-    "Everything in Pro",
-    "A/B testing",
-    "Analytics dashboard",
-    "AI backgrounds (Flux Pro)",
-    "Team access",
-  ],
-  ENTERPRISE: [
-    "Everything in Business",
-    "Custom domain",
-    "SLA guarantee",
-    "SSO",
-    "All AI models",
-    "Dedicated support",
   ],
 };
 
@@ -69,11 +68,9 @@ export default function PricingPage(): ReactElement {
           {PLANS.map((key) => {
             const config = PLAN_CONFIGS[key];
             const features = PLAN_FEATURES[key] ?? [];
-            const isHighlighted = key === "PRO";
+            const isHighlighted = key === "PLUS";
             const quotaLabel =
-              config.quota === UNLIMITED_QUOTA
-                ? "Unlimited images"
-                : `${config.quota.toLocaleString()} images/mo`;
+              config.aiImageLimit > 0 ? `${config.aiImageLimit} AI images/mo` : "No AI images";
 
             return (
               <Grid key={key} size={{ xs: 12, sm: 6, lg: 3 }}>

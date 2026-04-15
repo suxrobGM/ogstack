@@ -19,10 +19,13 @@ export default async function BillingPage(): Promise<ReactElement> {
   const usage = usageRes.data ?? {
     period: "",
     plan: Plan.FREE,
-    quota: 50,
     used: 0,
-    remaining: 50,
     aiImageCount: 0,
+    aiImageLimit: 3,
+    aiProImageCount: 0,
+    aiProImageLimit: 0,
+    aiAuditCount: 0,
+    aiAuditLimit: 0,
     cacheHits: 0,
   };
 

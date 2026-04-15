@@ -20,17 +20,17 @@ describe("tieredRateLimiter middleware", () => {
   };
 
   it("should allow requests within per-minute limit", async () => {
-    const app = createApp(Plan.FREE); // 10/min
+    const app = createApp(Plan.FREE); // 20/min
     const res = await app.handle(new Request("http://localhost/test"));
     expect(res.status).toBe(200);
-    expect(res.headers.get("x-ratelimit-limit")).toBe("10");
-    expect(res.headers.get("x-ratelimit-remaining")).toBe("9");
+    expect(res.headers.get("x-ratelimit-limit")).toBe("20");
+    expect(res.headers.get("x-ratelimit-remaining")).toBe("19");
   });
 
   it("should return 429 when per-minute limit exceeded", async () => {
-    const app = createApp(Plan.FREE); // 10/min
+    const app = createApp(Plan.FREE); // 20/min
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 20; i++) {
       await app.handle(new Request("http://localhost/test"));
     }
 
@@ -40,36 +40,30 @@ describe("tieredRateLimiter middleware", () => {
     expect(body.message).toContain("Too many requests");
   });
 
-  it("should use higher limits for PRO plan", async () => {
-    const app = createApp(Plan.PRO); // 60/min
+  it("should use higher limits for PLUS plan", async () => {
+    const app = createApp(Plan.PLUS); // 100/min
     const res = await app.handle(new Request("http://localhost/test"));
-    expect(res.headers.get("x-ratelimit-limit")).toBe("60");
-    expect(res.headers.get("x-ratelimit-remaining")).toBe("59");
+    expect(res.headers.get("x-ratelimit-limit")).toBe("100");
+    expect(res.headers.get("x-ratelimit-remaining")).toBe("99");
   });
 
-  it("should use higher limits for BUSINESS plan", async () => {
-    const app = createApp(Plan.BUSINESS); // 120/min
+  it("should use highest limits for PRO plan", async () => {
+    const app = createApp(Plan.PRO); // 500/min
     const res = await app.handle(new Request("http://localhost/test"));
-    expect(res.headers.get("x-ratelimit-limit")).toBe("120");
-  });
-
-  it("should use highest limits for ENTERPRISE plan", async () => {
-    const app = createApp("ENTERPRISE"); // 300/min
-    const res = await app.handle(new Request("http://localhost/test"));
-    expect(res.headers.get("x-ratelimit-limit")).toBe("300");
+    expect(res.headers.get("x-ratelimit-limit")).toBe("500");
   });
 
   it("should fall back to FREE plan when plan is undefined", async () => {
     const app = createApp(undefined);
     const res = await app.handle(new Request("http://localhost/test"));
-    expect(res.headers.get("x-ratelimit-limit")).toBe("10");
+    expect(res.headers.get("x-ratelimit-limit")).toBe("20");
   });
 
   it("should bypass rate limiting for social crawlers", async () => {
     const app = createApp(Plan.FREE);
 
     // Exhaust the limit
-    for (let i = 0; i < 11; i++) {
+    for (let i = 0; i < 21; i++) {
       await app.handle(new Request("http://localhost/test"));
     }
 
@@ -146,8 +140,8 @@ describe("resolveUserPlan", () => {
 
 describe("resolveApiKeyPlan", () => {
   it("should extract plan from apiKeyContext", () => {
-    const ctx = { apiKeyContext: { plan: "BUSINESS" } };
-    expect(resolveApiKeyPlan(ctx)).toBe("BUSINESS");
+    const ctx = { apiKeyContext: { plan: "PLUS" } };
+    expect(resolveApiKeyPlan(ctx)).toBe("PLUS");
   });
 
   it("should return undefined when no apiKeyContext", () => {

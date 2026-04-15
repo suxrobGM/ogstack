@@ -3,10 +3,13 @@ import { t, type Static } from "elysia";
 export const UsageStatsSchema = t.Object({
   period: t.String({ description: "Billing period in YYYY-MM format" }),
   plan: t.String(),
-  quota: t.Number({ description: "Monthly image quota (-1 for unlimited)" }),
-  used: t.Number({ description: "Images generated in the range" }),
-  remaining: t.Number({ description: "Images remaining (-1 for unlimited)" }),
+  used: t.Number({ description: "Non-AI images generated (unmetered; for display only)" }),
   aiImageCount: t.Number(),
+  aiImageLimit: t.Number(),
+  aiProImageCount: t.Number(),
+  aiProImageLimit: t.Number({ description: "Sub-cap on Flux 2 Pro; 0 means disabled" }),
+  aiAuditCount: t.Number(),
+  aiAuditLimit: t.Number(),
   cacheHits: t.Number(),
 });
 

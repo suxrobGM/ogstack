@@ -118,18 +118,15 @@ export function buildAiImagePrompt(
   return lines.join(" ").slice(0, MAX_PROMPT_CHARS);
 }
 
-/** Maps a user plan to the FAL model they're allowed to use. Returns null when
- *  the plan is not entitled to AI generation. */
-export function resolveFalModelForPlan(plan: Plan): string | null {
+/** Maps a user plan to the FAL model they're allowed to use. Free and Plus use
+ *  Flux 2; Pro uses Flux 2 Pro (capped separately by aiImageProLimit). */
+export function resolveFalModelForPlan(plan: Plan): string {
   switch (plan) {
-    case Plan.FREE:
-      return null;
     case Plan.PRO:
-      return FAL_MODELS.flux2;
-    case Plan.BUSINESS:
-    case Plan.ENTERPRISE:
       return FAL_MODELS.flux2Pro;
+    case Plan.PLUS:
+    case Plan.FREE:
     default:
-      return null;
+      return FAL_MODELS.flux2;
   }
 }

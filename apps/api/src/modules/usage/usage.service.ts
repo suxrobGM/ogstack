@@ -1,4 +1,4 @@
-import { Plan, PLAN_CONFIGS, UNLIMITED_QUOTA } from "@ogstack/shared";
+import { Plan, PLAN_CONFIGS } from "@ogstack/shared";
 import { singleton } from "tsyringe";
 import { PlanLimitError } from "@/common/errors/http.error";
 import {
@@ -14,6 +14,14 @@ import { NotificationService } from "@/modules/notification";
 import type { DateRange } from "@/types/pagination";
 import type { UsageDailyEntry, UsageHistoryEntry, UsageStats } from "./usage.schema";
 
+interface RecordUsageOptions {
+  cacheHit?: boolean;
+  apiKeyId?: string | null;
+  aiEnabled?: boolean;
+  aiProModel?: boolean;
+  isAudit?: boolean;
+}
+
 @singleton()
 export class UsageService {
   constructor(
@@ -21,95 +29,140 @@ export class UsageService {
     private readonly notificationService: NotificationService,
   ) {}
 
-  async enforceQuota(userId: string, projectId: string, apiKeyId?: string | null): Promise<void> {
+  async enforceAiImageQuota(userId: string, useProModel = false): Promise<void> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { plan: true },
     });
+    const plan = user?.plan ?? Plan.FREE;
+    const config = PLAN_CONFIGS[plan];
 
-    const quota = PLAN_CONFIGS[user?.plan ?? Plan.FREE].quota;
-    if (quota < 0) return;
+    const totals = await this.sumCurrentMonth(userId);
 
-    const periodStart = startOfMonth(new Date());
-    const usage = await this.findUsageRecord(userId, projectId, apiKeyId ?? null, periodStart);
-
-    if (usage && usage.imageCount >= quota) {
-      await this.notificationService.create({
+    if (totals.aiImageCount >= config.aiImageLimit) {
+      await this.notifyQuotaExceeded(
         userId,
-        type: "QUOTA_EXCEEDED",
-        title: "Monthly quota exceeded",
-        message: `You've reached your monthly limit of ${quota} images. Upgrade your plan for more.`,
-        actionUrl: "/billing",
-      });
-
+        `You've reached your monthly AI image limit of ${config.aiImageLimit}. Upgrade for more.`,
+      );
       throw new PlanLimitError(
-        `Monthly quota of ${quota} images exceeded. Upgrade your plan for more.`,
+        `Monthly AI image quota of ${config.aiImageLimit} exceeded. Upgrade your plan for more.`,
+      );
+    }
+
+    if (useProModel) {
+      if (config.aiImageProLimit <= 0) {
+        throw new PlanLimitError(
+          "Your plan does not include Flux 2 Pro model access. Upgrade to Pro to use it.",
+        );
+      }
+      if (totals.aiProImageCount >= config.aiImageProLimit) {
+        throw new PlanLimitError(
+          `Monthly Flux 2 Pro quota of ${config.aiImageProLimit} exceeded. Your remaining AI quota will use the standard model.`,
+        );
+      }
+    }
+  }
+
+  async enforceAiAuditQuota(userId: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { plan: true },
+    });
+    const plan = user?.plan ?? Plan.FREE;
+    const config = PLAN_CONFIGS[plan];
+
+    if (config.aiAuditLimit <= 0) {
+      throw new PlanLimitError(
+        "AI audit recommendations are not available on your plan. Upgrade to Plus or Pro.",
+      );
+    }
+
+    const totals = await this.sumCurrentMonth(userId);
+    if (totals.aiAuditCount >= config.aiAuditLimit) {
+      await this.notifyQuotaExceeded(
+        userId,
+        `You've reached your monthly AI audit limit of ${config.aiAuditLimit}. Upgrade for more.`,
+      );
+      throw new PlanLimitError(
+        `Monthly AI audit quota of ${config.aiAuditLimit} exceeded. Upgrade your plan for more.`,
       );
     }
   }
 
   async recordUsage(
     userId: string,
-    projectId: string,
-    cacheHit: boolean,
-    apiKeyId?: string | null,
-    aiEnabled = false,
+    projectId: string | null,
+    options: RecordUsageOptions = {},
   ): Promise<void> {
+    const {
+      cacheHit = false,
+      apiKeyId = null,
+      aiEnabled = false,
+      aiProModel = false,
+      isAudit = false,
+    } = options;
+
     const periodStart = startOfMonth(new Date());
-    const existing = await this.findUsageRecord(userId, projectId, apiKeyId ?? null, periodStart);
+    const existing = await this.findUsageRecord(userId, projectId, apiKeyId, periodStart);
     const countsAsAi = !cacheHit && aiEnabled;
+    const countsAsAiPro = countsAsAi && aiProModel;
+
+    const increments: Record<string, { increment: number }> = {};
+    if (isAudit) {
+      increments.aiAuditCount = { increment: 1 };
+    } else if (cacheHit) {
+      increments.cacheHits = { increment: 1 };
+    } else {
+      increments.imageCount = { increment: 1 };
+      if (countsAsAi) increments.aiImageCount = { increment: 1 };
+      if (countsAsAiPro) increments.aiProImageCount = { increment: 1 };
+    }
 
     if (existing) {
       await this.prisma.usageRecord.update({
         where: { id: existing.id },
-        data: cacheHit
-          ? { cacheHits: { increment: 1 } }
-          : {
-              imageCount: { increment: 1 },
-              ...(countsAsAi && { aiImageCount: { increment: 1 } }),
-            },
+        data: increments,
       });
     } else {
       await this.prisma.usageRecord.create({
         data: {
           userId,
           projectId,
-          apiKeyId: apiKeyId ?? null,
+          apiKeyId,
           periodStart,
           periodEnd: startOfNextMonth(periodStart),
-          imageCount: cacheHit ? 0 : 1,
+          imageCount: !isAudit && !cacheHit ? 1 : 0,
           aiImageCount: countsAsAi ? 1 : 0,
+          aiProImageCount: countsAsAiPro ? 1 : 0,
+          aiAuditCount: isAudit ? 1 : 0,
           cacheHits: cacheHit ? 1 : 0,
         },
       });
     }
 
-    if (!cacheHit) {
-      await this.checkUsageThreshold(userId, projectId, apiKeyId ?? null, periodStart);
+    if (!cacheHit && (aiEnabled || isAudit)) {
+      await this.checkUsageThreshold(userId);
     }
   }
 
-  private async checkUsageThreshold(
-    userId: string,
-    projectId: string,
-    apiKeyId: string | null,
-    periodStart: Date,
-  ): Promise<void> {
+  private async checkUsageThreshold(userId: string): Promise<void> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { plan: true },
     });
+    const plan = user?.plan ?? Plan.FREE;
+    const config = PLAN_CONFIGS[plan];
 
-    const quota = PLAN_CONFIGS[user?.plan ?? Plan.FREE].quota;
-    if (quota < 0) {
-      return;
-    }
+    const totals = await this.sumCurrentMonth(userId);
+    const periodStart = startOfMonth(new Date());
 
-    const usage = await this.findUsageRecord(userId, projectId, apiKeyId, periodStart);
+    const aiThreshold = Math.floor(config.aiImageLimit * 0.8);
+    const auditThreshold = Math.floor(config.aiAuditLimit * 0.8);
 
-    if (!usage || usage.imageCount < Math.floor(quota * 0.8)) {
-      return;
-    }
+    const nearAi = config.aiImageLimit > 0 && totals.aiImageCount >= aiThreshold;
+    const nearAudit = config.aiAuditLimit > 0 && totals.aiAuditCount >= auditThreshold;
+
+    if (!nearAi && !nearAudit) return;
 
     const existing = await this.prisma.notification.findFirst({
       where: {
@@ -118,52 +171,59 @@ export class UsageService {
         createdAt: { gte: periodStart },
       },
     });
-    if (existing) {
-      return;
+    if (existing) return;
+
+    const parts: string[] = [];
+    if (nearAi) {
+      parts.push(`${config.aiImageLimit - totals.aiImageCount} AI images remaining`);
+    }
+    if (nearAudit) {
+      parts.push(`${config.aiAuditLimit - totals.aiAuditCount} AI audits remaining`);
     }
 
-    const remaining = quota - usage.imageCount;
     await this.notificationService.create({
       userId,
       type: "USAGE_ALERT",
       title: "Approaching quota limit",
-      message: `You have ${remaining} image${remaining === 1 ? "" : "s"} remaining this month.`,
+      message: `${parts.join(", ")} this month.`,
+      actionUrl: "/billing",
+    });
+  }
+
+  private async notifyQuotaExceeded(userId: string, message: string): Promise<void> {
+    await this.notificationService.create({
+      userId,
+      type: "QUOTA_EXCEEDED",
+      title: "Monthly quota exceeded",
+      message,
       actionUrl: "/billing",
     });
   }
 
   async getUsageStats(userId: string, range: DateRange = {}): Promise<UsageStats> {
-    const { from, to } = rangeOrLastMonths(range, 1);
+    const { from } = rangeOrLastMonths(range, 1);
 
-    const [user, records] = await Promise.all([
+    const [user, totals] = await Promise.all([
       this.prisma.user.findUnique({
         where: { id: userId },
         select: { plan: true },
       }),
-      this.prisma.usageRecord.findMany({
-        where: { userId, periodStart: { gte: from, lte: to } },
-      }),
+      this.sumRange(userId, from, new Date()),
     ]);
 
     const plan = user?.plan ?? Plan.FREE;
-    const quota = PLAN_CONFIGS[plan].quota;
-
-    const totals = records.reduce(
-      (acc, r) => ({
-        imageCount: acc.imageCount + r.imageCount,
-        aiImageCount: acc.aiImageCount + r.aiImageCount,
-        cacheHits: acc.cacheHits + r.cacheHits,
-      }),
-      { imageCount: 0, aiImageCount: 0, cacheHits: 0 },
-    );
+    const config = PLAN_CONFIGS[plan];
 
     return {
       period: toYearMonth(from),
       plan,
-      quota,
       used: totals.imageCount,
-      remaining: quota < 0 ? UNLIMITED_QUOTA : Math.max(0, quota - totals.imageCount),
       aiImageCount: totals.aiImageCount,
+      aiImageLimit: config.aiImageLimit,
+      aiProImageCount: totals.aiProImageCount,
+      aiProImageLimit: config.aiImageProLimit,
+      aiAuditCount: totals.aiAuditCount,
+      aiAuditLimit: config.aiAuditLimit,
       cacheHits: totals.cacheHits,
     };
   }
@@ -244,12 +304,39 @@ export class UsageService {
 
   private findUsageRecord(
     userId: string,
-    projectId: string,
+    projectId: string | null,
     apiKeyId: string | null,
     periodStart: Date,
   ) {
     return this.prisma.usageRecord.findFirst({
-      where: { userId, projectId, apiKeyId: apiKeyId ?? null, periodStart },
+      where: { userId, projectId, apiKeyId, periodStart },
     });
+  }
+
+  private async sumCurrentMonth(userId: string) {
+    return this.sumRange(userId, startOfMonth(new Date()), new Date());
+  }
+
+  private async sumRange(userId: string, from: Date, to: Date) {
+    const records = await this.prisma.usageRecord.findMany({
+      where: { userId, periodStart: { gte: from, lte: to } },
+      select: {
+        imageCount: true,
+        aiImageCount: true,
+        aiProImageCount: true,
+        aiAuditCount: true,
+        cacheHits: true,
+      },
+    });
+    return records.reduce(
+      (acc, r) => ({
+        imageCount: acc.imageCount + r.imageCount,
+        aiImageCount: acc.aiImageCount + r.aiImageCount,
+        aiProImageCount: acc.aiProImageCount + r.aiProImageCount,
+        aiAuditCount: acc.aiAuditCount + r.aiAuditCount,
+        cacheHits: acc.cacheHits + r.cacheHits,
+      }),
+      { imageCount: 0, aiImageCount: 0, aiProImageCount: 0, aiAuditCount: 0, cacheHits: 0 },
+    );
   }
 }

@@ -5,12 +5,7 @@ import { PaginatedResponseSchema } from "@/types/response";
 
 // ── Shared enums ──
 
-const PlanEnum = t.Union([
-  t.Literal(Plan.FREE),
-  t.Literal(Plan.PRO),
-  t.Literal(Plan.BUSINESS),
-  t.Literal(Plan.ENTERPRISE),
-]);
+const PlanEnum = t.Union([t.Literal(Plan.FREE), t.Literal(Plan.PLUS), t.Literal(Plan.PRO)]);
 
 const UserStatusEnum = t.Union([t.Literal("active"), t.Literal("suspended")]);
 

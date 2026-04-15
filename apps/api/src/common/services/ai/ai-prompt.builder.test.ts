@@ -210,19 +210,15 @@ describe("buildAiImagePrompt", () => {
 });
 
 describe("resolveFalModelForPlan", () => {
-  it("returns null for FREE", () => {
-    expect(resolveFalModelForPlan(Plan.FREE)).toBeNull();
+  it("returns flux2 for FREE", () => {
+    expect(resolveFalModelForPlan(Plan.FREE)).toBe(FAL_MODELS.flux2);
   });
 
-  it("returns flux2 for PRO", () => {
-    expect(resolveFalModelForPlan(Plan.PRO)).toBe(FAL_MODELS.flux2);
+  it("returns flux2 for PLUS", () => {
+    expect(resolveFalModelForPlan(Plan.PLUS)).toBe(FAL_MODELS.flux2);
   });
 
-  it("returns flux2Pro for BUSINESS", () => {
-    expect(resolveFalModelForPlan(Plan.BUSINESS)).toBe(FAL_MODELS.flux2Pro);
-  });
-
-  it("returns flux2Pro for ENTERPRISE", () => {
-    expect(resolveFalModelForPlan(Plan.ENTERPRISE)).toBe(FAL_MODELS.flux2Pro);
+  it("returns flux2Pro for PRO", () => {
+    expect(resolveFalModelForPlan(Plan.PRO)).toBe(FAL_MODELS.flux2Pro);
   });
 });

@@ -1,31 +1,35 @@
-import { PLAN_CONFIGS, PLANS } from "@ogstack/shared";
+import { Plan, PLAN_CONFIGS, PLANS } from "@ogstack/shared";
 import Stripe from "stripe";
 import { prisma } from "@/common/database";
 import { logger } from "@/common/logger";
 
-const PLAN_FEATURES: Record<string, string[]> = {
-  FREE: ["5 templates", "GET meta tag mode", "Community support", "Watermark on images"],
+const PLAN_FEATURES: Record<Plan, string[]> = {
+  FREE: [
+    "Unlimited non-AI images",
+    "3 AI images / month",
+    "All 10 templates",
+    "1 project, 1 domain",
+    "Unlimited API keys",
+    "AI page analysis (with AI image gen)",
+    "20 requests / minute",
+    "Watermark on images",
+  ],
+  PLUS: [
+    "Everything in Free",
+    "100 AI images / month (Flux 2)",
+    "100 AI audit recommendations / month",
+    "5 projects, 3 domains per project",
+    "100 requests / minute",
+    "Email support",
+  ],
   PRO: [
-    "All templates",
-    "Brand Kit",
-    "AI backgrounds (Flux Schnell)",
+    "Everything in Plus",
+    "1,000 AI images / month (300 Flux 2 Pro + 700 Flux 2)",
+    "1,000 AI audit recommendations / month",
+    "Unlimited projects and domains",
     "No watermark",
+    "500 requests / minute",
     "Priority support",
-  ],
-  BUSINESS: [
-    "Everything in Pro",
-    "A/B testing",
-    "Analytics dashboard",
-    "AI backgrounds (Flux Pro)",
-    "Team access",
-  ],
-  ENTERPRISE: [
-    "Everything in Business",
-    "Custom domain",
-    "SLA guarantee",
-    "SSO",
-    "All AI models",
-    "Dedicated support",
   ],
 };
 
@@ -33,7 +37,7 @@ export async function seedPlans(): Promise<void> {
   const stripeKey = process.env.STRIPE_SECRET_KEY;
   const stripe = stripeKey ? new Stripe(stripeKey) : null;
 
-  for (const [index, key] of PLANS.entries()) {
+  for (const key of PLANS) {
     const config = PLAN_CONFIGS[key];
     let stripeProductId: string | null = null;
     let stripePriceId: string | null = null;
@@ -89,20 +93,20 @@ export async function seedPlans(): Promise<void> {
         key,
         name: config.name,
         price: config.price,
-        quota: config.quota,
+        quota: config.aiImageLimit,
         stripeProductId,
         stripePriceId,
         features: PLAN_FEATURES[key] ?? [],
-        sortOrder: index,
+        sortOrder: config.sortOrder,
       },
       update: {
         name: config.name,
         price: config.price,
-        quota: config.quota,
+        quota: config.aiImageLimit,
         stripeProductId,
         stripePriceId,
         features: PLAN_FEATURES[key] ?? [],
-        sortOrder: index,
+        sortOrder: config.sortOrder,
       },
     });
 

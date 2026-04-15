@@ -1,8 +1,9 @@
 import { singleton } from "tsyringe";
-import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
+import { BadRequestError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import {
   buildAiImagePrompt,
+  FAL_MODELS,
   ImageProviderService,
   resolveFalModelForPlan,
   type BuildPromptOptions,
@@ -77,8 +78,6 @@ export class ImageGenerationService {
       throw new NotFoundError("Project not found");
     }
 
-    await this.usageService.enforceQuota(userId, projectId, apiKeyId);
-
     const ctx = await this.buildRenderContext({
       userId,
       projectId,
@@ -91,14 +90,23 @@ export class ImageGenerationService {
 
     const cached = await this.lookupCached(ctx, options?.force === true);
     if (cached) {
-      await this.usageService.recordUsage(userId, projectId, true, apiKeyId);
+      await this.usageService.recordUsage(userId, projectId, { cacheHit: true, apiKeyId });
       await this.cache.incrementServeCount(cached.id);
       return toGenerateResponse(cached, { fromCache: true });
     }
 
+    if (ctx.aiModel) {
+      await this.usageService.enforceAiImageQuota(userId, ctx.aiModel === "fal-ai/flux-2-pro");
+    }
+
     const { image, outcome, generationMs } = await this.runGenerationPipeline(ctx);
 
-    await this.usageService.recordUsage(userId, projectId, false, apiKeyId, outcome.aiEnabled);
+    await this.usageService.recordUsage(userId, projectId, {
+      cacheHit: false,
+      apiKeyId,
+      aiEnabled: outcome.aiEnabled,
+      aiProModel: ctx.aiModel === FAL_MODELS.flux2Pro,
+    });
     logger.info(
       {
         imageId: image.id,
@@ -121,8 +129,6 @@ export class ImageGenerationService {
   ): Promise<Buffer> {
     const project = await this.resolveAndValidatePublicProject(publicId, url);
 
-    await this.usageService.enforceQuota(project.user.id, project.id);
-
     const ctx = await this.buildRenderContext({
       userId: project.user.id,
       projectId: project.id,
@@ -135,21 +141,26 @@ export class ImageGenerationService {
 
     const cached = await this.lookupCached(ctx, false);
     if (cached) {
-      await this.usageService.recordUsage(project.user.id, project.id, true);
+      await this.usageService.recordUsage(project.user.id, project.id, { cacheHit: true });
       await this.cache.incrementServeCount(cached.id);
       const buffer = await this.storage.get(cached.cacheKey);
       if (buffer) return buffer;
     }
 
+    if (ctx.aiModel) {
+      await this.usageService.enforceAiImageQuota(
+        project.user.id,
+        ctx.aiModel === FAL_MODELS.flux2Pro,
+      );
+    }
+
     const { outcome, generationMs } = await this.runGenerationPipeline(ctx);
 
-    await this.usageService.recordUsage(
-      project.user.id,
-      project.id,
-      false,
-      null,
-      outcome.aiEnabled,
-    );
+    await this.usageService.recordUsage(project.user.id, project.id, {
+      cacheHit: false,
+      aiEnabled: outcome.aiEnabled,
+      aiProModel: ctx.aiModel === FAL_MODELS.flux2Pro,
+    });
     logger.info(
       { cacheKey: ctx.cacheKey, generationMs, template, aiEnabled: outcome.aiEnabled },
       "OG image generated (public)",
@@ -283,9 +294,6 @@ export class ImageGenerationService {
     }
 
     const model = resolveFalModelForPlan(user.plan);
-    if (!model) {
-      throw new ForbiddenError("AI image generation requires a Pro plan or higher.");
-    }
     return { plan: user.plan, aiModel: model };
   }
 

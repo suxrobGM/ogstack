@@ -14,10 +14,8 @@ const CRAWLER_UA_PATTERNS = [
 ];
 
 const ONE_MINUTE = 60_000;
-const ONE_DAY = 86_400_000;
 
 const minuteStore = new RateLimitStore();
-const dayStore = new RateLimitStore();
 
 function isSocialCrawler(request: Request): boolean {
   const ua = request.headers.get("user-agent")?.toLowerCase();
@@ -25,7 +23,9 @@ function isSocialCrawler(request: Request): boolean {
   return CRAWLER_UA_PATTERNS.some((pattern) => ua.includes(pattern));
 }
 
-type PlanResolver = (context: Record<string, unknown>) => Plan | undefined;
+type PlanResolver = (
+  context: Record<string, unknown>,
+) => Plan | undefined | Promise<Plan | undefined>;
 
 interface TieredRateLimitOptions {
   resolvePlan: PlanResolver;
@@ -38,37 +38,31 @@ interface TieredRateLimitOptions {
 }
 
 /**
- * Tiered rate limiter that enforces per-minute and per-day limits based on user plan.
+ * Tiered rate limiter that enforces per-minute limits based on user plan.
  * Social crawler user agents bypass rate limits entirely.
- *
- * Headers set on every response:
- * - `X-RateLimit-Limit` — per-minute limit for the resolved plan
- * - `X-RateLimit-Remaining` — requests left in the current minute window
- * - `X-RateLimit-Reset` — unix timestamp (seconds) when the minute window resets
  */
 export function tieredRateLimiter(options: TieredRateLimitOptions) {
   const { resolvePlan, keyPrefix, keyFn } = options;
 
   return new Elysia({ name: `tiered-rate-limiter-${keyPrefix}` }).onBeforeHandle(
     { as: "scoped" },
-    (ctx) => {
+    async (ctx) => {
       const { request, set, server } = ctx;
 
       if (isSocialCrawler(request)) {
         return;
       }
 
-      const plan = resolvePlan(ctx as Record<string, unknown>) ?? Plan.FREE;
-      const config = PLAN_CONFIGS[plan as Plan];
-      const { perMinute, perDay } = config.rateLimit;
+      const resolved = await resolvePlan(ctx as Record<string, unknown>);
+      const plan = resolved ?? Plan.FREE;
+      const config = PLAN_CONFIGS[plan];
+      const { perMinute } = config.rateLimit;
 
       const baseKey = keyFn
         ? keyFn(ctx as Record<string, unknown>, request, server)
         : getClientIp(request, server);
 
       const minuteKey = `${keyPrefix}:min:${baseKey}`;
-      const dayKey = `${keyPrefix}:day:${baseKey}`;
-
       const minuteEntry = minuteStore.hit(minuteKey, ONE_MINUTE);
 
       set.headers["x-ratelimit-limit"] = String(perMinute);
@@ -80,19 +74,6 @@ export function tieredRateLimiter(options: TieredRateLimitOptions) {
         set.headers["retry-after"] = String(retryAfter);
         set.status = 429;
         return { code: "RATE_LIMITED", message: "Too many requests, please try again later" };
-      }
-
-      if (perDay > 0) {
-        const dayEntry = dayStore.hit(dayKey, ONE_DAY);
-        if (dayEntry.count > perDay) {
-          const retryAfter = Math.ceil((dayEntry.resetAt - Date.now()) / 1000);
-          set.headers["retry-after"] = String(retryAfter);
-          set.status = 429;
-          return {
-            code: "RATE_LIMITED",
-            message: "Daily rate limit exceeded, please try again tomorrow",
-          };
-        }
       }
     },
   );

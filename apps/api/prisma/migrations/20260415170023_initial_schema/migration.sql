@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "AuditAiStatus" AS ENUM ('PENDING', 'READY', 'FAILED', 'SKIPPED');
+
+-- CreateEnum
 CREATE TYPE "ImageFormat" AS ENUM ('PNG', 'JPEG', 'WEBP');
 
 -- CreateEnum
@@ -8,7 +11,7 @@ CREATE TYPE "NotificationType" AS ENUM ('USAGE_ALERT', 'QUOTA_EXCEEDED', 'BILLIN
 CREATE TYPE "UserRole" AS ENUM ('USER', 'ADMIN', 'SUPER_ADMIN');
 
 -- CreateEnum
-CREATE TYPE "Plan" AS ENUM ('FREE', 'PRO', 'BUSINESS', 'ENTERPRISE');
+CREATE TYPE "Plan" AS ENUM ('FREE', 'PLUS', 'PRO');
 
 -- CreateTable
 CREATE TABLE "audit_logs" (
@@ -35,6 +38,9 @@ CREATE TABLE "audit_reports" (
     "metadata" JSONB NOT NULL,
     "issues" JSONB NOT NULL,
     "category_scores" JSONB NOT NULL,
+    "ai_status" "AuditAiStatus",
+    "ai_analysis" JSONB,
+    "ai_error" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "audit_reports_pkey" PRIMARY KEY ("id")
@@ -64,6 +70,7 @@ CREATE TABLE "images" (
     "ai_enabled" BOOLEAN NOT NULL DEFAULT false,
     "generation_ms" INTEGER,
     "serve_count" INTEGER NOT NULL DEFAULT 0,
+    "generated_on_plan" "Plan" NOT NULL DEFAULT 'FREE',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "expires_at" TIMESTAMP(3),
 
@@ -130,7 +137,7 @@ CREATE TABLE "projects" (
     "user_id" UUID NOT NULL,
     "public_id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "domains" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "domains" TEXT[],
     "is_active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -141,7 +148,7 @@ CREATE TABLE "projects" (
 -- CreateTable
 CREATE TABLE "api_keys" (
     "id" UUID NOT NULL,
-    "project_id" UUID NOT NULL,
+    "project_id" UUID,
     "user_id" UUID NOT NULL,
     "key_hash" TEXT NOT NULL,
     "prefix" TEXT NOT NULL,
@@ -214,6 +221,8 @@ CREATE TABLE "usage_records" (
     "period_end" TIMESTAMP(3) NOT NULL,
     "image_count" INTEGER NOT NULL DEFAULT 0,
     "ai_image_count" INTEGER NOT NULL DEFAULT 0,
+    "ai_pro_image_count" INTEGER NOT NULL DEFAULT 0,
+    "ai_audit_count" INTEGER NOT NULL DEFAULT 0,
     "cache_hits" INTEGER NOT NULL DEFAULT 0,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
