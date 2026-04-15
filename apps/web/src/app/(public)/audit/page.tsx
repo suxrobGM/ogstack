@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { Box, Stack, Typography } from "@mui/material";
 import type { Metadata } from "next";
-import { AuditLanding } from "@/components/features/audit/audit-landing";
+import { AuditLanding } from "@/components/features/audit/form";
 
 export const metadata: Metadata = {
   title: "OG Audit — Score your Open Graph & SEO readiness · OGStack",

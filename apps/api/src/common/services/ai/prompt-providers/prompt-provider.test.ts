@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { createEmptyMetadata, type UrlMetadata } from "@/common/services/scraper";
-import { buildPromptUserMessage, sanitizePromptOutput } from "./prompt-provider";
+import { buildPromptUserMessage, sanitizePromptOutput } from "./utils";
 
 function meta(partial: Partial<UrlMetadata>): UrlMetadata {
   return { ...createEmptyMetadata("https://example.com"), ...partial };

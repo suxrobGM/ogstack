@@ -1,14 +1,14 @@
 import { container, singleton } from "tsyringe";
 import { logger } from "@/common/logger";
 import type { UrlMetadata } from "@/common/services/scraper.service";
+import { IMAGE_KEYWORDS_SYSTEM_PROMPT } from "./prompts";
 import {
   buildPromptUserMessage,
-  IMAGE_KEYWORDS_SYSTEM_PROMPT,
   PROMPT_PROVIDER_TOKEN,
   sanitizePromptOutput,
   type ChatRequest,
   type PromptProvider,
-} from "./prompt-provider";
+} from "./utils";
 
 const PROMPT_TIMEOUT_MS = Number.parseInt(process.env.PROMPT_PROVIDER_TIMEOUT_MS ?? "2500") || 2500;
 
@@ -32,7 +32,10 @@ export class PromptProviderService {
   private pick(): PromptProvider | null {
     const preferred = process.env.PROMPT_PROVIDER?.trim().toLowerCase();
     const enabled = this.resolveAll().filter((p) => p.isEnabled());
-    if (!enabled.length) return null;
+    if (!enabled.length) {
+      return null;
+    }
+
     if (preferred) {
       const match = enabled.find((p) => p.id === preferred);
       if (match) return match;

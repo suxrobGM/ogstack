@@ -19,11 +19,20 @@ const auditService = container.resolve(AuditService);
 export const auditController = new Elysia({ prefix: "/audit", tags: ["Audit"] })
   .use(optionalAuthGuard)
   .use(rateLimiter({ max: 10, windowMs: 60_000 }))
-  .post("/", ({ body, user }) => auditService.create(body.url, user?.id ?? null), {
-    body: AuditCreateBodySchema,
-    response: AuditReportSchema,
-    detail: { summary: "Run an audit on a URL" },
-  })
+  .post(
+    "/",
+    ({ body, user }) =>
+      auditService.create({
+        url: body.url,
+        userId: user?.id ?? null,
+        includeAi: body.includeAi,
+      }),
+    {
+      body: AuditCreateBodySchema,
+      response: AuditReportSchema,
+      detail: { summary: "Run an audit on a URL" },
+    },
+  )
   .get("/:id", ({ params }) => auditService.getById(params.id), {
     params: UuidIdParamSchema,
     response: AuditReportSchema,

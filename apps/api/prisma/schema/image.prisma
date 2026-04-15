@@ -5,34 +5,29 @@ enum ImageFormat {
 }
 
 model Image {
-  id         String  @id @default(uuid()) @db.Uuid
-  userId     String  @map("user_id") @db.Uuid
-  projectId  String? @map("project_id") @db.Uuid
-  apiKeyId   String? @map("api_key_id") @db.Uuid
-  templateId String? @map("template_id") @db.Uuid
-
-  category String?
-
-  sourceUrl String? @map("source_url")
-  cacheKey  String  @unique @map("cache_key")
-  imageUrl  String  @map("image_url")
-  cdnUrl    String? @map("cdn_url")
-
+  id          String      @id @default(uuid()) @db.Uuid
+  userId      String      @map("user_id") @db.Uuid
+  projectId   String?     @map("project_id") @db.Uuid
+  apiKeyId    String?     @map("api_key_id") @db.Uuid
+  templateId  String?     @map("template_id") @db.Uuid
+  category    String?
+  sourceUrl   String?     @map("source_url")
+  cacheKey    String      @unique @map("cache_key")
+  imageUrl    String      @map("image_url")
+  cdnUrl      String?     @map("cdn_url")
   title       String?
   description String?
-  faviconUrl  String? @map("favicon_url")
+  faviconUrl  String?     @map("favicon_url")
+  width       Int         @default(1200)
+  height      Int         @default(630)
+  format      ImageFormat @default(PNG)
+  fileSize    Int?        @map("file_size")
 
-  width    Int         @default(1200)
-  height   Int         @default(630)
-  format   ImageFormat @default(PNG)
-  fileSize Int?        @map("file_size")
-
-  aiModel   String? @map("ai_model")
-  aiPrompt  String? @map("ai_prompt") @db.Text
-  aiEnabled Boolean @default(false) @map("ai_enabled")
-
-  generationMs Int? @map("generation_ms")
-  serveCount   Int  @default(0) @map("serve_count")
+  aiModel      String? @map("ai_model")
+  aiPrompt     String? @map("ai_prompt") @db.Text
+  aiEnabled    Boolean @default(false) @map("ai_enabled")
+  generationMs Int?    @map("generation_ms")
+  serveCount   Int     @default(0) @map("serve_count")
 
   createdAt DateTime  @default(now()) @map("created_at")
   expiresAt DateTime? @map("expires_at")

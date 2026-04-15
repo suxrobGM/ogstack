@@ -9,7 +9,7 @@ export const AnalyzeRequestSchema = t.Object({
   skipAi: t.Optional(t.Boolean()),
 });
 
-const PageAnalysisImagePromptSchema = t.Object({
+export const PageAnalysisImagePromptSchema = t.Object({
   headline: t.String(),
   tagline: t.Nullable(t.String()),
   backgroundKeywords: t.String(),
@@ -23,7 +23,7 @@ const PageAnalysisImagePromptSchema = t.Object({
   ]),
 });
 
-const PageAnalysisAiSchema = t.Object({
+export const PageAnalysisAiSchema = t.Object({
   title: t.String(),
   description: t.String(),
   summary: t.String(),

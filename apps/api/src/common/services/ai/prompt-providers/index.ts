@@ -4,5 +4,6 @@ export * from "./llama-cpp.provider";
 export * from "./ollama.provider";
 export * from "./openai-compatible.provider";
 export * from "./openai.provider";
-export * from "./prompt-provider";
+export * from "./utils";
 export * from "./prompt-provider.service";
+export * from "./prompts";

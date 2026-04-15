@@ -1,13 +1,23 @@
+enum AuditAiStatus {
+  PENDING
+  READY
+  FAILED
+  SKIPPED
+}
+
 model AuditReport {
-  id             String   @id @default(uuid()) @db.Uuid
-  userId         String?  @map("user_id") @db.Uuid
+  id             String         @id @default(uuid()) @db.Uuid
+  userId         String?        @map("user_id") @db.Uuid
   url            String
-  overallScore   Int      @map("overall_score")
-  letterGrade    String   @map("letter_grade")
+  overallScore   Int            @map("overall_score")
+  letterGrade    String         @map("letter_grade")
   metadata       Json
   issues         Json
-  categoryScores Json     @map("category_scores")
-  createdAt      DateTime @default(now()) @map("created_at")
+  categoryScores Json           @map("category_scores")
+  aiStatus       AuditAiStatus? @map("ai_status")
+  aiAnalysis     Json?          @map("ai_analysis")
+  aiError        String?        @map("ai_error")
+  createdAt      DateTime       @default(now()) @map("created_at")
 
   user User? @relation(fields: [userId], references: [id])
 

@@ -24,6 +24,7 @@ export function AuditDashboard(props: AuditDashboardProps): ReactElement {
         <Stack spacing={3}>
           <Typography variant="h5">Run an audit</Typography>
           <AuditForm
+            showAiOption
             onSuccess={(report) => {
               queryClient.invalidateQueries({ queryKey: ["audit", "history"] });
               router.push(`/audits/${report.id}` as Route);

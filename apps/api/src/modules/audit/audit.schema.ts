@@ -1,10 +1,27 @@
 import { t, type Static } from "elysia";
+import { AuditAiStatus } from "@/generated/prisma";
 import { PaginationQueryBaseSchema } from "@/types/pagination";
 import { PaginatedResponseSchema } from "@/types/response";
 
+export const AuditAiInsightsSchema = t.Object({
+  suggestedOgTitle: t.String(),
+  suggestedOgDescription: t.String(),
+  suggestedTwitterTitle: t.String(),
+  suggestedTwitterDescription: t.String(),
+  toneAssessment: t.String(),
+  audienceFit: t.Union([t.Literal("strong"), t.Literal("mixed"), t.Literal("weak")]),
+  contentGaps: t.Array(t.String()),
+  socialCtrTips: t.Array(t.String()),
+  severity: t.Union([t.Literal("low"), t.Literal("medium"), t.Literal("high")]),
+  confidence: t.Union([t.Literal("high"), t.Literal("medium"), t.Literal("low")]),
+});
+
 export const AuditCreateBodySchema = t.Object({
   url: t.String({ format: "uri" }),
+  includeAi: t.Optional(t.Boolean()),
 });
+
+export const AuditAiStatusSchema = t.Enum(AuditAiStatus);
 
 export const IssueSeveritySchema = t.Union([
   t.Literal("critical"),
@@ -51,6 +68,9 @@ export const AuditReportSchema = t.Object({
     twitter: t.Number(),
     seo: t.Number(),
   }),
+  aiStatus: t.Nullable(AuditAiStatusSchema),
+  aiAnalysis: t.Nullable(AuditAiInsightsSchema),
+  aiError: t.Nullable(t.String()),
 });
 
 export const AuditHistoryItemSchema = t.Object({
@@ -66,6 +86,7 @@ export const AuditHistoryResponseSchema = PaginatedResponseSchema(AuditHistoryIt
 export const AuditHistoryQuerySchema = PaginationQueryBaseSchema;
 
 export type AuditCreateBody = Static<typeof AuditCreateBodySchema>;
+export type AuditAiInsights = Static<typeof AuditAiInsightsSchema>;
 export type AuditIssue = Static<typeof AuditIssueSchema>;
 export type IssueSeverity = Static<typeof IssueSeveritySchema>;
 export type IssueCategory = Static<typeof IssueCategorySchema>;

@@ -139,7 +139,9 @@ export class PageAnalysisService {
   }
 
   private async resolvePlan(userId: string | null): Promise<Plan> {
-    if (!userId) return Plan.FREE;
+    if (!userId) {
+      return Plan.FREE;
+    }
     const record = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { plan: true },

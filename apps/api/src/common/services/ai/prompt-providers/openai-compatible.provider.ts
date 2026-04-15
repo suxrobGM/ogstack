@@ -1,4 +1,4 @@
-import type { ChatRequest, PromptProvider } from "./prompt-provider";
+import type { ChatRequest, PromptProvider } from "./utils";
 
 interface ChatCompletionResponse {
   choices?: { message?: { content?: string } }[];

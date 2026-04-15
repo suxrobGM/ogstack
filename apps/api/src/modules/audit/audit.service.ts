@@ -1,9 +1,12 @@
 import { singleton } from "tsyringe";
-import { NotFoundError } from "@/common/errors";
+import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
+import { logger } from "@/common/logger";
 import { ScraperService } from "@/common/services/scraper.service";
-import { PrismaClient } from "@/generated/prisma";
-import { extractAuditMetadata, probeOgImage } from "./audit.extractor";
+import { AuditAiStatus, Plan, PrismaClient } from "@/generated/prisma";
+import { AuditAnalysisService } from "./audit-analysis.service";
+import { extractAuditMetadata, probeOgImage, type AuditMetadata } from "./audit.extractor";
 import type {
+  AuditAiInsights,
   AuditHistoryItem,
   AuditHistoryQuery,
   AuditHistoryResponse,
@@ -15,14 +18,25 @@ import { computeScore, runChecks } from "./audit.scoring";
 
 type CategoryScores = { og: number; twitter: number; seo: number };
 
+interface CreateAuditParams {
+  url: string;
+  userId: string | null;
+  includeAi?: boolean;
+}
+
 @singleton()
 export class AuditService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly scraper: ScraperService,
+    private readonly auditAnalysis: AuditAnalysisService,
   ) {}
 
-  async create(rawUrl: string, userId: string | null): Promise<AuditReportDto> {
+  async create(params: CreateAuditParams): Promise<AuditReportDto> {
+    const { url: rawUrl, userId, includeAi } = params;
+
+    const shouldEnrich = await this.checkAiEligibility(userId, includeAi);
+
     const { url, html } = await this.scraper.fetchValidatedHtml(rawUrl);
     const meta = await extractAuditMetadata(url, html);
 
@@ -44,6 +58,8 @@ export class AuditService {
       twitterCardType: meta.twitterCard,
     };
 
+    const aiStatus: AuditAiStatus = shouldEnrich ? AuditAiStatus.PENDING : AuditAiStatus.SKIPPED;
+
     const saved = await this.prisma.auditReport.create({
       data: {
         userId,
@@ -53,8 +69,13 @@ export class AuditService {
         metadata: metadata as unknown as AuditPreviewMetadata,
         issues: issues as unknown as AuditIssue[],
         categoryScores: scores.byCategory as unknown as CategoryScores,
+        aiStatus,
       },
     });
+
+    if (shouldEnrich && userId) {
+      void this.enrichWithAi(saved.id, meta, issues);
+    }
 
     return {
       id: saved.id,
@@ -65,6 +86,9 @@ export class AuditService {
       metadata,
       issues,
       categoryScores: scores.byCategory,
+      aiStatus,
+      aiAnalysis: null,
+      aiError: null,
     };
   }
 
@@ -83,6 +107,9 @@ export class AuditService {
       metadata: row.metadata as unknown as AuditPreviewMetadata,
       issues: row.issues as unknown as AuditIssue[],
       categoryScores: row.categoryScores as unknown as CategoryScores,
+      aiStatus: row.aiStatus ?? null,
+      aiAnalysis: (row.aiAnalysis as AuditAiInsights | null) ?? null,
+      aiError: row.aiError ?? null,
     };
   }
 
@@ -135,5 +162,56 @@ export class AuditService {
       where: { userId: null, createdAt: { lt: cutoff } },
     });
     return count;
+  }
+
+  /**
+   * Checks whether the requester may enrich this audit with AI. Anonymous
+   * requests silently fall through to `skipped` — only authenticated FREE
+   * users opting in get a 403 so the UI can surface the upgrade path.
+   */
+  private async checkAiEligibility(userId: string | null, includeAi = false): Promise<boolean> {
+    if (!includeAi) return false;
+    if (!userId) return false;
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { plan: true },
+    });
+    if (!user || user.plan === Plan.FREE) {
+      throw new ForbiddenError("AI audit recommendations require a Pro plan or higher.");
+    }
+    return true;
+  }
+
+  private async enrichWithAi(
+    reportId: string,
+    metadata: AuditMetadata,
+    issues: AuditIssue[],
+  ): Promise<void> {
+    try {
+      if (!this.auditAnalysis.isEnabled()) {
+        throw new BadRequestError(
+          "No AI provider configured — set PROMPT_PROVIDER and related env vars.",
+        );
+      }
+
+      const insights = await this.auditAnalysis.analyze({ metadata, issues });
+      await this.prisma.auditReport.update({
+        where: { id: reportId },
+        data: {
+          aiStatus: AuditAiStatus.READY,
+          aiAnalysis: insights as unknown as object,
+          aiError: null,
+        },
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      logger.warn({ reportId, message }, "Audit AI enrichment failed");
+
+      await this.prisma.auditReport.update({
+        where: { id: reportId },
+        data: { aiStatus: AuditAiStatus.FAILED, aiError: message },
+      });
+    }
   }
 }

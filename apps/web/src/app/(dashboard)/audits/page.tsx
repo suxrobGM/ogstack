@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { AuditDashboard } from "@/components/features/audit/audit-dashboard";
+import { AuditDashboard } from "@/components/features/audit/form";
 import { PageHeader } from "@/components/ui/layout/page-header";
 import { getServerClient } from "@/lib/api/server";
 import type { AuditHistoryResponse } from "@/types/api";

@@ -3,6 +3,7 @@ import { Box, Divider, Grid, Stack, Typography } from "@mui/material";
 import { Surface } from "@/components/ui/layout/surface";
 import { fontFamilies } from "@/theme/typography";
 import type { AuditReportResponse } from "@/types/api";
+import { AiRecommendationsPanel } from "../ai-recommendations";
 import { CtaBanner } from "./cta-banner";
 import { IssueList } from "./issue-list";
 import { PlatformPreviewGrid } from "./platform-preview-grid";
@@ -52,6 +53,8 @@ export function AuditReport(props: AuditReportProps): ReactElement {
           </Grid>
         </Grid>
       </Surface>
+
+      <AiRecommendationsPanel report={report} />
 
       <CtaBanner url={report.url} />
 

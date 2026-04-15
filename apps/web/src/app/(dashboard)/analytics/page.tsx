@@ -36,7 +36,9 @@ function aggregateTemplates(images: ImageItem[]): Record<string, number> {
   const counts: Record<string, number> = {};
   for (const img of images) {
     const name = img.template?.name;
-    if (!name) continue;
+    if (!name) {
+      continue;
+    }
     counts[name] = (counts[name] ?? 0) + 1;
   }
   return counts;
@@ -45,8 +47,11 @@ function aggregateTemplates(images: ImageItem[]): Record<string, number> {
 function aggregateTopProjects(images: ImageItem[]): TopProject[] {
   const counts = new Map<string, TopProject>();
   for (const img of images) {
-    if (!img.projectId) continue;
+    if (!img.projectId) {
+      continue;
+    }
     const existing = counts.get(img.projectId);
+
     if (existing) {
       existing.imageCount += 1;
     } else {
@@ -64,7 +69,9 @@ function averageGenerationMs(images: ImageItem[]): number | null {
   const values = images
     .map((i) => i.generationMs)
     .filter((v): v is number => typeof v === "number");
-  if (values.length === 0) return null;
+  if (values.length === 0) {
+    return null;
+  }
   return values.reduce((a, b) => a + b, 0) / values.length;
 }
 

@@ -1,5 +1,5 @@
 import { singleton } from "tsyringe";
-import type { ChatRequest, PromptProvider } from "./prompt-provider";
+import type { ChatRequest, PromptProvider } from "./utils";
 
 interface AnthropicMessagesResponse {
   content?: { type: string; text?: string }[];

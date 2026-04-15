@@ -1,14 +1,26 @@
 "use client";
 
 import type { ReactElement } from "react";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, Button, CircularProgress, LinearProgress, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  LinearProgress,
+  Link as MuiLink,
+  Stack,
+  Typography,
+} from "@mui/material";
+import { Plan } from "@ogstack/shared";
 import { useForm } from "@tanstack/react-form";
+import { FormCheckboxField } from "@/components/ui/form/form-checkbox-field";
 import { FormTextField } from "@/components/ui/form/form-text-field";
 import { Surface } from "@/components/ui/layout/surface";
 import { useApiMutation } from "@/hooks";
 import { client } from "@/lib/api/client";
-import { radii } from "@/theme";
+import { useAuth } from "@/providers/auth-provider";
+import { accent, iconSizes, radii } from "@/theme";
 import type { AuditReportResponse } from "@/types/api";
 import { normalizeUrlInput } from "@/utils/url";
 import { auditFormSchema, type AuditFormValues } from "./schema";
@@ -17,18 +29,22 @@ interface AuditFormProps {
   onSuccess: (report: AuditReportResponse) => void;
   autoFocus?: boolean;
   initialUrl?: string;
+  showAiOption?: boolean;
 }
 
 export function AuditForm(props: AuditFormProps): ReactElement {
-  const { onSuccess, autoFocus, initialUrl } = props;
+  const { onSuccess, autoFocus, initialUrl, showAiOption } = props;
+  const { user } = useAuth();
+  const aiAllowed = !!user && user.plan !== Plan.FREE;
 
   const mutation = useApiMutation((body: AuditFormValues) => client.api.audit.post(body), {
     errorMessage: (err) => err.message,
     onSuccess: (data) => onSuccess(data as AuditReportResponse),
   });
 
+  const defaultValues: AuditFormValues = { url: initialUrl ?? "", includeAi: false };
   const form = useForm({
-    defaultValues: { url: initialUrl ?? "" } satisfies AuditFormValues,
+    defaultValues,
     validators: { onSubmit: auditFormSchema },
     onSubmit: ({ value }) => {
       mutation.mutate(value);
@@ -69,6 +85,26 @@ export function AuditForm(props: AuditFormProps): ReactElement {
           size="medium"
           disabled={isPending}
         />
+        {showAiOption && (
+          <FormCheckboxField
+            form={form}
+            name="includeAi"
+            disabled={isPending || !aiAllowed}
+            label={
+              <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+                <AutoAwesomeIcon sx={{ fontSize: iconSizes.xs, color: accent.primary }} />
+                <Typography variant="body2">Include AI recommendations</Typography>
+              </Stack>
+            }
+            helperText={
+              !aiAllowed ? (
+                <>
+                  Pro feature — <MuiLink href="/billing">upgrade to unlock</MuiLink>.
+                </>
+              ) : undefined
+            }
+          />
+        )}
         <Button
           type="submit"
           variant="contained"
@@ -86,7 +122,7 @@ export function AuditForm(props: AuditFormProps): ReactElement {
         </Button>
         {isPending && (
           <Box sx={{ textAlign: "center" }}>
-            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+            <Typography variant="captionMuted">
               Fetching the page, parsing metadata, and grading it — usually 3–8 seconds.
             </Typography>
           </Box>
