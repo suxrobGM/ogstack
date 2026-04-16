@@ -10,9 +10,11 @@ export interface ChatRequest {
   temperature?: number;
 }
 
-/** A text completion provider. Implementations only supply a chat endpoint;
- *  higher-level transforms (metadata → prompt, JSON parsing, keyword
- *  sanitization) live in `PromptProviderService` and its callers. */
+/**
+ * A text completion provider. Implementations only supply a chat endpoint;
+ * higher-level transforms (metadata → prompt, JSON parsing, keyword
+ * sanitization) live in `PromptProviderService` and its callers.
+ */
 export interface PromptProvider {
   /** Short identifier for logs (e.g. "anthropic", "openai", "ollama"). */
   readonly id: string;
@@ -23,8 +25,10 @@ export interface PromptProvider {
   /** True when the provider is configured (API key / base URL present). */
   isEnabled(): boolean;
 
-  /** Generic chat completion. Returns the raw assistant text. Callers are
-   *  responsible for parsing (JSON, keywords, etc.). */
+  /**
+   * Generic chat completion. Returns the raw assistant text. Callers are
+   * responsible for parsing (JSON, keywords, etc.).
+   */
   chat(req: ChatRequest): Promise<string>;
 }
 
@@ -42,9 +46,11 @@ export function buildPromptUserMessage(metadata: UrlMetadata): string {
   return parts.join("\n");
 }
 
-/** Strips reasoning blocks (Qwen/DeepSeek `<think>...</think>`) and markdown
- *  code fences from raw LLM output. Returned text still needs format-specific
- *  parsing (keywords line, JSON, etc.). */
+/**
+ * Strips reasoning blocks (Qwen/DeepSeek `<think>...</think>`) and markdown
+ * code fences from raw LLM output. Returned text still needs format-specific
+ * parsing (keywords line, JSON, etc.).
+ */
 export function stripReasoningBlocks(raw: string): string {
   return raw
     .replace(/<think>[\s\S]*?<\/think>/gi, "")
@@ -52,8 +58,10 @@ export function stripReasoningBlocks(raw: string): string {
     .replace(/^```[a-z]*\n?|\n?```$/gi, "");
 }
 
-/** Strip reasoning blocks, quotes, and "Keywords:"-style prefixes from LLM
- *  output, then return the first non-empty line. */
+/**
+ * Strip reasoning blocks, quotes, and "Keywords:"-style prefixes from LLM
+ * output, then return the first non-empty line.
+ */
 export function sanitizePromptOutput(raw: string): string {
   const cleaned = stripReasoningBlocks(raw);
   for (const line of cleaned.split(/\r?\n/)) {
@@ -66,9 +74,11 @@ export function sanitizePromptOutput(raw: string): string {
   return "";
 }
 
-/** Parses a JSON object response from an LLM. Strips reasoning blocks and any
- *  text before the first `{` or after the last `}`. Returns null on any failure
- *  so callers can gracefully fall back. */
+/**
+ * Parses a JSON object response from an LLM. Strips reasoning blocks and any
+ * text before the first `{` or after the last `}`. Returns null on any failure
+ * so callers can gracefully fall back.
+ */
 export function parseJsonResponse<T>(raw: string): T | null {
   const cleaned = stripReasoningBlocks(raw)
     .replace(/^[^{]*/, "")
@@ -87,7 +97,7 @@ export function parseJsonResponse<T>(raw: string): T | null {
 /** Strips prompt-injection phrases so a user-supplied directive can't flip the
  *  system prompt's role. Keeps it short and tactical — defense in depth on top
  *  of the system prompt's own instructions. Caps at 500 chars. */
-export function sanitizeUserPrompt(raw: string | undefined): string {
+export function sanitizeUserPrompt(raw: string | null | undefined): string {
   if (!raw) return "";
   return raw
     .replace(/<\/?(system|assistant|user)>/gi, "")

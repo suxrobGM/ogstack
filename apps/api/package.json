@@ -17,8 +17,7 @@
     "build:win": "bun build --compile --minify-whitespace --minify-syntax --target bun-windows-x64 --outfile dist/server.exe src/app.ts",
     "build:types": "tsc --emitDeclarationOnly",
     "typecheck": "tsc --noEmit",
-    "generate:thumbnails": "bun run scripts/generate-template-thumbnails.ts",
-    "generate:landing-samples": "bun run scripts/generate-landing-samples.ts"
+    "generate:thumbnails": "bun run scripts/generate-template-thumbnails.ts"
   },
   "prisma": {
     "seed": "bun run prisma/seed/index.ts"

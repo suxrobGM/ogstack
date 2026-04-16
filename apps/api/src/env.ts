@@ -38,10 +38,8 @@ const EnvSchema = t.Object({
   STRIPE_WEBHOOK_SECRET: t.Optional(t.String()),
 
   FAL_API_KEY: t.Optional(t.String()),
-  FAL_TIMEOUT_MS: t.Optional(t.String({ default: "7000" })),
 
   PROMPT_PROVIDER: t.Optional(t.String()),
-  PROMPT_PROVIDER_TIMEOUT_MS: t.Optional(t.String({ default: "2500" })),
 
   ANTHROPIC_API_KEY: t.Optional(t.String()),
   ANTHROPIC_MODEL: t.Optional(t.String()),

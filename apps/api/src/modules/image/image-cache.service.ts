@@ -22,11 +22,12 @@ export class ImageCacheService {
   ) {}
 
   buildKey(input: BuildKeyInput): Promise<string> {
+    const { force, ...stableOptions } = input.options ?? {};
     const normalized = JSON.stringify({
       projectId: input.projectId,
       url: input.url,
       template: input.template,
-      ...input.options,
+      ...stableOptions,
       aiModel: input.aiModel,
       watermark: input.watermark,
     });

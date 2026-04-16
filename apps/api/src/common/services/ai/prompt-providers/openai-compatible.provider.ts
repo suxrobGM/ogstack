@@ -1,7 +1,14 @@
+import { logger } from "@/common/logger";
 import type { ChatRequest, PromptProvider } from "./utils";
 
 interface ChatCompletionResponse {
   choices?: { message?: { content?: string } }[];
+  usage?: {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    prompt_cache_hit_tokens?: number;
+    prompt_cache_miss_tokens?: number;
+  };
 }
 
 interface OpenAiCompatConfig {
@@ -66,6 +73,20 @@ export abstract class OpenAiCompatibleProvider implements PromptProvider {
     }
 
     const data = (await response.json()) as ChatCompletionResponse;
+
+    if (data.usage) {
+      logger.info(
+        {
+          provider: this.config.id,
+          promptTokens: data.usage.prompt_tokens,
+          completionTokens: data.usage.completion_tokens,
+          cacheHitTokens: data.usage.prompt_cache_hit_tokens,
+          cacheMissTokens: data.usage.prompt_cache_miss_tokens,
+        },
+        "LLM token usage",
+      );
+    }
+
     return data.choices?.[0]?.message?.content ?? "";
   }
 }

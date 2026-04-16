@@ -79,7 +79,7 @@ export function PreviewPane(props: PreviewPaneProps): ReactElement {
           </Alert>
         )}
 
-        {result && (
+        {result && !isGenerating && (
           <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap" }}>
             {result.cached && <Typography variant="captionMuted">Served from cache</Typography>}
             {result.generationMs != null && (
@@ -107,6 +107,7 @@ export function PreviewPane(props: PreviewPaneProps): ReactElement {
               download="og-image.png"
               target="_blank"
               rel="noopener noreferrer"
+              disabled={isGenerating}
               fullWidth
             >
               Download

@@ -1,8 +1,9 @@
 import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors";
 import { resolveFalModelForPlan, type BuildPromptOptions } from "@/common/services/ai";
+import { FAL_MODELS } from "@/common/services/ai/image-providers/fal-ai.provider";
 import { shouldWatermark } from "@/common/services/watermark";
-import { PrismaClient, type Plan } from "@/generated/prisma";
+import { Plan, PrismaClient } from "@/generated/prisma";
 import type { PageAnalysisAi } from "@/modules/page-analysis";
 import type { RenderOptions, TemplateSlug } from "@/modules/template";
 import { ImageCacheService } from "./image-cache.service";
@@ -85,6 +86,17 @@ export class RenderContextBuilder {
       return { plan: user.plan, aiModel: null };
     }
 
-    return { plan: user.plan, aiModel: resolveFalModelForPlan(user.plan) };
+    const aiModel = this.resolveAiModel(user.plan, options.aiModel);
+    return { plan: user.plan, aiModel };
+  }
+
+  private resolveAiModel(plan: Plan, requested?: "standard" | "pro"): string {
+    if (requested === "pro" && plan === Plan.PRO) {
+      return FAL_MODELS.flux2Pro;
+    }
+    if (requested === "standard") {
+      return FAL_MODELS.flux2;
+    }
+    return resolveFalModelForPlan(plan);
   }
 }

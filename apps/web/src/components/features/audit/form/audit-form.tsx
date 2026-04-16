@@ -12,14 +12,12 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { Plan } from "@ogstack/shared";
 import { useForm } from "@tanstack/react-form";
 import { FormCheckboxField } from "@/components/ui/form/form-checkbox-field";
 import { FormTextField } from "@/components/ui/form/form-text-field";
 import { Surface } from "@/components/ui/layout/surface";
 import { useApiMutation } from "@/hooks";
 import { client } from "@/lib/api/client";
-import { useAuth } from "@/providers/auth-provider";
 import { accent, iconSizes, radii } from "@/theme";
 import type { AuditReportResponse } from "@/types/api";
 import { normalizeUrlInput } from "@/utils/url";
@@ -30,12 +28,15 @@ interface AuditFormProps {
   autoFocus?: boolean;
   initialUrl?: string;
   showAiOption?: boolean;
+  /**
+   * Whether the AI recommendations checkbox is selectable. Callers that know
+   * the viewer's plan pass `true` for Plus/Pro; public usage leaves it off.
+   */
+  aiAllowed?: boolean;
 }
 
 export function AuditForm(props: AuditFormProps): ReactElement {
-  const { onSuccess, autoFocus, initialUrl, showAiOption } = props;
-  const { user } = useAuth();
-  const aiAllowed = !!user && user.plan !== Plan.FREE;
+  const { onSuccess, autoFocus, initialUrl, showAiOption, aiAllowed = false } = props;
 
   const mutation = useApiMutation((body: AuditFormValues) => client.api.audit.post(body), {
     errorMessage: (err) => err.message,

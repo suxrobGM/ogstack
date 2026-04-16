@@ -10,7 +10,21 @@ const AUTH_ROUTES = [
   ROUTES.verifyEmail,
 ];
 
-const PUBLIC_ROUTES = [ROUTES.home, ROUTES.docs];
+const PUBLIC_ROUTES = [
+  ROUTES.home,
+  ROUTES.docs,
+  ROUTES.features,
+  ROUTES.howItWorks,
+  ROUTES.aiShowcase,
+  ROUTES.templateGallery,
+  ROUTES.pricing,
+  ROUTES.audit,
+  ROUTES.about,
+  ROUTES.compare,
+  ROUTES.contact,
+  ROUTES.privacy,
+  ROUTES.terms,
+];
 
 export function proxy(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;

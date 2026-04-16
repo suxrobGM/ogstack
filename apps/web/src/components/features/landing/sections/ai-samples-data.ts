@@ -26,5 +26,5 @@ export function aiSampleUrl(sample: AiSample): string {
 }
 
 export function templateThumbFallback(template: string): string {
-  return `/images/templates/${template}.webp`;
+  return `/images/templates/${template}.png`;
 }

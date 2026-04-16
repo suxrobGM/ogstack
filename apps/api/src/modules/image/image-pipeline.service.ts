@@ -50,6 +50,7 @@ export class ImagePipelineService {
     const generationMs = Math.round(performance.now() - startMs);
 
     const stored = await this.storage.store(ctx.cacheKey, outcome.pngBuffer);
+    const imageUrl = `${stored.url}?v=${Date.now()}`;
     const templateRecord = await this.prisma.template.findUnique({
       where: { slug: ctx.template },
       select: { id: true },
@@ -63,7 +64,7 @@ export class ImagePipelineService {
         templateId: templateRecord?.id ?? null,
         sourceUrl: ctx.url,
         cacheKey: ctx.cacheKey,
-        imageUrl: stored.url,
+        imageUrl,
         title: metadata.ogTitle ?? metadata.title,
         description: metadata.ogDescription ?? metadata.description,
         faviconUrl: metadata.favicon,

@@ -32,6 +32,8 @@ export const LOGO_POSITION_LABELS: Record<LogoPosition, string> = {
   "bottom-right": "Bottom Right",
 };
 
+export type AiModelTier = "standard" | "pro";
+
 export interface PlaygroundFormValues {
   url: string;
   template: TemplateSlug;
@@ -41,6 +43,7 @@ export interface PlaygroundFormValues {
   logoUrl: string;
   logoPosition: LogoPosition;
   aiGenerated: boolean;
+  aiModel: AiModelTier;
   aiPrompt: string;
   fullOverride: boolean;
 }

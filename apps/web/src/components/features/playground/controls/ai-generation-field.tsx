@@ -9,11 +9,15 @@ import {
   Stack,
   Switch,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
+import { Plan } from "@ogstack/shared";
 import type { AnyReactForm } from "@/components/ui/form/types";
+import { useAuth } from "@/providers";
 import { accent, line, radii } from "@/theme";
-import { AI_PROMPT_MAX_CHARS } from "../schema";
+import { AI_PROMPT_MAX_CHARS, type AiModelTier } from "../schema";
 
 interface AiGenerationFieldProps {
   form: AnyReactForm;
@@ -46,7 +50,7 @@ export function AiGenerationField(props: AiGenerationFieldProps): ReactElement {
                       Generate with AI
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Pro plan or higher. AI creates the full image from page content.
+                      AI creates the full image from page content.
                     </Typography>
                   </Stack>
                 </Stack>
@@ -60,6 +64,7 @@ export function AiGenerationField(props: AiGenerationFieldProps): ReactElement {
 
           <Collapse in={aiGenerated} timeout="auto" unmountOnExit>
             <Stack spacing={1.5}>
+              <AiModelField form={form} />
               <AiPromptField form={form} />
               <FullOverrideField form={form} />
             </Stack>
@@ -67,6 +72,43 @@ export function AiGenerationField(props: AiGenerationFieldProps): ReactElement {
         </Stack>
       )}
     </form.Subscribe>
+  );
+}
+
+function AiModelField(props: { form: AnyReactForm }): ReactElement {
+  const { form } = props;
+  const { user } = useAuth();
+  const canUsePro = user?.plan === Plan.PRO;
+
+  return (
+    <form.Field name="aiModel">
+      {(field) => (
+        <Stack spacing={0.75}>
+          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+            Image quality
+          </Typography>
+          <ToggleButtonGroup
+            exclusive
+            fullWidth
+            size="small"
+            value={field.state.value ?? "standard"}
+            onChange={(_, value: AiModelTier | null) => {
+              if (value) field.handleChange(value);
+            }}
+          >
+            <ToggleButton value="standard">Standard</ToggleButton>
+            <ToggleButton value="pro" disabled={!canUsePro}>
+              Pro
+            </ToggleButton>
+          </ToggleButtonGroup>
+          <Typography variant="captionMuted">
+            {canUsePro
+              ? "Pro uses a higher-fidelity model with a separate monthly quota."
+              : "Upgrade to Pro to access the premium image model."}
+          </Typography>
+        </Stack>
+      )}
+    </form.Field>
   );
 }
 

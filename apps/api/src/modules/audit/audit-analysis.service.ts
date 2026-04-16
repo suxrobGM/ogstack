@@ -28,16 +28,13 @@ export class AuditAnalysisService {
   }
 
   async analyze(params: AnalyzeParams): Promise<AuditAiInsights> {
-    const raw = await this.promptProvider.chat(
-      {
-        system: AUDIT_ANALYSIS_SYSTEM_PROMPT,
-        user: this.buildUserMessage(params.metadata, params.issues),
-        json: true,
-        temperature: 0.3,
-        maxTokens: 5000,
-      },
-      { timeoutMs: ANALYSIS_TIMEOUT_MS },
-    );
+    const raw = await this.promptProvider.chat({
+      system: AUDIT_ANALYSIS_SYSTEM_PROMPT,
+      user: this.buildUserMessage(params.metadata, params.issues),
+      json: true,
+      temperature: 0.3,
+      maxTokens: 5000,
+    });
 
     if (!raw) {
       throw new BadRequestError(

@@ -8,7 +8,6 @@ export { HeroSection } from "./hero-section";
 export { HowItWorksSection } from "./how-it-works-section";
 export { PricingSection } from "./pricing-section";
 export { ProblemsSection } from "./problems-section";
-export { SocialPreviewsSection } from "./social-previews-section";
 export { TemplateGallerySection } from "./template-gallery-section";
 export {
   AI_SAMPLES,

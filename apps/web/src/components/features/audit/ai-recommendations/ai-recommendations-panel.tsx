@@ -1,22 +1,26 @@
 "use client";
 
 import type { ReactElement } from "react";
-import { Plan } from "@ogstack/shared";
 import { useApiQuery } from "@/hooks";
 import { client } from "@/lib/api/client";
-import { useAuth } from "@/providers/auth-provider";
 import type { AuditReportResponse } from "@/types/api";
 import { InsightsView } from "./insights-view";
 import { LockedPreview } from "./locked-preview";
 import { EmptyProView, FailedView, PendingView } from "./status-views";
 
+export type AuditViewer = "anonymous" | "free" | "pro";
+
 interface AiRecommendationsPanelProps {
   report: AuditReportResponse;
+  /**
+   * Who's looking at this report. Determines the empty/locked state shown
+   * when there's no AI analysis on the record.
+   */
+  viewer: AuditViewer;
 }
 
 export function AiRecommendationsPanel(props: AiRecommendationsPanelProps): ReactElement {
-  const { report } = props;
-  const { user } = useAuth();
+  const { report, viewer } = props;
 
   const { data } = useApiQuery(
     ["audit", "detail", report.id],
@@ -42,10 +46,10 @@ export function AiRecommendationsPanel(props: AiRecommendationsPanelProps): Reac
     case "FAILED":
       return <FailedView error={current.aiError} />;
     default: {
-      if (!user) {
+      if (viewer === "anonymous") {
         return <LockedPreview audience="anonymous" />;
       }
-      if (user.plan === Plan.FREE) {
+      if (viewer === "free") {
         return <LockedPreview audience="free" />;
       }
       return <EmptyProView />;

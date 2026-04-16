@@ -1,5 +1,4 @@
 {
-  "$schema": "./samples.manifest.schema.json",
   "generatedAt": "2026-04-16T02:02:26.681Z",
   "notes": "Populated by apps/api/scripts/generate-landing-samples.ts. Pair sources with generated .webp files placed alongside this manifest. Do not expose underlying model names in UI copy.",
   "samples": [
@@ -8,7 +7,7 @@
       "sourceUrl": "https://depvault.com/",
       "template": "split_hero",
       "quality": "pro",
-      "file": "depvault__split_hero__pro.webp",
+      "file": "depvault__split_hero__pro.png",
       "seeds": {
         "headline": "DepVault",
         "tagline": "Dependency management, simplified",
@@ -20,7 +19,7 @@
       "sourceUrl": "https://depvault.com/",
       "template": "split_hero",
       "quality": "standard",
-      "file": "depvault__split_hero__standard.webp",
+      "file": "depvault__split_hero__standard.png",
       "seeds": {
         "headline": "DepVault",
         "tagline": "Dependency management, simplified",
@@ -32,7 +31,7 @@
       "sourceUrl": "https://travel.state.gov/content/travel/en/legal/visa-law0/visa-bulletin.html",
       "template": "docs_page",
       "quality": "pro",
-      "file": "visa-bulletin__docs_page__pro.webp",
+      "file": "visa-bulletin__docs_page__pro.png",
       "seeds": {
         "headline": "Visa Bulletin",
         "tagline": "U.S. Department of State — Bureau of Consular Affairs",
@@ -44,7 +43,7 @@
       "sourceUrl": "https://www.prisma.io/changelog",
       "template": "changelog",
       "quality": "pro",
-      "file": "prisma-release__changelog__pro.webp",
+      "file": "prisma-release__changelog__pro.png",
       "seeds": {
         "headline": "Prisma 7 — Adapters & Faster Migrations",
         "tagline": "Next-generation Node.js and TypeScript ORM",
@@ -56,7 +55,7 @@
       "sourceUrl": "https://github.com/elysiajs/elysia",
       "template": "github_repo",
       "quality": "pro",
-      "file": "elysia-repo__github_repo__pro.webp",
+      "file": "elysia-repo__github_repo__pro.png",
       "seeds": {
         "headline": "Build Faster with Elysia",
         "tagline": "The ergonomic TypeScript framework powered by Bun for end-to-end type safety and exceptional developer experience.",
@@ -68,7 +67,7 @@
       "sourceUrl": "https://logisticsx.app",
       "template": "product_launch",
       "quality": "pro",
-      "file": "logisticsx__product_launch__pro.webp",
+      "file": "logisticsx__product_launch__pro.png",
       "seeds": {
         "headline": "AI Fleet Management Platform",
         "tagline": "Autonomous dispatch, HOS compliance, and route optimization for trucking fleets.",

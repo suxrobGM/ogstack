@@ -16,6 +16,7 @@ export const FAL_MODELS = {
 export type FalModel = (typeof FAL_MODELS)[keyof typeof FAL_MODELS];
 
 const SUPPORTED_MODELS = new Set<string>(Object.values(FAL_MODELS));
+const FAL_TIMEOUT = 30_000;
 
 interface FalSubmitResponse {
   request_id: string;
@@ -34,13 +35,7 @@ interface FalResultResponse {
 @singleton()
 export class FalAiProvider implements ImageProvider {
   readonly id = "fal";
-  private readonly apiKey: string | null;
-  private readonly defaultTimeoutMs: number;
-
-  constructor() {
-    this.apiKey = process.env.FAL_API_KEY ?? null;
-    this.defaultTimeoutMs = Number.parseInt(process.env.FAL_TIMEOUT_MS ?? "7000") || 7000;
-  }
+  private readonly apiKey = process.env.FAL_API_KEY ?? null;
 
   isEnabled(): boolean {
     return Boolean(this.apiKey);
@@ -62,9 +57,8 @@ export class FalAiProvider implements ImageProvider {
       throw new BadRequestError(`FAL provider does not support model "${model}".`);
     }
 
-    const timeoutMs = params.timeoutMs ?? this.defaultTimeoutMs;
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const timer = setTimeout(() => controller.abort(), FAL_TIMEOUT);
     const startMs = performance.now();
 
     try {

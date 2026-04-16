@@ -30,7 +30,14 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
 export default async function PublicAuditReportPage(props: PageProps): Promise<ReactElement> {
   const { id } = await props.params;
   const report = await fetchReport(id);
-  if (!report) notFound();
 
-  return <AuditReport report={report} />;
+  if (!report) {
+    notFound();
+  }
+
+  return (
+    <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
+      <AuditReport report={report} viewer="anonymous" />
+    </Container>
+  );
 }

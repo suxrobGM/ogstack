@@ -45,6 +45,7 @@ export const RenderOptionsSchema = t.Object({
   logoUrl: t.Optional(t.String({ format: "uri" })),
   logoPosition: t.Optional(LogoPositionSchema),
   aiGenerated: t.Optional(t.Boolean({ default: false })),
+  aiModel: t.Optional(t.Union([t.Literal("standard"), t.Literal("pro")])),
   aiPrompt: t.Optional(t.String({ maxLength: 500 })),
   fullOverride: t.Optional(t.Boolean({ default: false })),
   force: t.Optional(t.Boolean({ default: false })),

@@ -24,9 +24,6 @@ interface AnalyzeParams {
 
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24h in ms
 
-// Max time to wait for the LLM analysis before falling back to classic metadata.
-const ANALYSIS_TIMEOUT = 30_000;
-
 /**
  * Analyzes a page for its title, description, summary, key points, topics,
  * and image-prompt seeds. Free-tier users get classic scrape only; Pro+ users
@@ -151,18 +148,15 @@ export class PageAnalysisService {
 
   private async runAnalysis(
     metadata: UrlMetadata,
-    userPrompt: string | undefined,
+    userPrompt?: string,
   ): Promise<PageAnalysisAi | null> {
-    const raw = await this.promptProvider.chat(
-      {
-        system: PAGE_ANALYSIS_SYSTEM_PROMPT,
-        user: this.buildAnalyzeUserMessage(metadata, userPrompt),
-        json: true,
-        temperature: 0.3,
-        maxTokens: 5000,
-      },
-      { timeoutMs: ANALYSIS_TIMEOUT },
-    );
+    const raw = await this.promptProvider.chat({
+      system: PAGE_ANALYSIS_SYSTEM_PROMPT,
+      user: this.buildAnalyzeUserMessage(metadata, userPrompt),
+      json: true,
+      temperature: 0.3,
+      maxTokens: 5000,
+    });
     if (!raw) return null;
     const parsed = parseJsonResponse<PageAnalysisAi>(raw);
     if (!parsed) {
@@ -170,7 +164,9 @@ export class PageAnalysisService {
         { sample: raw.slice(0, 200) },
         "Page analysis LLM response was not valid JSON — falling back to classic",
       );
+      return null;
     }
+
     return parsed;
   }
 
@@ -243,7 +239,7 @@ export class PageAnalysisService {
     return hashSha256(`${url}|${bodyHash}|${promptHash}`);
   }
 
-  private buildAnalyzeUserMessage(metadata: UrlMetadata, userPrompt: string | undefined): string {
+  private buildAnalyzeUserMessage(metadata: UrlMetadata, userPrompt?: string): string {
     const page = {
       url: metadata.url,
       title: metadata.ogTitle ?? metadata.title,

@@ -10,7 +10,7 @@ import {
   type PromptProvider,
 } from "./utils";
 
-const PROMPT_TIMEOUT_MS = Number.parseInt(process.env.PROMPT_PROVIDER_TIMEOUT_MS ?? "2500") || 2500;
+const PROMPT_TIMEOUT = 30_000;
 
 /**
  * Facade that picks an enabled `PromptProvider` and dispatches chat calls.
@@ -52,18 +52,16 @@ export class PromptProviderService {
     return picked ? { id: picked.id, model: picked.model } : null;
   }
 
-  /** Generic chat call with caller-supplied timeout. Returns the raw assistant
-   *  text or null on timeout/error. Callers handle parsing (JSON, keywords). */
-  async chat(
-    req: Omit<ChatRequest, "signal">,
-    options: { timeoutMs?: number } = {},
-  ): Promise<string | null> {
+  /**
+   * Generic chat call with caller-supplied timeout. Returns the raw assistant
+   * text or null on timeout/error. Callers handle parsing (JSON, keywords).
+   */
+  async chat(req: Omit<ChatRequest, "signal">): Promise<string | null> {
     const provider = this.pick();
     if (!provider) return null;
 
-    const timeoutMs = options.timeoutMs ?? PROMPT_TIMEOUT_MS;
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const timer = setTimeout(() => controller.abort(), PROMPT_TIMEOUT);
     const startMs = performance.now();
 
     try {
@@ -88,9 +86,11 @@ export class PromptProviderService {
     }
   }
 
-  /** Turns page metadata into a short line of visual keywords for the image
-   *  prompt builder. Returns null on error; callers fall back to a static
-   *  background prompt. */
+  /**
+   * Turns page metadata into a short line of visual keywords for the image
+   * prompt builder. Returns null on error; callers fall back to a static
+   * background prompt.
+   */
   async generate(metadata: UrlMetadata): Promise<string | null> {
     const raw = await this.chat({
       system: IMAGE_KEYWORDS_SYSTEM_PROMPT,

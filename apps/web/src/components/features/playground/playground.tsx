@@ -34,6 +34,7 @@ const DEFAULTS: PlaygroundFormValues = {
   logoUrl: "",
   logoPosition: "top-left",
   aiGenerated: false,
+  aiModel: "standard",
   aiPrompt: "",
   fullOverride: false,
 };
@@ -142,6 +143,7 @@ export function Playground(props: PlaygroundProps): ReactElement {
         logoUrl: values.logoUrl || undefined,
         logoPosition: values.logoPosition,
         aiGenerated: values.aiGenerated,
+        aiModel: values.aiGenerated ? values.aiModel : undefined,
         aiPrompt: values.aiPrompt,
         fullOverride: values.fullOverride,
         force: force,
@@ -160,7 +162,7 @@ export function Playground(props: PlaygroundProps): ReactElement {
   });
 
   const handleRegenerate = () => {
-    submit(form.state.values, true);
+    submit(form.state.values, true, true);
   };
 
   const metaTag =

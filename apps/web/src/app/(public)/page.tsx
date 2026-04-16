@@ -10,7 +10,6 @@ import {
   HowItWorksSection,
   PricingSection,
   ProblemsSection,
-  SocialPreviewsSection,
 } from "@/components/features/landing";
 
 export default function HomePage(): ReactElement {
@@ -22,7 +21,6 @@ export default function HomePage(): ReactElement {
       <ProblemsSection />
       <FeaturesSection />
       <AuditPromoSection />
-      <SocialPreviewsSection />
       <FeaturedTemplatesSection />
       <CodeSection />
       <PricingSection />

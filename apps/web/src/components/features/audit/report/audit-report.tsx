@@ -3,7 +3,7 @@ import { Box, Divider, Grid, Stack, Typography } from "@mui/material";
 import { Surface } from "@/components/ui/layout/surface";
 import { fontFamilies } from "@/theme/typography";
 import type { AuditReportResponse } from "@/types/api";
-import { AiRecommendationsPanel } from "../ai-recommendations";
+import { AiRecommendationsPanel, type AuditViewer } from "../ai-recommendations";
 import { CtaBanner } from "./cta-banner";
 import { IssueList } from "./issue-list";
 import { PlatformPreviewGrid } from "./platform-preview-grid";
@@ -11,10 +11,11 @@ import { ScoreGauge } from "./score-gauge";
 
 interface AuditReportProps {
   report: AuditReportResponse;
+  viewer: AuditViewer;
 }
 
 export function AuditReport(props: AuditReportProps): ReactElement {
-  const { report } = props;
+  const { report, viewer } = props;
   const failing = report.issues.filter((i) => !i.pass).length;
 
   return (
@@ -54,7 +55,7 @@ export function AuditReport(props: AuditReportProps): ReactElement {
         </Grid>
       </Surface>
 
-      <AiRecommendationsPanel report={report} />
+      <AiRecommendationsPanel report={report} viewer={viewer} />
 
       <CtaBanner url={report.url} />
 
