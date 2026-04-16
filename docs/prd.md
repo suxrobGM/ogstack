@@ -79,10 +79,10 @@ OGStack evolves from an OG image API into the **visual identity layer for the in
 
 ### 3.1 Long-Term Vision (18 months)
 
-- Phase 1 (Months 1-3): Core API + templates + optional AI backgrounds → **Launch and acquire first 1,000 users**
-- Phase 2 (Months 4-6): OG Score audit tool + Brand Kit + framework plugins → **Viral growth engine**
-- Phase 3 (Months 7-12): Community Templates + Smart Style Matching + analytics → **Platform and ecosystem**
-- Phase 4 (Months 13-18): A/B testing + animated OGs + enterprise features → **Category leadership**
+- **Shipped (v1)**: Core API + 10 templates + content-aware AI image generation (Flux 2 / Flux 2 Pro) + AI page analysis + AI audit recommendations + public audit tool + dashboard + Stripe billing
+- **Next (Phase 2)**: Framework plugins (Next.js, Astro, WordPress), analytics, Community Templates
+- **Future (Phase 3)**: Smart Style Matching (auto-detect brand palette from site), A/B testing, animated OGs
+- **Enterprise**: SSO, SLA, custom domains, higher rate tiers
 
 ---
 
@@ -117,7 +117,7 @@ OGStack evolves from an OG image API into the **visual identity layer for the in
 GET https://cdn.ogstack.dev/p/{projectId}/generate?url=https://myblog.com/post-title&style=gradient_dark
 ```
 
-No API key required. The public project ID in the URL path identifies the user's account, plan, and Brand Kit. Developers copy the generated link from the dashboard playground and paste it directly into their `<meta>` tag — zero server-side code needed.
+No API key required. The public project ID in the URL path identifies the user's account and plan. Developers copy the generated link from the dashboard playground and paste it directly into their `<meta>` tag — zero server-side code needed.
 
 The API scrapes the target URL, extracts meta tags (title, description, favicon, author), and generates an OG image automatically. Supports full customization via query parameters.
 
@@ -144,7 +144,7 @@ This mode is for server-side / build-time usage where developers need programmat
 
 **Technical Flow:**
 
-1. Receive request → resolve project ID (GET) or validate API key (POST) → load user plan and Brand Kit → check rate limits
+1. Receive request → resolve project ID (GET) or validate API key (POST) → load user plan → check rate limits
 2. Validate domain: for GET requests, verify the `url` param domain matches the project's registered domains
 3. Check CDN cache for existing image (cache key = hash of project ID + URL + parameters)
 4. Cache HIT → serve from CDN (< 50ms)
@@ -203,7 +203,7 @@ This mode is for server-side / build-time usage where developers need programmat
 | `/dashboard/api-keys`   | Create, revoke, and manage API keys (for programmatic POST endpoint)                    |
 | `/dashboard/templates`  | Browse, preview, and customize templates                                                |
 | `/dashboard/images`     | Gallery of all generated images with search/filter                                      |
-| `/dashboard/brand`      | Brand Kit: upload logo, set colors, choose fonts                                        |
+| `/dashboard/audits`     | AI-powered URL audit with scoring and suggested tag rewrites                            |
 | `/dashboard/settings`   | Account settings, billing, team management                                              |
 | `/dashboard/playground` | Interactive playground: enter a URL, pick a template, preview the OG image in real-time |
 
@@ -263,7 +263,7 @@ OGStack uses a split authentication model optimized for the two primary use case
 - Each user gets a default project on signup with a unique public project ID (e.g., `cLx8kZ9m`)
 - Users can create multiple projects (e.g., one per site)
 - Each project has a **domain allowlist** — GET requests are only served if the `url` parameter matches a registered domain
-- Projects are tied to the user's plan, Brand Kit, and usage quota
+- Projects are tied to the user's plan and usage quota
 - Project IDs are public and safe to embed in HTML — abuse is prevented via domain allowlisting and rate limiting
 
 **API Keys (for programmatic POST endpoint only):**
@@ -367,46 +367,26 @@ A free, publicly accessible tool at `ogstack.dev/audit` where anyone can enter a
 
 ---
 
-## 7. Feature: Brand Kit & Smart Style Matching
+## 7. Feature: AI Page Analysis & Content-Aware Generation (Shipped)
 
-**Priority:** Phase 2-3 (Month 3-6)
-**Goal:** Increase stickiness and justify paid tiers for businesses.
+**Priority:** v1 — shipped.
+**Goal:** The headline differentiator. Every AI image is grounded in the page the user is trying to share — no hallucinated content, no manual prompting.
 
-### 7.1 Brand Kit (Manual Setup)
+### 7.1 Pipeline
 
-Users configure their brand identity in the dashboard:
+1. **Scrape** — `ScraperService` fetches the target URL with SSRF protection, extracts OG/Twitter/SEO tags, the page body, H1/H2 structure, author, published time. Headless rendering is allowed for Plus and Pro tiers.
+2. **LLM page analysis** — `PageAnalysisService` calls the configured `PromptProvider` (DeepSeek / Anthropic / OpenAI-compatible / Ollama / llama.cpp) with a structured JSON system prompt. The response includes page title, description, summary, key points, topics, content type, language, plus image-prompt seeds: headline, tagline, background keywords, suggested accent, and mood. Results are cached 24h per `(url, bodyHash, userPrompt)`.
+3. **Prompt build** — `buildAiImagePrompt` assembles a Flux-optimized prompt that leads with the extracted headline for legible on-image typography, then describes the background via the LLM's background keywords.
+4. **Image render** — `ImageProviderService` dispatches to the FAL provider. Standard quality uses Flux 2, Pro quality uses Flux 2 Pro (metered separately on the Pro plan with a 300-image sub-cap).
+5. **Fallback** — any failure in the AI path falls back to the deterministic Satori template render for the same URL, so the caller always receives an image.
 
-| Setting              | Input                    | Usage                                       |
-| -------------------- | ------------------------ | ------------------------------------------- |
-| **Logo**             | Upload PNG/SVG (max 2MB) | Placed in OG image corner or header         |
-| **Primary Color**    | Hex code or color picker | Accent color for templates, gradients       |
-| **Secondary Color**  | Hex code or color picker | Supporting color for backgrounds, borders   |
-| **Font**             | Select from curated list | Title and body text rendering               |
-| **Default Template** | Select from library      | Applied when no template param is specified |
-| **Domain(s)**        | List of domains          | Brand Kit auto-applies to matching domains  |
+### 7.2 Reuse across features
 
-**Storage:** Brand Kit assets stored in Cloudflare R2. Configuration stored in Prisma/PostgreSQL.
+The page-analysis output is shared between AI image generation and AI audit recommendations. A single cached analysis feeds both pipelines to avoid duplicate LLM spend.
 
-### 7.2 Smart Style Matching (AI-Powered)
+### 7.3 Roadmap
 
-**Description:** Instead of manually configuring a Brand Kit, users click "Auto-detect" and the system:
-
-1. Scrapes the user's website homepage
-2. Takes a screenshot of the page
-3. Uses a vision model (Claude or GPT-4o) to analyze the color palette, typography, and design style
-4. Extracts dominant colors (primary, secondary, accent)
-5. Identifies the closest matching font from the curated list
-6. Detects the logo/favicon
-7. Auto-populates the Brand Kit with detected values
-8. Generates a sample OG image for preview and approval
-
-**Technical Requirements:**
-
-- Screenshot capture: Headless browser (Playwright) or screenshot API
-- Vision model API call: Send screenshot to Claude/GPT-4o with prompt to extract design attributes
-- Color extraction: Algorithmic extraction from screenshot pixels (k-means clustering) as fallback/supplement to AI
-- Response time: < 15 seconds for full detection
-- User confirmation required before saving (never auto-apply without review)
+- **Smart Style Matching** (Phase 3): auto-detect a site's brand palette/font from a screenshot via a vision model and apply it as defaults on all AI renders.
 
 ---
 
@@ -482,7 +462,6 @@ model User {
 
   projects         Project[]
   apiKeys          ApiKey[]
-  brandKits        BrandKit[]
   generatedImages  GeneratedImage[]
   auditReports     AuditReport[]
   auditLogs        AuditLog[]
@@ -541,28 +520,6 @@ model ApiKey {
 
   @@index([key])
   @@map("api_keys")
-}
-
-// ─── Brand Kit ──────────────────────────────
-
-model BrandKit {
-  id              String   @id @default(cuid())
-  userId          String   @map("user_id")
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name            String   @default("Default")
-  domains         String[] @default([])
-  logoUrl         String?  @map("logo_url")
-  primaryColor    String   @default("#000000") @map("primary_color")
-  secondaryColor  String   @default("#FFFFFF") @map("secondary_color")
-  accentColor     String   @default("#3B82F6") @map("accent_color")
-  fontFamily      String   @default("inter") @map("font_family")
-  defaultTemplate String   @default("gradient_dark") @map("default_template")
-  isDefault       Boolean  @default(false) @map("is_default")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-
-  @@unique([userId, name])
-  @@map("brand_kits")
 }
 
 // ─── Templates ──────────────────────────────
@@ -746,18 +703,18 @@ GET https://cdn.ogstack.dev/p/{projectId}/generate?url={url}&template={template}
 
 This is the primary integration point. Developers copy this URL from the dashboard and paste it into their `<meta og:image>` tag. No API key needed — the project ID identifies the account.
 
-| Parameter  | Type              | Required | Default         | Description                                                            |
-| ---------- | ----------------- | -------- | --------------- | ---------------------------------------------------------------------- |
-| `url`      | string            | Yes      | —               | URL to generate OG image for (must match project's registered domains) |
-| `template` | string            | No       | User's default  | Template slug                                                          |
-| `theme`    | `dark` \| `light` | No       | `dark`          | Color theme                                                            |
-| `ai`       | boolean           | No       | `false`         | Enable AI background                                                   |
-| `accent`   | string            | No       | Brand Kit color | Hex color code                                                         |
-| `font`     | string            | No       | Brand Kit font  | Font family name                                                       |
-| `format`   | `png` \| `jpeg`   | No       | `png`           | Output format                                                          |
-| `width`    | number            | No       | `1200`          | Image width                                                            |
-| `height`   | number            | No       | `630`           | Image height                                                           |
-| `cache`    | boolean           | No       | `true`          | Use cached version if available                                        |
+| Parameter  | Type              | Required | Default          | Description                                                            |
+| ---------- | ----------------- | -------- | ---------------- | ---------------------------------------------------------------------- |
+| `url`      | string            | Yes      | —                | URL to generate OG image for (must match project's registered domains) |
+| `template` | string            | No       | User's default   | Template slug                                                          |
+| `theme`    | `dark` \| `light` | No       | `dark`           | Color theme                                                            |
+| `ai`       | boolean           | No       | `false`          | Enable AI background                                                   |
+| `accent`   | string            | No       | Template default | Hex color code                                                         |
+| `font`     | string            | No       | Template default | Font family name                                                       |
+| `format`   | `png` \| `jpeg`   | No       | `png`            | Output format                                                          |
+| `width`    | number            | No       | `1200`           | Image width                                                            |
+| `height`   | number            | No       | `630`            | Image height                                                           |
+| `cache`    | boolean           | No       | `true`           | Use cached version if available                                        |
 
 **Response:** `200 OK` with `Content-Type: image/png` (binary image data)
 
@@ -1009,14 +966,14 @@ X-RateLimit-Reset: 1711036800
 
 ## 14. Risks & Mitigations
 
-| Risk                                          | Likelihood | Impact | Mitigation                                                                                                         |
-| --------------------------------------------- | ---------- | ------ | ------------------------------------------------------------------------------------------------------------------ |
-| AI model provider (FAL.ai) has outage         | Medium     | High   | Implement fallback to Replicate; template-only mode as degraded experience                                         |
-| Competitor (Vercel) builds native OG image AI | Medium     | High   | Move faster; focus on features Vercel won't build (marketplace, audit tool, multi-framework)                       |
-| URL scraping blocked by target sites          | Low        | Medium | Respect robots.txt; fallback to manual parameter mode; use metadata extraction libraries (not full rendering)      |
-| AI generates inappropriate content            | Low        | High   | Content moderation layer; restrict prompts to abstract/geometric styles; human review for flagged outputs          |
-| Low conversion from free to paid              | Medium     | High   | Improve watermark visibility; gate AI features strictly; build features that create lock-in (Brand Kit, analytics) |
-| Scaling costs exceed revenue                  | Low        | Medium | Aggressive caching (99%+ cache hit rate); usage-based pricing prevents abuse; auto-scaling with spending caps      |
+| Risk                                          | Likelihood | Impact | Mitigation                                                                                                                                           |
+| --------------------------------------------- | ---------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AI model provider (FAL.ai) has outage         | Medium     | High   | Implement fallback to Replicate; template-only mode as degraded experience                                                                           |
+| Competitor (Vercel) builds native OG image AI | Medium     | High   | Move faster; focus on features Vercel won't build (marketplace, audit tool, multi-framework)                                                         |
+| URL scraping blocked by target sites          | Low        | Medium | Respect robots.txt; fallback to manual parameter mode; use metadata extraction libraries (not full rendering)                                        |
+| AI generates inappropriate content            | Low        | High   | Content moderation layer; restrict prompts to abstract/geometric styles; human review for flagged outputs                                            |
+| Low conversion from free to paid              | Medium     | High   | Improve watermark visibility; gate AI features strictly; build features that create lock-in (analytics, AI audit recommendations, framework plugins) |
+| Scaling costs exceed revenue                  | Low        | Medium | Aggressive caching (99%+ cache hit rate); usage-based pricing prevents abuse; auto-scaling with spending caps                                        |
 
 ---
 
@@ -1043,7 +1000,7 @@ X-RateLimit-Reset: 1711036800
 | **Placid.app**             | Template-based image generation API         | From $29/mo      | No AI; limited templates; expensive for the features |
 | **Bannerbear**             | REST API for dynamic image/video generation | From $49/mo      | Generic (not OG-focused); no AI; expensive           |
 | **ScreenshotOne**          | Screenshot API repurposed for OG images     | From $9/mo       | Screenshots, not designed images; ugly results       |
-| **ogimageapi.io**          | Simple OG image API                         | Free tier + paid | Very basic; limited templates; no AI; no brand kit   |
+| **ogimageapi.io**          | Simple OG image API                         | Free tier + paid | Very basic; limited templates; no AI                 |
 | **Robolly**                | Cloud image generation API                  | From $19/mo      | Not OG-focused; template-heavy; no AI                |
 
 **OGStack's unique advantages:**
@@ -1063,7 +1020,7 @@ X-RateLimit-Reset: 1711036800
 5. **Integration:** Copies the generated meta tag from the playground (e.g., `<meta property="og:image" content="https://cdn.ogstack.dev/p/cLx8kZ9m/generate?url=..." />`) and pastes it into their HTML — done in 30 seconds, no API key, no server-side code
 6. **Wow moment:** Shares a blog post on Twitter, sees the beautiful OG image in the preview
 7. **Upgrade trigger:** Hits 50 image limit, or wants AI backgrounds / no watermark → upgrades to Pro ($12/mo)
-8. **Retention:** Sets up Brand Kit, adds all their projects → switching cost increases
+8. **Retention:** Adds all their projects, configures domain allowlists, hits their monthly AI quota → switching cost increases
 9. **Advocacy:** Shares their OG Score badge, tells friends, refers colleagues
 
 ### C. Reference: OG Image Specifications by Platform

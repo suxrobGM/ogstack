@@ -1,8 +1,9 @@
 import type { ReactElement } from "react";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import VerifiedIcon from "@mui/icons-material/Verified";
-import { Box, Button, Container, Grid, Stack, Typography } from "@mui/material";
+import { Box, Button, Chip, Container, Grid, Stack, Typography } from "@mui/material";
 import { Surface } from "@/components/ui/layout/surface";
 import { ROUTES } from "@/lib/constants";
 import { iconSizes } from "@/theme";
@@ -35,6 +36,20 @@ export function AuditPromoSection(): ReactElement {
                 <Typography variant="h2" sx={{ maxWidth: 520 }}>
                   Is your URL ready to be shared?
                 </Typography>
+                <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
+                  <Chip
+                    icon={<AutoAwesomeIcon sx={{ fontSize: 14 }} />}
+                    label="+ AI recommendations on Plus & Pro"
+                    size="small"
+                    sx={{
+                      bgcolor: "rgba(180,83,9,0.10)",
+                      color: "accent.primary",
+                      border: "1px solid rgba(180,83,9,0.22)",
+                      fontSize: 12,
+                      "& .MuiChip-icon": { color: "accent.primary" },
+                    }}
+                  />
+                </Stack>
                 <Typography variant="body1Muted" sx={{ maxWidth: 520 }}>
                   Paste any URL and get an A–F grade in seconds. See exactly how it previews on
                   every major platform, and get a line-by-line fix list for anything that&apos;s

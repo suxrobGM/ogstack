@@ -55,7 +55,6 @@ export function AuditHistoryList(props: AuditHistoryListProps): ReactElement {
             sx={{
               bgcolor: `${color}1A`,
               color,
-              fontFamily: fontFamilies.mono,
               fontWeight: 600,
             }}
           />

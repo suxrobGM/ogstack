@@ -1,7 +1,6 @@
 import type { PropsWithChildren, ReactElement } from "react";
 import { Box } from "@mui/material";
-import { Footer } from "@/components/features/landing/footer";
-import { LandingNavbar } from "@/components/features/landing/landing-navbar";
+import { Footer, LandingNavbar } from "@/components/features/landing";
 
 export default function PublicLayout({ children }: PropsWithChildren): ReactElement {
   return (

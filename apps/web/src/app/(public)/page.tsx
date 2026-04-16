@@ -1,22 +1,32 @@
 import type { ReactElement } from "react";
-import { AuditPromoSection } from "@/components/features/landing/audit-promo-section";
-import { CodeSection } from "@/components/features/landing/code-section";
-import { FeaturesSection } from "@/components/features/landing/features-section";
-import { HeroSection } from "@/components/features/landing/hero-section";
-import { PricingSection } from "@/components/features/landing/pricing-section";
-import { SocialPreviewsSection } from "@/components/features/landing/social-previews-section";
-import { TemplateGallerySection } from "@/components/features/landing/template-gallery-section";
+import {
+  AiShowcaseSection,
+  AuditPromoSection,
+  CodeSection,
+  FeaturedTemplatesSection,
+  FeaturesSection,
+  FinalCtaSection,
+  HeroSection,
+  HowItWorksSection,
+  PricingSection,
+  ProblemsSection,
+  SocialPreviewsSection,
+} from "@/components/features/landing";
 
 export default function HomePage(): ReactElement {
   return (
     <>
       <HeroSection />
-      <SocialPreviewsSection />
-      <AuditPromoSection />
+      <AiShowcaseSection limit={3} />
+      <HowItWorksSection />
+      <ProblemsSection />
       <FeaturesSection />
+      <AuditPromoSection />
+      <SocialPreviewsSection />
+      <FeaturedTemplatesSection />
       <CodeSection />
-      <TemplateGallerySection />
       <PricingSection />
+      <FinalCtaSection />
     </>
   );
 }

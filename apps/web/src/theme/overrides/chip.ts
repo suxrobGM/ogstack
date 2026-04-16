@@ -11,7 +11,7 @@ export const chipOverrides: Components<Theme>["MuiChip"] = {
     root: {
       borderRadius: radii.xs,
       fontFamily: fontFamilies.mono,
-      fontSize: "0.72rem",
+      fontSize: 11,
       fontWeight: 500,
       letterSpacing: "0.03em",
       height: 24,

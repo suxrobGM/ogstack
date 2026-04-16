@@ -4,9 +4,17 @@
 
 ## Product
 
-OGStack is a developer-first API platform for generating beautiful Open Graph images. Single meta tag or API call → contextual social preview images with zero design effort.
+OGStack is a developer-first API platform for generating beautiful Open Graph images **powered by AI that reads your page content**. A single meta tag or API call → contextual, on-brand social preview images with zero design effort.
 
 - **Domain**: ogstack.dev | **API**: api.ogstack.dev | **CDN**: cdn.ogstack.dev
+
+## AI Features (Shipped)
+
+All three AI capabilities are production and gated by plan tier:
+
+- **Content-aware AI image generation** — Scrape → LLM page analysis → Flux-powered render. The LLM extracts headline, tagline, topics, tone, and mood; the image model renders with legible on-image typography. Standard quality on Free/Plus; Pro quality (with a sub-cap) on Pro.
+- **AI audit recommendations** — Score any URL 0–100 across OG, Twitter card, and SEO hygiene, then produce suggested tag rewrites, tone assessment, CTR tips, and content-gap flags. Free tier: scoring only (no AI rewrites). Plus/Pro: AI rewrites included, metered.
+- **AI page analysis** — Structured extraction of headline, tagline, summary, topics, content type, language, suggested accent, and mood. Cached 24h per URL; reused by both image generation and audit recommendations to avoid double LLM spend.
 
 ## API Modes
 
@@ -20,6 +28,8 @@ OGStack is a developer-first API platform for generating beautiful Open Graph im
 ```
 
 Parameters: `url`, `template`, `accent`, `dark`, `aiGenerated`, `aiPrompt`, `font`, `logoUrl`, `logoPosition`
+
+When `aiGenerated=true`, the endpoint runs page analysis through the configured LLM provider and hands the extracted seeds (headline, tagline, background keywords, mood) to the image model. Results are cached per `(projectId, url, template, options, aiModel, watermark)` for 24h.
 
 The public endpoint enforces the project's allowed-domain list against the request URL's hostname. In `NODE_ENV=development`, localhost hostnames bypass the check. Rate limits are applied per-`publicId` at the project owner's plan tier.
 
@@ -39,9 +49,9 @@ Returns 409 `IMAGE_EXISTS` when another image already exists for the same `(proj
 - **POST endpoint**: Secret API key via Bearer header
 - **Dashboard**: Email/password, GitHub OAuth, Google OAuth
 
-## Templates (MVP)
+## Templates
 
-gradient_dark, gradient_light, split_hero, centered_bold, blog_card, docs_page, product_launch, changelog, github_repo, minimal — all 10 available on every tier.
+gradient_dark, gradient_light, split_hero, centered_bold, blog_card, docs_page, product_launch, changelog, github_repo, minimal — all 10 available on every tier, each optionally AI-enhanced via `aiGenerated=true`.
 
 ## Data Model (Key Entities)
 
@@ -93,14 +103,14 @@ User management, subscription management, audit logs. Role-based (ADMIN only).
 
 ## Tech Stack
 
-| Layer              | Technology                                            |
-| ------------------ | ----------------------------------------------------- |
-| API                | ElysiaJS (Bun)                                        |
-| Frontend           | Next.js 16 + MUI 9                                    |
-| Database           | PostgreSQL + Prisma 7                                 |
-| DI                 | tsyringe                                              |
-| Template Rendering | Satori + @resvg/resvg-js                              |
-| AI Image Gen       | Flux 2 / Flux 2 Pro (FAL.ai)                          |
-| LLM                | DeepSeek V3.2 (page analysis + audit recommendations) |
-| CDN                | Cloudflare R2 + CDN                                   |
-| Payments           | Stripe                                                |
+| Layer              | Technology                                                                                                                  |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| API                | ElysiaJS (Bun)                                                                                                              |
+| Frontend           | Next.js 16 + MUI 9                                                                                                          |
+| Database           | PostgreSQL + Prisma 7                                                                                                       |
+| DI                 | tsyringe                                                                                                                    |
+| Template Rendering | Satori + @resvg/resvg-js                                                                                                    |
+| AI Image Gen       | Flux 2 / Flux 2 Pro (FAL.ai)                                                                                                |
+| LLM                | Pluggable prompt providers (DeepSeek, Anthropic, OpenAI-compatible, Ollama, llama.cpp) — selected via `PROMPT_PROVIDER` env |
+| CDN                | Cloudflare R2 + CDN                                                                                                         |
+| Payments           | Stripe                                                                                                                      |

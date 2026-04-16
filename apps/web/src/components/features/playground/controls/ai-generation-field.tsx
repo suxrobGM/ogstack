@@ -46,7 +46,7 @@ export function AiGenerationField(props: AiGenerationFieldProps): ReactElement {
                       Generate with AI
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Pro plan or higher. Flux creates the full image from page content.
+                      Pro plan or higher. AI creates the full image from page content.
                     </Typography>
                   </Stack>
                 </Stack>
