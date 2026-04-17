@@ -6,8 +6,10 @@ import { TemplateService } from "./template.service";
 const MOCK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"></svg>';
 const MOCK_PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
 
+const satoriSpy = mock(() => Promise.resolve(MOCK_SVG));
+
 mock.module("satori", () => ({
-  default: mock(() => Promise.resolve(MOCK_SVG)),
+  default: satoriSpy,
 }));
 
 mock.module("@resvg/resvg-js", () => ({
@@ -126,6 +128,42 @@ describe("TemplateService", () => {
           logoPosition: "top-right",
         });
         expect(result).toBeInstanceOf(Buffer);
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    });
+
+    it("should default to 1200x630 when no dimensions are provided", async () => {
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = mock(() =>
+        Promise.resolve(new Response(new ArrayBuffer(100))),
+      ) as unknown as typeof fetch;
+      satoriSpy.mockClear();
+
+      try {
+        await service.render("minimal", createMockMetadata());
+        const calls = satoriSpy.mock.calls as unknown as unknown[][];
+        const config = calls[0]?.[1] as { width: number; height: number };
+        expect(config.width).toBe(1200);
+        expect(config.height).toBe(630);
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    });
+
+    it("should honor a custom dimensions argument", async () => {
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = mock(() =>
+        Promise.resolve(new Response(new ArrayBuffer(100))),
+      ) as unknown as typeof fetch;
+      satoriSpy.mockClear();
+
+      try {
+        await service.render("minimal", createMockMetadata(), {}, { width: 1920, height: 1080 });
+        const calls = satoriSpy.mock.calls as unknown as unknown[][];
+        const config = calls[0]?.[1] as { width: number; height: number };
+        expect(config.width).toBe(1920);
+        expect(config.height).toBe(1080);
       } finally {
         globalThis.fetch = originalFetch;
       }

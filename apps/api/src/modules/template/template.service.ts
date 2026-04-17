@@ -1,3 +1,4 @@
+import { OG_DIMENSIONS, type ImageDimensions } from "@ogstack/shared/constants";
 import { Resvg } from "@resvg/resvg-js";
 import satori from "satori";
 import { singleton } from "tsyringe";
@@ -8,9 +9,6 @@ import { getTemplate, hasTemplate, listTemplates } from "./template.registry";
 import type { FontFamily, RenderOptions, TemplateInfo, TemplateSlug } from "./template.schema";
 import { safeFetchImageDataUrl } from "./template.utils";
 import type { TemplateProps } from "./templates/types";
-
-const OG_WIDTH = 1200;
-const OG_HEIGHT = 630;
 
 const DEFAULT_ACCENT = "#3B82F6";
 const DEFAULT_LOGO_POSITION = "top-left" as const;
@@ -56,6 +54,7 @@ export class TemplateService {
     slug: TemplateSlug,
     metadata: UrlMetadata,
     options: RenderOptions = {},
+    dimensions: ImageDimensions = OG_DIMENSIONS,
   ): Promise<Buffer> {
     if (!hasTemplate(slug)) {
       throw new NotFoundError(`Template "${slug}" not found`);
@@ -80,13 +79,13 @@ export class TemplateService {
     const element = template.render(props);
 
     const svg = await satori(element, {
-      width: OG_WIDTH,
-      height: OG_HEIGHT,
+      width: dimensions.width,
+      height: dimensions.height,
       fonts,
     });
 
     const resvg = new Resvg(svg, {
-      fitTo: { mode: "width", value: OG_WIDTH },
+      fitTo: { mode: "width", value: dimensions.width },
     });
 
     const pngData = resvg.render();
