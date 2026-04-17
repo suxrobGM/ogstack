@@ -24,6 +24,25 @@ interface AnalyzeParams {
   skipAi?: boolean;
 }
 
+interface PageContextParams extends AnalyzeParams {
+  /** Return cached AI context if present, but never spend tokens on a fresh LLM call. */
+  cacheOnly?: boolean;
+}
+
+interface ResolveAiParams extends PageContextParams {
+  plan: Plan;
+  metadata: UrlMetadata;
+}
+
+interface PersistAnalysisParams {
+  cacheKey: string;
+  url: string;
+  userId: string | null;
+  metadata: UrlMetadata;
+  ai: PageAnalysisAi;
+  userPrompt: string;
+}
+
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24h in ms
 
 /**
@@ -44,41 +63,80 @@ export class PageAnalysisService {
   async analyze(params: AnalyzeParams): Promise<PageAnalysisResult> {
     const { url, userId, userPrompt, fullOverride, skipAi } = params;
     const plan = await this.resolvePlan(userId);
+    const metadata = await this.scraper.extractMetadata(url, {
+      allowHeadless: plan !== Plan.FREE,
+    });
 
-    const allowHeadless = plan !== Plan.FREE;
-    const metadata = await this.scraper.extractMetadata(url, { allowHeadless });
+    const { ai, cached } = await this.resolveAi({
+      plan,
+      metadata,
+      url,
+      userId,
+      userPrompt,
+      fullOverride,
+      skipAi,
+    });
+
+    return {
+      mode: ai ? "ai" : "classic",
+      metadata: toPublicMetadata(metadata),
+      ai,
+      cached,
+    };
+  }
+
+  /**
+   * Page context for downstream consumers (image generation, audit). Scrapes
+   * metadata and returns the cached AI summary when available. Pass
+   * `cacheOnly: true` to skip a fresh LLM call on cache miss — use this when
+   * the caller can usefully continue without AI context.
+   */
+  async getPageContext(params: PageContextParams): Promise<{
+    metadata: UrlMetadata;
+    ai: PageAnalysisAi | null;
+  }> {
+    const { url, userId, userPrompt, fullOverride, skipAi, cacheOnly } = params;
+    const plan = await this.resolvePlan(userId);
+    const metadata = await this.scraper.extractMetadata(url, {
+      allowHeadless: plan !== Plan.FREE,
+    });
+
+    const { ai } = await this.resolveAi({
+      plan,
+      metadata,
+      url,
+      userId,
+      userPrompt,
+      fullOverride,
+      skipAi,
+      cacheOnly,
+    });
+    return { metadata, ai };
+  }
+
+  private async resolveAi(
+    params: ResolveAiParams,
+  ): Promise<{ ai: PageAnalysisAi | null; cached: boolean }> {
+    const { plan, metadata, url, userId, userPrompt, fullOverride, skipAi, cacheOnly } = params;
+
     const canUseAi = plan !== Plan.FREE && this.promptProvider.isEnabled() && !skipAi;
-
-    // Full override or caller skipAi: user's prompt is the truth, or the caller
-    // explicitly opted out — don't spend tokens on AI analysis.
     if (fullOverride || !canUseAi) {
-      return {
-        mode: "classic",
-        metadata: toPublicMetadata(metadata),
-        ai: null,
-        cached: false,
-      };
+      return { ai: null, cached: false };
     }
 
     const cacheKey = await this.buildCacheKey(url, metadata, userPrompt);
     const cached = await this.findCached(cacheKey);
     if (cached) {
-      return {
-        mode: "ai",
-        metadata: toPublicMetadata(metadata),
-        ai: cached,
-        cached: true,
-      };
+      return { ai: cached, cached: true };
+    }
+
+    if (cacheOnly) {
+      return { ai: null, cached: false };
     }
 
     const ai = await this.runAnalysis(metadata, userPrompt);
     if (!ai) {
-      return {
-        mode: "classic",
-        metadata: toPublicMetadata(metadata),
-        ai: null,
-        cached: false,
-      };
+      return { ai: null, cached: false };
     }
 
     await this.persist({
@@ -90,51 +148,7 @@ export class PageAnalysisService {
       userPrompt: sanitizeUserPrompt(userPrompt),
     });
 
-    return {
-      mode: "ai",
-      metadata: toPublicMetadata(metadata),
-      ai,
-      cached: false,
-    };
-  }
-
-  /** Used by the image-generation pipeline. Returns the cached AI result if
-   *  present, otherwise runs a fresh analysis. Keeps the LLM call at most
-   *  once per (url, userPrompt) combination within the TTL window. */
-  async getForImageGeneration(params: AnalyzeParams): Promise<{
-    metadata: UrlMetadata;
-    ai: PageAnalysisAi | null;
-  }> {
-    const { url, userId, userPrompt, fullOverride, skipAi } = params;
-    const plan = await this.resolvePlan(userId);
-    const metadata = await this.scraper.extractMetadata(url, {
-      allowHeadless: plan !== Plan.FREE,
-    });
-
-    const canUseAi = plan !== Plan.FREE && this.promptProvider.isEnabled() && !skipAi;
-
-    if (fullOverride || !canUseAi) {
-      return { metadata, ai: null };
-    }
-
-    const cacheKey = await this.buildCacheKey(url, metadata, userPrompt);
-    const cached = await this.findCached(cacheKey);
-    if (cached) {
-      return { metadata, ai: cached };
-    }
-
-    const ai = await this.runAnalysis(metadata, userPrompt);
-    if (ai) {
-      await this.persist({
-        cacheKey,
-        url,
-        userId,
-        metadata,
-        ai,
-        userPrompt: sanitizeUserPrompt(userPrompt),
-      });
-    }
-    return { metadata, ai };
+    return { ai, cached: false };
   }
 
   private async resolvePlan(userId: string | null): Promise<Plan> {
@@ -187,14 +201,7 @@ export class PageAnalysisService {
     }
   }
 
-  private async persist(input: {
-    cacheKey: string;
-    url: string;
-    userId: string | null;
-    metadata: UrlMetadata;
-    ai: PageAnalysisAi;
-    userPrompt: string;
-  }): Promise<void> {
+  private async persist(input: PersistAnalysisParams): Promise<void> {
     const provider = this.promptProvider.getActiveProvider();
     const expiresAt = new Date(Date.now() + CACHE_TTL);
     const publicMetadata = toPublicMetadata(input.metadata);

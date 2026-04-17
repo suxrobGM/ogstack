@@ -133,7 +133,7 @@ describe("ImageGenerationService", () => {
 
       expect(result.cached).toBe(false);
       expect(result.imageUrl).toBeDefined();
-      expect(result.metadata.title).toBe("OG Title");
+      expect(result.source.title).toBe("OG Title");
       expect(mockTemplateService.render).toHaveBeenCalled();
       expect(mockStorage.store).toHaveBeenCalled();
       expect(mockPrisma.image.create).toHaveBeenCalled();
@@ -156,7 +156,7 @@ describe("ImageGenerationService", () => {
 
       expect(result.cached).toBe(true);
       expect(result.imageUrl).toBe("https://cdn.example.com/cached.png");
-      expect(result.metadata.title).toBe("Cached Title");
+      expect(result.source.title).toBe("Cached Title");
       expect(mockTemplateService.render).not.toHaveBeenCalled();
       expect(mockStorage.store).not.toHaveBeenCalled();
       expect(mockPrisma.image.update).toHaveBeenCalled();
@@ -209,12 +209,14 @@ describe("ImageGenerationService", () => {
   });
 
   describe("generateByPublicId", () => {
+    const publicParams = {
+      publicId: "abc123",
+      url: "https://example.com",
+      template: "gradient_dark",
+    };
+
     it("should return PNG buffer on cache miss", async () => {
-      const result = await service.generateByPublicId(
-        "abc123",
-        "https://example.com",
-        "gradient_dark",
-      );
+      const result = await service.generateByPublicId(publicParams);
 
       expect(result).toBeInstanceOf(Buffer);
       expect(result[0]).toBe(0x89);
@@ -231,11 +233,7 @@ describe("ImageGenerationService", () => {
         generatedOnPlan: "FREE",
       });
 
-      const result = await service.generateByPublicId(
-        "abc123",
-        "https://example.com",
-        "gradient_dark",
-      );
+      const result = await service.generateByPublicId(publicParams);
 
       expect(result).toBeInstanceOf(Buffer);
       expect(mockStorage.get).toHaveBeenCalled();
@@ -251,11 +249,7 @@ describe("ImageGenerationService", () => {
       });
       (mockStorage.get as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      const result = await service.generateByPublicId(
-        "abc123",
-        "https://example.com",
-        "gradient_dark",
-      );
+      const result = await service.generateByPublicId(publicParams);
 
       expect(result).toBeInstanceOf(Buffer);
       expect(mockPrisma.image.delete).toHaveBeenCalled();
@@ -266,7 +260,7 @@ describe("ImageGenerationService", () => {
       (mockPrisma.project.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
 
       await expect(
-        service.generateByPublicId("unknown", "https://example.com", "gradient_dark"),
+        service.generateByPublicId({ ...publicParams, publicId: "unknown" }),
       ).rejects.toThrow("Project not found");
     });
 
@@ -280,7 +274,7 @@ describe("ImageGenerationService", () => {
       });
 
       await expect(
-        service.generateByPublicId("abc123", "https://evil.com/page", "gradient_dark"),
+        service.generateByPublicId({ ...publicParams, url: "https://evil.com/page" }),
       ).rejects.toThrow("is not allowed");
     });
   });

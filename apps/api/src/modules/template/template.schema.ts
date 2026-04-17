@@ -40,6 +40,11 @@ export const LogoPositionSchema = t.Union(
   { default: "top-left" },
 );
 
+/**
+ * Internal render contract. Flat shape consumed by the template renderer,
+ * context builder, and cache-key hasher. Service-level concerns like
+ * `force` and `ai.override` are handled outside this type.
+ */
 export const RenderOptionsSchema = t.Object({
   accent: t.Optional(t.String({ pattern: "^#[0-9a-fA-F]{6}$", default: "#3B82F6" })),
   dark: t.Optional(t.Boolean({ default: true })),
@@ -50,8 +55,6 @@ export const RenderOptionsSchema = t.Object({
   aiGenerated: t.Optional(t.Boolean({ default: false })),
   aiModel: t.Optional(t.Union([t.Literal("standard"), t.Literal("pro")])),
   aiPrompt: t.Optional(t.String({ maxLength: 500 })),
-  fullOverride: t.Optional(t.Boolean({ default: false })),
-  force: t.Optional(t.Boolean({ default: false })),
 });
 
 export const TemplateInfoSchema = t.Object({

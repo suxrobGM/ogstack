@@ -15,18 +15,16 @@ type GenerateResponseExtras =
   | { fromCache: false; outcome: AiRenderOutcome; generationMs: number };
 
 export function toGenerateResponse(image: Image, extras: GenerateResponseExtras): GenerateResponse {
-  const metadata = {
-    title: image.title,
-    description: image.description,
-    favicon: image.faviconUrl,
-  };
-
   const base = {
     kind: fromPrismaImageKind(image.kind),
     width: image.width,
     height: image.height,
-    assets: assetsFromImage(image),
-    metadata,
+    assets: assetsFromImage(image) ?? null,
+    source: {
+      title: image.title,
+      description: image.description,
+      favicon: image.faviconUrl,
+    },
   };
 
   if (extras.fromCache) {
@@ -34,20 +32,28 @@ export function toGenerateResponse(image: Image, extras: GenerateResponseExtras)
       ...base,
       imageUrl: image.cdnUrl ?? image.imageUrl,
       cached: true,
-      aiEnabled: image.aiEnabled,
-      aiModel: image.aiModel,
-      aiPrompt: image.aiPrompt,
+      generationMs: null,
+      // aiFellBack isn't persisted on the Image row, so cache hits report false.
+      ai: image.aiEnabled
+        ? { enabled: true, model: image.aiModel, prompt: image.aiPrompt, fellBack: false }
+        : null,
     };
   }
 
+  const { outcome } = extras;
+  const aiAttempted = outcome.aiEnabled || outcome.aiFellBack;
   return {
     ...base,
     imageUrl: image.imageUrl,
     cached: false,
     generationMs: extras.generationMs,
-    aiEnabled: extras.outcome.aiEnabled,
-    aiFellBack: extras.outcome.aiFellBack,
-    aiModel: extras.outcome.aiModel,
-    aiPrompt: extras.outcome.aiPrompt,
+    ai: aiAttempted
+      ? {
+          enabled: outcome.aiEnabled,
+          model: outcome.aiModel,
+          prompt: outcome.aiPrompt,
+          fellBack: outcome.aiFellBack,
+        }
+      : null,
   };
 }

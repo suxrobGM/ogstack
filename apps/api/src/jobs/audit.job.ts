@@ -2,7 +2,7 @@ import { cron, Patterns } from "@elysiajs/cron";
 import { Elysia } from "elysia";
 import { container } from "@/common/di";
 import { logger } from "@/common/logger";
-import { AuditService } from "./audit.service";
+import { AuditService } from "@/modules/audit";
 
 const AUDIT_RETENTION_DAYS = 30;
 
@@ -19,8 +19,10 @@ async function runCleanup(): Promise<void> {
   }
 }
 
-/** Elysia plugin that deletes anonymous audit reports older than the
- *  retention window, daily at midnight. */
+/**
+ * Elysia plugin that deletes anonymous audit reports older than the
+ * retention window, daily at midnight.
+ */
 export const auditCleanupCron = new Elysia({ name: "audit-cleanup-cron" }).use(
   cron({
     name: "audit-cleanup",

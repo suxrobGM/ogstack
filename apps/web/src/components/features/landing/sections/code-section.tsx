@@ -11,7 +11,7 @@ const SNIPPETS = {
 />`,
   ai: `<meta
   property="og:image"
-  content="https://api.ogstack.dev/og/pk_abc123?url=https://my-site.com/post&aiGenerated=true"
+  content="https://api.ogstack.dev/og/pk_abc123?url=https://my-site.com/post&ai=true"
 />`,
   post: `await fetch("https://api.ogstack.dev/v1/generate", {
   method: "POST",
@@ -22,7 +22,7 @@ const SNIPPETS = {
   body: JSON.stringify({
     projectId: "prj_123",
     url: "https://my-site.com/post",
-    options: { aiGenerated: true }
+    ai: true
   })
 });`,
 };

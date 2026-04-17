@@ -10,7 +10,7 @@ import type { RenderOptions } from "@/modules/template";
 import { UsageService } from "@/modules/usage";
 import { RenderContextBuilder } from "./context.builder";
 import { toGenerateResponse } from "./generation.mapper";
-import type { GenerateResponse } from "./generation.schema";
+import type { AiOptions, AiParam, GenerateResponse, StyleOptions } from "./generation.schema";
 import { ImagePipelineService } from "./pipeline.service";
 import { ImageRecordService } from "./record.service";
 
@@ -21,11 +21,20 @@ interface GenerateParams {
   url: string;
   kind?: ImageKind;
   template?: string;
-  options?: RenderOptions;
-  /** When true, `options.aiPrompt` is used as-is as the full Flux prompt. */
-  fullOverride?: boolean;
-  /** When true, replace an existing image at the same (projectId, url). Deletes old R2 + row. */
-  override?: boolean;
+  style?: StyleOptions;
+  ai?: AiParam;
+  /** Evict any existing image at (projectId, url) and regenerate. Covers both
+   *  same-cacheKey and different-cacheKey-same-URL collisions. */
+  force?: boolean;
+}
+
+interface GenerateByPublicIdParams {
+  publicId: string;
+  url: string;
+  kind?: ImageKind;
+  template?: string;
+  style?: StyleOptions;
+  ai?: AiParam;
 }
 
 @singleton()
@@ -41,8 +50,8 @@ export class ImageGenerationService {
   ) {}
 
   async generate(params: GenerateParams): Promise<GenerateResponse> {
-    const { userId, projectId, apiKeyId, url, kind, template, options, fullOverride, override } =
-      params;
+    const { userId, projectId, apiKeyId, url, kind, template, style, ai, force } = params;
+    const aiOptions = normalizeAi(ai);
 
     const project = await this.prisma.project.findUnique({ where: { id: projectId } });
     if (!project || project.userId !== userId) {
@@ -56,22 +65,21 @@ export class ImageGenerationService {
       url,
       kind: kind ?? "og",
       template,
-      options,
-      fullOverride: fullOverride ?? false,
+      options: flattenRenderOptions(style, aiOptions),
+      fullOverride: aiOptions?.override ?? false,
     });
 
     const cached = await this.records.find(ctx.cacheKey);
-    if (cached && options?.force !== true) {
+    if (cached && !force) {
       await this.usageService.recordUsage(userId, projectId, { cacheHit: true, apiKeyId });
       await this.records.incrementServeCount(cached.id);
       return toGenerateResponse(cached, { fromCache: true });
     }
-
-    if (cached && options?.force === true) {
+    if (cached && force) {
       await this.records.evict(cached.id, cached.cacheKey, ctx.kind);
     }
 
-    await this.handleDuplicateUrl(projectId, url, ctx.cacheKey, ctx.kind, override ?? false);
+    await this.handleDuplicateUrl(projectId, url, ctx.cacheKey, ctx.kind, force ?? false);
 
     if (ctx.aiModel) {
       await this.usageService.enforceAiImageQuota(userId, ctx.aiModel === FAL_MODELS.flux2Pro);
@@ -99,13 +107,8 @@ export class ImageGenerationService {
     return toGenerateResponse(image, { fromCache: false, outcome, generationMs });
   }
 
-  async generateByPublicId(
-    publicId: string,
-    url: string,
-    template?: string,
-    options?: RenderOptions,
-    kind: ImageKind = "og",
-  ): Promise<Buffer> {
+  async generateByPublicId(params: GenerateByPublicIdParams): Promise<Buffer> {
+    const { publicId, url, kind, template, style, ai } = params;
     const project = await this.publicResolver.resolveAndValidate(publicId, url);
 
     const ctx = await this.contextBuilder.build({
@@ -113,9 +116,9 @@ export class ImageGenerationService {
       projectId: project.id,
       apiKeyId: undefined,
       url,
-      kind,
+      kind: kind ?? "og",
       template,
-      options,
+      options: flattenRenderOptions(style, normalizeAi(ai)),
       fullOverride: false,
     });
 
@@ -164,15 +167,15 @@ export class ImageGenerationService {
 
   /**
    * When an image already exists for (projectId, url) but with a different
-   * cache key (different template/options), require explicit override. On
-   * override, evict the old image + R2 object before continuing.
+   * cache key (different template/options), require `force`. Otherwise throw
+   * `ImageConflictError` so the UI can prompt the user to confirm replacement.
    */
   private async handleDuplicateUrl(
     projectId: string,
     url: string,
     newCacheKey: string,
     kind: ImageKind,
-    override: boolean,
+    force: boolean,
   ): Promise<void> {
     const existing = await this.prisma.image.findFirst({
       where: { projectId, sourceUrl: url },
@@ -180,13 +183,35 @@ export class ImageGenerationService {
     if (!existing) return;
     if (existing.cacheKey === newCacheKey) return;
 
-    if (!override) {
+    if (!force) {
       throw new ImageConflictError(
-        "An image already exists for this URL with different settings. Pass override=true to replace it.",
+        "An image already exists for this URL with different settings. Pass force=true to replace it.",
         existing.id,
       );
     }
 
     await this.records.evict(existing.id, existing.cacheKey, kind);
   }
+}
+
+function normalizeAi(ai: AiParam | undefined): AiOptions | null {
+  if (ai == null) return null;
+  return ai === true ? {} : ai;
+}
+
+function flattenRenderOptions(
+  style: StyleOptions | null | undefined,
+  ai: AiOptions | null | undefined,
+): RenderOptions {
+  return {
+    accent: style?.accent,
+    dark: style?.dark,
+    font: style?.font,
+    logoUrl: style?.logo?.url,
+    logoPosition: style?.logo?.position,
+    aspectRatio: style?.aspectRatio,
+    aiGenerated: ai !== undefined,
+    aiModel: ai?.model,
+    aiPrompt: ai?.prompt,
+  };
 }

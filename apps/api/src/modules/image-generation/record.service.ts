@@ -29,13 +29,12 @@ export class ImageRecordService {
   ) {}
 
   buildKey(input: BuildKeyInput): Promise<string> {
-    const { force, ...stableOptions } = input.options ?? {};
     const normalized = JSON.stringify({
       projectId: input.projectId,
       url: input.url,
       kind: input.kind,
       template: input.template,
-      ...stableOptions,
+      ...(input.options ?? {}),
       aiModel: input.aiModel,
       watermark: input.watermark,
     });

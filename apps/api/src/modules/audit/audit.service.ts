@@ -203,9 +203,13 @@ export class AuditService {
         );
       }
 
-      const { ai: pageAnalysis } = await this.pageAnalysis.getForImageGeneration({
+      // cacheOnly: audit-analysis works without page context, so we reuse the
+      // playground/image-gen cache when warm but don't spend a second LLM call
+      // just to enrich audit recommendations.
+      const { ai: pageAnalysis } = await this.pageAnalysis.getPageContext({
         url: metadata.url,
         userId,
+        cacheOnly: true,
       });
       const insights = await this.auditAnalysis.analyze({ metadata, issues, pageAnalysis });
       await this.prisma.auditReport.update({

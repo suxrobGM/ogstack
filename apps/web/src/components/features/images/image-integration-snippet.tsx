@@ -35,7 +35,7 @@ function buildIntegrationSnippet(image: ImageItem): string | null {
   const params = new URLSearchParams({ url: sourceUrl });
 
   if (image.aiModel) {
-    params.set("aiGenerated", "true");
+    params.set("ai", "true");
   } else if (image.template?.slug) {
     params.set("template", image.template.slug);
   }

@@ -73,7 +73,7 @@ export function PreviewPane(props: PreviewPaneProps): ReactElement {
           <EmptyPreview />
         )}
 
-        {result?.aiFellBack && (
+        {result?.ai?.fellBack && (
           <Alert severity="warning" variant="outlined">
             AI generation unavailable — rendered template fallback.
           </Alert>

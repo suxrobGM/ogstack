@@ -76,7 +76,10 @@ function toOgParams(values: PlaygroundFormValues): URLSearchParams {
   if (values.font !== "inter") params.set("font", values.font);
   if (values.logoUrl) params.set("logoUrl", values.logoUrl);
   if (values.logoPosition !== "top-left") params.set("logoPosition", values.logoPosition);
-  if (values.aiGenerated) params.set("aiGenerated", "true");
+  if (values.aiGenerated) {
+    params.set("ai", "true");
+    if (values.aiModel !== "standard") params.set("aiModel", values.aiModel);
+  }
   if (values.aiPrompt) params.set("aiPrompt", values.aiPrompt);
   return params;
 }
@@ -133,7 +136,7 @@ export function Playground(props: PlaygroundProps): ReactElement {
     client.api["page-analysis"].analyze.post(variables),
   );
 
-  const submit = (values: PlaygroundFormValues, force: boolean, override = false) => {
+  const submit = (values: PlaygroundFormValues, force: boolean) => {
     setLastFormValues(values);
     setAnalyzed(true);
 
@@ -147,32 +150,33 @@ export function Playground(props: PlaygroundProps): ReactElement {
     }
 
     // Icon set is always AI and ignores template/styling options.
-    const aiGenerated = values.kind === "icon_set" ? true : values.aiGenerated;
+    const aiEnabled = values.kind === "icon_set" ? true : values.aiGenerated;
     generateMutation.mutate({
       url: values.url,
       kind: values.kind,
       template: values.kind === "icon_set" ? undefined : values.template,
       projectId: selectedProjectId,
-      override,
-      options: {
+      force,
+      style: {
         accent: values.accent,
         dark: values.dark,
         font: values.font,
-        logoUrl: values.logoUrl || undefined,
-        logoPosition: values.logoPosition,
+        logo: values.logoUrl ? { url: values.logoUrl, position: values.logoPosition } : undefined,
         aspectRatio: values.kind === "blog_hero" ? values.aspectRatio : undefined,
-        aiGenerated,
-        aiModel: aiGenerated ? values.aiModel : undefined,
-        aiPrompt: values.aiPrompt,
-        fullOverride: values.fullOverride,
-        force: force,
       },
+      ai: aiEnabled
+        ? {
+            model: values.aiModel,
+            prompt: values.aiPrompt,
+            override: values.fullOverride,
+          }
+        : undefined,
     });
   };
 
   const confirmOverride = (): void => {
     setOverridePrompt(false);
-    if (lastFormValues) submit(lastFormValues, false, true);
+    if (lastFormValues) submit(lastFormValues, true);
   };
 
   const form = useForm({
@@ -187,7 +191,7 @@ export function Playground(props: PlaygroundProps): ReactElement {
   });
 
   const handleRegenerate = () => {
-    submit(form.state.values, true, true);
+    submit(form.state.values, true);
   };
 
   const metaTag =

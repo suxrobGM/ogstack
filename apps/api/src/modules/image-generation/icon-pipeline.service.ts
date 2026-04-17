@@ -57,7 +57,7 @@ export class IconPipelineService {
       throw new BadRequestError("Icon-set generation requires an AI model.");
     }
 
-    const { metadata, ai } = await this.pageAnalysis.getForImageGeneration({
+    const { metadata, ai } = await this.pageAnalysis.getPageContext({
       url: ctx.url,
       userId: ctx.userId,
       userPrompt: ctx.options?.aiPrompt,

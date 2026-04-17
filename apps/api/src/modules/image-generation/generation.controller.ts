@@ -1,4 +1,4 @@
-import type { BlogHeroAspect, ImageKind } from "@ogstack/shared/constants";
+import type { ImageKind } from "@ogstack/shared/constants";
 import { Elysia } from "elysia";
 import { container } from "@/common/di";
 import { ForbiddenError } from "@/common/errors";
@@ -9,6 +9,9 @@ import {
   GenerateResponseSchema,
   PublicGenerateParamsSchema,
   PublicGenerateQuerySchema,
+  type AiOptions,
+  type PublicGenerateQuery,
+  type StyleOptions,
 } from "./generation.schema";
 import { ImageGenerationService } from "./generation.service";
 
@@ -77,22 +80,14 @@ function publicImageRoute(opts: PublicRouteOptions) {
     .get(
       "/:publicId",
       async ({ params, query, set }) => {
-        const pngBuffer = await imageGenerationService.generateByPublicId(
-          params.publicId,
-          query.url,
-          query.template,
-          {
-            accent: query.accent,
-            dark: query.dark === "false" ? false : true,
-            font: query.font,
-            logoUrl: query.logoUrl,
-            logoPosition: query.logoPosition,
-            aspectRatio: query.aspectRatio as BlogHeroAspect | undefined,
-            aiGenerated: query.aiGenerated === "true",
-            aiPrompt: query.aiPrompt,
-          },
-          opts.kind,
-        );
+        const pngBuffer = await imageGenerationService.generateByPublicId({
+          publicId: params.publicId,
+          url: query.url,
+          kind: opts.kind,
+          template: query.template,
+          style: styleFromQuery(query) ?? undefined,
+          ai: aiFromQuery(query) ?? undefined,
+        });
         set.headers["content-type"] = "image/png";
         set.headers["cache-control"] = opts.cacheControl;
         return pngBuffer;
@@ -103,6 +98,38 @@ function publicImageRoute(opts: PublicRouteOptions) {
         detail: { summary: opts.summary, description: opts.description },
       },
     );
+}
+
+function styleFromQuery(query: PublicGenerateQuery): StyleOptions | null {
+  const logo = query.logoUrl ? { url: query.logoUrl, position: query.logoPosition } : null;
+
+  const hasAny =
+    query.accent != null ||
+    query.dark != null ||
+    query.font != null ||
+    logo != null ||
+    query.aspectRatio != null;
+
+  if (!hasAny) {
+    return null;
+  }
+  return {
+    accent: query.accent,
+    dark: query.dark,
+    font: query.font,
+    logo: logo ?? undefined,
+    aspectRatio: query.aspectRatio,
+  };
+}
+
+function aiFromQuery(query: PublicGenerateQuery): AiOptions | null {
+  if (!query.ai) {
+    return null;
+  }
+  return {
+    model: query.aiModel,
+    prompt: query.aiPrompt,
+  };
 }
 
 /** /og/:publicId — unauthenticated CDN endpoint, returns a PNG directly. */

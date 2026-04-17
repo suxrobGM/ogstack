@@ -1,2 +1,2 @@
 export * from "./audit.controller";
-export * from "./audit.job";
+export * from "./audit.service";

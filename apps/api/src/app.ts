@@ -7,9 +7,10 @@ import { errorMiddleware } from "@/common/middleware";
 import { corsPlugin, swaggerPlugin, uploadsStaticPlugin } from "@/common/plugins";
 import { logAiServicesAtStartup } from "@/common/services/ai";
 import { validateEnv } from "@/env";
+import { auditCleanupCron } from "@/jobs";
 import { adminController } from "@/modules/admin";
 import { apiKeyController } from "@/modules/api-key";
-import { auditCleanupCron, auditController, auditUserController } from "@/modules/audit";
+import { auditController, auditUserController } from "@/modules/audit";
 import { authController } from "@/modules/auth";
 import {
   billingController,

@@ -24,9 +24,9 @@ export function OutputPanel(props: OutputPanelProps): ReactElement {
     return <></>;
   }
 
-  const hasMetadata = Boolean(result.metadata?.title || result.metadata?.description);
+  const hasMetadata = Boolean(result.source?.title || result.source?.description);
   const hasMetaTag = Boolean(metaTag);
-  const hasAiPrompt = Boolean(result.aiPrompt);
+  const hasAiPrompt = Boolean(result.ai?.prompt);
 
   if (!hasMetadata && !hasMetaTag && !hasAiPrompt) {
     return <></>;
@@ -43,7 +43,7 @@ export function OutputPanel(props: OutputPanelProps): ReactElement {
           {hasAiPrompt && (
             <Tab
               value="ai-prompt"
-              label={`AI Prompt${aiModelLabel(result.aiModel) ? ` · ${aiModelLabel(result.aiModel)}` : ""}`}
+              label={`AI Prompt${aiModelLabel(result.ai?.model) ? ` · ${aiModelLabel(result.ai?.model)}` : ""}`}
             />
           )}
         </Tabs>
@@ -51,8 +51,8 @@ export function OutputPanel(props: OutputPanelProps): ReactElement {
         <Box>
           {tab === "metadata" && hasMetadata && <MetadataView result={result} />}
           {tab === "meta-tag" && hasMetaTag && metaTag && <MetaTagView metaTag={metaTag} />}
-          {tab === "ai-prompt" && hasAiPrompt && result.aiPrompt && (
-            <AiPromptView prompt={result.aiPrompt} />
+          {tab === "ai-prompt" && hasAiPrompt && result.ai?.prompt && (
+            <AiPromptView prompt={result.ai.prompt} />
           )}
         </Box>
       </Stack>
@@ -64,26 +64,21 @@ function MetadataView(props: { result: GenerateDto }): ReactElement {
   const { result } = props;
   return (
     <Stack spacing={1}>
-      {result.metadata.favicon && (
+      {result.source.favicon && (
         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <Box
-            component="img"
-            src={result.metadata.favicon}
-            alt=""
-            sx={{ width: 16, height: 16 }}
-          />
+          <Box component="img" src={result.source.favicon} alt="" sx={{ width: 16, height: 16 }} />
           <Typography variant="captionMuted">Favicon</Typography>
         </Stack>
       )}
-      {result.metadata.title && (
+      {result.source.title && (
         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
           <LanguageIcon sx={{ fontSize: 16, color: textColors.secondary }} />
-          <Typography variant="body2">{result.metadata.title}</Typography>
+          <Typography variant="body2">{result.source.title}</Typography>
         </Stack>
       )}
-      {result.metadata.description && (
+      {result.source.description && (
         <Typography variant="body2Muted" sx={{ pl: 3 }}>
-          {result.metadata.description}
+          {result.source.description}
         </Typography>
       )}
     </Stack>
