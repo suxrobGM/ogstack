@@ -1,3 +1,4 @@
+import type { ImageKind } from "@ogstack/shared/constants";
 import { singleton } from "tsyringe";
 import { logger } from "@/common/logger";
 import { ImageStorageService } from "@/common/services/storage";
@@ -8,6 +9,7 @@ import type { RenderOptions } from "@/modules/template";
 interface BuildKeyInput {
   projectId: string;
   url: string;
+  kind: ImageKind;
   template: string;
   options: RenderOptions | undefined;
   aiModel: string | null;
@@ -26,6 +28,7 @@ export class ImageCacheService {
     const normalized = JSON.stringify({
       projectId: input.projectId,
       url: input.url,
+      kind: input.kind,
       template: input.template,
       ...stableOptions,
       aiModel: input.aiModel,

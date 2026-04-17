@@ -1,28 +1,42 @@
-import type { PageAnalysisAi } from "@ogstack/shared";
+import {
+  DEFAULT_HERO_TEMPLATE_SLUG,
+  DEFAULT_TEMPLATE_SLUG,
+  resolveDimensions,
+  type BlogHeroAspect,
+  type ImageDimensions,
+  type ImageKind,
+  type PageAnalysisAi,
+} from "@ogstack/shared";
 import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors";
 import { resolveFalModelForPlan, type BuildPromptOptions } from "@/common/services/ai";
 import { FAL_MODELS } from "@/common/services/ai/image-providers/fal-ai.provider";
 import { shouldWatermark } from "@/common/services/watermark";
 import { Plan, PrismaClient } from "@/generated/prisma";
-import type { RenderOptions, TemplateSlug } from "@/modules/template";
+import type { RenderOptions } from "@/modules/template";
+import { hasHeroTemplate } from "@/modules/template/hero.registry";
+import { hasTemplate } from "@/modules/template/template.registry";
 import { ImageCacheService } from "./image-cache.service";
 
 export interface RenderContextInput {
   userId: string;
   projectId: string;
-  apiKeyId: string | undefined;
+  apiKeyId?: string;
   url: string;
-  template: TemplateSlug;
-  options: RenderOptions | undefined;
+  kind: ImageKind;
+  /** Optional — defaults to the kind-appropriate default slug. */
+  template?: string;
+  options?: RenderOptions;
   fullOverride: boolean;
 }
 
-export interface RenderContext extends RenderContextInput {
+export interface RenderContext extends Omit<RenderContextInput, "template"> {
+  template: string;
   plan: Plan;
   aiModel: string | null;
   watermark: boolean;
   cacheKey: string;
+  dimensions: ImageDimensions;
 }
 
 @singleton()
@@ -33,17 +47,43 @@ export class RenderContextBuilder {
   ) {}
 
   async build(input: RenderContextInput): Promise<RenderContext> {
+    const template = this.resolveTemplate(input.kind, input.template);
+    const dimensions = resolveDimensions(
+      input.kind,
+      input.options?.aspectRatio as BlogHeroAspect | undefined,
+    );
     const { plan, aiModel } = await this.resolveUser(input.userId, input.options);
     const watermark = shouldWatermark(plan);
     const cacheKey = await this.cache.buildKey({
       projectId: input.projectId,
       url: input.url,
-      template: input.template,
+      kind: input.kind,
+      template,
       options: input.options,
       aiModel,
       watermark,
     });
-    return { ...input, plan, aiModel, watermark, cacheKey };
+    return { ...input, template, plan, aiModel, watermark, cacheKey, dimensions };
+  }
+
+  private resolveTemplate(kind: ImageKind, requested: string | undefined): string {
+    if (kind === "blog_hero") {
+      const slug = requested ?? DEFAULT_HERO_TEMPLATE_SLUG;
+      if (!hasHeroTemplate(slug)) {
+        throw new NotFoundError(`Hero template "${slug}" not found`);
+      }
+      return slug;
+    }
+    if (kind === "icon_set") {
+      // Icon-set generation doesn't use a template; the value is stored for
+      // cache-key stability but the pipeline ignores it.
+      return requested ?? "icon_default";
+    }
+    const slug = requested ?? DEFAULT_TEMPLATE_SLUG;
+    if (!hasTemplate(slug)) {
+      throw new NotFoundError(`Template "${slug}" not found`);
+    }
+    return slug;
   }
 
   /**

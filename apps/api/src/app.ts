@@ -16,7 +16,12 @@ import {
   billingWebhookController,
   syncStripeOnStartup,
 } from "@/modules/billing";
-import { imageApiController, imageController, imagePublicController } from "@/modules/image";
+import {
+  imageApiController,
+  imageController,
+  imageHeroPublicController,
+  imagePublicController,
+} from "@/modules/image";
 import { notificationController } from "@/modules/notification";
 import { pageAnalysisController } from "@/modules/page-analysis";
 import { projectController } from "@/modules/project";
@@ -37,6 +42,7 @@ const app = new Elysia()
   })
   .get("/health", () => ({ status: "ok", timestamp: new Date().toISOString() }))
   .use(imagePublicController)
+  .use(imageHeroPublicController)
   .use(auditCleanupCron)
   .group("/api", (api) =>
     api

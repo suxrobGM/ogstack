@@ -1,11 +1,11 @@
-import { isPlanAtLeast } from "@ogstack/shared";
+import { isPlanAtLeast, type ImageKind } from "@ogstack/shared";
 import { singleton } from "tsyringe";
 import { ImageConflictError, NotFoundError, TierLockedError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { FAL_MODELS } from "@/common/services/ai";
 import { ImageStorageService } from "@/common/services/storage";
 import { PrismaClient } from "@/generated/prisma";
-import type { RenderOptions, TemplateSlug } from "@/modules/template";
+import type { RenderOptions } from "@/modules/template";
 import { UsageService } from "@/modules/usage";
 import { ImageCacheService } from "./image-cache.service";
 import { RenderContextBuilder } from "./image-context.builder";
@@ -19,7 +19,8 @@ interface GenerateParams {
   projectId: string;
   apiKeyId?: string;
   url: string;
-  template: TemplateSlug;
+  kind?: ImageKind;
+  template?: string;
   options?: RenderOptions;
   /** When true, `options.aiPrompt` is used as-is as the full Flux prompt. */
   fullOverride?: boolean;
@@ -40,7 +41,8 @@ export class ImageGenerationService {
   ) {}
 
   async generate(params: GenerateParams): Promise<GenerateResponse> {
-    const { userId, projectId, apiKeyId, url, template, options, fullOverride, override } = params;
+    const { userId, projectId, apiKeyId, url, kind, template, options, fullOverride, override } =
+      params;
 
     const project = await this.prisma.project.findUnique({ where: { id: projectId } });
     if (!project || project.userId !== userId) {
@@ -52,6 +54,7 @@ export class ImageGenerationService {
       projectId,
       apiKeyId,
       url,
+      kind: kind ?? "og",
       template,
       options,
       fullOverride: fullOverride ?? false,
@@ -99,8 +102,9 @@ export class ImageGenerationService {
   async generateByPublicId(
     publicId: string,
     url: string,
-    template: TemplateSlug,
+    template?: string,
     options?: RenderOptions,
+    kind: ImageKind = "og",
   ): Promise<Buffer> {
     const project = await this.publicResolver.resolveAndValidate(publicId, url);
 
@@ -109,6 +113,7 @@ export class ImageGenerationService {
       projectId: project.id,
       apiKeyId: undefined,
       url,
+      kind,
       template,
       options,
       fullOverride: false,

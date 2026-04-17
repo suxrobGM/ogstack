@@ -1,4 +1,5 @@
 import type { PageAnalysisAi } from "@ogstack/shared";
+import type { HeroTemplateSlug } from "@ogstack/shared/constants";
 import { singleton } from "tsyringe";
 import { logger } from "@/common/logger";
 import { buildAiImagePrompt, ImageProviderService } from "@/common/services/ai";
@@ -7,14 +8,10 @@ import { ImageStorageService } from "@/common/services/storage";
 import { WatermarkService } from "@/common/services/watermark";
 import { PrismaClient, type Image } from "@/generated/prisma";
 import { PageAnalysisService } from "@/modules/page-analysis";
-import {
-  getTemplate,
-  TemplateService,
-  type RenderOptions,
-  type TemplateSlug,
-} from "@/modules/template";
+import { getTemplate, TemplateService, type TemplateSlug } from "@/modules/template";
+import { getHeroTemplate } from "@/modules/template/hero.registry";
 import { RenderContextBuilder, type RenderContext } from "./image-context.builder";
-import type { AiRenderOutcome } from "./image.mapper";
+import { toPrismaImageKind, type AiRenderOutcome } from "./image.mapper";
 
 export interface PipelineResult {
   image: Image;
@@ -52,10 +49,18 @@ export class ImagePipelineService {
 
     const stored = await this.storage.store(ctx.cacheKey, outcome.pngBuffer);
     const imageUrl = `${stored.url}?v=${Date.now()}`;
-    const templateRecord = await this.prisma.template.findUnique({
-      where: { slug: ctx.template },
-      select: { id: true },
-    });
+
+    // Only OG rows link back to a Template DB record (hero and icon kinds
+    // live in their own registries and don't seed DB template rows).
+    const templateRecord =
+      ctx.kind === "og"
+        ? await this.prisma.template.findUnique({
+            where: { slug: ctx.template },
+            select: { id: true },
+          })
+        : null;
+
+    const category = this.resolveCategory(ctx);
 
     const image = await this.prisma.image.create({
       data: {
@@ -63,19 +68,20 @@ export class ImagePipelineService {
         projectId: ctx.projectId,
         apiKeyId: ctx.apiKeyId ?? null,
         templateId: templateRecord?.id ?? null,
+        kind: toPrismaImageKind(ctx.kind),
         sourceUrl: ctx.url,
         cacheKey: ctx.cacheKey,
         imageUrl,
         title: metadata.ogTitle ?? metadata.title,
         description: metadata.ogDescription ?? metadata.description,
         faviconUrl: metadata.favicon,
-        width: 1200,
-        height: 630,
+        width: ctx.dimensions.width,
+        height: ctx.dimensions.height,
         format: "PNG",
         fileSize: stored.size,
         generationMs,
         serveCount: 1,
-        category: getTemplate(ctx.template).info.category,
+        category,
         aiEnabled: outcome.aiEnabled,
         aiModel: outcome.aiModel,
         aiPrompt: outcome.aiPrompt,
@@ -84,6 +90,16 @@ export class ImagePipelineService {
     });
 
     return { image, outcome, generationMs };
+  }
+
+  private resolveCategory(ctx: RenderContext): string | null {
+    if (ctx.kind === "og") {
+      return getTemplate(ctx.template as TemplateSlug).info.category;
+    }
+    if (ctx.kind === "blog_hero") {
+      return getHeroTemplate(ctx.template as HeroTemplateSlug).info.category;
+    }
+    return null;
   }
 
   private async renderWithAiFallback(
@@ -124,21 +140,25 @@ export class ImagePipelineService {
           { template: ctx.template, error: error instanceof Error ? error.message : String(error) },
           "AI image generation failed, falling back to template render",
         );
-        return this.renderTemplate(ctx.template, metadata, ctx.options, finalize, true);
+        return this.renderTemplate(metadata, finalize, true, ctx);
       }
     }
 
-    return this.renderTemplate(ctx.template, metadata, ctx.options, finalize, false);
+    return this.renderTemplate(metadata, finalize, false, ctx);
   }
 
   private async renderTemplate(
-    template: TemplateSlug,
     metadata: UrlMetadata,
-    options: RenderOptions | undefined,
     finalize: (buf: Buffer) => Promise<Buffer>,
     aiFellBack: boolean,
+    ctx: RenderContext,
   ): Promise<AiRenderOutcome> {
-    const rawBuffer = await this.templateService.render(template, metadata, options);
+    const rawBuffer = await this.templateService.render(
+      ctx.template,
+      metadata,
+      ctx.options,
+      ctx.dimensions,
+    );
     return {
       pngBuffer: await finalize(rawBuffer),
       aiEnabled: false,

@@ -1,3 +1,4 @@
+import type { BlogHeroAspect } from "@ogstack/shared/constants";
 import { Elysia } from "elysia";
 import { container } from "@/common/di";
 import { tieredRateLimiter } from "@/common/middleware/tiered-rate-limiter";
@@ -6,12 +7,13 @@ import { PublicGenerateParamsSchema, PublicGenerateQuerySchema } from "./image.s
 
 const imageGenerationService = container.resolve(ImageGenerationService);
 
-/** /og/:publicId — unauthenticated CDN endpoint, returns a PNG directly. */
-export const imagePublicController = new Elysia({ prefix: "/og", tags: ["Images"] })
+/** /hero/:publicId — unauthenticated CDN endpoint for blog cover / hero images.
+ *  Longer edge cache than OG because hero images change less often. */
+export const imageHeroPublicController = new Elysia({ prefix: "/hero", tags: ["Images"] })
   .use(
     tieredRateLimiter({
       resolvePlan: "publicId",
-      keyPrefix: "og-public",
+      keyPrefix: "hero-public",
       keyFn: (ctx) => {
         const params = ctx.params as { publicId?: string } | undefined;
         return params?.publicId ?? "unknown";
@@ -31,22 +33,25 @@ export const imagePublicController = new Elysia({ prefix: "/og", tags: ["Images"
           font: query.font,
           logoUrl: query.logoUrl,
           logoPosition: query.logoPosition,
+          aspectRatio: query.aspectRatio as BlogHeroAspect | undefined,
           aiGenerated: query.aiGenerated === "true",
           aiPrompt: query.aiPrompt,
         },
+        "blog_hero",
       );
 
       set.headers["content-type"] = "image/png";
-      set.headers["cache-control"] = "public, max-age=86400, s-maxage=604800";
+      // Hero images change less often than OG — extend edge cache to 30 days.
+      set.headers["cache-control"] = "public, max-age=86400, s-maxage=2592000";
       return pngBuffer;
     },
     {
       params: PublicGenerateParamsSchema,
       query: PublicGenerateQuerySchema,
       detail: {
-        summary: "Generate OG image (public)",
+        summary: "Generate blog hero image (public)",
         description:
-          "Public meta-tag mode. Returns the PNG directly with long cache headers. Rate-limited per publicId by project owner's plan.",
+          "Public endpoint for blog cover / hero images (1600x900 or 1920x1080). Returns the PNG directly with 30d edge cache.",
       },
     },
   );

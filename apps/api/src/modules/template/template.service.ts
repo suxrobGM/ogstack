@@ -5,6 +5,7 @@ import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors/http.error";
 import { logger } from "@/common/logger";
 import type { UrlMetadata } from "@/common/services/scraper.service";
+import { getHeroTemplate, hasHeroTemplate } from "./hero.registry";
 import { getTemplate, hasTemplate, listTemplates } from "./template.registry";
 import type { FontFamily, RenderOptions, TemplateInfo, TemplateSlug } from "./template.schema";
 import { safeFetchImageDataUrl } from "./template.utils";
@@ -51,16 +52,12 @@ export class TemplateService {
   }
 
   async render(
-    slug: TemplateSlug,
+    slug: string,
     metadata: UrlMetadata,
     options: RenderOptions = {},
     dimensions: ImageDimensions = OG_DIMENSIONS,
   ): Promise<Buffer> {
-    if (!hasTemplate(slug)) {
-      throw new NotFoundError(`Template "${slug}" not found`);
-    }
-
-    const template = getTemplate(slug);
+    const template = this.resolveRenderer(slug);
     const fontFamily = options.font ?? "inter";
     const [fonts, ogImageDataUrl, logoDataUrl] = await Promise.all([
       this.loadFonts(fontFamily),
@@ -90,6 +87,17 @@ export class TemplateService {
 
     const pngData = resvg.render();
     return Buffer.from(pngData.asPng());
+  }
+
+  /** Dispatches to the OG or hero registry based on the slug. */
+  private resolveRenderer(slug: string): { render: (props: TemplateProps) => React.ReactNode } {
+    if (hasTemplate(slug)) {
+      return getTemplate(slug as TemplateSlug);
+    }
+    if (hasHeroTemplate(slug)) {
+      return getHeroTemplate(slug);
+    }
+    throw new NotFoundError(`Template "${slug}" not found`);
   }
 
   /**

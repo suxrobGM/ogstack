@@ -54,6 +54,7 @@ export const RenderOptionsSchema = t.Object({
   font: t.Optional(FontFamilySchema),
   logoUrl: t.Optional(t.String({ format: "uri" })),
   logoPosition: t.Optional(LogoPositionSchema),
+  aspectRatio: t.Optional(t.Union([t.Literal("16:9"), t.Literal("16:10")])),
   aiGenerated: t.Optional(t.Boolean({ default: false })),
   aiModel: t.Optional(t.Union([t.Literal("standard"), t.Literal("pro")])),
   aiPrompt: t.Optional(t.String({ maxLength: 500 })),

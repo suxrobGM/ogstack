@@ -3,7 +3,14 @@ import { ForbiddenError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { ImageStorageService } from "@/common/services/storage";
 import { Prisma, PrismaClient } from "@/generated/prisma";
-import type { ImageItem, ImageListQuery, ImageListResponse, ImageUpdateBody } from "./image.schema";
+import { fromPrismaImageKind } from "./image.mapper";
+import type {
+  ImageAsset,
+  ImageItem,
+  ImageListQuery,
+  ImageListResponse,
+  ImageUpdateBody,
+} from "./image.schema";
 
 type ImageWithRelations = Prisma.ImageGetPayload<{
   include: {
@@ -13,6 +20,8 @@ type ImageWithRelations = Prisma.ImageGetPayload<{
 }>;
 
 function toImageItem(row: ImageWithRelations): ImageItem {
+  const assets =
+    row.assets && Array.isArray(row.assets) ? (row.assets as unknown as ImageAsset[]) : null;
   return {
     id: row.id,
     sourceUrl: row.sourceUrl,
@@ -21,6 +30,7 @@ function toImageItem(row: ImageWithRelations): ImageItem {
     title: row.title,
     description: row.description,
     faviconUrl: row.faviconUrl,
+    kind: fromPrismaImageKind(row.kind),
     category: row.category,
     template: row.template ? { slug: row.template.slug, name: row.template.name } : null,
     projectId: row.projectId,
@@ -33,6 +43,7 @@ function toImageItem(row: ImageWithRelations): ImageItem {
     format: row.format,
     generationMs: row.generationMs,
     serveCount: row.serveCount,
+    assets,
     createdAt: row.createdAt,
   };
 }
