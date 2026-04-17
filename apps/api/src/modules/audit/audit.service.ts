@@ -3,6 +3,7 @@ import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors"
 import { logger } from "@/common/logger";
 import { ScraperService } from "@/common/services/scraper.service";
 import { AuditAiStatus, Plan, PrismaClient } from "@/generated/prisma";
+import { PageAnalysisService } from "@/modules/page-analysis";
 import { UsageService } from "@/modules/usage";
 import { AuditAnalysisService } from "./audit-analysis.service";
 import { extractAuditMetadata, probeOgImage, type AuditMetadata } from "./audit.extractor";
@@ -31,6 +32,7 @@ export class AuditService {
     private readonly prisma: PrismaClient,
     private readonly scraper: ScraperService,
     private readonly auditAnalysis: AuditAnalysisService,
+    private readonly pageAnalysis: PageAnalysisService,
     private readonly usageService: UsageService,
   ) {}
 
@@ -201,7 +203,11 @@ export class AuditService {
         );
       }
 
-      const insights = await this.auditAnalysis.analyze({ metadata, issues });
+      const { ai: pageAnalysis } = await this.pageAnalysis.getForImageGeneration({
+        url: metadata.url,
+        userId,
+      });
+      const insights = await this.auditAnalysis.analyze({ metadata, issues, pageAnalysis });
       await this.prisma.auditReport.update({
         where: { id: reportId },
         data: {

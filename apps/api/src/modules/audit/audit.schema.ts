@@ -3,15 +3,37 @@ import { AuditAiStatus } from "@/generated/prisma";
 import { PaginationQueryBaseSchema } from "@/types/pagination";
 import { PaginatedResponseSchema } from "@/types/response";
 
+export const AuditPriorityActionSchema = t.Object({
+  title: t.String(),
+  rationale: t.String(),
+  impact: t.Union([t.Literal("high"), t.Literal("medium"), t.Literal("low")]),
+});
+
+export const AuditSearchSnippetSchema = t.Object({
+  suggestedTitle: t.String(),
+  suggestedMetaDescription: t.String(),
+});
+
+export const AuditDiscoverabilitySchema = t.Object({
+  schemaOrgRecommendations: t.Array(t.String()),
+  canonicalHealth: t.Union([t.Literal("ok"), t.Literal("missing"), t.Literal("suspicious")]),
+  hreflangRecommendations: t.Array(t.String()),
+  structuredDataGaps: t.Array(t.String()),
+});
+
 export const AuditAiInsightsSchema = t.Object({
+  priorityActions: t.Array(AuditPriorityActionSchema),
   suggestedOgTitle: t.String(),
   suggestedOgDescription: t.String(),
   suggestedTwitterTitle: t.String(),
   suggestedTwitterDescription: t.String(),
+  searchSnippet: AuditSearchSnippetSchema,
   toneAssessment: t.String(),
   audienceFit: t.Union([t.Literal("strong"), t.Literal("mixed"), t.Literal("weak")]),
   contentGaps: t.Array(t.String()),
   socialCtrTips: t.Array(t.String()),
+  discoverability: AuditDiscoverabilitySchema,
+  keywordOpportunities: t.Array(t.String()),
   severity: t.Union([t.Literal("low"), t.Literal("medium"), t.Literal("high")]),
   confidence: t.Union([t.Literal("high"), t.Literal("medium"), t.Literal("low")]),
 });
@@ -82,11 +104,13 @@ export const AuditHistoryItemSchema = t.Object({
 });
 
 export const AuditHistoryResponseSchema = PaginatedResponseSchema(AuditHistoryItemSchema);
-
 export const AuditHistoryQuerySchema = PaginationQueryBaseSchema;
 
 export type AuditCreateBody = Static<typeof AuditCreateBodySchema>;
 export type AuditAiInsights = Static<typeof AuditAiInsightsSchema>;
+export type AuditPriorityAction = Static<typeof AuditPriorityActionSchema>;
+export type AuditSearchSnippet = Static<typeof AuditSearchSnippetSchema>;
+export type AuditDiscoverability = Static<typeof AuditDiscoverabilitySchema>;
 export type AuditIssue = Static<typeof AuditIssueSchema>;
 export type IssueSeverity = Static<typeof IssueSeveritySchema>;
 export type IssueCategory = Static<typeof IssueCategorySchema>;

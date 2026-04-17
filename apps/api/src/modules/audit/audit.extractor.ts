@@ -18,8 +18,8 @@ export interface AuditMetadata {
   h1Count: number;
   imageCount: number;
   imagesMissingAlt: number;
-  hasStructuredData: boolean;
-  hasHreflang: boolean;
+  structuredDataTypes: string[];
+  hreflangVariants: string[];
 
   ogTitle: string | null;
   ogDescription: string | null;
@@ -47,6 +47,46 @@ function resolveRelative(href: string | null, base: string): string | null {
   }
 }
 
+/**
+ * Recursively walks JSON-LD values to pull every `@type`. JSON-LD allows
+ * `@type` on nested objects and arrays (e.g. `mainEntity`, `author`, `isPartOf`),
+ * so a single script block often describes several typed entities.
+ */
+function extractJsonLdTypes(value: unknown, out: string[]): void {
+  if (!value) {
+    return;
+  }
+  if (Array.isArray(value)) {
+    for (const entry of value) {
+      extractJsonLdTypes(entry, out);
+    }
+    return;
+  }
+  if (typeof value !== "object") {
+    return;
+  }
+
+  const record = value as Record<string, unknown>;
+  const type = record["@type"];
+
+  if (typeof type === "string" && !out.includes(type)) {
+    out.push(type);
+  } else if (Array.isArray(type)) {
+    for (const t of type) {
+      if (typeof t === "string" && !out.includes(t)) {
+        out.push(t);
+      }
+    }
+  }
+
+  for (const key of Object.keys(record)) {
+    if (key === "@type") {
+      continue;
+    }
+    extractJsonLdTypes(record[key], out);
+  }
+}
+
 export async function extractAuditMetadata(url: string, html: string): Promise<AuditMetadata> {
   const meta: AuditMetadata = {
     url,
@@ -64,8 +104,8 @@ export async function extractAuditMetadata(url: string, html: string): Promise<A
     h1Count: 0,
     imageCount: 0,
     imagesMissingAlt: 0,
-    hasStructuredData: false,
-    hasHreflang: false,
+    structuredDataTypes: [],
+    hreflangVariants: [],
     ogTitle: null,
     ogDescription: null,
     ogImage: null,
@@ -83,6 +123,7 @@ export async function extractAuditMetadata(url: string, html: string): Promise<A
 
   let titleText = "";
   let capturingTitle = false;
+  let jsonLdBuffer = "";
 
   const rewriter = new HTMLRewriter()
     .on("html", {
@@ -149,8 +190,11 @@ export async function extractAuditMetadata(url: string, html: string): Promise<A
       },
     })
     .on('link[rel="alternate"][hreflang]', {
-      element() {
-        meta.hasHreflang = true;
+      element(el) {
+        const hreflang = el.getAttribute("hreflang");
+        if (hreflang?.trim() && !meta.hreflangVariants.includes(hreflang.trim())) {
+          meta.hreflangVariants.push(hreflang.trim());
+        }
       },
     })
     .on('link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]', {
@@ -174,8 +218,23 @@ export async function extractAuditMetadata(url: string, html: string): Promise<A
       },
     })
     .on('script[type="application/ld+json"]', {
-      element() {
-        meta.hasStructuredData = true;
+      text(text) {
+        jsonLdBuffer += text.text;
+        if (text.lastInTextNode) {
+          const raw = jsonLdBuffer.trim();
+          jsonLdBuffer = "";
+          if (raw) {
+            try {
+              const parsed = JSON.parse(raw) as unknown;
+              extractJsonLdTypes(parsed, meta.structuredDataTypes);
+            } catch {
+              // Malformed JSON-LD still signals intent; record unknown type.
+              if (!meta.structuredDataTypes.includes("Unknown")) {
+                meta.structuredDataTypes.push("Unknown");
+              }
+            }
+          }
+        }
       },
     });
 

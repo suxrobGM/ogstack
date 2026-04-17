@@ -345,8 +345,10 @@ export const CHECKS: Check[] = [
     weight: 3,
     title: "Structured data (JSON-LD)",
     run: (m) =>
-      m.hasStructuredData
-        ? pass("JSON-LD structured data detected.")
+      m.structuredDataTypes.length > 0
+        ? pass(
+            `JSON-LD structured data detected (${m.structuredDataTypes.slice(0, 3).join(", ")}).`,
+          )
         : fail(
             "No JSON-LD structured data.",
             "Add a schema.org JSON-LD block (e.g. Article, WebSite, Product) to unlock rich results.",

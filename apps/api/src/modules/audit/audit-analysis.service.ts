@@ -1,3 +1,4 @@
+import type { PageAnalysisAi } from "@ogstack/shared/types";
 import { singleton } from "tsyringe";
 import { BadRequestError } from "@/common/errors";
 import { logger } from "@/common/logger";
@@ -9,11 +10,10 @@ import {
 import type { AuditMetadata } from "./audit.extractor";
 import type { AuditAiInsights, AuditIssue } from "./audit.schema";
 
-const ANALYSIS_TIMEOUT_MS = 30_000;
-
 interface AnalyzeParams {
   metadata: AuditMetadata;
   issues: AuditIssue[];
+  pageAnalysis?: PageAnalysisAi | null;
 }
 
 /** Generates audit-focused AI insights: suggested OG/Twitter rewrites, tone
@@ -30,10 +30,10 @@ export class AuditAnalysisService {
   async analyze(params: AnalyzeParams): Promise<AuditAiInsights> {
     const raw = await this.promptProvider.chat({
       system: AUDIT_ANALYSIS_SYSTEM_PROMPT,
-      user: this.buildUserMessage(params.metadata, params.issues),
+      user: this.buildUserMessage(params.metadata, params.issues, params.pageAnalysis ?? null),
       json: true,
       temperature: 0.3,
-      maxTokens: 5000,
+      maxTokens: 6000,
     });
 
     if (!raw) {
@@ -52,18 +52,32 @@ export class AuditAnalysisService {
     return parsed;
   }
 
-  private buildUserMessage(metadata: AuditMetadata, issues: AuditIssue[]): string {
+  private buildUserMessage(
+    metadata: AuditMetadata,
+    issues: AuditIssue[],
+    pageAnalysis: PageAnalysisAi | null,
+  ): string {
     const currentTags = {
       url: metadata.url,
       title: metadata.title,
       description: metadata.description,
-      h1Count: metadata.h1Count,
+      canonical: metadata.canonical,
+      robots: metadata.robots,
       lang: metadata.lang,
+      favicon: metadata.favicon,
+      h1Count: metadata.h1Count,
+      imageCount: metadata.imageCount,
+      imagesMissingAlt: metadata.imagesMissingAlt,
+      structuredDataTypes: metadata.structuredDataTypes,
+      hreflangVariants: metadata.hreflangVariants,
       og: {
         title: metadata.ogTitle,
         description: metadata.ogDescription,
         image: metadata.ogImage,
+        imageWidth: metadata.ogImageWidth,
+        imageHeight: metadata.ogImageHeight,
         type: metadata.ogType,
+        url: metadata.ogUrl,
         siteName: metadata.ogSiteName,
       },
       twitter: {
@@ -78,9 +92,24 @@ export class AuditAnalysisService {
       .filter((i) => !i.pass)
       .map((i) => ({ id: i.id, category: i.category, title: i.title }));
 
-    return [
+    const parts = [
       `currentTags: ${JSON.stringify(currentTags)}`,
       `existingIssues: ${JSON.stringify(failingIssues)}`,
-    ].join("\n\n");
+    ];
+
+    if (pageAnalysis) {
+      const pageContext = {
+        summary: pageAnalysis.summary,
+        topics: pageAnalysis.topics,
+        contentType: pageAnalysis.contentType,
+        language: pageAnalysis.language,
+        pageTheme: pageAnalysis.pageTheme,
+        brandHints: pageAnalysis.brandHints,
+        contentSignals: pageAnalysis.contentSignals,
+      };
+      parts.push(`pageAnalysis: ${JSON.stringify(pageContext)}`);
+    }
+
+    return parts.join("\n\n");
   }
 }

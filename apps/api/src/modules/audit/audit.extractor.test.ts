@@ -17,7 +17,7 @@ describe("extractAuditMetadata", () => {
     expect(meta.ogImage).toBeNull();
     expect(meta.h1Count).toBe(0);
     expect(meta.imageCount).toBe(0);
-    expect(meta.hasStructuredData).toBe(false);
+    expect(meta.structuredDataTypes).toEqual([]);
     expect(meta.hasViewport).toBe(false);
     expect(meta.favicon).toBe("https://example.com/favicon.ico");
   });
@@ -136,7 +136,7 @@ describe("extractAuditMetadata", () => {
       URL_BASE,
       html('<head><link rel="alternate" hreflang="es" href="/es"></head>'),
     );
-    expect(meta.hasHreflang).toBe(true);
+    expect(meta.hreflangVariants).toEqual(["es"]);
   });
 
   it("picks the first favicon-ish link and resolves it", async () => {
@@ -178,7 +178,7 @@ describe("extractAuditMetadata", () => {
       URL_BASE,
       html('<head><script type="application/ld+json">{"@type":"Article"}</script></head>'),
     );
-    expect(meta.hasStructuredData).toBe(true);
+    expect(meta.structuredDataTypes).toContain("Article");
   });
 
   it("ignores meta tags with empty content", async () => {
