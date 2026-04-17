@@ -1,5 +1,4 @@
 import type { PageAnalysisAi } from "@ogstack/shared";
-import type { HeroTemplateSlug } from "@ogstack/shared/constants";
 import { singleton } from "tsyringe";
 import { logger } from "@/common/logger";
 import { buildAiImagePrompt, ImageProviderService } from "@/common/services/ai";
@@ -9,7 +8,6 @@ import { WatermarkService } from "@/common/services/watermark";
 import { PrismaClient, type Image } from "@/generated/prisma";
 import { PageAnalysisService } from "@/modules/page-analysis";
 import { getTemplate, TemplateService, type TemplateSlug } from "@/modules/template";
-import { getHeroTemplate } from "@/modules/template/hero.registry";
 import { IconPipelineService } from "./icon-pipeline.service";
 import { RenderContextBuilder, type RenderContext } from "./image-context.builder";
 import { toPrismaImageKind, type AiRenderOutcome } from "./image.mapper";
@@ -98,13 +96,8 @@ export class ImagePipelineService {
   }
 
   private resolveCategory(ctx: RenderContext): string | null {
-    if (ctx.kind === "og") {
-      return getTemplate(ctx.template as TemplateSlug).info.category;
-    }
-    if (ctx.kind === "blog_hero") {
-      return getHeroTemplate(ctx.template as HeroTemplateSlug).info.category;
-    }
-    return null;
+    if (ctx.kind === "icon_set") return null;
+    return getTemplate(ctx.template as TemplateSlug).info.category;
   }
 
   private async renderWithAiFallback(

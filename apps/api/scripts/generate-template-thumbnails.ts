@@ -29,7 +29,9 @@ async function main(): Promise<void> {
   await mkdir(OUTPUT_DIR, { recursive: true });
 
   const templateService = new TemplateService();
-  const templates = listTemplates();
+  // Only OG templates get 1200×630 thumbnails for the playground gallery.
+  // Hero templates render at different dimensions and are previewed separately.
+  const templates = listTemplates("og");
 
   console.log(`Generating ${templates.length} template thumbnails (WebP)...`);
 

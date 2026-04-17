@@ -1,11 +1,11 @@
 import {
-  DEFAULT_HERO_TEMPLATE_SLUG,
-  DEFAULT_TEMPLATE_SLUG,
+  DEFAULT_TEMPLATE_SLUG_BY_KIND,
   resolveDimensions,
   type BlogHeroAspect,
   type ImageDimensions,
   type ImageKind,
   type PageAnalysisAi,
+  type TemplateSlug,
 } from "@ogstack/shared";
 import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors";
@@ -14,8 +14,7 @@ import { FAL_MODELS } from "@/common/services/ai/image-providers/fal-ai.provider
 import { shouldWatermark } from "@/common/services/watermark";
 import { Plan, PrismaClient } from "@/generated/prisma";
 import type { RenderOptions } from "@/modules/template";
-import { hasHeroTemplate } from "@/modules/template/hero.registry";
-import { hasTemplate } from "@/modules/template/template.registry";
+import { hasTemplate, templateSupportsKind } from "@/modules/template/template.registry";
 import { ImageCacheService } from "./image-cache.service";
 
 export interface RenderContextInput {
@@ -71,21 +70,17 @@ export class RenderContextBuilder {
   }
 
   private resolveTemplate(kind: ImageKind, requested: string | undefined): string {
-    if (kind === "blog_hero") {
-      const slug = requested ?? DEFAULT_HERO_TEMPLATE_SLUG;
-      if (!hasHeroTemplate(slug)) {
-        throw new NotFoundError(`Hero template "${slug}" not found`);
-      }
-      return slug;
-    }
     if (kind === "icon_set") {
       // Icon-set generation doesn't use a template; the value is stored for
       // cache-key stability but the pipeline ignores it.
       return requested ?? "icon_default";
     }
-    const slug = requested ?? DEFAULT_TEMPLATE_SLUG;
+    const slug = requested ?? DEFAULT_TEMPLATE_SLUG_BY_KIND[kind];
     if (!hasTemplate(slug)) {
       throw new NotFoundError(`Template "${slug}" not found`);
+    }
+    if (!templateSupportsKind(slug as TemplateSlug, kind)) {
+      throw new NotFoundError(`Template "${slug}" does not support kind "${kind}"`);
     }
     return slug;
   }

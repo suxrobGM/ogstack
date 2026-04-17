@@ -1,30 +1,22 @@
 import {
-  DEFAULT_HERO_TEMPLATE_SLUG,
   DEFAULT_TEMPLATE_SLUG,
-  HERO_TEMPLATE_SLUGS,
+  IMAGE_KINDS,
   TEMPLATE_SLUGS,
-  type HeroTemplateSlug as SharedHeroTemplateSlug,
+  type ImageKind,
   type TemplateSlug as SharedTemplateSlug,
 } from "@ogstack/shared/constants";
 import { t, type Static } from "elysia";
 
-// `t.Unsafe<T>` wraps a runtime schema with a compile-time type override. We
-// build an enum-constrained string schema from the shared slug list, then
-// brand its Static type with `SharedTemplateSlug` so handlers and inferred
-// types get the narrow union without TypeBox's excessive tuple-inference cost.
-export const TemplateSlugSchema = t.Unsafe<SharedTemplateSlug>(
-  t.String({
-    enum: [...TEMPLATE_SLUGS],
-    default: DEFAULT_TEMPLATE_SLUG,
-  }),
-);
+const TEMPLATE_SLUG_ENUM = Object.fromEntries(TEMPLATE_SLUGS.map((slug) => [slug, slug])) as {
+  readonly [K in SharedTemplateSlug]: K;
+};
 
-export const HeroTemplateSlugSchema = t.Unsafe<SharedHeroTemplateSlug>(
-  t.String({
-    enum: [...HERO_TEMPLATE_SLUGS],
-    default: DEFAULT_HERO_TEMPLATE_SLUG,
-  }),
-);
+const IMAGE_KIND_ENUM = Object.fromEntries(IMAGE_KINDS.map((kind) => [kind, kind])) as {
+  readonly [K in ImageKind]: K;
+};
+
+export const TemplateSlugSchema = t.Enum(TEMPLATE_SLUG_ENUM, { default: DEFAULT_TEMPLATE_SLUG });
+export const ImageKindSchema = t.Enum(IMAGE_KIND_ENUM);
 
 export const FontFamilySchema = t.Union(
   [
@@ -67,22 +59,18 @@ export const TemplateInfoSchema = t.Object({
   name: t.String(),
   description: t.String(),
   category: t.String(),
+  supportedKinds: t.Array(ImageKindSchema),
 });
 
-export const HeroTemplateInfoSchema = t.Object({
-  slug: HeroTemplateSlugSchema,
-  name: t.String(),
-  description: t.String(),
-  category: t.String(),
+export const TemplateListQuerySchema = t.Object({
+  kind: t.Optional(ImageKindSchema),
 });
 
 export const TemplateListResponseSchema = t.Array(TemplateInfoSchema);
-export const HeroTemplateListResponseSchema = t.Array(HeroTemplateInfoSchema);
 
 export type TemplateSlug = SharedTemplateSlug;
-export type HeroTemplateSlug = SharedHeroTemplateSlug;
 export type FontFamily = Static<typeof FontFamilySchema>;
 export type LogoPosition = Static<typeof LogoPositionSchema>;
 export type RenderOptions = Static<typeof RenderOptionsSchema>;
 export type TemplateInfo = Static<typeof TemplateInfoSchema>;
-export type HeroTemplateInfo = Static<typeof HeroTemplateInfoSchema>;
+export type TemplateListQuery = Static<typeof TemplateListQuerySchema>;

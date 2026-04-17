@@ -2,6 +2,7 @@
 
 import type { ReactElement } from "react";
 import { Stack, Typography } from "@mui/material";
+import type { ImageKind } from "@ogstack/shared";
 import type { AnyReactForm } from "@/components/ui/form/types";
 import type { TemplateInfo } from "@/types/api";
 import { TemplateSelector } from "../template-selector";
@@ -19,15 +20,22 @@ export function TemplateField(props: TemplateFieldProps): ReactElement {
       <Typography variant="body2" sx={{ fontWeight: 500 }}>
         Template
       </Typography>
-      <form.Field name="template">
-        {(field) => (
-          <TemplateSelector
-            templates={templates}
-            selected={field.state.value}
-            onSelect={(slug) => field.handleChange(slug)}
-          />
-        )}
-      </form.Field>
+      <form.Subscribe selector={(s: { values: { kind: ImageKind } }) => s.values.kind}>
+        {(kind: ImageKind) => {
+          const visible = templates.filter((t) => t.supportedKinds.includes(kind));
+          return (
+            <form.Field name="template">
+              {(field) => (
+                <TemplateSelector
+                  templates={visible}
+                  selected={field.state.value}
+                  onSelect={(slug) => field.handleChange(slug)}
+                />
+              )}
+            </form.Field>
+          );
+        }}
+      </form.Subscribe>
     </Stack>
   );
 }

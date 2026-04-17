@@ -44,13 +44,24 @@ describe("TemplateService", () => {
   });
 
   describe("list", () => {
-    it("should return all available templates", () => {
+    it("should return all available templates when no kind is given", () => {
       const templates = service.list();
-      expect(templates).toHaveLength(10);
+      expect(templates).toHaveLength(15);
       expect(templates[0]).toHaveProperty("slug");
       expect(templates[0]).toHaveProperty("name");
       expect(templates[0]).toHaveProperty("description");
       expect(templates[0]).toHaveProperty("category");
+      expect(templates[0]).toHaveProperty("supportedKinds");
+    });
+
+    it("should return only OG templates when kind=og", () => {
+      const templates = service.list("og");
+      expect(templates).toHaveLength(10);
+    });
+
+    it("should return only hero templates when kind=blog_hero", () => {
+      const templates = service.list("blog_hero");
+      expect(templates).toHaveLength(5);
     });
   });
 
@@ -194,6 +205,11 @@ describe("TemplateService", () => {
           "changelog",
           "github_repo",
           "minimal",
+          "hero_editorial",
+          "hero_spotlight",
+          "hero_panorama",
+          "hero_minimal",
+          "hero_brand_card",
         ] as const;
 
         for (const slug of slugs) {

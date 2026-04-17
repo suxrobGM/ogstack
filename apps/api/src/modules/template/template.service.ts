@@ -1,11 +1,10 @@
-import { OG_DIMENSIONS, type ImageDimensions } from "@ogstack/shared/constants";
+import { OG_DIMENSIONS, type ImageDimensions, type ImageKind } from "@ogstack/shared/constants";
 import { Resvg } from "@resvg/resvg-js";
 import satori from "satori";
 import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors/http.error";
 import { logger } from "@/common/logger";
 import type { UrlMetadata } from "@/common/services/scraper.service";
-import { getHeroTemplate, hasHeroTemplate } from "./hero.registry";
 import { getTemplate, hasTemplate, listTemplates } from "./template.registry";
 import type { FontFamily, RenderOptions, TemplateInfo, TemplateSlug } from "./template.schema";
 import { safeFetchImageDataUrl } from "./template.utils";
@@ -47,8 +46,8 @@ const FONT_FAMILY_MAP: Record<FontFamily, string> = {
 export class TemplateService {
   private readonly fontCache = new Map<string, ArrayBuffer>();
 
-  list(): TemplateInfo[] {
-    return listTemplates();
+  list(kind?: ImageKind): TemplateInfo[] {
+    return listTemplates(kind);
   }
 
   async render(
@@ -89,15 +88,11 @@ export class TemplateService {
     return Buffer.from(pngData.asPng());
   }
 
-  /** Dispatches to the OG or hero registry based on the slug. */
   private resolveRenderer(slug: string): { render: (props: TemplateProps) => React.ReactNode } {
-    if (hasTemplate(slug)) {
-      return getTemplate(slug as TemplateSlug);
+    if (!hasTemplate(slug)) {
+      throw new NotFoundError(`Template "${slug}" not found`);
     }
-    if (hasHeroTemplate(slug)) {
-      return getHeroTemplate(slug);
-    }
-    throw new NotFoundError(`Template "${slug}" not found`);
+    return getTemplate(slug as TemplateSlug);
   }
 
   /**
