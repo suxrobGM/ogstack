@@ -8,8 +8,8 @@ import { ROUTES } from "@/lib/constants";
 import { line, surfaces } from "@/theme/palette";
 import { radii } from "@/theme/tokens";
 import { fontFamilies } from "@/theme/typography";
-import { buildOgImageUrl, buildOgMetaTag, templateThumbnailUrl } from "@/utils/og-image";
-import { normalizeUrlInput } from "@/utils/url";
+import { buildOgImageUrl, buildOgMetaTag } from "@/utils/integration-snippet";
+import { normalizeUrlInput, templateThumbnailUrl } from "@/utils/url";
 
 const DEFAULT_URL = "https://my-blog.com/building-with-bun";
 

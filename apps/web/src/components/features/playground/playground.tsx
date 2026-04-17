@@ -15,7 +15,7 @@ import type {
   TemplateInfo,
   UsageStatsResponse,
 } from "@/types/api";
-import { buildOgImageUrl, buildOgMetaTag, OG_PRODUCTION_HOST } from "@/utils/og-image";
+import { buildPlaygroundSnippet } from "@/utils/integration-snippet";
 import { ControlsPanel } from "./controls-panel";
 import { OutputPanel } from "./output-panel";
 import { OverrideDialog } from "./override-dialog";
@@ -124,7 +124,7 @@ export function Playground(props: PlaygroundProps): ReactElement {
     setLastFormValues(values);
     setAnalyzed(true);
 
-    if (values.url.trim() && !values.fullOverride) {
+    if (values.url && !values.fullOverride) {
       analyzeMutation.mutate({
         url: values.url,
         userPrompt: values.aiPrompt,
@@ -170,7 +170,10 @@ export function Playground(props: PlaygroundProps): ReactElement {
       template: initialTemplate,
       url: initialUrl,
     } as PlaygroundFormValues,
-    validators: { onSubmit: playgroundFormSchema },
+    validators: {
+      onBlur: playgroundFormSchema,
+      onSubmit: playgroundFormSchema,
+    },
     onSubmit: ({ value }) => submit(value, false),
   });
 
@@ -178,11 +181,14 @@ export function Playground(props: PlaygroundProps): ReactElement {
     submit(form.state.values, true);
   };
 
-  const metaTag =
-    result && lastFormValues && selectedProject
-      ? buildOgMetaTag(
-          buildOgImageUrl(selectedProject.publicId, toOgParams(lastFormValues), OG_PRODUCTION_HOST),
-        )
+  const integration =
+    result && lastFormValues
+      ? buildPlaygroundSnippet({
+          kind: lastFormValues.kind,
+          result,
+          publicProjectId: selectedProject?.publicId ?? null,
+          ogParams: toOgParams(lastFormValues),
+        })
       : null;
 
   return (
@@ -226,7 +232,7 @@ export function Playground(props: PlaygroundProps): ReactElement {
 
       {result && (
         <Grid size={{ xs: 12 }}>
-          <OutputPanel result={result} metaTag={metaTag} />
+          <OutputPanel result={result} integration={integration} />
         </Grid>
       )}
 

@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { container } from "@/common/di";
+import { ImageProviderService } from "@/common/services/ai";
 import { createEmptyMetadata, ScraperService, type UrlMetadata } from "@/common/services/scraper";
 import { ImageStorageService } from "@/common/services/storage";
 import { WatermarkService } from "@/common/services/watermark";
 import { PrismaClient } from "@/generated/prisma";
+import { PageAnalysisService } from "@/modules/page-analysis";
 import { TemplateService } from "@/modules/template/template.service";
 import { UsageService } from "@/modules/usage/usage.service";
 import { ImageGenerationService } from "./generation.service";
@@ -94,6 +96,19 @@ function createMockStorageService() {
   } as unknown as ImageStorageService;
 }
 
+function createMockPageAnalysisService() {
+  return {
+    getPageContext: mock(() => Promise.resolve({ metadata: MOCK_METADATA, ai: null })),
+  } as unknown as PageAnalysisService;
+}
+
+function createMockImageProviderService() {
+  return {
+    isEnabledForModel: mock(() => false),
+    generate: mock(() => Promise.resolve(MOCK_PNG)),
+  } as unknown as ImageProviderService;
+}
+
 describe("ImageGenerationService", () => {
   let service: ImageGenerationService;
   let mockPrisma: ReturnType<typeof createMockPrisma>;
@@ -102,6 +117,8 @@ describe("ImageGenerationService", () => {
   let mockUsageService: ReturnType<typeof createMockUsageService>;
   let mockStorage: ReturnType<typeof createMockStorageService>;
   let mockWatermark: ReturnType<typeof createMockWatermarkService>;
+  let mockPageAnalysis: ReturnType<typeof createMockPageAnalysisService>;
+  let mockImageProvider: ReturnType<typeof createMockImageProviderService>;
 
   beforeEach(() => {
     container.clearInstances();
@@ -111,12 +128,22 @@ describe("ImageGenerationService", () => {
     mockUsageService = createMockUsageService();
     mockStorage = createMockStorageService();
     mockWatermark = createMockWatermarkService();
+    mockPageAnalysis = createMockPageAnalysisService();
+    mockImageProvider = createMockImageProviderService();
     container.registerInstance(PrismaClient, mockPrisma as unknown as PrismaClient);
     container.registerInstance(ScraperService, mockScraper as unknown as ScraperService);
     container.registerInstance(TemplateService, mockTemplateService as unknown as TemplateService);
     container.registerInstance(UsageService, mockUsageService as unknown as UsageService);
     container.registerInstance(ImageStorageService, mockStorage as unknown as ImageStorageService);
     container.registerInstance(WatermarkService, mockWatermark as unknown as WatermarkService);
+    container.registerInstance(
+      PageAnalysisService,
+      mockPageAnalysis as unknown as PageAnalysisService,
+    );
+    container.registerInstance(
+      ImageProviderService,
+      mockImageProvider as unknown as ImageProviderService,
+    );
     service = container.resolve(ImageGenerationService);
   });
 

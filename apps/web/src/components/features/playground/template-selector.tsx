@@ -6,7 +6,7 @@ import { Box, Chip, Grid, Typography } from "@mui/material";
 import type { ImageKind } from "@ogstack/shared";
 import { accent, line, motion, radii, shadows, surfaces } from "@/theme";
 import type { TemplateInfo } from "@/types/api";
-import { templateThumbnailUrl } from "@/utils/og-image";
+import { templateThumbnailUrl } from "@/utils/url";
 
 interface TemplateSelectorProps {
   templates: TemplateInfo[];

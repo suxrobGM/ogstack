@@ -8,8 +8,10 @@ import { description, logoStyles, prettyHost, resolveTheme, title, withAlpha } f
 export function Billboard(props: TemplateProps): ReactElement {
   const { accent, dark, logoUrl, logoPosition, metadata, scale } = props;
   const theme = resolveTheme(dark, accent);
-  const heading = title(props);
+  const heading = title(props, 60);
   const desc = description(props, 140);
+
+  const headingSize = heading.length > 32 ? scale.display + 12 : scale.display + 36;
   const host = prettyHost(metadata.url);
   const eyebrow = metadata.siteName ?? host;
 
@@ -38,8 +40,14 @@ export function Billboard(props: TemplateProps): ReactElement {
         <GradientHeading
           from={theme.fg}
           to={accent}
-          size={scale.display + 36}
-          style={{ textAlign: "center", justifyContent: "center", display: "flex" }}
+          size={headingSize}
+          style={{
+            textAlign: "center",
+            justifyContent: "center",
+            display: "flex",
+            overflowWrap: "break-word",
+            wordBreak: "break-word",
+          }}
         >
           {heading}
         </GradientHeading>

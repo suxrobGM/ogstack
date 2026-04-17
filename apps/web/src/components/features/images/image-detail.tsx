@@ -132,23 +132,25 @@ export function ImageDetail(props: ImageDetailProps): ReactElement {
         <ImageIntegrationSnippet image={image} />
       </Surface>
 
-      <Surface>
-        <Stack spacing={2}>
-          <Box>
-            <Typography variant="h6">Platform previews</Typography>
-            <Typography variant="body2Muted">
-              How this image appears when shared across networks.
-            </Typography>
-          </Box>
-          <Grid container spacing={2}>
-            {PLATFORMS.map((platform) => (
-              <Grid key={platform.id} size={{ xs: 12, sm: 6, lg: 4 }}>
-                <PlatformPreviewCard platform={platform} metadata={previewMetadata} />
-              </Grid>
-            ))}
-          </Grid>
-        </Stack>
-      </Surface>
+      {image.kind === "og" && (
+        <Surface>
+          <Stack spacing={2}>
+            <Box>
+              <Typography variant="h6">Platform previews</Typography>
+              <Typography variant="body2Muted">
+                How this image appears when shared across networks.
+              </Typography>
+            </Box>
+            <Grid container spacing={2}>
+              {PLATFORMS.map((platform) => (
+                <Grid key={platform.id} size={{ xs: 12, sm: 6, lg: 4 }}>
+                  <PlatformPreviewCard platform={platform} metadata={previewMetadata} />
+                </Grid>
+              ))}
+            </Grid>
+          </Stack>
+        </Surface>
+      )}
     </Stack>
   );
 }

@@ -54,15 +54,12 @@ export class ImagePipelineService {
     const stored = await this.storage.store(`${ctx.cacheKey}.png`, outcome.pngBuffer);
     const imageUrl = `${stored.url}?v=${Date.now()}`;
 
-    // Only OG rows link back to a Template DB record (hero and icon kinds
-    // live in their own registries and don't seed DB template rows).
-    const templateRecord =
-      ctx.kind === "og"
-        ? await this.prisma.template.findUnique({
-            where: { slug: ctx.template },
-            select: { id: true },
-          })
-        : null;
+    // OG and blog_hero share the unified template registry, so both link back
+    // to the DB Template row. (icon_set is short-circuited above.)
+    const templateRecord = await this.prisma.template.findUnique({
+      where: { slug: ctx.template },
+      select: { id: true },
+    });
 
     const category = this.resolveCategory(ctx);
 

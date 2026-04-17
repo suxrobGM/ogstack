@@ -5,9 +5,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Surface } from "@/components/ui/layout/surface";
 import { ROUTES } from "@/lib/constants";
-import { radii } from "@/theme/tokens";
 import { fontFamilies } from "@/theme/typography";
-import { templateThumbnailUrl } from "@/utils/og-image";
+import { templateThumbnailUrl } from "@/utils/url";
 
 export const metadata: Metadata = {
   title: "Templates — OGStack",

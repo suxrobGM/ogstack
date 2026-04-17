@@ -158,12 +158,20 @@ export function prettyPath(url: string): string {
   }
 }
 
-export function title(props: TemplateProps): string {
+/**
+ * Default cap matches the longest-known "safe" headline for display-sized
+ * fonts on an OG canvas (1200×630). Templates that run smaller fonts can
+ * pass a larger `max`; templates with oversized display fonts should pass a
+ * smaller one (see Billboard at 60).
+ */
+export function title(props: TemplateProps, max = 120): string {
   const fromMeta = props.metadata.ogTitle ?? props.metadata.title;
-  if (fromMeta) return fromMeta;
+  if (fromMeta) {
+    return truncate(fromMeta, max);
+  }
   const host = prettyHost(props.metadata.url);
   const path = prettyPath(props.metadata.url);
-  return path ? `${host}${path}` : host;
+  return truncate(path ? `${host}${path}` : host, max);
 }
 
 export function description(props: TemplateProps, max = 160): string {

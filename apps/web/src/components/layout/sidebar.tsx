@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactElement } from "react";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -15,7 +16,6 @@ import { motion } from "@/theme/tokens";
 import { isNavGroup } from "./constants";
 import { FeedbackMenu } from "./feedback-menu";
 import { NavGroupItem } from "./nav-group";
-import { NAV_ICON_MAP } from "./nav-icons";
 import { NavItem } from "./nav-item";
 import { NotificationBell } from "./notification-bell";
 import type { ShellConfig } from "./shell-config";
@@ -115,12 +115,12 @@ export function Sidebar(props: SidebarProps): ReactElement {
               <NavGroupItem
                 key={item.label}
                 label={item.label}
-                icon={NAV_ICON_MAP[item.icon]}
+                icon={item.icon}
                 collapsed={collapsed}
                 children={item.children.map((child) => ({
                   label: child.label,
                   href: child.href,
-                  icon: NAV_ICON_MAP[child.icon],
+                  icon: child.icon,
                 }))}
               />
             );
@@ -130,7 +130,7 @@ export function Sidebar(props: SidebarProps): ReactElement {
               key={item.href}
               label={item.label}
               href={item.href}
-              icon={NAV_ICON_MAP[item.icon]}
+              icon={item.icon}
               collapsed={collapsed}
               active={pathname === item.href || pathname.startsWith(item.href + "/")}
             />
@@ -140,7 +140,7 @@ export function Sidebar(props: SidebarProps): ReactElement {
           <NavItem
             label="Admin Panel"
             href={ROUTES.adminOverview}
-            icon={NAV_ICON_MAP.adminPanel}
+            icon={<AdminPanelSettingsIcon fontSize="small" />}
             collapsed={collapsed}
             active={false}
           />

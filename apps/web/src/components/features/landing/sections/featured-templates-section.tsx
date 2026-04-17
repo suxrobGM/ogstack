@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ROUTES } from "@/lib/constants";
 import { radii } from "@/theme/tokens";
 import { fontFamilies } from "@/theme/typography";
-import { templateThumbnailUrl } from "@/utils/og-image";
+import { templateThumbnailUrl } from "@/utils/url";
 
 const FEATURED = ["aurora", "showcase", "blog_card", "product_launch"];
 

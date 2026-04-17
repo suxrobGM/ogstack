@@ -5,6 +5,7 @@ import { logger } from "@/common/logger";
 import { FAL_MODELS } from "@/common/services/ai";
 import { ImageStorageService } from "@/common/services/storage";
 import { PrismaClient } from "@/generated/prisma";
+import { toPrismaImageKind } from "@/modules/image/image.mapper";
 import { PublicProjectResolver } from "@/modules/project/public-project.resolver";
 import type { RenderOptions } from "@/modules/template";
 import { UsageService } from "@/modules/usage";
@@ -97,11 +98,13 @@ export class ImageGenerationService {
       {
         imageId: image.id,
         cacheKey: ctx.cacheKey,
+        kind: ctx.kind,
         generationMs,
         template,
         aiEnabled: outcome.aiEnabled,
+        aiProModel: ctx.aiModel === FAL_MODELS.flux2Pro,
       },
-      "OG image generated",
+      "Image generated",
     );
 
     return toGenerateResponse(image, { fromCache: false, outcome, generationMs });
@@ -166,9 +169,10 @@ export class ImageGenerationService {
   }
 
   /**
-   * When an image already exists for (projectId, url) but with a different
-   * cache key (different template/options), require `force`. Otherwise throw
-   * `ImageConflictError` so the UI can prompt the user to confirm replacement.
+   * When an image of the same kind already exists for (projectId, url) but
+   * with a different cache key, require `force`. Blog heroes skip the check
+   * entirely — multiple covers per URL are allowed since they're standalone
+   * assets, not tied to a single meta tag.
    */
   private async handleDuplicateUrl(
     projectId: string,
@@ -177,8 +181,10 @@ export class ImageGenerationService {
     kind: ImageKind,
     force: boolean,
   ): Promise<void> {
+    if (kind === "blog_hero") return;
+
     const existing = await this.prisma.image.findFirst({
-      where: { projectId, sourceUrl: url },
+      where: { projectId, sourceUrl: url, kind: toPrismaImageKind(kind) },
     });
     if (!existing) return;
     if (existing.cacheKey === newCacheKey) return;
@@ -210,7 +216,7 @@ function flattenRenderOptions(
     logoUrl: style?.logo?.url,
     logoPosition: style?.logo?.position,
     aspectRatio: style?.aspectRatio,
-    aiGenerated: ai !== undefined,
+    aiGenerated: ai != null,
     aiModel: ai?.model,
     aiPrompt: ai?.prompt,
   };

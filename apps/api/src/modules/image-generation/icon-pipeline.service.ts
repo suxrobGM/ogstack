@@ -164,6 +164,7 @@ export class IconPipelineService {
         const stored = await this.storage.store(key, buffer, plan.contentType);
         pngAssets.push({
           name: plan.name,
+          url: stored.url,
           width: plan.size,
           height: plan.size,
           sizeBytes: stored.size,
@@ -182,6 +183,7 @@ export class IconPipelineService {
     );
     pngAssets.push({
       name: "favicon.ico",
+      url: icoStored.url,
       width: 48,
       height: 48,
       sizeBytes: icoStored.size,
@@ -206,6 +208,7 @@ export class IconPipelineService {
     );
     pngAssets.push({
       name: "site.webmanifest",
+      url: manifestStored.url,
       width: 0,
       height: 0,
       sizeBytes: manifestStored.size,

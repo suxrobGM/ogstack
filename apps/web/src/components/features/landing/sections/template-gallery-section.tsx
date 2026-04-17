@@ -3,7 +3,7 @@ import { Box, Container, Grid, Typography } from "@mui/material";
 import Image from "next/image";
 import { radii } from "@/theme/tokens";
 import { fontFamilies } from "@/theme/typography";
-import { templateThumbnailUrl } from "@/utils/og-image";
+import { templateThumbnailUrl } from "@/utils/url";
 
 const TEMPLATES = [
   "aurora",

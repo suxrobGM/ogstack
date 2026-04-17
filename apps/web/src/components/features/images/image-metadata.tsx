@@ -18,6 +18,11 @@ export function ImageMetadata(props: ImageMetadataProps): ReactElement {
 
   return (
     <Stack spacing={1.5}>
+      {image.title && (
+        <MetaRow label="Title">
+          <Typography variant="body2">{image.title}</Typography>
+        </MetaRow>
+      )}
       <MetaRow label="Source URL">
         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
           <Typography variant="body2" sx={{ wordBreak: "break-all" }}>
@@ -37,13 +42,15 @@ export function ImageMetadata(props: ImageMetadataProps): ReactElement {
       <MetaRow label="Generation">
         <GenerationChip image={image} />
       </MetaRow>
-      <MetaRow label="Template">
-        <Typography variant="body2">
-          {image.template
-            ? `${image.template.name} (${image.template.slug})`
-            : (image.category ?? "—")}
-        </Typography>
-      </MetaRow>
+      {!image.aiModel && (
+        <MetaRow label="Template">
+          <Typography variant="body2">
+            {image.template
+              ? `${image.template.name} (${image.template.slug})`
+              : (image.category ?? "—")}
+          </Typography>
+        </MetaRow>
+      )}
       <MetaRow label="Project">
         <Typography variant="body2">{image.projectName ?? "—"}</Typography>
       </MetaRow>

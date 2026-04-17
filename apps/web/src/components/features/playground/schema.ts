@@ -1,6 +1,7 @@
 import {
   BLOG_HERO_ASPECTS,
   IMAGE_KINDS,
+  isValidHttpUrl,
   type BlogHeroAspect,
   type ImageKind,
 } from "@ogstack/shared";
@@ -51,9 +52,11 @@ export const BLOG_HERO_ASPECT_LABELS: Record<BlogHeroAspect, string> = {
 };
 
 export const playgroundFormSchema = z.object({
-  url: z.url("Enter a valid URL (including https://)."),
+  url: z.string().refine(isValidHttpUrl, {
+    message: "Enter a valid URL (including https://, no spaces).",
+  }),
   kind: z.enum(IMAGE_KINDS),
-  template: z.string(),
+  template: z.string().min(1, "Pick a template."),
   aspectRatio: z.enum(BLOG_HERO_ASPECTS),
   accent: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Enter a valid hex color (e.g. #3B82F6)."),
   dark: z.boolean(),

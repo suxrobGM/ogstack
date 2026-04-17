@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactElement } from "react";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { Box, Divider, List, Stack, Typography } from "@mui/material";
 import { isAdminRole } from "@ogstack/shared";
 import { usePathname } from "next/navigation";
@@ -10,7 +11,6 @@ import { line } from "@/theme/palette";
 import { isNavGroup } from "./constants";
 import { FeedbackMenu } from "./feedback-menu";
 import { NavGroupItem } from "./nav-group";
-import { NAV_ICON_MAP } from "./nav-icons";
 import { NavItem } from "./nav-item";
 import { NotificationBell } from "./notification-bell";
 import type { ShellConfig } from "./shell-config";
@@ -43,11 +43,11 @@ export function MobileNav(props: MobileNavProps): ReactElement {
               <NavGroupItem
                 key={item.label}
                 label={item.label}
-                icon={NAV_ICON_MAP[item.icon]}
+                icon={item.icon}
                 children={item.children.map((child) => ({
                   label: child.label,
                   href: child.href,
-                  icon: NAV_ICON_MAP[child.icon],
+                  icon: child.icon,
                 }))}
               />
             );
@@ -57,7 +57,7 @@ export function MobileNav(props: MobileNavProps): ReactElement {
               key={item.href}
               label={item.label}
               href={item.href}
-              icon={NAV_ICON_MAP[item.icon]}
+              icon={item.icon}
               active={pathname === item.href || pathname.startsWith(item.href + "/")}
             />
           );
@@ -66,7 +66,7 @@ export function MobileNav(props: MobileNavProps): ReactElement {
           <NavItem
             label="Admin Panel"
             href={ROUTES.adminOverview}
-            icon={NAV_ICON_MAP.adminPanel}
+            icon={<AdminPanelSettingsIcon fontSize="small" />}
             active={false}
           />
         )}

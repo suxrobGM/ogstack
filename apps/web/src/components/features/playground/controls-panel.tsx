@@ -2,7 +2,7 @@
 
 import type { ReactElement } from "react";
 import { Stack, Typography } from "@mui/material";
-import { BLOG_HERO_ASPECTS, isValidHttpUrl, type ImageKind } from "@ogstack/shared";
+import { BLOG_HERO_ASPECTS, type ImageKind } from "@ogstack/shared";
 import { FormSelectField } from "@/components/ui/form/form-select-field";
 import { FormTextField } from "@/components/ui/form/form-text-field";
 import type { AnyReactForm } from "@/components/ui/form/types";
@@ -112,12 +112,12 @@ export function ControlsPanel(props: ControlsPanelProps): ReactElement {
           }}
         </form.Subscribe>
 
-        <form.Subscribe selector={(s: { values: { url: string } }) => s.values.url}>
-          {(url: string) => (
+        <form.Subscribe selector={(s: { canSubmit: boolean }) => s.canSubmit}>
+          {(canSubmit: boolean) => (
             <GenerateButton
               isGenerating={isGenerating}
               onClick={onGenerate}
-              disabled={!selectedProjectId || !isValidHttpUrl(url)}
+              disabled={!selectedProjectId || !canSubmit}
             />
           )}
         </form.Subscribe>

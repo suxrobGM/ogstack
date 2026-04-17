@@ -12,6 +12,16 @@ export const ImageKindSchema = t.Union(
   { default: "og" },
 );
 
+/**
+ * Kind variant for filter queries — no default, so an absent filter means
+ * "any kind" rather than silently narrowing to `og`.
+ */
+const ImageKindFilterSchema = t.Union([
+  t.Literal("og"),
+  t.Literal("blog_hero"),
+  t.Literal("icon_set"),
+]);
+
 export const BlogHeroAspectSchema = t.Union([t.Literal("16:9"), t.Literal("16:10")], {
   default: "16:9",
 });
@@ -24,6 +34,7 @@ export const ImageFormatSchema = t.Enum(ImageFormat);
 
 export const ImageAssetSchema = t.Object({
   name: t.String(),
+  url: t.String(),
   width: t.Number(),
   height: t.Number(),
   sizeBytes: t.Number(),
@@ -35,7 +46,7 @@ export const ImageListQuerySchema = t.Composite([
   t.Object({
     projectId: t.Optional(t.String({ format: "uuid" })),
     category: t.Optional(TemplateCategoryEnumSchema),
-    kind: t.Optional(ImageKindSchema),
+    kind: t.Optional(ImageKindFilterSchema),
     search: t.Optional(t.String()),
   }),
 ]);

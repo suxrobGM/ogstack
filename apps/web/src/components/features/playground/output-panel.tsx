@@ -8,16 +8,17 @@ import { CodeBlock } from "@/components/ui/display/code-block";
 import { Surface } from "@/components/ui/layout/surface";
 import { textColors } from "@/theme";
 import type { GenerateDto } from "@/types/api";
+import type { IntegrationSnippet } from "@/utils/integration-snippet";
 
 interface OutputPanelProps {
   result: GenerateDto | null;
-  metaTag: string | null;
+  integration: IntegrationSnippet | null;
 }
 
-type TabId = "metadata" | "meta-tag" | "ai-prompt";
+type TabId = "metadata" | "integration" | "ai-prompt";
 
 export function OutputPanel(props: OutputPanelProps): ReactElement {
-  const { result, metaTag } = props;
+  const { result, integration } = props;
   const [tab, setTab] = useState<TabId>("metadata");
 
   if (!result) {
@@ -25,10 +26,10 @@ export function OutputPanel(props: OutputPanelProps): ReactElement {
   }
 
   const hasMetadata = Boolean(result.source?.title || result.source?.description);
-  const hasMetaTag = Boolean(metaTag);
+  const hasIntegration = Boolean(integration);
   const hasAiPrompt = Boolean(result.ai?.prompt);
 
-  if (!hasMetadata && !hasMetaTag && !hasAiPrompt) {
+  if (!hasMetadata && !hasIntegration && !hasAiPrompt) {
     return <></>;
   }
 
@@ -39,7 +40,7 @@ export function OutputPanel(props: OutputPanelProps): ReactElement {
       <Stack spacing={2}>
         <Tabs value={tab} onChange={handleChange} variant="scrollable" allowScrollButtonsMobile>
           {hasMetadata && <Tab value="metadata" label="Metadata" />}
-          {hasMetaTag && <Tab value="meta-tag" label="Meta Tag" />}
+          {hasIntegration && integration && <Tab value="integration" label={integration.label} />}
           {hasAiPrompt && (
             <Tab
               value="ai-prompt"
@@ -50,7 +51,7 @@ export function OutputPanel(props: OutputPanelProps): ReactElement {
 
         <Box>
           {tab === "metadata" && hasMetadata && <MetadataView result={result} />}
-          {tab === "meta-tag" && hasMetaTag && metaTag && <MetaTagView metaTag={metaTag} />}
+          {tab === "integration" && integration && <IntegrationView snippet={integration} />}
           {tab === "ai-prompt" && hasAiPrompt && result.ai?.prompt && (
             <AiPromptView prompt={result.ai.prompt} />
           )}
@@ -85,10 +86,11 @@ function MetadataView(props: { result: GenerateDto }): ReactElement {
   );
 }
 
-function MetaTagView(props: { metaTag: string }): ReactElement {
+function IntegrationView(props: { snippet: IntegrationSnippet }): ReactElement {
+  const { snippet } = props;
   return (
     <Suspense fallback={<Skeleton variant="rectangular" height={80} />}>
-      <CodeBlock code={props.metaTag} language="html" />
+      <CodeBlock code={snippet.code} language={snippet.language === "html" ? "html" : undefined} />
     </Suspense>
   );
 }
