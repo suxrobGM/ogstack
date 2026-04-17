@@ -2,21 +2,23 @@ import { ICON_MASTER_SIZE, ICON_SIZES, type IconSize } from "@ogstack/shared/con
 import pngToIco from "png-to-ico";
 import sharp from "sharp";
 import { singleton } from "tsyringe";
+import { BadRequestError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { buildIconPrompt, ImageProviderService } from "@/common/services/ai";
 import { ImageStorageService } from "@/common/services/storage";
 import { PrismaClient } from "@/generated/prisma";
+import { toPrismaImageKind } from "@/modules/image/image.mapper";
+import type { ImageAsset } from "@/modules/image/image.schema";
 import { PageAnalysisService } from "@/modules/page-analysis";
-import type { RenderContext } from "./image-context.builder";
-import type { PipelineResult } from "./image-pipeline.service";
-import { toPrismaImageKind, type AiRenderOutcome } from "./image.mapper";
-import type { ImageAsset } from "./image.schema";
+import type { RenderContext } from "./context.builder";
+import type { AiRenderOutcome } from "./generation.mapper";
+import type { PipelineResult } from "./pipeline.service";
 
 const FAVICON_ICO_SIZES: IconSize[] = [16, 32, 48];
 
 interface IconAssetPlan {
   name: string;
-  size: IconSize | null;
+  size: IconSize;
   contentType: string;
 }
 
@@ -51,6 +53,10 @@ export class IconPipelineService {
   async run(ctx: RenderContext): Promise<PipelineResult> {
     const startMs = performance.now();
 
+    if (!ctx.aiModel) {
+      throw new BadRequestError("Icon-set generation requires an AI model.");
+    }
+
     const { metadata, ai } = await this.pageAnalysis.getForImageGeneration({
       url: ctx.url,
       userId: ctx.userId,
@@ -60,9 +66,6 @@ export class IconPipelineService {
     });
 
     const prompt = buildIconPrompt(metadata, ai, ctx.options?.aiPrompt);
-    if (!ctx.aiModel) {
-      throw new Error("Icon-set generation requires an AI model. Callers must set ctx.aiModel.");
-    }
 
     const masterPng = await this.imageProvider.generate({
       model: ctx.aiModel,
@@ -125,9 +128,10 @@ export class IconPipelineService {
     return { image, outcome, generationMs };
   }
 
-  /** Resize the 1024×1024 master into every size we need. Lanczos3 on the
-   *  downscale path preserves the most detail at small sizes; post-sharpen
-   *  at sizes ≤48 fights the softness of aggressive downsampling. */
+  /**
+   * Lanczos3 on the downscale preserves detail; post-sharpen at sizes ≤48
+   * fights the softness of aggressive downsampling.
+   */
   private async resizeToAllSizes(master: Buffer): Promise<Map<IconSize, Buffer>> {
     const results = new Map<IconSize, Buffer>();
     await Promise.all(
@@ -154,8 +158,7 @@ export class IconPipelineService {
 
     await Promise.all(
       ICON_FILES.map(async (plan) => {
-        if (plan.size === null) return;
-        const buffer = resized.get(plan.size as IconSize);
+        const buffer = resized.get(plan.size);
         if (!buffer) return;
         const key = `${cacheKey}/${plan.name}`;
         const stored = await this.storage.store(key, buffer, plan.contentType);
@@ -168,7 +171,6 @@ export class IconPipelineService {
       }),
     );
 
-    // Package .ico from the 16/32/48 variants.
     const icoBuffers = FAVICON_ICO_SIZES.map((s) => resized.get(s)).filter((b): b is Buffer =>
       Boolean(b),
     );
@@ -185,7 +187,6 @@ export class IconPipelineService {
       sizeBytes: icoStored.size,
     });
 
-    // site.webmanifest pointing at the 192/512 PNGs.
     const manifest = {
       name: "Site",
       short_name: "Site",

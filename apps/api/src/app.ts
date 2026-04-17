@@ -16,12 +16,13 @@ import {
   billingWebhookController,
   syncStripeOnStartup,
 } from "@/modules/billing";
+import { imageController } from "@/modules/image";
 import {
-  imageApiController,
-  imageController,
+  imageGenerationApiController,
+  imageGenerationDashboardController,
   imageHeroPublicController,
   imagePublicController,
-} from "@/modules/image";
+} from "@/modules/image-generation";
 import { notificationController } from "@/modules/notification";
 import { pageAnalysisController } from "@/modules/page-analysis";
 import { projectController } from "@/modules/project";
@@ -52,7 +53,8 @@ const app = new Elysia()
       .use(auditController)
       .use(auditUserController)
       .use(pageAnalysisController)
-      .use(imageApiController)
+      .use(imageGenerationApiController)
+      .use(imageGenerationDashboardController)
       .use(imageController)
       .use(projectController)
       .use(templateController)

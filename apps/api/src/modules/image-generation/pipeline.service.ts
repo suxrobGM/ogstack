@@ -6,11 +6,12 @@ import { type UrlMetadata } from "@/common/services/scraper";
 import { ImageStorageService } from "@/common/services/storage";
 import { WatermarkService } from "@/common/services/watermark";
 import { PrismaClient, type Image } from "@/generated/prisma";
+import { toPrismaImageKind } from "@/modules/image/image.mapper";
 import { PageAnalysisService } from "@/modules/page-analysis";
 import { getTemplate, TemplateService, type TemplateSlug } from "@/modules/template";
+import { RenderContextBuilder, type RenderContext } from "./context.builder";
+import type { AiRenderOutcome } from "./generation.mapper";
 import { IconPipelineService } from "./icon-pipeline.service";
-import { RenderContextBuilder, type RenderContext } from "./image-context.builder";
-import { toPrismaImageKind, type AiRenderOutcome } from "./image.mapper";
 
 export interface PipelineResult {
   image: Image;

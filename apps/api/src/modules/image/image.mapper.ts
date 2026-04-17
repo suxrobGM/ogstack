@@ -1,82 +1,75 @@
 import type { ImageKind as WireImageKind } from "@ogstack/shared/constants";
-import { ImageKind, type Image } from "@/generated/prisma";
-import type { GenerateResponse, ImageAsset } from "./image.schema";
+import { ImageKind, Prisma, type Image } from "@/generated/prisma";
+import type { ImageAsset, ImageItem } from "./image.schema";
 
-/** Convert the wire-level ImageKind literal to the Prisma enum. */
+const PRISMA_TO_WIRE: Record<ImageKind, WireImageKind> = {
+  [ImageKind.OG]: "og",
+  [ImageKind.BLOG_HERO]: "blog_hero",
+  [ImageKind.ICON_SET]: "icon_set",
+};
+
+const WIRE_TO_PRISMA: Record<WireImageKind, ImageKind> = {
+  og: ImageKind.OG,
+  blog_hero: ImageKind.BLOG_HERO,
+  icon_set: ImageKind.ICON_SET,
+};
+
 export function toPrismaImageKind(kind: WireImageKind): ImageKind {
-  switch (kind) {
-    case "og":
-      return ImageKind.OG;
-    case "blog_hero":
-      return ImageKind.BLOG_HERO;
-    case "icon_set":
-      return ImageKind.ICON_SET;
-  }
+  return WIRE_TO_PRISMA[kind];
 }
 
-/** Convert the Prisma enum back to the wire-level literal. */
 export function fromPrismaImageKind(kind: ImageKind): WireImageKind {
-  switch (kind) {
-    case ImageKind.OG:
-      return "og";
-    case ImageKind.BLOG_HERO:
-      return "blog_hero";
-    case ImageKind.ICON_SET:
-      return "icon_set";
-  }
+  return PRISMA_TO_WIRE[kind];
 }
 
-export interface AiRenderOutcome {
-  pngBuffer: Buffer;
-  aiEnabled: boolean;
-  aiFellBack: boolean;
-  aiModel: string | null;
-  aiPrompt: string | null;
+/**
+ * Storage key used to persist a generated image. Kept here so CRUD deletion
+ * and pipeline eviction agree on the format. Icon sets live under a
+ * per-generation prefix; everything else is a single `.png` file.
+ */
+export function storageKeyFor(kind: ImageKind, cacheKey: string): string {
+  return kind === ImageKind.ICON_SET ? `${cacheKey}/` : `${cacheKey}.png`;
 }
 
-type GenerateResponseExtras =
-  | { fromCache: true }
-  | { fromCache: false; outcome: AiRenderOutcome; generationMs: number };
+export const imageWithRelationsInclude = {
+  template: { select: { slug: true, name: true } },
+  project: { select: { name: true, publicId: true } },
+} satisfies Prisma.ImageInclude;
 
-function assetsFrom(image: Image): ImageAsset[] | null {
-  if (!image.assets || !Array.isArray(image.assets)) return null;
-  return image.assets as unknown as ImageAsset[];
+type ImageWithRelations = Prisma.ImageGetPayload<{ include: typeof imageWithRelationsInclude }>;
+
+function assetsFrom(assets: Prisma.JsonValue | null): ImageAsset[] | null {
+  if (!assets || !Array.isArray(assets)) return null;
+  return assets as unknown as ImageAsset[];
 }
 
-export function toGenerateResponse(image: Image, extras: GenerateResponseExtras): GenerateResponse {
-  const metadata = {
-    title: image.title,
-    description: image.description,
-    favicon: image.faviconUrl,
-  };
-
-  const base = {
-    kind: fromPrismaImageKind(image.kind),
-    width: image.width,
-    height: image.height,
-    assets: assetsFrom(image),
-    metadata,
-  };
-
-  if (extras.fromCache) {
-    return {
-      ...base,
-      imageUrl: image.cdnUrl ?? image.imageUrl,
-      cached: true,
-      aiEnabled: image.aiEnabled,
-      aiModel: image.aiModel,
-      aiPrompt: image.aiPrompt,
-    };
-  }
-
+export function toImageItem(row: ImageWithRelations): ImageItem {
   return {
-    ...base,
-    imageUrl: image.imageUrl,
-    cached: false,
-    generationMs: extras.generationMs,
-    aiEnabled: extras.outcome.aiEnabled,
-    aiFellBack: extras.outcome.aiFellBack,
-    aiModel: extras.outcome.aiModel,
-    aiPrompt: extras.outcome.aiPrompt,
+    id: row.id,
+    sourceUrl: row.sourceUrl,
+    imageUrl: row.imageUrl,
+    cdnUrl: row.cdnUrl,
+    title: row.title,
+    description: row.description,
+    faviconUrl: row.faviconUrl,
+    kind: fromPrismaImageKind(row.kind),
+    category: row.category,
+    template: row.template ? { slug: row.template.slug, name: row.template.name } : null,
+    projectId: row.projectId,
+    projectName: row.project?.name ?? null,
+    publicProjectId: row.project?.publicId ?? null,
+    aiModel: row.aiModel,
+    generatedOnPlan: row.generatedOnPlan,
+    width: row.width,
+    height: row.height,
+    format: row.format,
+    generationMs: row.generationMs,
+    serveCount: row.serveCount,
+    assets: assetsFrom(row.assets),
+    createdAt: row.createdAt,
   };
+}
+
+export function assetsFromImage(image: Image): ImageAsset[] | null {
+  return assetsFrom(image.assets);
 }

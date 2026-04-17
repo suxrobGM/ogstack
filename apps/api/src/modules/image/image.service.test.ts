@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { container } from "@/common/di";
 import { ImageStorageService } from "@/common/services/storage";
-import { PrismaClient } from "@/generated/prisma";
+import { ImageKind, PrismaClient } from "@/generated/prisma";
 import { ImageService } from "./image.service";
 
 function createMockImage(overrides: Record<string, unknown> = {}) {
@@ -14,6 +14,7 @@ function createMockImage(overrides: Record<string, unknown> = {}) {
     category: "TECH" as const,
     sourceUrl: "https://example.com",
     cacheKey: "cache-abc",
+    kind: ImageKind.OG,
     imageUrl: "http://localhost/uploads/cache-abc.png",
     cdnUrl: null,
     title: "Example",
@@ -140,22 +141,22 @@ describe("ImageService", () => {
   });
 
   describe("delete", () => {
-    it("deletes owner's image and removes storage when no other refs", async () => {
-      (mockPrisma.image.count as ReturnType<typeof mock>).mockResolvedValue(0);
+    it("deletes OG image storage with .png suffix", async () => {
       await service.delete("user-1", "img-1");
-      expect(mockStorage.delete).toHaveBeenCalledWith("cache-abc");
+      expect(mockStorage.delete).toHaveBeenCalledWith("cache-abc.png");
       expect(mockPrisma.image.delete).toHaveBeenCalled();
     });
 
-    it("skips storage.delete when another row references the cacheKey", async () => {
-      (mockPrisma.image.count as ReturnType<typeof mock>).mockResolvedValue(1);
+    it("deletes ICON_SET storage under its prefix", async () => {
+      (mockPrisma.image.findUnique as ReturnType<typeof mock>).mockResolvedValue(
+        createMockImage({ kind: ImageKind.ICON_SET }),
+      );
       await service.delete("user-1", "img-1");
-      expect(mockStorage.delete).not.toHaveBeenCalled();
+      expect(mockStorage.delete).toHaveBeenCalledWith("cache-abc/");
       expect(mockPrisma.image.delete).toHaveBeenCalled();
     });
 
     it("swallows storage.delete errors but still removes DB row", async () => {
-      (mockPrisma.image.count as ReturnType<typeof mock>).mockResolvedValue(0);
       (mockStorage.delete as ReturnType<typeof mock>).mockRejectedValue(new Error("boom"));
       await service.delete("user-1", "img-1");
       expect(mockPrisma.image.delete).toHaveBeenCalled();

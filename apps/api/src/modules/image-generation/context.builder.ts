@@ -15,7 +15,7 @@ import { shouldWatermark } from "@/common/services/watermark";
 import { Plan, PrismaClient } from "@/generated/prisma";
 import type { RenderOptions } from "@/modules/template";
 import { hasTemplate, templateSupportsKind } from "@/modules/template/template.registry";
-import { ImageCacheService } from "./image-cache.service";
+import { ImageRecordService } from "./record.service";
 
 export interface RenderContextInput {
   userId: string;
@@ -23,7 +23,7 @@ export interface RenderContextInput {
   apiKeyId?: string;
   url: string;
   kind: ImageKind;
-  /** Optional — defaults to the kind-appropriate default slug. */
+  /** Defaults to the kind-appropriate default slug. */
   template?: string;
   options?: RenderOptions;
   fullOverride: boolean;
@@ -42,7 +42,7 @@ export interface RenderContext extends Omit<RenderContextInput, "template"> {
 export class RenderContextBuilder {
   constructor(
     private readonly prisma: PrismaClient,
-    private readonly cache: ImageCacheService,
+    private readonly records: ImageRecordService,
   ) {}
 
   async build(input: RenderContextInput): Promise<RenderContext> {
@@ -57,7 +57,7 @@ export class RenderContextBuilder {
       input.kind === "icon_set" ? { ...(input.options ?? {}), aiGenerated: true } : input.options;
     const { plan, aiModel } = await this.resolveUser(input.userId, effectiveOptions);
     const watermark = shouldWatermark(plan);
-    const cacheKey = await this.cache.buildKey({
+    const cacheKey = await this.records.buildKey({
       projectId: input.projectId,
       url: input.url,
       kind: input.kind,

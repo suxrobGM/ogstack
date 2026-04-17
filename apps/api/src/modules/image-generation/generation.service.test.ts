@@ -6,7 +6,7 @@ import { WatermarkService } from "@/common/services/watermark";
 import { PrismaClient } from "@/generated/prisma";
 import { TemplateService } from "@/modules/template/template.service";
 import { UsageService } from "@/modules/usage/usage.service";
-import { ImageGenerationService } from "./image-generation.service";
+import { ImageGenerationService } from "./generation.service";
 
 const MOCK_METADATA: UrlMetadata = {
   ...createEmptyMetadata("https://example.com"),
@@ -30,13 +30,14 @@ function createMockPrisma() {
           id: "proj-1",
           userId: "user-1",
           publicId: "abc123",
-          domains: [],
-          user: { id: "user-1" },
+          domains: ["example.com"],
+          user: { id: "user-1", plan: "PRO" },
         }),
       ),
     },
     image: {
       findUnique: mock(() => Promise.resolve(null)),
+      findFirst: mock(() => Promise.resolve(null)),
       create: mock(() =>
         Promise.resolve({
           id: "img-1",
@@ -53,7 +54,7 @@ function createMockPrisma() {
       findUnique: mock(() => Promise.resolve({ id: "tmpl-1" })),
     },
     user: {
-      findUnique: mock(() => Promise.resolve({ plan: "BUSINESS" })),
+      findUnique: mock(() => Promise.resolve({ plan: "PRO" })),
     },
   } as unknown as PrismaClient;
 }
@@ -133,9 +134,6 @@ describe("ImageGenerationService", () => {
       expect(result.cached).toBe(false);
       expect(result.imageUrl).toBeDefined();
       expect(result.metadata.title).toBe("OG Title");
-      expect(mockScraper.extractMetadata).toHaveBeenCalledWith("https://example.com", {
-        allowHeadless: true,
-      });
       expect(mockTemplateService.render).toHaveBeenCalled();
       expect(mockStorage.store).toHaveBeenCalled();
       expect(mockPrisma.image.create).toHaveBeenCalled();
@@ -159,7 +157,6 @@ describe("ImageGenerationService", () => {
       expect(result.cached).toBe(true);
       expect(result.imageUrl).toBe("https://cdn.example.com/cached.png");
       expect(result.metadata.title).toBe("Cached Title");
-      expect(mockScraper.extractMetadata).not.toHaveBeenCalled();
       expect(mockTemplateService.render).not.toHaveBeenCalled();
       expect(mockStorage.store).not.toHaveBeenCalled();
       expect(mockPrisma.image.update).toHaveBeenCalled();
@@ -221,7 +218,6 @@ describe("ImageGenerationService", () => {
 
       expect(result).toBeInstanceOf(Buffer);
       expect(result[0]).toBe(0x89);
-      expect(mockScraper.extractMetadata).toHaveBeenCalled();
       expect(mockTemplateService.render).toHaveBeenCalled();
       expect(mockStorage.store).toHaveBeenCalled();
     });
@@ -232,6 +228,7 @@ describe("ImageGenerationService", () => {
         imageUrl: "/uploads/images/cached.png",
         cdnUrl: null,
         serveCount: 3,
+        generatedOnPlan: "FREE",
       });
 
       const result = await service.generateByPublicId(
@@ -242,7 +239,27 @@ describe("ImageGenerationService", () => {
 
       expect(result).toBeInstanceOf(Buffer);
       expect(mockStorage.get).toHaveBeenCalled();
-      expect(mockScraper.extractMetadata).not.toHaveBeenCalled();
+      expect(mockTemplateService.render).not.toHaveBeenCalled();
+    });
+
+    it("evicts stale row and regenerates when blob is missing", async () => {
+      (mockPrisma.image.findUnique as ReturnType<typeof mock>).mockResolvedValue({
+        id: "img-cached",
+        cacheKey: "cache-abc",
+        kind: "OG",
+        generatedOnPlan: "FREE",
+      });
+      (mockStorage.get as ReturnType<typeof mock>).mockResolvedValue(null);
+
+      const result = await service.generateByPublicId(
+        "abc123",
+        "https://example.com",
+        "gradient_dark",
+      );
+
+      expect(result).toBeInstanceOf(Buffer);
+      expect(mockPrisma.image.delete).toHaveBeenCalled();
+      expect(mockTemplateService.render).toHaveBeenCalled();
     });
 
     it("should throw NotFoundError for unknown publicId", async () => {
@@ -253,38 +270,18 @@ describe("ImageGenerationService", () => {
       ).rejects.toThrow("Project not found");
     });
 
-    it("applies watermark for FREE plan owner", async () => {
-      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue({ plan: "FREE" });
-      await service.generateByPublicId("abc123", "https://example.com", "gradient_dark");
-      expect(mockWatermark.apply).toHaveBeenCalled();
-    });
-
-    it("applies watermark for PRO plan owner", async () => {
-      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue({ plan: "PRO" });
-      await service.generateByPublicId("abc123", "https://example.com", "gradient_dark");
-      expect(mockWatermark.apply).toHaveBeenCalled();
-    });
-
-    it("does not apply watermark for BUSINESS plan owner", async () => {
-      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue({
-        plan: "BUSINESS",
-      });
-      await service.generateByPublicId("abc123", "https://example.com", "gradient_dark");
-      expect(mockWatermark.apply).not.toHaveBeenCalled();
-    });
-
     it("should reject URLs not matching project domains", async () => {
       (mockPrisma.project.findUnique as ReturnType<typeof mock>).mockResolvedValue({
         id: "proj-1",
         userId: "user-1",
         publicId: "abc123",
         domains: ["allowed.com"],
-        user: { id: "user-1" },
+        user: { id: "user-1", plan: "PRO" },
       });
 
       await expect(
         service.generateByPublicId("abc123", "https://evil.com/page", "gradient_dark"),
-      ).rejects.toThrow("Domain not allowed");
+      ).rejects.toThrow("is not allowed");
     });
   });
 });

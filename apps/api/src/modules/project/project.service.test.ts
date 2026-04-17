@@ -25,7 +25,7 @@ function createMockPrisma() {
     project: {
       findMany: mock(() => Promise.resolve([createMockProject()])),
       findUnique: mock(() => Promise.resolve(createMockProject())),
-      count: mock(() => Promise.resolve(0)),
+      count: mock(() => Promise.resolve(1)),
       create: mock(() => Promise.resolve(createMockProject())),
       update: mock(() => Promise.resolve(createMockProject({ name: "Updated" }))),
       delete: mock(() => Promise.resolve(createMockProject())),

@@ -2,51 +2,14 @@ import { singleton } from "tsyringe";
 import { ForbiddenError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { ImageStorageService } from "@/common/services/storage";
-import { Prisma, PrismaClient } from "@/generated/prisma";
-import { fromPrismaImageKind, toPrismaImageKind } from "./image.mapper";
-import type {
-  ImageAsset,
-  ImageItem,
-  ImageListQuery,
-  ImageListResponse,
-  ImageUpdateBody,
-} from "./image.schema";
-
-type ImageWithRelations = Prisma.ImageGetPayload<{
-  include: {
-    template: { select: { slug: true; name: true } };
-    project: { select: { name: true; publicId: true } };
-  };
-}>;
-
-function toImageItem(row: ImageWithRelations): ImageItem {
-  const assets =
-    row.assets && Array.isArray(row.assets) ? (row.assets as unknown as ImageAsset[]) : null;
-  return {
-    id: row.id,
-    sourceUrl: row.sourceUrl,
-    imageUrl: row.imageUrl,
-    cdnUrl: row.cdnUrl,
-    title: row.title,
-    description: row.description,
-    faviconUrl: row.faviconUrl,
-    kind: fromPrismaImageKind(row.kind),
-    category: row.category,
-    template: row.template ? { slug: row.template.slug, name: row.template.name } : null,
-    projectId: row.projectId,
-    projectName: row.project?.name ?? null,
-    publicProjectId: row.project?.publicId ?? null,
-    aiModel: row.aiModel,
-    generatedOnPlan: row.generatedOnPlan,
-    width: row.width,
-    height: row.height,
-    format: row.format,
-    generationMs: row.generationMs,
-    serveCount: row.serveCount,
-    assets,
-    createdAt: row.createdAt,
-  };
-}
+import { Prisma, PrismaClient, type Image } from "@/generated/prisma";
+import {
+  imageWithRelationsInclude,
+  storageKeyFor,
+  toImageItem,
+  toPrismaImageKind,
+} from "./image.mapper";
+import type { ImageItem, ImageListQuery, ImageListResponse, ImageUpdateBody } from "./image.schema";
 
 @singleton()
 export class ImageService {
@@ -56,15 +19,7 @@ export class ImageService {
   ) {}
 
   async findById(userId: string, id: string): Promise<ImageItem> {
-    const row = await this.prisma.image.findUnique({
-      where: { id },
-      include: {
-        template: { select: { slug: true, name: true } },
-        project: { select: { name: true, publicId: true } },
-      },
-    });
-    if (!row) throw new NotFoundError("Image not found");
-    if (row.userId !== userId) throw new ForbiddenError("Not allowed");
+    const row = await this.findOwnedImageWithRelations(userId, id);
     return toImageItem(row);
   }
 
@@ -99,10 +54,7 @@ export class ImageService {
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
-        include: {
-          template: { select: { slug: true, name: true } },
-          project: { select: { name: true, publicId: true } },
-        },
+        include: imageWithRelationsInclude,
       }),
       this.prisma.image.count({ where }),
     ]);
@@ -119,62 +71,70 @@ export class ImageService {
   }
 
   async update(userId: string, id: string, body: ImageUpdateBody): Promise<ImageItem> {
-    const existing = await this.prisma.image.findUnique({ where: { id } });
-    if (!existing) throw new NotFoundError("Image not found");
-    if (existing.userId !== userId) throw new ForbiddenError("Not allowed");
-
+    await this.assertOwnedImage(userId, id);
     const updated = await this.prisma.image.update({
       where: { id },
       data: { title: body.title, description: body.description },
-      include: {
-        template: { select: { slug: true, name: true } },
-        project: { select: { name: true, publicId: true } },
-      },
+      include: imageWithRelationsInclude,
     });
     return toImageItem(updated);
   }
 
   async delete(userId: string, id: string): Promise<{ success: true }> {
-    const existing = await this.prisma.image.findUnique({ where: { id } });
-    if (!existing) throw new NotFoundError("Image not found");
-    if (existing.userId !== userId) throw new ForbiddenError("Not allowed");
-    return this.deleteImageRow(existing.id, existing.cacheKey);
+    const existing = await this.assertOwnedImage(userId, id);
+    return this.deleteImageRow(existing);
   }
 
   async bulkDelete(userId: string, ids: string[]): Promise<{ success: true; deleted: number }> {
     const rows = await this.prisma.image.findMany({
       where: { id: { in: ids }, userId },
-      select: { id: true, cacheKey: true },
+      select: { id: true, cacheKey: true, kind: true },
     });
 
     let deleted = 0;
     for (const row of rows) {
-      await this.deleteImageRow(row.id, row.cacheKey);
+      await this.deleteImageRow(row);
       deleted += 1;
     }
     return { success: true, deleted };
   }
 
   async deleteAsAdmin(id: string): Promise<{ success: true }> {
-    const existing = await this.prisma.image.findUnique({ where: { id } });
+    const existing = await this.prisma.image.findUnique({
+      where: { id },
+      select: { id: true, cacheKey: true, kind: true },
+    });
     if (!existing) throw new NotFoundError("Image not found");
-    return this.deleteImageRow(existing.id, existing.cacheKey);
+    return this.deleteImageRow(existing);
   }
 
-  private async deleteImageRow(id: string, cacheKey: string): Promise<{ success: true }> {
-    const otherRefs = await this.prisma.image.count({
-      where: { cacheKey, id: { not: id } },
+  private async assertOwnedImage(userId: string, id: string): Promise<Image> {
+    const row = await this.prisma.image.findUnique({ where: { id } });
+    if (!row) throw new NotFoundError("Image not found");
+    if (row.userId !== userId) throw new ForbiddenError("Not allowed");
+    return row;
+  }
+
+  private async findOwnedImageWithRelations(userId: string, id: string) {
+    const row = await this.prisma.image.findUnique({
+      where: { id },
+      include: imageWithRelationsInclude,
     });
+    if (!row) throw new NotFoundError("Image not found");
+    if (row.userId !== userId) throw new ForbiddenError("Not allowed");
+    return row;
+  }
 
-    if (otherRefs === 0) {
-      try {
-        await this.storage.delete(cacheKey);
-      } catch (err) {
-        logger.warn({ err, cacheKey }, "storage.delete failed — continuing");
-      }
+  private async deleteImageRow(
+    image: Pick<Image, "id" | "cacheKey" | "kind">,
+  ): Promise<{ success: true }> {
+    const key = storageKeyFor(image.kind, image.cacheKey);
+    try {
+      await this.storage.delete(key);
+    } catch (err) {
+      logger.warn({ err, key }, "storage.delete failed — continuing");
     }
-
-    await this.prisma.image.delete({ where: { id } });
+    await this.prisma.image.delete({ where: { id: image.id } });
     return { success: true };
   }
 }

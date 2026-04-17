@@ -4,6 +4,7 @@ import { logger } from "@/common/logger";
 import { ImageStorageService } from "@/common/services/storage";
 import { hashSha256 } from "@/common/utils/crypto";
 import { PrismaClient, type Image } from "@/generated/prisma";
+import { storageKeyFor, toPrismaImageKind } from "@/modules/image/image.mapper";
 import type { RenderOptions } from "@/modules/template";
 
 interface BuildKeyInput {
@@ -16,8 +17,12 @@ interface BuildKeyInput {
   watermark: boolean;
 }
 
+/**
+ * Reads and mutates the generated-image record indexed by cacheKey. Wraps the
+ * key hashing, DB lookups, serve-count increments, and eviction (storage + row).
+ */
 @singleton()
-export class ImageCacheService {
+export class ImageRecordService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly storage: ImageStorageService,
@@ -48,15 +53,9 @@ export class ImageCacheService {
     });
   }
 
-  async evict(imageId: string, cacheKey: string): Promise<void> {
-    const image = await this.prisma.image.findUnique({
-      where: { id: imageId },
-      select: { kind: true },
-    });
+  async evict(imageId: string, cacheKey: string, kind: ImageKind): Promise<void> {
+    const key = storageKeyFor(toPrismaImageKind(kind), cacheKey);
     try {
-      // Icon sets live under a per-generation prefix; everything else is a
-      // single `.png` file keyed on the cacheKey.
-      const key = image?.kind === "ICON_SET" ? `${cacheKey}/` : `${cacheKey}.png`;
       await this.storage.delete(key);
     } catch (error) {
       logger.warn(

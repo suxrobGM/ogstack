@@ -5,14 +5,14 @@ import { logger } from "@/common/logger";
 import { FAL_MODELS } from "@/common/services/ai";
 import { ImageStorageService } from "@/common/services/storage";
 import { PrismaClient } from "@/generated/prisma";
+import { PublicProjectResolver } from "@/modules/project/public-project.resolver";
 import type { RenderOptions } from "@/modules/template";
 import { UsageService } from "@/modules/usage";
-import { ImageCacheService } from "./image-cache.service";
-import { RenderContextBuilder } from "./image-context.builder";
-import { ImagePipelineService } from "./image-pipeline.service";
-import { toGenerateResponse } from "./image.mapper";
-import type { GenerateResponse } from "./image.schema";
-import { PublicProjectResolver } from "./public-project.resolver";
+import { RenderContextBuilder } from "./context.builder";
+import { toGenerateResponse } from "./generation.mapper";
+import type { GenerateResponse } from "./generation.schema";
+import { ImagePipelineService } from "./pipeline.service";
+import { ImageRecordService } from "./record.service";
 
 interface GenerateParams {
   userId: string;
@@ -34,7 +34,7 @@ export class ImageGenerationService {
     private readonly prisma: PrismaClient,
     private readonly usageService: UsageService,
     private readonly storage: ImageStorageService,
-    private readonly cache: ImageCacheService,
+    private readonly records: ImageRecordService,
     private readonly contextBuilder: RenderContextBuilder,
     private readonly pipeline: ImagePipelineService,
     private readonly publicResolver: PublicProjectResolver,
@@ -60,18 +60,18 @@ export class ImageGenerationService {
       fullOverride: fullOverride ?? false,
     });
 
-    const cached = await this.cache.find(ctx.cacheKey);
+    const cached = await this.records.find(ctx.cacheKey);
     if (cached && options?.force !== true) {
       await this.usageService.recordUsage(userId, projectId, { cacheHit: true, apiKeyId });
-      await this.cache.incrementServeCount(cached.id);
+      await this.records.incrementServeCount(cached.id);
       return toGenerateResponse(cached, { fromCache: true });
     }
 
     if (cached && options?.force === true) {
-      await this.cache.evict(cached.id, cached.cacheKey);
+      await this.records.evict(cached.id, cached.cacheKey, ctx.kind);
     }
 
-    await this.handleDuplicateUrl(projectId, url, ctx.cacheKey, override ?? false);
+    await this.handleDuplicateUrl(projectId, url, ctx.cacheKey, ctx.kind, override ?? false);
 
     if (ctx.aiModel) {
       await this.usageService.enforceAiImageQuota(userId, ctx.aiModel === FAL_MODELS.flux2Pro);
@@ -119,17 +119,26 @@ export class ImageGenerationService {
       fullOverride: false,
     });
 
-    const cached = await this.cache.find(ctx.cacheKey);
+    const cached = await this.records.find(ctx.cacheKey);
     if (cached) {
       if (!isPlanAtLeast(project.user.plan, cached.generatedOnPlan)) {
         throw new TierLockedError(
           "This image was generated on a higher tier. Re-subscribe to serve it.",
         );
       }
-      await this.usageService.recordUsage(project.user.id, project.id, { cacheHit: true });
-      await this.cache.incrementServeCount(cached.id);
       const buffer = await this.storage.get(`${cached.cacheKey}.png`);
-      if (buffer) return buffer;
+      if (buffer) {
+        await this.usageService.recordUsage(project.user.id, project.id, { cacheHit: true });
+        await this.records.incrementServeCount(cached.id);
+        return buffer;
+      }
+      // Row exists but blob is gone — evict before regenerating to avoid the
+      // unique-cacheKey constraint when the pipeline creates a fresh row.
+      logger.warn(
+        { cacheKey: ctx.cacheKey, imageId: cached.id },
+        "Cache row without blob, evicting and regenerating",
+      );
+      await this.records.evict(cached.id, cached.cacheKey, ctx.kind);
     }
 
     if (ctx.aiModel) {
@@ -162,6 +171,7 @@ export class ImageGenerationService {
     projectId: string,
     url: string,
     newCacheKey: string,
+    kind: ImageKind,
     override: boolean,
   ): Promise<void> {
     const existing = await this.prisma.image.findFirst({
@@ -177,6 +187,6 @@ export class ImageGenerationService {
       );
     }
 
-    await this.cache.evict(existing.id, existing.cacheKey);
+    await this.records.evict(existing.id, existing.cacheKey, kind);
   }
 }

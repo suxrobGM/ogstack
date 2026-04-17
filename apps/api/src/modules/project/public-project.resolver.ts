@@ -61,10 +61,6 @@ export class PublicProjectResolver {
     return project;
   }
 
-  /**
-   * Returns true when the current user plan is at least the tier an image was
-   * generated on. Used to block serving premium-tier images after downgrade.
-   */
   canServeImage(currentPlan: Plan, generatedOnPlan: Plan): boolean {
     return isPlanAtLeast(currentPlan, generatedOnPlan);
   }
