@@ -49,7 +49,7 @@ export class FalAiProvider implements ImageProvider {
     if (!this.apiKey) {
       throw new BadRequestError("FAL.ai is not configured on this server.");
     }
-    const { model, prompt } = params;
+    const { model, prompt, imageSize = "landscape_16_9" } = params;
     if (!prompt.trim()) {
       throw new BadRequestError("AI prompt is empty.");
     }
@@ -62,7 +62,7 @@ export class FalAiProvider implements ImageProvider {
     const startMs = performance.now();
 
     try {
-      const submit = await this.submit(model, prompt, controller.signal);
+      const submit = await this.submit(model, prompt, imageSize, controller.signal);
       const requestId = submit.request_id;
       const statusUrl =
         submit.status_url ?? `https://queue.fal.run/${model}/requests/${requestId}/status`;
@@ -89,6 +89,7 @@ export class FalAiProvider implements ImageProvider {
   private async submit(
     model: string,
     prompt: string,
+    imageSize: string,
     signal: AbortSignal,
   ): Promise<FalSubmitResponse> {
     const response = await fetch(`https://queue.fal.run/${model}`, {
@@ -100,7 +101,7 @@ export class FalAiProvider implements ImageProvider {
       signal,
       body: JSON.stringify({
         prompt,
-        image_size: "landscape_16_9",
+        image_size: imageSize,
         num_images: 1,
         enable_safety_checker: true,
         output_format: "png",

@@ -52,7 +52,11 @@ export class RenderContextBuilder {
       input.kind,
       input.options?.aspectRatio as BlogHeroAspect | undefined,
     );
-    const { plan, aiModel } = await this.resolveUser(input.userId, input.options);
+    // Icon-set generation is always AI — the pipeline requires a Flux model
+    // regardless of whether the caller opted into `aiGenerated`.
+    const effectiveOptions =
+      input.kind === "icon_set" ? { ...(input.options ?? {}), aiGenerated: true } : input.options;
+    const { plan, aiModel } = await this.resolveUser(input.userId, effectiveOptions);
     const watermark = shouldWatermark(plan);
     const cacheKey = await this.cache.buildKey({
       projectId: input.projectId,

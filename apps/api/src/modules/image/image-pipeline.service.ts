@@ -10,6 +10,7 @@ import { PrismaClient, type Image } from "@/generated/prisma";
 import { PageAnalysisService } from "@/modules/page-analysis";
 import { getTemplate, TemplateService, type TemplateSlug } from "@/modules/template";
 import { getHeroTemplate } from "@/modules/template/hero.registry";
+import { IconPipelineService } from "./icon-pipeline.service";
 import { RenderContextBuilder, type RenderContext } from "./image-context.builder";
 import { toPrismaImageKind, type AiRenderOutcome } from "./image.mapper";
 
@@ -29,10 +30,14 @@ export class ImagePipelineService {
     private readonly watermarkService: WatermarkService,
     private readonly pageAnalysis: PageAnalysisService,
     private readonly contextBuilder: RenderContextBuilder,
+    private readonly iconPipeline: IconPipelineService,
   ) {}
 
   /** Scrape → (optional LLM) → render → store → persist. */
   async run(ctx: RenderContext): Promise<PipelineResult> {
+    if (ctx.kind === "icon_set") {
+      return this.iconPipeline.run(ctx);
+    }
     const startMs = performance.now();
     const { metadata, ai } = await this.pageAnalysis.getForImageGeneration({
       url: ctx.url,
@@ -47,7 +52,7 @@ export class ImagePipelineService {
     const outcome = await this.renderWithAiFallback(metadata, ai, ctx);
     const generationMs = Math.round(performance.now() - startMs);
 
-    const stored = await this.storage.store(ctx.cacheKey, outcome.pngBuffer);
+    const stored = await this.storage.store(`${ctx.cacheKey}.png`, outcome.pngBuffer);
     const imageUrl = `${stored.url}?v=${Date.now()}`;
 
     // Only OG rows link back to a Template DB record (hero and icon kinds

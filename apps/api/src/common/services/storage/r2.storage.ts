@@ -1,7 +1,9 @@
 import {
   DeleteObjectCommand,
+  DeleteObjectsCommand,
   GetObjectCommand,
   HeadObjectCommand,
+  ListObjectsV2Command,
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
@@ -45,9 +47,7 @@ export class R2ImageStorage implements IImageStorage {
     );
 
     const url = this.publicUrl ? `${this.publicUrl}/${path}` : path;
-
-    logger.debug({ key, size: buffer.length }, "Image stored in R2");
-
+    logger.debug({ key, size: buffer.length }, "Stored in R2");
     return { key, url, size: buffer.length };
   }
 
@@ -65,12 +65,19 @@ export class R2ImageStorage implements IImageStorage {
     }
   }
 
+  /**
+   * Deletes a single object when `key` points at a file (has an extension),
+   * or every object under the prefix when `key` ends with `/` or has no
+   * extension in its last segment.
+   */
   async delete(key: string): Promise<void> {
+    if (this.isPrefix(key)) {
+      await this.deletePrefix(key);
+      return;
+    }
     const path = this.keyToPath(key);
-
     await this.client.send(new DeleteObjectCommand({ Bucket: this.bucketName, Key: path }));
-
-    logger.debug({ key }, "Image deleted from R2");
+    logger.debug({ key }, "Deleted from R2");
   }
 
   async exists(key: string): Promise<boolean> {
@@ -84,7 +91,32 @@ export class R2ImageStorage implements IImageStorage {
     }
   }
 
+  private async deletePrefix(prefix: string): Promise<void> {
+    const path = this.keyToPath(prefix.replace(/\/$/, ""));
+    const list = await this.client.send(
+      new ListObjectsV2Command({ Bucket: this.bucketName, Prefix: path }),
+    );
+    const objects = list.Contents?.map((o) => ({ Key: o.Key })).filter((o): o is { Key: string } =>
+      Boolean(o.Key),
+    );
+    if (!objects || objects.length === 0) return;
+
+    await this.client.send(
+      new DeleteObjectsCommand({
+        Bucket: this.bucketName,
+        Delete: { Objects: objects },
+      }),
+    );
+    logger.debug({ prefix, count: objects.length }, "Prefix deleted from R2");
+  }
+
+  private isPrefix(key: string): boolean {
+    if (key.endsWith("/")) return true;
+    const lastSegment = key.split("/").pop() ?? "";
+    return !lastSegment.includes(".");
+  }
+
   private keyToPath(key: string): string {
-    return `images/${key}.png`;
+    return `images/${key}`;
   }
 }

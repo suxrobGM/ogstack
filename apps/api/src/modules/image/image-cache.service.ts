@@ -49,8 +49,15 @@ export class ImageCacheService {
   }
 
   async evict(imageId: string, cacheKey: string): Promise<void> {
+    const image = await this.prisma.image.findUnique({
+      where: { id: imageId },
+      select: { kind: true },
+    });
     try {
-      await this.storage.delete(cacheKey);
+      // Icon sets live under a per-generation prefix; everything else is a
+      // single `.png` file keyed on the cacheKey.
+      const key = image?.kind === "ICON_SET" ? `${cacheKey}/` : `${cacheKey}.png`;
+      await this.storage.delete(key);
     } catch (error) {
       logger.warn(
         { cacheKey, error: error instanceof Error ? error.message : String(error) },

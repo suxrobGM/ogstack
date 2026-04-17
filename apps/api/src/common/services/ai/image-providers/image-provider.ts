@@ -2,6 +2,16 @@
  * Abstraction over AI text-to-image providers (FAL.ai Flux today; Replicate,
  * Stability, OpenAI, etc. tomorrow). Providers turn a prompt into a PNG.
  */
+/** FAL's `image_size` parameter — added here because it's the one dimension
+ *  knob most providers expose. Defaults to the landscape OG/hero ratio. */
+export type ImageSize =
+  | "landscape_16_9"
+  | "landscape_4_3"
+  | "portrait_4_3"
+  | "portrait_16_9"
+  | "square"
+  | "square_hd";
+
 export interface ImageGenerateParams {
   /**
    * Provider-specific model identifier (e.g. "fal-ai/flux/schnell"). Callers
@@ -9,6 +19,8 @@ export interface ImageGenerateParams {
    */
   model: string;
   prompt: string;
+  /** Provider hint for output aspect ratio. Defaults to `landscape_16_9`. */
+  imageSize?: ImageSize;
 }
 
 export interface ImageProvider {

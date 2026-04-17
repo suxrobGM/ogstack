@@ -128,7 +128,7 @@ export class ImageGenerationService {
       }
       await this.usageService.recordUsage(project.user.id, project.id, { cacheHit: true });
       await this.cache.incrementServeCount(cached.id);
-      const buffer = await this.storage.get(cached.cacheKey);
+      const buffer = await this.storage.get(`${cached.cacheKey}.png`);
       if (buffer) return buffer;
     }
 

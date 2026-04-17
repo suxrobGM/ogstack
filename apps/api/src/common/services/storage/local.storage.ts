@@ -1,5 +1,5 @@
 import { mkdir, readFile, rm, stat } from "node:fs/promises";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { singleton } from "tsyringe";
 import { logger } from "@/common/logger";
 import type { IImageStorage, StoredImage } from "./types";
@@ -16,15 +16,15 @@ export class LocalImageStorage implements IImageStorage {
   }
 
   async store(key: string, buffer: Buffer, _contentType: string): Promise<StoredImage> {
-    await this.ensureDir();
     const filePath = this.keyToPath(key);
+    await mkdir(dirname(filePath), { recursive: true });
     await Bun.write(filePath, buffer);
 
-    logger.debug({ key, size: buffer.length }, "Image stored locally");
+    logger.debug({ key, size: buffer.length }, "Stored locally");
 
     return {
       key,
-      url: `${this.baseUrl}/${key}.png`,
+      url: `${this.baseUrl}/${key}`,
       size: buffer.length,
     };
   }
@@ -39,11 +39,13 @@ export class LocalImageStorage implements IImageStorage {
   }
 
   async delete(key: string): Promise<void> {
+    const target = this.keyToPath(key);
     try {
-      await rm(this.keyToPath(key));
-      logger.debug({ key }, "Image deleted locally");
+      // rm with recursive handles both single files and prefix directories.
+      await rm(target, { recursive: true, force: true });
+      logger.debug({ key }, "Deleted locally");
     } catch {
-      // File may not exist
+      // path may not exist
     }
   }
 
@@ -57,7 +59,7 @@ export class LocalImageStorage implements IImageStorage {
   }
 
   private keyToPath(key: string): string {
-    return resolve(this.baseDir, `${key}.png`);
+    return resolve(this.baseDir, key);
   }
 
   private async ensureDir(): Promise<void> {

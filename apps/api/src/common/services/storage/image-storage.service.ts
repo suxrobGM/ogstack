@@ -35,6 +35,12 @@ export class ImageStorageService {
     return buffer;
   }
 
+  /**
+   * Deletes either a single object or every object under a prefix. Keys with
+   * an extension in the final segment are treated as single-file deletes;
+   * keys ending in `/` or with no extension are treated as prefix deletes
+   * (used to evict entire icon-set directories).
+   */
   async delete(key: string): Promise<void> {
     await this.backend.delete(key);
     await this.cache.delete(`img:${key}`);
