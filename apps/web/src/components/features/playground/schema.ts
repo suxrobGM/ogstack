@@ -1,4 +1,4 @@
-import type { TemplateSlug } from "@ogstack/shared";
+import type { BlogHeroAspect, ImageKind } from "@ogstack/shared";
 
 export const FONT_FAMILIES = [
   "inter",
@@ -32,11 +32,24 @@ export const LOGO_POSITION_LABELS: Record<LogoPosition, string> = {
   "bottom-right": "Bottom Right",
 };
 
+export const IMAGE_KIND_LABELS: Record<ImageKind, string> = {
+  og: "OG Image",
+  blog_hero: "Blog Hero",
+  icon_set: "Favicon Set",
+};
+
+export const BLOG_HERO_ASPECT_LABELS: Record<BlogHeroAspect, string> = {
+  "16:9": "16:9 · 1600×900",
+  "16:10": "16:10 · 1920×1080",
+};
+
 export type AiModelTier = "standard" | "pro";
 
 export interface PlaygroundFormValues {
   url: string;
-  template: TemplateSlug;
+  kind: ImageKind;
+  template: string;
+  aspectRatio: BlogHeroAspect;
   accent: string;
   dark: boolean;
   font: FontFamily;

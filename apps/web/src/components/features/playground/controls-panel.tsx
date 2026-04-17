@@ -2,7 +2,8 @@
 
 import type { ReactElement } from "react";
 import { Stack, Typography } from "@mui/material";
-import { isValidHttpUrl } from "@ogstack/shared/utils";
+import { BLOG_HERO_ASPECTS, isValidHttpUrl, type ImageKind } from "@ogstack/shared";
+import { FormSelectField } from "@/components/ui/form/form-select-field";
 import { FormTextField } from "@/components/ui/form/form-text-field";
 import type { AnyReactForm } from "@/components/ui/form/types";
 import { Surface } from "@/components/ui/layout/surface";
@@ -11,10 +12,17 @@ import { normalizeUrlInput } from "@/utils/url";
 import {
   AiGenerationField,
   GenerateButton,
+  KindSwitcher,
   ProjectSelect,
   StylingFields,
   TemplateField,
 } from "./controls";
+import { BLOG_HERO_ASPECT_LABELS } from "./schema";
+
+const ASPECT_RATIO_ITEMS = BLOG_HERO_ASPECTS.map((value) => ({
+  value,
+  label: BLOG_HERO_ASPECT_LABELS[value],
+}));
 
 interface ControlsPanelProps {
   form: AnyReactForm;
@@ -40,6 +48,8 @@ export function ControlsPanel(props: ControlsPanelProps): ReactElement {
   return (
     <Surface sx={{ height: "100%" }}>
       <Stack spacing={3}>
+        <KindSwitcher form={form} />
+
         <ProjectSelect
           projects={projects}
           selectedProjectId={selectedProjectId}
@@ -56,24 +66,50 @@ export function ControlsPanel(props: ControlsPanelProps): ReactElement {
           transform={normalizeUrlInput}
         />
 
-        <AiGenerationField form={form} />
+        <form.Subscribe selector={(s: { values: { kind: ImageKind } }) => s.values.kind}>
+          {(kind: ImageKind) => {
+            if (kind === "icon_set") {
+              return (
+                <Typography variant="captionMuted">
+                  Favicon sets are always AI-generated from your brand signals (logo hint, theme
+                  color, page analysis). Templates and styling options don&apos;t apply here.
+                </Typography>
+              );
+            }
 
-        <form.Subscribe
-          selector={(s: { values: { aiGenerated: boolean } }) => s.values.aiGenerated}
-        >
-          {(aiGenerated: boolean) =>
-            aiGenerated ? (
-              <Typography variant="captionMuted">
-                AI mode generates the full image from page content. Template and styling options are
-                not used.
-              </Typography>
-            ) : (
+            return (
               <Stack spacing={3}>
-                <TemplateField form={form} templates={templates} />
-                <StylingFields form={form} />
+                <AiGenerationField form={form} />
+
+                {kind === "blog_hero" && (
+                  <FormSelectField
+                    form={form}
+                    name="aspectRatio"
+                    label="Aspect ratio"
+                    items={ASPECT_RATIO_ITEMS}
+                  />
+                )}
+
+                <form.Subscribe
+                  selector={(s: { values: { aiGenerated: boolean } }) => s.values.aiGenerated}
+                >
+                  {(aiGenerated: boolean) =>
+                    aiGenerated ? (
+                      <Typography variant="captionMuted">
+                        AI mode generates the full image from page content. Template and styling
+                        options are not used.
+                      </Typography>
+                    ) : (
+                      <Stack spacing={3}>
+                        <TemplateField form={form} templates={templates} />
+                        <StylingFields form={form} />
+                      </Stack>
+                    )
+                  }
+                </form.Subscribe>
               </Stack>
-            )
-          }
+            );
+          }}
         </form.Subscribe>
 
         <form.Subscribe selector={(s: { values: { url: string } }) => s.values.url}>

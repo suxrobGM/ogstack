@@ -2,7 +2,7 @@
 
 import { useState, type ReactElement } from "react";
 import { Grid } from "@mui/material";
-import { ERROR_CODES } from "@ogstack/shared";
+import { ERROR_CODES, isImageKind, type ImageKind } from "@ogstack/shared";
 import { useForm } from "@tanstack/react-form";
 import { useSearchParams } from "next/navigation";
 import { useApiMutation, useApiQuery } from "@/hooks";
@@ -27,7 +27,9 @@ import { UsageMeter } from "./usage-meter";
 
 const DEFAULTS: PlaygroundFormValues = {
   url: "",
+  kind: "og",
   template: "gradient_dark",
+  aspectRatio: "16:9",
   accent: "#3B82F6",
   dark: true,
   font: "inter",
@@ -38,6 +40,18 @@ const DEFAULTS: PlaygroundFormValues = {
   aiPrompt: "",
   fullOverride: false,
 };
+
+function defaultTemplateForKind(kind: ImageKind): string {
+  switch (kind) {
+    case "blog_hero":
+      return "hero_editorial";
+    case "icon_set":
+      return "icon_default";
+    case "og":
+    default:
+      return "gradient_dark";
+  }
+}
 
 interface AnalyzeVariables {
   url: string;
@@ -70,8 +84,9 @@ function toOgParams(values: PlaygroundFormValues): URLSearchParams {
 export function Playground(props: PlaygroundProps): ReactElement {
   const { initialProjects, initialTemplates } = props;
   const searchParams = useSearchParams();
-  const initialTemplate =
-    (searchParams.get("template") as PlaygroundFormValues["template"] | null) ?? DEFAULTS.template;
+  const rawKind = searchParams.get("kind");
+  const initialKind: ImageKind = isImageKind(rawKind) ? rawKind : DEFAULTS.kind;
+  const initialTemplate = searchParams.get("template") ?? defaultTemplateForKind(initialKind);
 
   const initialUrl = searchParams.get("url") ?? DEFAULTS.url;
 
@@ -131,9 +146,12 @@ export function Playground(props: PlaygroundProps): ReactElement {
       });
     }
 
+    // Icon set is always AI and ignores template/styling options.
+    const aiGenerated = values.kind === "icon_set" ? true : values.aiGenerated;
     generateMutation.mutate({
       url: values.url,
-      template: values.template,
+      kind: values.kind,
+      template: values.kind === "icon_set" ? undefined : values.template,
       projectId: selectedProjectId,
       override,
       options: {
@@ -142,8 +160,9 @@ export function Playground(props: PlaygroundProps): ReactElement {
         font: values.font,
         logoUrl: values.logoUrl || undefined,
         logoPosition: values.logoPosition,
-        aiGenerated: values.aiGenerated,
-        aiModel: values.aiGenerated ? values.aiModel : undefined,
+        aspectRatio: values.kind === "blog_hero" ? values.aspectRatio : undefined,
+        aiGenerated,
+        aiModel: aiGenerated ? values.aiModel : undefined,
         aiPrompt: values.aiPrompt,
         fullOverride: values.fullOverride,
         force: force,
@@ -157,7 +176,12 @@ export function Playground(props: PlaygroundProps): ReactElement {
   };
 
   const form = useForm({
-    defaultValues: { ...DEFAULTS, template: initialTemplate, url: initialUrl },
+    defaultValues: {
+      ...DEFAULTS,
+      kind: initialKind,
+      template: initialTemplate,
+      url: initialUrl,
+    },
     onSubmit: ({ value }) => submit(value, false),
   });
 

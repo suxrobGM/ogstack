@@ -28,7 +28,22 @@ export const SIDEBAR_NAV_ITEMS: readonly NavEntry[] = [
     icon: "library",
     children: [
       { label: "Templates", href: ROUTES.templates, icon: "library" },
-      { label: "Images", href: ROUTES.images, icon: "photoLibrary" },
+      { label: "Gallery", href: ROUTES.images, icon: "photoLibrary" },
+      {
+        label: "OG Images",
+        href: `${ROUTES.playground}?kind=og` as typeof ROUTES.playground,
+        icon: "image",
+      },
+      {
+        label: "Blog Heroes",
+        href: `${ROUTES.playground}?kind=blog_hero` as typeof ROUTES.playground,
+        icon: "landscape",
+      },
+      {
+        label: "Favicons",
+        href: `${ROUTES.playground}?kind=icon_set` as typeof ROUTES.playground,
+        icon: "stars",
+      },
       { label: "Audits", href: ROUTES.audits, icon: "verified" },
     ],
   },

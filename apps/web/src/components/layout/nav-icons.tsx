@@ -4,11 +4,13 @@ import BarChartIcon from "@mui/icons-material/BarChart";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import FolderIcon from "@mui/icons-material/Folder";
 import GroupsIcon from "@mui/icons-material/Groups";
+import LandscapeIcon from "@mui/icons-material/Landscape";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import PaymentIcon from "@mui/icons-material/Payment";
 import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import SettingsIcon from "@mui/icons-material/Settings";
+import StarsIcon from "@mui/icons-material/Stars";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 
@@ -19,6 +21,8 @@ export const NAV_ICON_MAP: Record<string, ReactElement> = {
   playCircle: <PlayCircleIcon fontSize="small" />,
   library: <LibraryBooksIcon fontSize="small" />,
   photoLibrary: <PhotoLibraryIcon fontSize="small" />,
+  landscape: <LandscapeIcon fontSize="small" />,
+  stars: <StarsIcon fontSize="small" />,
   verified: <VerifiedIcon fontSize="small" />,
   vpnKey: <VpnKeyIcon fontSize="small" />,
   payment: <PaymentIcon fontSize="small" />,
