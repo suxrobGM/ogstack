@@ -1,9 +1,10 @@
 "use client";
 
-import type { MouseEvent, ReactElement } from "react";
-import { Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import type { ReactElement } from "react";
+import { Stack, Typography } from "@mui/material";
 import { IMAGE_KINDS, type ImageKind } from "@ogstack/shared";
 import { useRouter, useSearchParams } from "next/navigation";
+import { FormToggleField } from "@/components/ui/form";
 import type { AnyReactForm } from "@/components/ui/form/types";
 import { IMAGE_KIND_LABELS } from "../schema";
 
@@ -23,17 +24,17 @@ function defaultTemplateForKind(kind: ImageKind): string {
   }
 }
 
+const KIND_ITEMS = IMAGE_KINDS.map((value) => ({
+  value,
+  label: IMAGE_KIND_LABELS[value],
+}));
+
 export function KindSwitcher(props: KindSwitcherProps): ReactElement {
   const { form } = props;
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const handleKindChange = (_event: MouseEvent<HTMLElement>, next: ImageKind | null) => {
-    if (!next) {
-      return;
-    }
-
-    form.setFieldValue("kind", next);
+  const handleKindChange = (next: ImageKind): void => {
     // Reset template to the kind's default on switch.
     form.setFieldValue("template", defaultTemplateForKind(next));
     // Sync the URL so deep links + in-page state stay consistent.
@@ -49,30 +50,20 @@ export function KindSwitcher(props: KindSwitcherProps): ReactElement {
   };
 
   return (
-    <form.Subscribe selector={(s: { values: { kind: ImageKind } }) => s.values.kind}>
-      {(kind: ImageKind) => (
-        <Stack spacing={1}>
-          <Typography
-            variant="captionMuted"
-            sx={{ textTransform: "uppercase", letterSpacing: "0.05em" }}
-          >
-            Image kind
-          </Typography>
-          <ToggleButtonGroup
-            exclusive
-            fullWidth
-            size="small"
-            value={kind}
-            onChange={handleKindChange}
-          >
-            {IMAGE_KINDS.map((option) => (
-              <ToggleButton key={option} value={option}>
-                {IMAGE_KIND_LABELS[option]}
-              </ToggleButton>
-            ))}
-          </ToggleButtonGroup>
-        </Stack>
-      )}
-    </form.Subscribe>
+    <Stack spacing={1}>
+      <Typography
+        variant="captionMuted"
+        sx={{ textTransform: "uppercase", letterSpacing: "0.05em" }}
+      >
+        Image kind
+      </Typography>
+      <FormToggleField
+        form={form}
+        name="kind"
+        items={KIND_ITEMS}
+        fullWidth
+        onChange={handleKindChange}
+      />
+    </Stack>
   );
 }

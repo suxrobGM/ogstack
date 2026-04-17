@@ -1,22 +1,43 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import LightModeIcon from "@mui/icons-material/LightMode";
 import TuneIcon from "@mui/icons-material/Tune";
 import { Button, Collapse, Stack } from "@mui/material";
-import { FormSelectField } from "@/components/ui/form/form-select-field";
+import { FormColorField, FormSelectField, FormToggleField } from "@/components/ui/form";
 import type { AnyReactForm } from "@/components/ui/form/types";
 import { FONT_FAMILIES, FONT_LABELS } from "../schema";
-import { AccentColorField } from "./accent-color-field";
 import { LogoFields } from "./logo-fields";
-import { ModeField } from "./mode-field";
 
 interface StylingFieldsProps {
   form: AnyReactForm;
 }
 
 const fontItems = FONT_FAMILIES.map((f) => ({ value: f, label: FONT_LABELS[f] }));
+
+const MODE_ITEMS = [
+  {
+    value: true,
+    label: (
+      <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+        <DarkModeIcon sx={{ fontSize: 18 }} />
+        <span>Dark</span>
+      </Stack>
+    ),
+  },
+  {
+    value: false,
+    label: (
+      <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+        <LightModeIcon sx={{ fontSize: 18 }} />
+        <span>Light</span>
+      </Stack>
+    ),
+  },
+] as const;
 
 export function StylingFields(props: StylingFieldsProps): ReactElement {
   const { form } = props;
@@ -37,8 +58,8 @@ export function StylingFields(props: StylingFieldsProps): ReactElement {
 
       <Collapse in={open} timeout="auto" unmountOnExit>
         <Stack spacing={3}>
-          <AccentColorField form={form} />
-          <ModeField form={form} />
+          <FormColorField form={form} name="accent" label="Accent Color" />
+          <FormToggleField form={form} name="dark" label="Mode" items={MODE_ITEMS} />
           <FormSelectField form={form} name="font" label="Font" items={fontItems} />
           <LogoFields form={form} />
         </Stack>

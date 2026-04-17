@@ -22,7 +22,7 @@ import { OutputPanel } from "./output-panel";
 import { OverrideDialog } from "./override-dialog";
 import { PageContentPanel } from "./page-content-panel";
 import { PreviewPane } from "./preview-pane";
-import type { PlaygroundFormValues } from "./schema";
+import { playgroundFormSchema, type PlaygroundFormValues } from "./schema";
 import { UsageMeter } from "./usage-meter";
 
 const DEFAULTS: PlaygroundFormValues = {
@@ -181,7 +181,8 @@ export function Playground(props: PlaygroundProps): ReactElement {
       kind: initialKind,
       template: initialTemplate,
       url: initialUrl,
-    },
+    } as PlaygroundFormValues,
+    validators: { onSubmit: playgroundFormSchema },
     onSubmit: ({ value }) => submit(value, false),
   });
 

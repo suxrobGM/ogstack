@@ -1,21 +1,26 @@
 "use client";
 
-import type { ChangeEvent, ReactElement } from "react";
+import type { ChangeEvent, ReactElement, ReactNode } from "react";
 import { Box, Stack, TextField, Typography } from "@mui/material";
-import type { AnyReactForm } from "@/components/ui/form/types";
+import type { AnyFieldApi } from "@tanstack/react-form";
 import { line, radii } from "@/theme";
+import type { AnyReactForm } from "./types";
 
-interface AccentColorFieldProps {
+interface FormColorFieldProps {
   form: AnyReactForm;
+  name: string;
+  label?: ReactNode;
 }
 
-export function AccentColorField(props: AccentColorFieldProps): ReactElement {
-  const { form } = props;
+/** TanStack Form-bound color picker with a synced hex text input. Accepts partial hex input during typing. */
+export function FormColorField(props: FormColorFieldProps): ReactElement {
+  const { form, name, label } = props;
+
   return (
     <Stack spacing={0.5}>
-      <Typography variant="body2Muted">Accent Color</Typography>
-      <form.Field name="accent">
-        {(field) => (
+      {label && <Typography variant="body2Muted">{label}</Typography>}
+      <form.Field name={name}>
+        {(field: AnyFieldApi) => (
           <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
             <Box
               component="input"
@@ -46,10 +51,14 @@ export function AccentColorField(props: AccentColorFieldProps): ReactElement {
               }}
               onBlur={field.handleBlur}
               error={field.state.meta.errors.length > 0}
+              helperText={
+                (field.state.meta.errors[0] as { message?: string })?.message ??
+                field.state.meta.errors[0]?.toString()
+              }
               slotProps={{
                 input: { sx: { fontFamily: "monospace", fontSize: "0.875rem" } },
               }}
-              sx={{ width: 120 }}
+              sx={{ width: 140 }}
             />
           </Stack>
         )}
