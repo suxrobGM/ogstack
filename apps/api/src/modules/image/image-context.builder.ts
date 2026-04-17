@@ -1,10 +1,10 @@
+import type { PageAnalysisAi } from "@ogstack/shared";
 import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors";
 import { resolveFalModelForPlan, type BuildPromptOptions } from "@/common/services/ai";
 import { FAL_MODELS } from "@/common/services/ai/image-providers/fal-ai.provider";
 import { shouldWatermark } from "@/common/services/watermark";
 import { Plan, PrismaClient } from "@/generated/prisma";
-import type { PageAnalysisAi } from "@/modules/page-analysis";
 import type { RenderOptions, TemplateSlug } from "@/modules/template";
 import { ImageCacheService } from "./image-cache.service";
 
@@ -69,6 +69,11 @@ export class RenderContextBuilder {
       enrichedKeywords: ai?.imagePrompt.backgroundKeywords ?? null,
       overrideHeadline: ai?.imagePrompt.headline ?? null,
       overrideTagline: ai?.imagePrompt.tagline ?? null,
+      pageTheme: ai?.pageTheme ?? null,
+      mood: ai?.imagePrompt.mood ?? null,
+      palette: ai?.brandHints?.palette ?? null,
+      accent: ai?.imagePrompt.suggestedAccent ?? null,
+      industry: ai?.brandHints?.industry ?? null,
     };
   }
 

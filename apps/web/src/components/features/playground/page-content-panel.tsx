@@ -136,7 +136,7 @@ export function PageContentPanel(props: PageContentPanelProps): ReactElement {
                   Topics
                 </Typography>
                 <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap", gap: 0.5 }}>
-                  {ai.topics.map((topic) => (
+                  {ai.topics.map(({ topic }) => (
                     <Chip key={topic} label={topic} size="small" variant="outlined" />
                   ))}
                 </Stack>

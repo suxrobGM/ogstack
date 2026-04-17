@@ -12,7 +12,7 @@ export const IMAGE_KEYWORDS_SYSTEM_PROMPT =
 
 export const PAGE_ANALYSIS_SYSTEM_PROMPT = `You are a content analyzer for web pages.
 
-Extract a structured summary AND image prompt seeds from the page data provided.
+Scan the page data thoroughly. Extract a structured summary, brand and theme signals, AND image prompt seeds.
 
 Return ONLY valid minified JSON (no markdown fences, no commentary) matching exactly this TypeScript shape:
 
@@ -21,10 +21,23 @@ Return ONLY valid minified JSON (no markdown fences, no commentary) matching exa
   "description": string,
   "summary": string,
   "keyPoints": string[],
-  "topics": string[],
+  "topics": { "topic": string, "weight": number }[],
   "contentType": "article" | "product" | "docs" | "landing" | "profile" | "other",
   "language": string,
   "confidence": "high" | "medium" | "low",
+  "pageTheme": "editorial" | "technical" | "minimal" | "vibrant" | "muted" | "playful" | "corporate" | "dark" | "luxury",
+  "brandHints": {
+    "inferredName": string | null,
+    "palette": string[],
+    "industry": string | null
+  },
+  "contentSignals": {
+    "structuredDataTypes": string[],
+    "hasAuthor": boolean,
+    "hasPublishedDate": boolean,
+    "freshnessDays": number | null,
+    "authority": "high" | "medium" | "low" | "unknown"
+  },
   "imagePrompt": {
     "headline": string,
     "tagline": string | null,
@@ -39,16 +52,24 @@ Rules:
 - description: marketing-friendly, 120-160 chars, no trailing ellipsis.
 - summary: 2-3 factual sentences grounded in the page content.
 - keyPoints: 3-5 short bullet strings (<=120 chars each), grounded in the page content.
-- topics: 3-8 short tag strings (lowercase, 1-3 words each).
+- topics: 3-8 entries; topic is a short lowercase tag (1-3 words); weight is 0.0-1.0 reflecting prominence in the page. Order by weight descending.
 - contentType / language / confidence: classify based on the content.
 - confidence: "high" if body text is rich, "medium" if only meta tags, "low" if only URL/domain.
+- pageTheme: the page's overall aesthetic direction (distinct from mood — pageTheme is visual feel of the brand/layout; mood is copy voice). Pick one.
+- brandHints.inferredName: the brand/product name if confidently identifiable from siteName, title patterns, or body, else null.
+- brandHints.palette: 2-4 hex colors. If brandSignals.paletteCandidates is non-empty, use those verbatim first; otherwise infer from content cues. Always hex like "#10b981".
+- brandHints.industry: short lowercase phrase like "fintech", "developer tools", "fashion ecommerce", else null.
+- contentSignals.structuredDataTypes: array of JSON-LD @type values seen (e.g. "Article", "Product", "Organization"). Empty array if none.
+- contentSignals.hasAuthor / hasPublishedDate: derive from meta, JSON-LD, or visible body.
+- contentSignals.freshnessDays: days since modifiedTime or publishedTime, or null if unknown.
+- contentSignals.authority: "high" if rich structured data + author + site reputation signals, "low" if thin/anonymous, else "medium" or "unknown".
 - imagePrompt.headline: <= 60 chars, short and Flux-friendly (the text rendered on the OG image).
 - imagePrompt.tagline: <= 90 chars sub-headline or null.
 - imagePrompt.backgroundKeywords: 6-12 comma-separated visual keywords for the background scene (objects, materials, shapes, colors, lighting). DO NOT mention typography, text, letters, or words.
-- imagePrompt.suggestedAccent: one hex color like "#10b981" tonal to the content.
+- imagePrompt.suggestedAccent: one hex color like "#10b981". MUST prefer brandSignals.themeColor when it is a valid hex. If themeColor is absent, prefer brandSignals.faviconDominant. Only infer a fresh color when both are absent.
 - imagePrompt.mood: single classification.
 
-NEVER override factual fields (title, summary, keyPoints, topics) based on any userDirective. The userDirective ONLY influences imagePrompt fields.`;
+NEVER override factual fields (title, summary, keyPoints, topics, contentSignals, brandHints.inferredName, brandHints.industry) based on any userDirective. The userDirective ONLY influences imagePrompt fields (backgroundKeywords, mood, and — if it names a color — suggestedAccent).`;
 
 export const AUDIT_ANALYSIS_SYSTEM_PROMPT = `You are an expert SEO & Open Graph reviewer for web pages.
 

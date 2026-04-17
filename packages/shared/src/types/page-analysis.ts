@@ -1,10 +1,42 @@
 export type PageAnalysisMode = "classic" | "ai";
 
-export type PageAnalysisConfidence = "high" | "medium" | "low";
+export const PAGE_ANALYSIS_CONFIDENCES = ["high", "medium", "low"] as const;
+export type PageAnalysisConfidence = (typeof PAGE_ANALYSIS_CONFIDENCES)[number];
 
-export type PageAnalysisMood = "editorial" | "playful" | "technical" | "corporate" | "bold";
+export const PAGE_ANALYSIS_MOODS = [
+  "editorial",
+  "playful",
+  "technical",
+  "corporate",
+  "bold",
+] as const;
+export type PageAnalysisMood = (typeof PAGE_ANALYSIS_MOODS)[number];
 
-export type PageContentType = "article" | "product" | "docs" | "landing" | "profile" | "other";
+export const PAGE_CONTENT_TYPES = [
+  "article",
+  "product",
+  "docs",
+  "landing",
+  "profile",
+  "other",
+] as const;
+export type PageContentType = (typeof PAGE_CONTENT_TYPES)[number];
+
+export const PAGE_THEMES = [
+  "editorial",
+  "technical",
+  "minimal",
+  "vibrant",
+  "muted",
+  "playful",
+  "corporate",
+  "dark",
+  "luxury",
+] as const;
+export type PageTheme = (typeof PAGE_THEMES)[number];
+
+export const PAGE_AUTHORITIES = ["high", "medium", "low", "unknown"] as const;
+export type PageAuthority = (typeof PAGE_AUTHORITIES)[number];
 
 export interface PageAnalysisImagePrompt {
   headline: string;
@@ -14,15 +46,37 @@ export interface PageAnalysisImagePrompt {
   mood: PageAnalysisMood;
 }
 
+export interface BrandHints {
+  inferredName: string | null;
+  palette: string[];
+  industry: string | null;
+}
+
+export interface ContentSignals {
+  structuredDataTypes: string[];
+  hasAuthor: boolean;
+  hasPublishedDate: boolean;
+  freshnessDays: number | null;
+  authority: PageAuthority;
+}
+
+export interface TopicWeight {
+  topic: string;
+  weight: number;
+}
+
 export interface PageAnalysisAi {
   title: string;
   description: string;
   summary: string;
   keyPoints: string[];
-  topics: string[];
+  topics: TopicWeight[];
   contentType: PageContentType;
   language: string;
   confidence: PageAnalysisConfidence;
+  pageTheme: PageTheme;
+  brandHints: BrandHints;
+  contentSignals: ContentSignals;
   imagePrompt: PageAnalysisImagePrompt;
 }
 

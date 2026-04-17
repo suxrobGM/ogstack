@@ -1,3 +1,4 @@
+import type { PageAnalysisAi, PageAnalysisResult } from "@ogstack/shared";
 import { singleton } from "tsyringe";
 import { logger } from "@/common/logger";
 import {
@@ -9,10 +10,11 @@ import {
 import { ScraperService, type UrlMetadata } from "@/common/services/scraper";
 import { hashSha256 } from "@/common/utils/crypto";
 import { Plan, PrismaClient } from "@/generated/prisma";
+import { extractBrandSignals, type BrandSignals } from "./brand-signals";
 import { toPublicMetadata } from "./page-analysis.mapper";
-import type { PageAnalysisAi, PageAnalysisResult } from "./page-analysis.types";
 
-const BODY_EXCERPT_CHARS = 3000;
+const BODY_EXCERPT_CHARS = 4500;
+const MAX_JSON_LD_ENTITIES = 3;
 
 interface AnalyzeParams {
   url: string;
@@ -150,12 +152,13 @@ export class PageAnalysisService {
     metadata: UrlMetadata,
     userPrompt?: string,
   ): Promise<PageAnalysisAi | null> {
+    const brandSignals = await extractBrandSignals(metadata);
     const raw = await this.promptProvider.chat({
       system: PAGE_ANALYSIS_SYSTEM_PROMPT,
-      user: this.buildAnalyzeUserMessage(metadata, userPrompt),
+      user: this.buildAnalyzeUserMessage(metadata, brandSignals, userPrompt),
       json: true,
       temperature: 0.3,
-      maxTokens: 5000,
+      maxTokens: 6000,
     });
     if (!raw) return null;
     const parsed = parseJsonResponse<PageAnalysisAi>(raw);
@@ -239,24 +242,52 @@ export class PageAnalysisService {
     return hashSha256(`${url}|${bodyHash}|${promptHash}`);
   }
 
-  private buildAnalyzeUserMessage(metadata: UrlMetadata, userPrompt?: string): string {
+  private buildAnalyzeUserMessage(
+    metadata: UrlMetadata,
+    brandSignals: BrandSignals,
+    userPrompt?: string,
+  ): string {
     const page = {
       url: metadata.url,
       title: metadata.ogTitle ?? metadata.title,
       description: metadata.ogDescription ?? metadata.description,
       siteName: metadata.siteName,
       lang: metadata.lang,
+      locale: metadata.locale,
+      canonicalUrl: metadata.canonicalUrl,
       h1: metadata.h1,
       h2s: metadata.h2s.slice(0, 4),
       tags: metadata.tags.slice(0, 10),
       publishedTime: metadata.publishedTime,
+      modifiedTime: metadata.modifiedTime,
+      section: metadata.section,
       author: metadata.author,
+      twitter: {
+        card: metadata.twitterCard,
+        title: metadata.twitterTitle,
+        description: metadata.twitterDescription,
+        image: metadata.twitterImage,
+      },
+      jsonLd: metadata.jsonLd.slice(0, MAX_JSON_LD_ENTITIES).map((entity) => ({
+        type: entity.type,
+        headline: entity.headline,
+        name: entity.name,
+        description: entity.description,
+        image: entity.image,
+        author: entity.author,
+        datePublished: entity.datePublished,
+        dateModified: entity.dateModified,
+      })),
+      faviconUrl: metadata.favicon,
       bodyText: metadata.bodyText?.slice(0, BODY_EXCERPT_CHARS) ?? null,
       isThinHtml: metadata.isThinHtml,
     };
 
     const directive = sanitizeUserPrompt(userPrompt);
-    const parts = [`page: ${JSON.stringify(page)}`];
+    const parts = [
+      `page: ${JSON.stringify(page)}`,
+      `brandSignals: ${JSON.stringify(brandSignals)}`,
+    ];
     if (directive) {
       parts.push(
         `userDirective: ${JSON.stringify(directive)} (apply ONLY to imagePrompt.backgroundKeywords, mood, and suggestedAccent)`,

@@ -1,5 +1,5 @@
+import type { PageAnalysisMetadata } from "@ogstack/shared/types";
 import type { UrlMetadata } from "@/common/services/scraper";
-import type { PageAnalysisMetadata } from "./page-analysis.types";
 
 export function toPublicMetadata(metadata: UrlMetadata): PageAnalysisMetadata {
   return {

@@ -1,3 +1,4 @@
+import type { PageAnalysisAi } from "@ogstack/shared";
 import { singleton } from "tsyringe";
 import { logger } from "@/common/logger";
 import { buildAiImagePrompt, ImageProviderService } from "@/common/services/ai";
@@ -5,7 +6,7 @@ import { type UrlMetadata } from "@/common/services/scraper";
 import { ImageStorageService } from "@/common/services/storage";
 import { WatermarkService } from "@/common/services/watermark";
 import { PrismaClient, type Image } from "@/generated/prisma";
-import { PageAnalysisService, type PageAnalysisAi } from "@/modules/page-analysis";
+import { PageAnalysisService } from "@/modules/page-analysis";
 import {
   getTemplate,
   TemplateService,
