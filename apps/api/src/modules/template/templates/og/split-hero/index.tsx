@@ -1,9 +1,9 @@
 import type { ReactElement } from "react";
-import { Kicker, Pill, RadialGlow } from "../decorations";
-import { Box, Canvas, Row, Stack } from "../layout";
-import { Text } from "../text";
-import type { TemplateProps } from "../types";
-import { description, logoStyles, prettyHost, resolveTheme, title, withAlpha } from "../utils";
+import { Kicker, Pill, RadialGlow } from "../../decorations";
+import { Box, Canvas, Row, Stack } from "../../layout";
+import { Text } from "../../text";
+import type { TemplateProps } from "../../types";
+import { description, logoStyles, prettyHost, resolveTheme, title, withAlpha } from "../../utils";
 
 const RIGHT_COL_WIDTH = 504;
 const CANVAS_HEIGHT = 630;

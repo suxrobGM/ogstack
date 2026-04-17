@@ -1,9 +1,9 @@
 import type { ReactElement } from "react";
-import { Kicker } from "../decorations";
-import { Box, Canvas, Dot, Row, Spacer, Stack } from "../layout";
-import { Text } from "../text";
-import type { TemplateProps } from "../types";
-import { description, logoStyles, resolveTheme, title, withAlpha } from "../utils";
+import { Kicker } from "../../decorations";
+import { Box, Canvas, Dot, Row, Spacer, Stack } from "../../layout";
+import { Text } from "../../text";
+import type { TemplateProps } from "../../types";
+import { description, logoStyles, resolveTheme, title, withAlpha } from "../../utils";
 import { ForkIcon, IssueIcon, RepoIcon, StarIcon } from "./icons";
 
 function repoSlug(url: string): { owner: string; name: string } {

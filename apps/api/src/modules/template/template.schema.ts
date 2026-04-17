@@ -1,6 +1,9 @@
 import {
+  DEFAULT_HERO_TEMPLATE_SLUG,
   DEFAULT_TEMPLATE_SLUG,
+  HERO_TEMPLATE_SLUGS,
   TEMPLATE_SLUGS,
+  type HeroTemplateSlug as SharedHeroTemplateSlug,
   type TemplateSlug as SharedTemplateSlug,
 } from "@ogstack/shared/constants";
 import { t, type Static } from "elysia";
@@ -13,6 +16,13 @@ export const TemplateSlugSchema = t.Unsafe<SharedTemplateSlug>(
   t.String({
     enum: [...TEMPLATE_SLUGS],
     default: DEFAULT_TEMPLATE_SLUG,
+  }),
+);
+
+export const HeroTemplateSlugSchema = t.Unsafe<SharedHeroTemplateSlug>(
+  t.String({
+    enum: [...HERO_TEMPLATE_SLUGS],
+    default: DEFAULT_HERO_TEMPLATE_SLUG,
   }),
 );
 
@@ -58,10 +68,20 @@ export const TemplateInfoSchema = t.Object({
   category: t.String(),
 });
 
+export const HeroTemplateInfoSchema = t.Object({
+  slug: HeroTemplateSlugSchema,
+  name: t.String(),
+  description: t.String(),
+  category: t.String(),
+});
+
 export const TemplateListResponseSchema = t.Array(TemplateInfoSchema);
+export const HeroTemplateListResponseSchema = t.Array(HeroTemplateInfoSchema);
 
 export type TemplateSlug = SharedTemplateSlug;
+export type HeroTemplateSlug = SharedHeroTemplateSlug;
 export type FontFamily = Static<typeof FontFamilySchema>;
 export type LogoPosition = Static<typeof LogoPositionSchema>;
 export type RenderOptions = Static<typeof RenderOptionsSchema>;
 export type TemplateInfo = Static<typeof TemplateInfoSchema>;
+export type HeroTemplateInfo = Static<typeof HeroTemplateInfoSchema>;

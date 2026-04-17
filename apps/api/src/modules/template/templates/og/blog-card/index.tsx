@@ -1,8 +1,8 @@
 import type { ReactElement } from "react";
-import { AvatarCircle, Pill } from "../decorations";
-import { Box, Canvas, Dot, Row, Stack } from "../layout";
-import { Text } from "../text";
-import type { TemplateProps } from "../types";
+import { AvatarCircle, Pill } from "../../decorations";
+import { Box, Canvas, Dot, Row, Stack } from "../../layout";
+import { Text } from "../../text";
+import type { TemplateProps } from "../../types";
 import {
   description,
   formattedDate,
@@ -11,7 +11,7 @@ import {
   resolveTheme,
   title,
   withAlpha,
-} from "../utils";
+} from "../../utils";
 import { deriveCategory, estimateReadTime } from "./helpers";
 
 export function BlogCard(props: TemplateProps): ReactElement {

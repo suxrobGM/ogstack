@@ -1,9 +1,9 @@
 import type { ReactElement } from "react";
-import { DotGrid, Kicker, RadialGlow } from "../decorations";
-import { Canvas, Dot, Row, Rule, Stack } from "../layout";
-import { Text } from "../text";
-import type { TemplateProps } from "../types";
-import { description, logoStyles, prettyHost, resolveTheme, title } from "../utils";
+import { DotGrid, Kicker, RadialGlow } from "../../decorations";
+import { Canvas, Dot, Row, Rule, Stack } from "../../layout";
+import { Text } from "../../text";
+import type { TemplateProps } from "../../types";
+import { description, logoStyles, prettyHost, resolveTheme, title } from "../../utils";
 
 export function GradientDark(props: TemplateProps): ReactElement {
   const { accent, logoUrl, logoPosition, metadata } = props;

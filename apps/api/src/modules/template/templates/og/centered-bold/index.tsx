@@ -1,9 +1,9 @@
 import type { ReactElement } from "react";
-import { GradientHeading, Kicker } from "../decorations";
-import { Box, Canvas, Dot, Row, Stack } from "../layout";
-import { Text } from "../text";
-import type { TemplateProps } from "../types";
-import { description, logoStyles, prettyHost, resolveTheme, title, withAlpha } from "../utils";
+import { GradientHeading, Kicker } from "../../decorations";
+import { Box, Canvas, Dot, Row, Stack } from "../../layout";
+import { Text } from "../../text";
+import type { TemplateProps } from "../../types";
+import { description, logoStyles, prettyHost, resolveTheme, title, withAlpha } from "../../utils";
 
 export function CenteredBold(props: TemplateProps): ReactElement {
   const { dark, accent, logoUrl, logoPosition, metadata } = props;

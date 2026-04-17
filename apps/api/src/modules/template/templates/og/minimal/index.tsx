@@ -1,8 +1,8 @@
 import type { ReactElement } from "react";
-import { Box, Canvas, Dot, Row, Rule, Stack } from "../layout";
-import { Text } from "../text";
-import type { TemplateProps } from "../types";
-import { description, logoStyles, prettyHost, resolveTheme, title } from "../utils";
+import { Box, Canvas, Dot, Row, Rule, Stack } from "../../layout";
+import { Text } from "../../text";
+import type { TemplateProps } from "../../types";
+import { description, logoStyles, prettyHost, resolveTheme, title } from "../../utils";
 
 export function Minimal(props: TemplateProps): ReactElement {
   const { dark, accent, logoUrl, logoPosition, metadata } = props;

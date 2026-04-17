@@ -1,16 +1,16 @@
 import type { TemplateSlug } from "@ogstack/shared/constants";
 import type { ReactNode } from "react";
 import type { TemplateInfo } from "./template.schema";
-import { BlogCard } from "./templates/blog-card";
-import { CenteredBold } from "./templates/centered-bold";
-import { Changelog } from "./templates/changelog";
-import { DocsPage } from "./templates/docs-page";
-import { GithubRepo } from "./templates/github-repo";
-import { GradientDark } from "./templates/gradient-dark";
-import { GradientLight } from "./templates/gradient-light";
-import { Minimal } from "./templates/minimal";
-import { ProductLaunch } from "./templates/product-launch";
-import { SplitHero } from "./templates/split-hero";
+import { BlogCard } from "./templates/og/blog-card";
+import { CenteredBold } from "./templates/og/centered-bold";
+import { Changelog } from "./templates/og/changelog";
+import { DocsPage } from "./templates/og/docs-page";
+import { GithubRepo } from "./templates/og/github-repo";
+import { GradientDark } from "./templates/og/gradient-dark";
+import { GradientLight } from "./templates/og/gradient-light";
+import { Minimal } from "./templates/og/minimal";
+import { ProductLaunch } from "./templates/og/product-launch";
+import { SplitHero } from "./templates/og/split-hero";
 import type { TemplateProps } from "./templates/types";
 
 interface TemplateEntry {

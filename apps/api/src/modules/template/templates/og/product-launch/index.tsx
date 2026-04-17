@@ -1,8 +1,8 @@
 import type { ReactElement } from "react";
-import { LabelValue } from "../decorations";
-import { Canvas, Dot, Row, Rule, Spacer, Stack } from "../layout";
-import { Text } from "../text";
-import type { TemplateProps } from "../types";
+import { LabelValue } from "../../decorations";
+import { Canvas, Dot, Row, Rule, Spacer, Stack } from "../../layout";
+import { Text } from "../../text";
+import type { TemplateProps } from "../../types";
 import {
   description,
   formattedDate,
@@ -11,7 +11,7 @@ import {
   resolveTheme,
   title,
   withAlpha,
-} from "../utils";
+} from "../../utils";
 import { GradientMesh } from "./gradient-mesh";
 import { ReleaseBadge } from "./release-badge";
 

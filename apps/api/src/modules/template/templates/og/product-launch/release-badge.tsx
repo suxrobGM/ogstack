@@ -1,8 +1,8 @@
 import type { ReactElement } from "react";
-import { LabelValue } from "../decorations";
-import { Dot, Row, Rule, Stack } from "../layout";
-import { Text } from "../text";
-import { withAlpha } from "../utils";
+import { LabelValue } from "../../decorations";
+import { Dot, Row, Rule, Stack } from "../../layout";
+import { Text } from "../../text";
+import { withAlpha } from "../../utils";
 
 export function ReleaseBadge(props: {
   accent: string;

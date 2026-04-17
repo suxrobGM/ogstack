@@ -1,9 +1,9 @@
 import type { ReactElement } from "react";
-import { CornerMarks, Kicker } from "../decorations";
-import { Box, Canvas, Row, Rule, Stack } from "../layout";
-import { Text } from "../text";
-import type { TemplateProps } from "../types";
-import { description, logoStyles, prettyHost, title } from "../utils";
+import { CornerMarks, Kicker } from "../../decorations";
+import { Box, Canvas, Row, Rule, Stack } from "../../layout";
+import { Text } from "../../text";
+import type { TemplateProps } from "../../types";
+import { description, logoStyles, prettyHost, title } from "../../utils";
 
 const PAPER = {
   bg: "#faf7f2",

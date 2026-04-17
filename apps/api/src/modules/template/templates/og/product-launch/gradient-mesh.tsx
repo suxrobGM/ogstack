@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
-import { Box } from "../layout";
-import { withAlpha } from "../utils";
+import { Box } from "../../layout";
+import { withAlpha } from "../../utils";
 
 export function GradientMesh(props: { accent: string; strong: string }): ReactElement {
   const { accent, strong } = props;

@@ -1,9 +1,9 @@
 import type { ReactElement } from "react";
-import { Pill } from "../decorations";
-import { Box, Canvas, Row, Rule, Stack } from "../layout";
-import { Text } from "../text";
-import type { TemplateProps } from "../types";
-import { description, logoStyles, prettyHost, resolveTheme, title, withAlpha } from "../utils";
+import { Pill } from "../../decorations";
+import { Box, Canvas, Row, Rule, Stack } from "../../layout";
+import { Text } from "../../text";
+import type { TemplateProps } from "../../types";
+import { description, logoStyles, prettyHost, resolveTheme, title, withAlpha } from "../../utils";
 import { buildNavItems, getPathSegments } from "./helpers";
 
 export function DocsPage(props: TemplateProps): ReactElement {
