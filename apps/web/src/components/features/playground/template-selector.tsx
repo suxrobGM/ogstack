@@ -3,6 +3,7 @@
 import type { ReactElement } from "react";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Box, Chip, Grid, Typography } from "@mui/material";
+import type { ImageKind } from "@ogstack/shared";
 import { accent, line, motion, radii, shadows, surfaces } from "@/theme";
 import type { TemplateInfo } from "@/types/api";
 import { templateThumbnailUrl } from "@/utils/og-image";
@@ -11,10 +12,18 @@ interface TemplateSelectorProps {
   templates: TemplateInfo[];
   selected: string;
   onSelect: (slug: string) => void;
+  kind: ImageKind;
 }
 
+const THUMB_ASPECT_RATIO: Record<ImageKind, string> = {
+  og: "1200 / 630",
+  blog_hero: "16 / 9",
+  icon_set: "1 / 1",
+};
+
 export function TemplateSelector(props: TemplateSelectorProps): ReactElement {
-  const { templates, selected, onSelect } = props;
+  const { templates, selected, onSelect, kind } = props;
+  const thumbAspectRatio = THUMB_ASPECT_RATIO[kind];
 
   return (
     <Box
@@ -63,7 +72,7 @@ export function TemplateSelector(props: TemplateSelectorProps): ReactElement {
                 <Box
                   sx={{
                     width: "100%",
-                    aspectRatio: "1200 / 630",
+                    aspectRatio: thumbAspectRatio,
                     backgroundColor: surfaces.elevated,
                     backgroundImage: thumbnailSrc ? `url(${thumbnailSrc})` : undefined,
                     backgroundSize: "cover",

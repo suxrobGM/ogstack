@@ -30,6 +30,7 @@ export function TemplateField(props: TemplateFieldProps): ReactElement {
                   templates={visible}
                   selected={field.state.value}
                   onSelect={(slug) => field.handleChange(slug)}
+                  kind={kind}
                 />
               )}
             </form.Field>
