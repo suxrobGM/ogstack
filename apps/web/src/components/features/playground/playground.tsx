@@ -2,9 +2,8 @@
 
 import { useState, type ReactElement } from "react";
 import { Grid } from "@mui/material";
-import { ERROR_CODES, isImageKind, type ImageKind } from "@ogstack/shared";
+import { ERROR_CODES, type ImageKind } from "@ogstack/shared";
 import { useForm } from "@tanstack/react-form";
-import { useSearchParams } from "next/navigation";
 import { useApiMutation, useApiQuery } from "@/hooks";
 import { client } from "@/lib/api/client";
 import { queryKeys } from "@/lib/query-keys";
@@ -41,17 +40,6 @@ const DEFAULTS: PlaygroundFormValues = {
   fullOverride: false,
 };
 
-function defaultTemplateForKind(kind: ImageKind): string {
-  switch (kind) {
-    case "icon_set":
-      return "icon_default";
-    case "og":
-    case "blog_hero":
-    default:
-      return "editorial";
-  }
-}
-
 interface AnalyzeVariables {
   url: string;
   userPrompt?: string;
@@ -62,6 +50,9 @@ interface AnalyzeVariables {
 interface PlaygroundProps {
   initialProjects: ProjectListResponse | null;
   initialTemplates: TemplateInfo[] | null;
+  initialKind: ImageKind;
+  initialUrl: string;
+  initialTemplate: string;
 }
 
 /** Serialize only the params that differ from backend defaults, so the meta
@@ -84,13 +75,7 @@ function toOgParams(values: PlaygroundFormValues): URLSearchParams {
 }
 
 export function Playground(props: PlaygroundProps): ReactElement {
-  const { initialProjects, initialTemplates } = props;
-  const searchParams = useSearchParams();
-  const rawKind = searchParams.get("kind");
-  const initialKind: ImageKind = isImageKind(rawKind) ? rawKind : DEFAULTS.kind;
-  const initialTemplate = searchParams.get("template") ?? defaultTemplateForKind(initialKind);
-
-  const initialUrl = searchParams.get("url") ?? DEFAULTS.url;
+  const { initialProjects, initialTemplates, initialKind, initialUrl, initialTemplate } = props;
 
   const [selectedProjectId, setSelectedProjectId] = useState(
     () => initialProjects?.items[0]?.id ?? "",

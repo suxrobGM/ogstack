@@ -29,6 +29,12 @@ export const SIDEBAR_NAV_ITEMS: readonly NavEntry[] = [
     children: [
       { label: "Templates", href: ROUTES.templates, icon: "library" },
       { label: "Gallery", href: ROUTES.images, icon: "photoLibrary" },
+    ],
+  },
+  {
+    label: "Tools",
+    icon: "tools",
+    children: [
       {
         label: "OG Images",
         href: `${ROUTES.playground}?kind=og` as typeof ROUTES.playground,
