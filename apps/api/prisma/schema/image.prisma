@@ -4,12 +4,19 @@ enum ImageFormat {
   WEBP
 }
 
+enum ImageKind {
+  OG
+  BLOG_HERO
+  ICON_SET
+}
+
 model Image {
   id          String      @id @default(uuid()) @db.Uuid
   userId      String      @map("user_id") @db.Uuid
   projectId   String?     @map("project_id") @db.Uuid
   apiKeyId    String?     @map("api_key_id") @db.Uuid
   templateId  String?     @map("template_id") @db.Uuid
+  kind        ImageKind   @default(OG)
   category    String?
   sourceUrl   String?     @map("source_url")
   cacheKey    String      @unique @map("cache_key")
@@ -22,6 +29,7 @@ model Image {
   height      Int         @default(630)
   format      ImageFormat @default(PNG)
   fileSize    Int?        @map("file_size")
+  assets      Json?
 
   aiModel         String? @map("ai_model")
   aiPrompt        String? @map("ai_prompt") @db.Text
@@ -41,6 +49,7 @@ model Image {
   @@index([cacheKey])
   @@index([userId, createdAt])
   @@index([userId, category])
+  @@index([userId, kind])
   @@index([sourceUrl])
   @@map("images")
 }
