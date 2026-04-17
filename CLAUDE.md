@@ -1,8 +1,6 @@
 # OGStack Platform
 
-@docs/prd-summary.md
-
-OGStack is a developer-first API platform for generating beautiful Open Graph images. A single meta tag or API call produces contextual social preview images for any URL — no design effort required.
+OGStack is a developer-first **branded image API platform** — Open Graph previews, blog covers, and favicon/app icon sets — with AI that reads your page content. A single meta tag or API call produces contextual, on-brand visuals for any URL.
 
 ## Tech Stack
 
@@ -14,7 +12,6 @@ OGStack is a developer-first API platform for generating beautiful Open Graph im
 ## PRD & Design References
 
 - **PRD**: `docs/prd.md` — full product spec, API design, data model, pricing, launch plan
-- **PRD Summary**: `docs/prd-summary.md` — condensed reference for key specs and acceptance criteria
 
 ### UI Component Guidelines
 

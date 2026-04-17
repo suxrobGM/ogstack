@@ -66,8 +66,8 @@ export function PricingSection(): ReactElement {
           variant="body1Muted"
           sx={{ textAlign: "center", mb: 6, maxWidth: 520, mx: "auto" }}
         >
-          Start free. Non-AI OG images are unlimited on every plan — only AI generation and audit
-          recommendations are metered.
+          Start free. Non-AI images (OG + blog hero) are unlimited on every plan — only AI
+          generation and audit recommendations are metered.
         </Typography>
         <Grid container spacing={2} sx={{ alignItems: "stretch", justifyContent: "center" }}>
           {PLANS.map((key) => {

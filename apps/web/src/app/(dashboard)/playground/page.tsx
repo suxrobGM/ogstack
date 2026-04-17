@@ -14,7 +14,10 @@ export default async function PlaygroundPage(): Promise<ReactElement> {
 
   return (
     <Stack spacing={3}>
-      <PageHeader title="Playground" description="Preview and customize OG images for any URL." />
+      <PageHeader
+        title="Playground"
+        description="Preview and customize OG images, blog heroes, and favicon sets for any URL."
+      />
       <Playground initialProjects={projectsRes.data} initialTemplates={templatesRes.data} />
     </Stack>
   );

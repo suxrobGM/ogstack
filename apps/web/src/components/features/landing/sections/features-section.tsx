@@ -5,7 +5,10 @@ import BoltIcon from "@mui/icons-material/Bolt";
 import CodeIcon from "@mui/icons-material/Code";
 import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 import InsightsIcon from "@mui/icons-material/Insights";
+import LandscapeIcon from "@mui/icons-material/Landscape";
+import PhotoFilterIcon from "@mui/icons-material/PhotoFilter";
 import PsychologyIcon from "@mui/icons-material/Psychology";
+import StarsIcon from "@mui/icons-material/Stars";
 import { Box, Container, Grid, Stack, Typography } from "@mui/material";
 import { Surface } from "@/components/ui/layout/surface";
 
@@ -17,22 +20,40 @@ interface Feature {
 
 const FEATURES: Feature[] = [
   {
+    icon: PhotoFilterIcon,
+    title: "OG preview images",
+    description:
+      "1200×630 social previews. Template or AI. One meta tag covers Twitter, LinkedIn, Slack, Discord, iMessage — every platform a crawler visits.",
+  },
+  {
+    icon: LandscapeIcon,
+    title: "Blog covers & heroes",
+    description:
+      "1600×900 and 1920×1080 hero art for blog posts and landing pages. Five hand-tuned templates, each optionally AI-enhanced with your brand palette.",
+  },
+  {
+    icon: StarsIcon,
+    title: "Favicon + app icon sets",
+    description:
+      "Paste a URL, get the full icon kit: favicon.ico, apple-touch-icon, manifest 192/512, and the matching <link> snippet. AI-generated from your brand seeds.",
+  },
+  {
     icon: AutoAwesomeIcon,
     title: "Content-aware AI images",
     description:
-      "Our LLM reads the page, extracts the key message, and prompts a best-in-class image model to render an on-brand hero image — no design effort required.",
+      "Our LLM reads the page, extracts the key message, and prompts a best-in-class image model to render on-brand output — no design effort required.",
   },
   {
     icon: InsightsIcon,
     title: "AI audit recommendations",
     description:
-      "Score any URL 0–100 across OG, Twitter card, and SEO hygiene, then get suggested rewrites for titles, descriptions, and CTR-friendly copy.",
+      "Score any URL 0–100 across OG, Twitter card, and SEO hygiene. Get priority actions, suggested rewrites, search-snippet variants, and keyword opportunities.",
   },
   {
     icon: PsychologyIcon,
     title: "AI page analysis",
     description:
-      "Structured extraction of headline, tagline, topics, tone, and mood — reused across image generation and audits for consistent results.",
+      "Structured extraction of headline, tagline, topics, pageTheme, brand palette, and content signals — reused across image generation and audits.",
   },
   {
     icon: DashboardCustomizeIcon,
@@ -62,7 +83,7 @@ export function FeaturesSection(): ReactElement {
           Features
         </Typography>
         <Typography variant="h2" sx={{ mb: 6, maxWidth: 620 }}>
-          Built around the AI that makes your previews actually good
+          A branded image API, powered by AI that reads your page
         </Typography>
         <Grid container spacing={2.5}>
           {FEATURES.map((f) => {

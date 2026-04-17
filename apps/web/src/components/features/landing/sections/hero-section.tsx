@@ -14,7 +14,7 @@ export function HeroSection(): ReactElement {
       >
         <Chip
           icon={<AutoAwesomeIcon sx={{ fontSize: 14 }} />}
-          label="Now with content-aware AI image generation"
+          label="Now with AI image generation for OG, blog heroes, and favicons"
           size="small"
           sx={{
             mb: 2,
@@ -25,7 +25,7 @@ export function HeroSection(): ReactElement {
           }}
         />
         <Typography variant="h1" sx={{ mb: 1.5 }}>
-          OG images that
+          Branded images that
           <br />
           <Box component="em" sx={{ fontStyle: "italic", color: "accent.primary" }}>
             read your page
@@ -34,15 +34,15 @@ export function HeroSection(): ReactElement {
         <Typography
           variant="body1Muted"
           sx={{
-            maxWidth: 560,
+            maxWidth: 620,
             mx: "auto",
             mb: { xs: 3, md: 3.5 },
             fontSize: "1rem",
             lineHeight: 1.65,
           }}
         >
-          Paste a URL. Our AI analyzes the content, picks the right headline, tone, and palette, and
-          renders a designed preview image in seconds. One meta tag — every platform covered.
+          Paste a URL. We generate OG images, blog covers, and full favicon sets — the AI reads the
+          content, picks the headline, tone, and palette, and renders designed assets in seconds.
         </Typography>
         <Stack
           direction={{ xs: "column", sm: "row" }}

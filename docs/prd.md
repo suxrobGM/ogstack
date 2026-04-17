@@ -105,21 +105,33 @@ OGStack evolves from an OG image API into the **visual identity layer for the in
 
 ## 5. Core Features (MVP — Month 1)
 
-### 5.1 OG Image Generation API
+### 5.1 Branded Image Generation API
 
-**Description:** A REST API endpoint that accepts a URL (or manual parameters) and returns a generated OG image as PNG.
+**Description:** A REST API that accepts a URL and a `kind` discriminator (`og` | `blog_hero` | `icon_set`) and returns the appropriate branded image output — a single PNG for OG/hero, a full file set under an R2 prefix for icon sets.
+
+**Output kinds:**
+
+| Kind        | Dimensions                          | AI option | Output                                                |
+| ----------- | ----------------------------------- | --------- | ----------------------------------------------------- |
+| `og`        | 1200×630                            | Optional  | Single PNG                                            |
+| `blog_hero` | 1600×900 (16:9) / 1920×1080 (16:10) | Optional  | Single PNG                                            |
+| `icon_set`  | Set (16/32/48/180/192/512)          | Always AI | favicon.ico, PNGs, apple-touch-icon, site.webmanifest |
 
 **Two Modes:**
 
 **Mode A — URL-based (meta tag integration)**
 
 ```text
-GET https://cdn.ogstack.dev/p/{projectId}/generate?url=https://myblog.com/post-title&style=gradient_dark
+# OG
+GET https://api.ogstack.dev/og/{publicProjectId}?url=https://myblog.com/post-title&template=gradient_dark
+
+# Blog hero
+GET https://api.ogstack.dev/hero/{publicProjectId}?url=https://myblog.com/post-title&template=hero_editorial&aspectRatio=16:9
 ```
 
-No API key required. The public project ID in the URL path identifies the user's account and plan. Developers copy the generated link from the dashboard playground and paste it directly into their `<meta>` tag — zero server-side code needed.
+No API key required. The public project ID in the URL path identifies the user's account and plan. Developers copy the generated link from the dashboard playground and paste it directly into their `<meta>` tag (OG) or `<img src>` (hero). Icon sets are not served from a public endpoint — they're downloaded once from the dashboard.
 
-The API scrapes the target URL, extracts meta tags (title, description, favicon, author), and generates an OG image automatically. Supports full customization via query parameters.
+The API scrapes the target URL, extracts meta tags (title, description, favicon, author, theme-color, JSON-LD, Twitter card), runs an LLM page analysis (when AI is enabled) to derive pageTheme + brandHints + contentSignals, and generates the appropriate image. Full customization via query parameters.
 
 **Mode B — Parameter-based (programmatic, API key required)**
 
@@ -128,38 +140,40 @@ POST https://api.ogstack.dev/v1/generate
 Authorization: Bearer og_live_abc123xyz
 
 {
-  "title": "How to Build a SaaS in 2026",
-  "description": "A complete guide for founders",
-  "logo": "https://myblog.com/logo.png",
-  "theme": "dark",
-  "accent_color": "#FF6B35",
-  "template": "split_hero",
-  "ai_background": true
+  "url": "https://myblog.com/post-title",
+  "kind": "blog_hero",
+  "template": "hero_editorial",
+  "projectId": "...",
+  "options": {
+    "aspectRatio": "16:9",
+    "aiGenerated": true
+  },
+  "override": false
 }
 ```
 
-This mode is for server-side / build-time usage where developers need programmatic control. Requires a secret API key passed via `Authorization: Bearer` header.
+`kind` defaults to `"og"`. For `icon_set`, `template` is omitted and AI is always on — the response includes an `assets[]` array enumerating every file in the set. Requires a secret API key passed via `Authorization: Bearer` header.
 
-**API Response:** Returns the image as binary PNG (Content-Type: image/png) for direct use in `<meta>` tags, or returns a JSON response with the CDN URL.
+**API Response:** JSON `{ imageUrl, kind, width, height, cached, assets?, metadata, aiEnabled, ... }`. The public `/og/:publicId` and `/hero/:publicId` endpoints return PNG directly for meta-tag / img-src usage.
 
 **Technical Flow:**
 
 1. Receive request → resolve project ID (GET) or validate API key (POST) → load user plan → check rate limits
 2. Validate domain: for GET requests, verify the `url` param domain matches the project's registered domains
-3. Check CDN cache for existing image (cache key = hash of project ID + URL + parameters)
-4. Cache HIT → serve from CDN (< 50ms)
-5. Cache MISS → scrape URL for meta tags (title, description, favicon, og:image fallback)
-6. If `ai_background: true` and user tier allows → generate AI prompt from content → call Flux Schnell API → receive background image
-7. Render Satori template with extracted content + AI background (or template pattern)
-8. Convert SVG → PNG via resvg
-9. Upload to Cloudflare R2 → cache on CDN
-10. Return image
+3. Check cache for existing image — cache key = SHA256(projectId + url + kind + template + options + aiModel + watermark)
+4. Cache HIT → serve from CDN (< 100ms)
+5. Cache MISS → scrape URL for metadata; when AI is enabled, run page analysis (cached 24h) to extract pageTheme, brandHints, contentSignals
+6. Dispatch on `kind`:
+   - `og` / `blog_hero` — template (OG registry or hero registry) + optional Flux generation → Satori → PNG
+   - `icon_set` — always Flux 2 square_hd → sharp resize to all icon sizes → png-to-ico for favicon.ico → site.webmanifest
+7. Upload to Cloudflare R2 (single file for og/hero; full prefix for icon_set) → cache on CDN
+8. Return image
 
 **Acceptance Criteria:**
 
 - Template-only generation completes in < 500ms (p95)
 - AI-enhanced generation completes in < 8 seconds (p95), cached in < 100ms
-- Output dimensions: 1200×630px (standard OG size) with option for 1200×675 (Twitter) and 1080×1080 (Instagram)
+- Output dimensions: OG 1200×630; blog hero 1600×900 or 1920×1080; icon set sizes 16/32/48/180/192/512
 - Supports JPEG and PNG output formats
 - Handles URLs that require JavaScript rendering (SPA fallback via metadata extraction)
 
@@ -298,15 +312,15 @@ OGStack uses a split authentication model optimized for the two primary use case
 
 ### 5.6 Pricing & Billing
 
-Three tiers. Non-AI image generation is **unmetered on every tier** — render cost is trivial and cache absorbs repeats. The real cost drivers (AI image generation via FAL, AI audit recommendations via DeepSeek) are capped per-plan.
+Three tiers. Non-AI OG and non-AI blog hero generation are **unmetered on every tier** — render cost is trivial and cache absorbs repeats. The real cost drivers (AI image generation via FAL, AI audit recommendations via DeepSeek) share a single monthly cap, so an AI render of any kind (OG, hero, icon set) counts the same.
 
-| Tier     | Price  | Non-AI Images | AI Images/mo                    | AI Audits/mo | Watermark | Projects  | Domains/project | Rate (req/min) |
-| -------- | ------ | ------------- | ------------------------------- | ------------ | --------- | --------- | --------------- | -------------- |
-| **Free** | $0     | Unlimited     | 3 (Flux 2)                      | —            | Yes       | 1         | 1               | 20             |
-| **Plus** | $10/mo | Unlimited     | 100 (Flux 2)                    | 100          | Yes       | 5         | 3               | 100            |
-| **Pro**  | $30/mo | Unlimited     | 1,000 (300 Flux 2 Pro + Flux 2) | 1,000        | No        | Unlimited | Unlimited       | 500            |
+| Tier     | Price  | Non-AI (OG + hero) | AI renders/mo (OG, hero, icon set) | AI Audits/mo | Watermark | Projects  | Domains/project | Rate (req/min) |
+| -------- | ------ | ------------------ | ---------------------------------- | ------------ | --------- | --------- | --------------- | -------------- |
+| **Free** | $0     | Unlimited          | 3 (Flux 2)                         | —            | Yes       | 1         | 1               | 20             |
+| **Plus** | $10/mo | Unlimited          | 100 (Flux 2)                       | 100          | Yes       | 5         | 3               | 100            |
+| **Pro**  | $30/mo | Unlimited          | 1,000 (300 Flux 2 Pro + Flux 2)    | 1,000        | No        | Unlimited | Unlimited       | 500            |
 
-All plans include unlimited API keys, all 10 templates, and AI page analysis bundled with AI image generation. Pro adds priority support and the Flux 2 Pro model (sub-capped at 300/mo within the 1,000 AI image allowance).
+All plans include unlimited API keys, all 10 OG + 5 hero templates, and AI page analysis bundled with AI image generation. Pro adds priority support and the Flux 2 Pro model (sub-capped at 300/mo within the 1,000 AI render allowance). One icon set counts as one AI render and always uses Flux 2 (never Flux 2 Pro), regardless of tier.
 
 **Promo codes:** Created in the Stripe dashboard. Customers enter them on the Stripe-hosted checkout page, or the dashboard pre-applies them via `promotionCode` on the checkout request.
 
@@ -374,18 +388,26 @@ A free, publicly accessible tool at `ogstack.dev/audit` where anyone can enter a
 
 ### 7.1 Pipeline
 
-1. **Scrape** — `ScraperService` fetches the target URL with SSRF protection, extracts OG/Twitter/SEO tags, the page body, H1/H2 structure, author, published time. Headless rendering is allowed for Plus and Pro tiers.
-2. **LLM page analysis** — `PageAnalysisService` calls the configured `PromptProvider` (DeepSeek / Anthropic / OpenAI-compatible / Ollama / llama.cpp) with a structured JSON system prompt. The response includes page title, description, summary, key points, topics, content type, language, plus image-prompt seeds: headline, tagline, background keywords, suggested accent, and mood. Results are cached 24h per `(url, bodyHash, userPrompt)`.
-3. **Prompt build** — `buildAiImagePrompt` assembles a Flux-optimized prompt that leads with the extracted headline for legible on-image typography, then describes the background via the LLM's background keywords.
-4. **Image render** — `ImageProviderService` dispatches to the FAL provider. Standard quality uses Flux 2, Pro quality uses Flux 2 Pro (metered separately on the Pro plan with a 300-image sub-cap).
-5. **Fallback** — any failure in the AI path falls back to the deterministic Satori template render for the same URL, so the caller always receives an image.
+1. **Scrape** — `ScraperService` fetches the target URL with SSRF protection, extracts OG/Twitter/SEO tags, the page body, H1/H2 structure, author, published time, theme-color, canonical, hreflang, JSON-LD entities, and favicon. Headless rendering is allowed for Plus and Pro tiers.
+2. **Brand signals** — `extractBrandSignals` fetches the favicon (time-capped, size-capped, SSRF-blocked), extracts its dominant color via `sharp`, and combines it with the scraped theme-color into a palette candidate list.
+3. **LLM page analysis** — `PageAnalysisService` calls the configured `PromptProvider` (DeepSeek / Anthropic / OpenAI-compatible / Ollama / llama.cpp) with a structured JSON system prompt. The response now includes:
+   - Factual fields: title, description, summary, weighted topics, content type, language, confidence.
+   - **pageTheme** — aesthetic direction (editorial / technical / minimal / vibrant / muted / playful / corporate / dark / luxury). Distinct from `mood` (which captures copy voice); `pageTheme` captures visual feel.
+   - **brandHints** — `{ inferredName, palette, industry }`. Palette is 2–4 hex colors; when `brandSignals.paletteCandidates` is non-empty, the prompt requires the LLM to use them verbatim before inferring.
+   - **contentSignals** — `{ structuredDataTypes, hasAuthor, hasPublishedDate, freshnessDays, authority }`. Ground truth for audit recommendations and freshness-aware decisions.
+   - **imagePrompt** — headline, tagline, background keywords, suggestedAccent, mood. `suggestedAccent` MUST prefer scraped `themeColor`, then `faviconDominant`, before any LLM inference.
+     Results are cached 24h per `(url, bodyHash, userPrompt)`.
+4. **Prompt build** — `buildAiImagePrompt` assembles a Flux-optimized prompt that leads with the extracted headline for legible on-image typography, then threads pageTheme, mood, palette, accent, and industry into the style suffix so AI output reflects the page's aesthetic and brand rather than a one-size-fits-all editorial style.
+5. **Image render** — `ImageProviderService` dispatches to the FAL provider. Standard quality uses Flux 2, Pro quality uses Flux 2 Pro (metered separately on the Pro plan with a 300-image sub-cap). For icon sets, the pipeline uses a dedicated `buildIconPrompt` that forbids text, gradients, and thin strokes; requests `square_hd`; and post-processes the 1024×1024 master into the full icon set with `sharp`.
+6. **Fallback** — any failure in the AI path falls back to the deterministic Satori template render for the same URL, so the caller always receives an image (except `icon_set`, which has no template fallback by design).
 
 ### 7.2 Reuse across features
 
-The page-analysis output is shared between AI image generation and AI audit recommendations. A single cached analysis feeds both pipelines to avoid duplicate LLM spend.
+The page-analysis output is shared between AI image generation (OG, hero, icon set) and AI audit recommendations. A single cached analysis feeds every downstream pipeline to avoid duplicate LLM spend. The audit service additionally consumes `pageTheme`, `brandHints`, and `contentSignals` to ground tone assessment and keyword opportunities in the same prior read.
 
 ### 7.3 Roadmap
 
+- **Manual logo upload for icon sets** (v1.1): let users with an existing logo upload it and receive the full generated icon set from that source rather than an AI-inferred mark. Mitigates Flux's legibility limits at 16×16.
 - **Smart Style Matching** (Phase 3): auto-detect a site's brand palette/font from a screenshot via a vision model and apply it as defaults on all AI renders.
 
 ---
@@ -433,249 +455,24 @@ If community template volume and user demand reach critical mass (50+ quality co
 
 ## 9. Database Schema (Prisma)
 
-```prisma
-generator client {
-  provider = "prisma-client-js"
-}
+The authoritative schema lives under [apps/api/prisma/schema/](../apps/api/prisma/schema/) (Prisma multi-file mode). Key entities:
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
+| Model          | Purpose                                                                                                                                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `User`         | Account, plan (FREE/PLUS/PRO), role (USER/ADMIN/SUPER_ADMIN), Stripe customer+subscription ids, OAuth ids                                                                                               |
+| `Project`      | Owned by a user; carries `publicId` (unguessable), domains[] allowlist, is active flag                                                                                                                  |
+| `ApiKey`       | Hashed bearer token; optionally scoped to a single project                                                                                                                                              |
+| `Template`     | DB-backed template registry (category, name, description); seeded from the code registries                                                                                                              |
+| `Image`        | One row per generation. `kind` (OG/BLOG_HERO/ICON_SET), `cacheKey` (unique), `imageUrl`, `assets` (Json, icon sets), `width/height`, `aiModel`, `aiPrompt`, `generatedOnPlan`, `fileSize`, `serveCount` |
+| `PageAnalysis` | 24h cache of the LLM page-analysis output keyed on SHA256(url, bodyHash, userPrompt)                                                                                                                    |
+| `AuditReport`  | Scored URL audit with AI insights (priorityActions, discoverability, keywordOpportunities, searchSnippet, tag rewrites)                                                                                 |
+| `UsageRecord`  | Per-period counters: `imageCount`, `aiImageCount`, `aiProImageCount`, `aiAuditCount`, `cacheHits`                                                                                                       |
+| `Subscription` | Stripe subscription state (id, status, currentPeriodEnd, cancelAtPeriodEnd, isComp)                                                                                                                     |
+| `AuditLog`     | Admin-action + sensitive mutation trail (actor, role, action, entityType/Id, metadata, ipAddress)                                                                                                       |
 
-// ─── Users & Auth ───────────────────────────
+Enums: `Plan { FREE PLUS PRO }`, `Role { USER ADMIN SUPER_ADMIN }`, `ImageKind { OG BLOG_HERO ICON_SET }`, `ImageFormat { PNG JPEG WEBP }`, `TemplateCategory` (free-form string on Image, enum on Template).
 
-model User {
-  id               String    @id @default(cuid())
-  email            String    @unique
-  name             String?
-  avatarUrl        String?   @map("avatar_url")
-  passwordHash     String?   @map("password_hash")
-  githubId         String?   @unique @map("github_id")
-  googleId         String?   @unique @map("google_id")
-  plan             Plan      @default(FREE)
-  role             Role      @default(USER)
-  stripeCustomerId String?   @unique @map("stripe_customer_id")
-  stripeSubId      String?   @map("stripe_sub_id")
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
-
-  projects         Project[]
-  apiKeys          ApiKey[]
-  generatedImages  GeneratedImage[]
-  auditReports     AuditReport[]
-  auditLogs        AuditLog[]
-  usageRecords     UsageRecord[]
-
-  @@map("users")
-}
-
-enum Plan {
-  FREE
-  PLUS
-  PRO
-}
-
-enum Role {
-  USER
-  ADMIN
-  SUPER_ADMIN // hard-coded in the database, not assignable via UI
-}
-
-// ─── Projects (Public Access) ────────────────
-
-model Project {
-  id             String    @id @default(cuid())
-  publicId       String    @unique @default(cuid()) @map("public_id") // Short public ID used in meta tag URLs
-  name           String
-  userId         String    @map("user_id")
-  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  domains        String[]  @map("domains") // Required (minItems: 1). Re-validated on every public OG request.
-  isActive       Boolean   @default(true) @map("is_active")
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
-
-  generatedImages GeneratedImage[]
-  usageRecords    UsageRecord[]
-
-  @@index([publicId])
-  @@index([userId])
-  @@map("projects")
-}
-
-// ─── API Keys (Secret, for POST endpoint) ────
-
-model ApiKey {
-  id          String    @id @default(cuid())
-  key         String    @unique @default(cuid())
-  name        String
-  userId      String    @map("user_id")
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  isActive    Boolean   @default(true) @map("is_active")
-  lastUsedAt  DateTime? @map("last_used_at")
-  createdAt   DateTime  @default(now()) @map("created_at")
-
-  generatedImages GeneratedImage[]
-  usageRecords    UsageRecord[]
-
-  @@index([key])
-  @@map("api_keys")
-}
-
-// ─── Templates ──────────────────────────────
-
-model Template {
-  id              String           @id @default(cuid())
-  slug            String           @unique
-  name            String
-  description     String?
-  category        TemplateCategory
-  previewUrl      String?          @map("preview_url")
-  jsxCode         String           @db.Text @map("jsx_code")
-  isBuiltIn       Boolean          @default(false) @map("is_built_in")
-  isCommunity     Boolean          @default(false) @map("is_community")
-  contributorName String?          @map("contributor_name")
-  contributorUrl  String?          @map("contributor_url")
-  darkMode        Boolean          @default(true) @map("dark_mode")
-  lightMode       Boolean          @default(true) @map("light_mode")
-  createdAt       DateTime         @default(now()) @map("created_at")
-  updatedAt       DateTime         @updatedAt @map("updated_at")
-
-  generatedImages GeneratedImage[]
-
-  @@map("templates")
-}
-
-enum TemplateCategory {
-  TECH
-  MARKETING
-  MINIMAL
-  CREATIVE
-  BUSINESS
-  DOCUMENTATION
-  SOCIAL
-}
-
-// ─── Generated Images ───────────────────────
-
-model GeneratedImage {
-  id           String      @id @default(cuid())
-  userId       String      @map("user_id")
-  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  projectId    String?     @map("project_id")
-  project      Project?    @relation(fields: [projectId], references: [id])
-  apiKeyId     String?     @map("api_key_id")
-  apiKey       ApiKey?     @relation(fields: [apiKeyId], references: [id])
-  templateId   String?     @map("template_id")
-  template     Template?   @relation(fields: [templateId], references: [id])
-
-  sourceUrl    String?     @map("source_url")
-  cacheKey     String      @unique @map("cache_key")
-  imageUrl     String      @map("image_url")
-  cdnUrl       String?     @map("cdn_url")
-
-  title        String?
-  description  String?
-  faviconUrl   String?     @map("favicon_url")
-
-  width        Int         @default(1200)
-  height       Int         @default(630)
-  format       ImageFormat @default(PNG)
-  fileSize     Int?        @map("file_size")
-
-  aiModel         String?  @map("ai_model")
-  aiPrompt        String?  @db.Text @map("ai_prompt")
-  aiEnabled       Boolean  @default(false) @map("ai_enabled")
-  generatedOnPlan Plan     @default(FREE) @map("generated_on_plan") // Tier-gate check on serve
-
-  generationMs Int?        @map("generation_ms")
-  serveCount   Int         @default(0) @map("serve_count")
-
-  createdAt    DateTime    @default(now()) @map("created_at")
-  expiresAt    DateTime?   @map("expires_at")
-
-  @@index([cacheKey])
-  @@index([userId, createdAt])
-  @@index([sourceUrl])
-  @@map("generated_images")
-}
-
-enum ImageFormat {
-  PNG
-  JPEG
-  WEBP
-}
-
-// ─── OG Score Audit ─────────────────────────
-
-model AuditReport {
-  id             String   @id @default(cuid())
-  userId         String?  @map("user_id")
-  user           User?    @relation(fields: [userId], references: [id])
-  url            String
-  overallScore   Int      @map("overall_score")
-  letterGrade    String   @map("letter_grade")
-  hasOgImage     Boolean  @map("has_og_image")
-  ogImageUrl     String?  @map("og_image_url")
-  ogImageWidth   Int?     @map("og_image_width")
-  ogImageHeight  Int?     @map("og_image_height")
-  ogImageSize    Int?     @map("og_image_size")
-  hasOgTitle     Boolean  @map("has_og_title")
-  hasOgDesc      Boolean  @map("has_og_desc")
-  hasTwitterCard Boolean  @map("has_twitter_card")
-  issues         Json
-  previews       Json
-  createdAt      DateTime @default(now()) @map("created_at")
-
-  @@index([url])
-  @@map("audit_reports")
-}
-
-// ─── Usage Tracking ─────────────────────────
-
-model UsageRecord {
-  id           String   @id @default(cuid())
-  userId       String   @map("user_id")
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  projectId    String?  @map("project_id")
-  project      Project? @relation(fields: [projectId], references: [id])
-  apiKeyId     String?  @map("api_key_id")
-  apiKey       ApiKey?  @relation(fields: [apiKeyId], references: [id])
-  period          String
-  imageCount      Int @default(0) @map("image_count")       // Tracked for analytics; NOT capped
-  aiImageCount    Int @default(0) @map("ai_image_count")    // Capped by plan.aiImageLimit
-  aiProImageCount Int @default(0) @map("ai_pro_image_count") // Capped by plan.aiImageProLimit (Pro only)
-  aiAuditCount    Int @default(0) @map("ai_audit_count")    // Capped by plan.aiAuditLimit
-  cacheHits       Int @default(0) @map("cache_hits")        // Never counted toward quota
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-
-  @@unique([userId, projectId, apiKeyId, period])
-  @@index([userId, period])
-  @@map("usage_records")
-}
-
-// ─── Audit Log ──────────────────────────────
-
-model AuditLog {
-  id           String   @id @default(cuid())
-  actorId      String   @map("actor_id")
-  actor        User     @relation(fields: [actorId], references: [id])
-  actorRole    Role     @map("actor_role")          // USER or ADMIN — captures role at time of action
-  action       String                               // e.g. "user.register", "project.create", "admin.plan_change", "api_key.revoke"
-  entityType   String?  @map("entity_type")         // e.g. "user", "project", "api_key", "brand_kit"
-  entityId     String?  @map("entity_id")           // ID of the affected entity
-  metadata      Json?                                // Additional context (old/new values, metadata)
-  ipAddress    String?  @map("ip_address")
-  createdAt    DateTime @default(now()) @map("created_at")
-
-  @@index([actorId])
-  @@index([entityType, entityId])
-  @@index([action])
-  @@index([createdAt])
-  @@map("audit_logs")
-}
-```
+Money uses `Decimal(12,2)`; IDs are UUIDs or CUIDs depending on model; every row has `createdAt` + `updatedAt`. Icon set assets are stored under the R2 prefix `images/{cacheKey}/*`; all other kinds use `images/{cacheKey}.png`.
 
 ---
 

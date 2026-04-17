@@ -30,7 +30,7 @@ const PROBLEMS: Problem[] = [
     icon: HistoryToggleOffIcon,
     title: "Stale content",
     description:
-      "You change the title but the OG image stays frozen on the old copy. Caches in every platform make this worse.",
+      "You change the title but the OG image, blog hero, and icons stay frozen on the old copy. Caches in every platform make this worse.",
   },
   {
     icon: QueryStatsIcon,
