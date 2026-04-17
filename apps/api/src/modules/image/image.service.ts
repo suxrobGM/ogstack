@@ -3,7 +3,7 @@ import { ForbiddenError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { ImageStorageService } from "@/common/services/storage";
 import { Prisma, PrismaClient } from "@/generated/prisma";
-import { fromPrismaImageKind } from "./image.mapper";
+import { fromPrismaImageKind, toPrismaImageKind } from "./image.mapper";
 import type {
   ImageAsset,
   ImageItem,
@@ -69,13 +69,14 @@ export class ImageService {
   }
 
   async list(userId: string, query: ImageListQuery): Promise<ImageListResponse> {
-    const { page, limit, projectId, category, from, to, search } = query;
+    const { page, limit, projectId, category, kind, from, to, search } = query;
     const skip = (page - 1) * limit;
 
     const where: Prisma.ImageWhereInput = {
       userId,
       ...(projectId && { projectId }),
       ...(category && { category }),
+      ...(kind && { kind: toPrismaImageKind(kind) }),
       ...(from || to
         ? {
             createdAt: {

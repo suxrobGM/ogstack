@@ -26,6 +26,7 @@ const emptyFilters = (projectId?: string): ImageGalleryFilters => ({
   search: "",
   projectId: projectId ?? "",
   category: "",
+  kind: "",
   from: "",
   to: "",
 });
@@ -44,6 +45,7 @@ export function ImagesGallery(props: ImagesGalleryProps): ReactElement {
     debouncedSearch ||
     (!fixedProjectId && filters.projectId) ||
     filters.category ||
+    filters.kind ||
     filters.from ||
     filters.to,
   );
@@ -54,6 +56,7 @@ export function ImagesGallery(props: ImagesGalleryProps): ReactElement {
       search: debouncedSearch,
       projectId: filters.projectId,
       category: filters.category,
+      kind: filters.kind,
       from: filters.from,
       to: filters.to,
     }),
@@ -65,6 +68,7 @@ export function ImagesGallery(props: ImagesGalleryProps): ReactElement {
           ...(debouncedSearch && { search: debouncedSearch }),
           ...(filters.projectId && { projectId: filters.projectId }),
           ...(filters.category && { category: filters.category }),
+          ...(filters.kind && { kind: filters.kind }),
           ...(filters.from && { from: new Date(filters.from) }),
           ...(filters.to && { to: new Date(filters.to) }),
         },

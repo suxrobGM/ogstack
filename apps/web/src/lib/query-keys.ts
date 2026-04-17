@@ -42,6 +42,7 @@ export const queryKeys = {
       search: string;
       projectId: string;
       category: string;
+      kind: string;
       from: string;
       to: string;
     }) => [...queryKeys.images.all, "list", params] as const,
