@@ -66,6 +66,14 @@ export function DiscordIcon(props: IconProps): ReactElement {
   );
 }
 
+export function VKIcon(props: IconProps): ReactElement {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12.78 16.2c-5.32 0-8.56-3.65-8.7-9.72h2.68c.09 4.46 2.1 6.35 3.66 6.74V6.48h2.56v3.88c1.52-.16 3.12-1.9 3.66-3.88h2.53a6.88 6.88 0 0 1-3.15 4.5c1.54.7 3.13 2.24 3.74 4.62h-2.79c-.47-1.56-1.93-2.77-3.99-2.96v2.96h-.2z" />
+    </svg>
+  );
+}
+
 export const PLATFORM_ICONS: Record<string, (props: IconProps) => ReactElement> = {
   x: XIcon,
   facebook: FacebookIcon,
@@ -74,4 +82,5 @@ export const PLATFORM_ICONS: Record<string, (props: IconProps) => ReactElement> 
   slack: SlackIcon,
   telegram: TelegramIcon,
   discord: DiscordIcon,
+  vk: VKIcon,
 };

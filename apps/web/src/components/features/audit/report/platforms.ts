@@ -41,7 +41,7 @@ export const PLATFORMS: PlatformConfig[] = [
   {
     id: "slack",
     name: "Slack",
-    layout: "compact",
+    layout: "large",
     titleMax: 100,
     descMax: 300,
     imageAspect: "1.91 / 1",
@@ -50,7 +50,7 @@ export const PLATFORMS: PlatformConfig[] = [
   {
     id: "telegram",
     name: "Telegram",
-    layout: "compact",
+    layout: "large",
     titleMax: 80,
     descMax: 200,
     imageAspect: "1.91 / 1",
@@ -59,7 +59,7 @@ export const PLATFORMS: PlatformConfig[] = [
   {
     id: "discord",
     name: "Discord",
-    layout: "compact",
+    layout: "large",
     titleMax: 100,
     descMax: 350,
     imageAspect: "1.91 / 1",
@@ -73,6 +73,15 @@ export const PLATFORMS: PlatformConfig[] = [
     descMax: 120,
     imageAspect: "1 / 1",
     hintColor: "#E4405F",
+  },
+  {
+    id: "vk",
+    name: "VK",
+    layout: "compact",
+    titleMax: 90,
+    descMax: 220,
+    imageAspect: "1 / 1",
+    hintColor: "#0077FF",
   },
 ];
 
