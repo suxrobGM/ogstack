@@ -125,7 +125,7 @@ describe("ImageGenerationService", () => {
       userId: "user-1",
       projectId: "proj-1",
       url: "https://example.com",
-      template: "gradient_dark" as const,
+      template: "aurora" as const,
     };
 
     it("should generate a new image on cache miss", async () => {
@@ -212,7 +212,7 @@ describe("ImageGenerationService", () => {
     const publicParams = {
       publicId: "abc123",
       url: "https://example.com",
-      template: "gradient_dark",
+      template: "aurora",
     };
 
     it("should return PNG buffer on cache miss", async () => {

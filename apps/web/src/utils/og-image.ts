@@ -1,3 +1,4 @@
+import type { ImageKind } from "@ogstack/shared/constants";
 import { API_BASE_URL } from "@/lib/api/constants";
 
 /**
@@ -7,9 +8,14 @@ import { API_BASE_URL } from "@/lib/api/constants";
  */
 export const OG_PRODUCTION_HOST = "https://api.ogstack.dev";
 
-/** Path to a template's preview thumbnail bundled in `apps/web/public`. */
-export function templateThumbnailUrl(slug: string): string {
-  return `/images/templates/${slug.replace(/_/g, "-")}.webp`;
+/**
+ * Path to a template's preview thumbnail. Templates are rendered at both OG
+ * (1200×630) and hero (16:9) aspect ratios, so callers pass the kind whose
+ * preview they want to display.
+ */
+export function templateThumbnailUrl(slug: string, kind: ImageKind = "og"): string {
+  const kindSuffix = kind === "blog_hero" ? "hero" : "og";
+  return `/images/templates/${slug.replace(/_/g, "-")}-${kindSuffix}.webp`;
 }
 
 /**

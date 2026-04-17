@@ -5,7 +5,6 @@ import {
   type ImageDimensions,
   type ImageKind,
   type PageAnalysisAi,
-  type TemplateSlug,
 } from "@ogstack/shared";
 import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors";
@@ -14,7 +13,7 @@ import { FAL_MODELS } from "@/common/services/ai/image-providers/fal-ai.provider
 import { shouldWatermark } from "@/common/services/watermark";
 import { Plan, PrismaClient } from "@/generated/prisma";
 import type { RenderOptions } from "@/modules/template";
-import { hasTemplate, templateSupportsKind } from "@/modules/template/template.registry";
+import { hasTemplate } from "@/modules/template/template.registry";
 import { ImageRecordService } from "./record.service";
 
 export interface RenderContextInput {
@@ -78,9 +77,6 @@ export class RenderContextBuilder {
     const slug = requested ?? DEFAULT_TEMPLATE_SLUG_BY_KIND[kind];
     if (!hasTemplate(slug)) {
       throw new NotFoundError(`Template "${slug}" not found`);
-    }
-    if (!templateSupportsKind(slug as TemplateSlug, kind)) {
-      throw new NotFoundError(`Template "${slug}" does not support kind "${kind}"`);
     }
     return slug;
   }

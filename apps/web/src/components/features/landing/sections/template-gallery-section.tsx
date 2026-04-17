@@ -6,16 +6,17 @@ import { fontFamilies } from "@/theme/typography";
 import { templateThumbnailUrl } from "@/utils/og-image";
 
 const TEMPLATES = [
-  "gradient_dark",
-  "gradient_light",
-  "split_hero",
-  "centered_bold",
+  "aurora",
+  "editorial",
+  "showcase",
+  "billboard",
   "blog_card",
   "docs_page",
   "product_launch",
   "changelog",
   "github_repo",
   "minimal",
+  "panorama",
 ];
 
 export function TemplateGallerySection(): ReactElement {

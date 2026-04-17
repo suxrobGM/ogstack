@@ -9,12 +9,11 @@ import type { Project, TemplateInfo } from "@/types/api";
 import { templateThumbnailUrl } from "@/utils/og-image";
 import { TemplatePreviewDialog } from "./template-preview-dialog";
 
-type KindFilter = "all" | ImageKind;
+type AspectPreview = Extract<ImageKind, "og" | "blog_hero">;
 
-const KIND_FILTERS: Array<{ value: KindFilter; label: string }> = [
-  { value: "all", label: "All kinds" },
-  { value: "og", label: "OG" },
-  { value: "blog_hero", label: "Hero" },
+const ASPECT_PREVIEW_OPTIONS: Array<{ value: AspectPreview; label: string; cssAspect: string }> = [
+  { value: "og", label: "OG preview", cssAspect: "1200 / 630" },
+  { value: "blog_hero", label: "Hero preview", cssAspect: "16 / 9" },
 ];
 
 interface TemplateGalleryProps {
@@ -26,39 +25,33 @@ export function TemplateGallery(props: TemplateGalleryProps): ReactElement {
   const { initialTemplates, projects } = props;
 
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedKind, setSelectedKind] = useState<KindFilter>("all");
+  const [aspectPreview, setAspectPreview] = useState<AspectPreview>("og");
   const [previewTemplate, setPreviewTemplate] = useState<TemplateInfo | null>(null);
 
-  const kindFiltered =
-    selectedKind === "all"
-      ? initialTemplates
-      : initialTemplates.filter((t) => t.supportedKinds.includes(selectedKind));
-
-  const categories = Array.from(new Set(kindFiltered.map((t) => t.category)));
+  const categories = Array.from(new Set(initialTemplates.map((t) => t.category)));
   const visible =
     selectedCategory === "all"
-      ? kindFiltered
-      : kindFiltered.filter((t) => t.category === selectedCategory);
+      ? initialTemplates
+      : initialTemplates.filter((t) => t.category === selectedCategory);
+  const cssAspect =
+    ASPECT_PREVIEW_OPTIONS.find((o) => o.value === aspectPreview)?.cssAspect ?? "1200 / 630";
 
   return (
     <Stack spacing={3}>
       <PageHeader
         title="Templates"
-        description="Browse our template library and preview with your content."
+        description="Browse our template library and preview with your content. Every template renders at any supported size — pick your aspect at render time."
       />
 
       <Stack spacing={1.5}>
         <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
-          {KIND_FILTERS.map((kind) => (
+          {ASPECT_PREVIEW_OPTIONS.map((option) => (
             <Chip
-              key={kind.value}
-              label={kind.label}
-              color={selectedKind === kind.value ? "primary" : "default"}
-              variant={selectedKind === kind.value ? "filled" : "outlined"}
-              onClick={() => {
-                setSelectedKind(kind.value);
-                setSelectedCategory("all");
-              }}
+              key={option.value}
+              label={option.label}
+              color={aspectPreview === option.value ? "primary" : "default"}
+              variant={aspectPreview === option.value ? "filled" : "outlined"}
+              onClick={() => setAspectPreview(option.value)}
             />
           ))}
         </Stack>
@@ -103,9 +96,9 @@ export function TemplateGallery(props: TemplateGalleryProps): ReactElement {
               <Box
                 sx={{
                   width: "100%",
-                  aspectRatio: "1200 / 630",
+                  aspectRatio: cssAspect,
                   backgroundColor: surfaces.elevated,
-                  backgroundImage: `url(${templateThumbnailUrl(template.slug)})`,
+                  backgroundImage: `url(${templateThumbnailUrl(template.slug, aspectPreview)})`,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                 }}

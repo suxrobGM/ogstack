@@ -7,7 +7,7 @@ import { radii } from "@/theme/tokens";
 import { fontFamilies } from "@/theme/typography";
 import { templateThumbnailUrl } from "@/utils/og-image";
 
-const FEATURED = ["gradient_dark", "split_hero", "blog_card", "product_launch"];
+const FEATURED = ["aurora", "showcase", "blog_card", "product_launch"];
 
 export function FeaturedTemplatesSection(): ReactElement {
   return (

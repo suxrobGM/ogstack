@@ -28,7 +28,7 @@ import { UsageMeter } from "./usage-meter";
 const DEFAULTS: PlaygroundFormValues = {
   url: "",
   kind: "og",
-  template: "gradient_dark",
+  template: "editorial",
   aspectRatio: "16:9",
   accent: "#3B82F6",
   dark: true,
@@ -43,13 +43,12 @@ const DEFAULTS: PlaygroundFormValues = {
 
 function defaultTemplateForKind(kind: ImageKind): string {
   switch (kind) {
-    case "blog_hero":
-      return "hero_editorial";
     case "icon_set":
       return "icon_default";
     case "og":
+    case "blog_hero":
     default:
-      return "gradient_dark";
+      return "editorial";
   }
 }
 
@@ -70,7 +69,7 @@ interface PlaygroundProps {
 function toOgParams(values: PlaygroundFormValues): URLSearchParams {
   const params = new URLSearchParams();
   params.set("url", values.url);
-  if (values.template !== "gradient_dark") params.set("template", values.template);
+  if (values.template !== "editorial") params.set("template", values.template);
   if (values.accent !== "#3B82F6") params.set("accent", values.accent);
   if (!values.dark) params.set("dark", "false");
   if (values.font !== "inter") params.set("font", values.font);

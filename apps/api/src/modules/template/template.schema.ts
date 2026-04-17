@@ -62,11 +62,6 @@ export const TemplateInfoSchema = t.Object({
   name: t.String(),
   description: t.String(),
   category: t.String(),
-  supportedKinds: t.Array(ImageKindSchema),
-});
-
-export const TemplateListQuerySchema = t.Object({
-  kind: t.Optional(ImageKindSchema),
 });
 
 export const TemplateListResponseSchema = t.Array(TemplateInfoSchema);
@@ -76,4 +71,3 @@ export type FontFamily = Static<typeof FontFamilySchema>;
 export type LogoPosition = Static<typeof LogoPositionSchema>;
 export type RenderOptions = Static<typeof RenderOptionsSchema>;
 export type TemplateInfo = Static<typeof TemplateInfoSchema>;
-export type TemplateListQuery = Static<typeof TemplateListQuerySchema>;

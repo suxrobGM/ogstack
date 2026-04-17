@@ -36,7 +36,7 @@ export function TemplateSelector(props: TemplateSelectorProps): ReactElement {
       <Grid container spacing={1.5}>
         {templates.map((template) => {
           const isSelected = selected === template.slug;
-          const thumbnailSrc = templateThumbnailUrl(template.slug);
+          const thumbnailSrc = templateThumbnailUrl(template.slug, kind);
 
           return (
             <Grid key={template.slug} size={6}>

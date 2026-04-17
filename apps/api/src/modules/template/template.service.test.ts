@@ -1,3 +1,4 @@
+import { BLOG_HERO_DIMENSIONS, OG_DIMENSIONS } from "@ogstack/shared/constants";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { container } from "@/common/di";
 import { createEmptyMetadata, type UrlMetadata } from "@/common/services/scraper";
@@ -44,30 +45,18 @@ describe("TemplateService", () => {
   });
 
   describe("list", () => {
-    it("should return all available templates when no kind is given", () => {
+    it("should return all 11 available templates", () => {
       const templates = service.list();
-      expect(templates).toHaveLength(15);
+      expect(templates).toHaveLength(11);
       expect(templates[0]).toHaveProperty("slug");
       expect(templates[0]).toHaveProperty("name");
       expect(templates[0]).toHaveProperty("description");
       expect(templates[0]).toHaveProperty("category");
-      expect(templates[0]).toHaveProperty("supportedKinds");
-    });
-
-    it("should return only OG templates when kind=og", () => {
-      const templates = service.list("og");
-      expect(templates).toHaveLength(10);
-    });
-
-    it("should return only hero templates when kind=blog_hero", () => {
-      const templates = service.list("blog_hero");
-      expect(templates).toHaveLength(5);
     });
   });
 
   describe("render", () => {
     it("should render a template to a PNG buffer", async () => {
-      // Mock font fetching
       const mockFontCss =
         'src: url(https://fonts.gstatic.com/s/inter/v18/abc.woff2) format("woff2");';
       const mockFontData = new ArrayBuffer(100);
@@ -83,9 +72,9 @@ describe("TemplateService", () => {
       }) as unknown as typeof fetch;
 
       try {
-        const result = await service.render("gradient_dark", createMockMetadata());
+        const result = await service.render("aurora", createMockMetadata());
         expect(result).toBeInstanceOf(Buffer);
-        expect(result[0]).toBe(0x89); // PNG magic byte
+        expect(result[0]).toBe(0x89);
       } finally {
         globalThis.fetch = originalFetch;
       }
@@ -180,7 +169,7 @@ describe("TemplateService", () => {
       }
     });
 
-    it("should render all template slugs without errors", async () => {
+    it("should render every template at OG and hero dimensions", async () => {
       const originalFetch = globalThis.fetch;
       const mockFontCss =
         'src: url(https://fonts.gstatic.com/s/inter/v18/abc.woff2) format("woff2");';
@@ -195,26 +184,30 @@ describe("TemplateService", () => {
 
       try {
         const slugs = [
-          "gradient_dark",
-          "gradient_light",
-          "split_hero",
-          "centered_bold",
+          "aurora",
+          "billboard",
           "blog_card",
-          "docs_page",
-          "product_launch",
           "changelog",
+          "docs_page",
+          "editorial",
           "github_repo",
           "minimal",
-          "hero_editorial",
-          "hero_spotlight",
-          "hero_panorama",
-          "hero_minimal",
-          "hero_brand_card",
+          "panorama",
+          "product_launch",
+          "showcase",
         ] as const;
 
         for (const slug of slugs) {
-          const result = await service.render(slug, createMockMetadata());
-          expect(result).toBeInstanceOf(Buffer);
+          const og = await service.render(slug, createMockMetadata(), {}, OG_DIMENSIONS, "og");
+          expect(og).toBeInstanceOf(Buffer);
+          const hero = await service.render(
+            slug,
+            createMockMetadata(),
+            {},
+            BLOG_HERO_DIMENSIONS["16:9"],
+            "blog_hero",
+          );
+          expect(hero).toBeInstanceOf(Buffer);
         }
       } finally {
         globalThis.fetch = originalFetch;

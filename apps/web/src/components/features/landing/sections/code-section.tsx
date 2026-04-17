@@ -7,7 +7,7 @@ import { CodeBlock } from "@/components/ui/display/code-block";
 const SNIPPETS = {
   basic: `<meta
   property="og:image"
-  content="https://api.ogstack.dev/og/pk_abc123?url=https://my-site.com/post&template=gradient_dark"
+  content="https://api.ogstack.dev/og/pk_abc123?url=https://my-site.com/post&template=editorial"
 />`,
   ai: `<meta
   property="og:image"

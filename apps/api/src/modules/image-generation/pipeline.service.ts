@@ -157,6 +157,7 @@ export class ImagePipelineService {
       metadata,
       ctx.options,
       ctx.dimensions,
+      ctx.kind,
     );
     return {
       pngBuffer: await finalize(rawBuffer),

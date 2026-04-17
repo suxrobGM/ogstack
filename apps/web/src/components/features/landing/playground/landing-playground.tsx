@@ -14,11 +14,11 @@ import { normalizeUrlInput } from "@/utils/url";
 const DEFAULT_URL = "https://my-blog.com/building-with-bun";
 
 const TEMPLATES = [
-  "gradient_dark",
-  "gradient_light",
-  "split_hero",
+  "aurora",
+  "editorial",
+  "showcase",
   "blog_card",
-  "centered_bold",
+  "billboard",
   "docs_page",
   "minimal",
 ] as const;

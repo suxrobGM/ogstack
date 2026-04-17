@@ -1,5 +1,6 @@
+import type { ImageDimensions } from "@ogstack/shared/constants";
 import type { LogoPosition } from "../template.schema";
-import type { TemplateProps } from "./types";
+import type { ScaleTokens, TemplateProps } from "./types";
 
 export interface ThemeColors {
   bg: string;
@@ -175,4 +176,29 @@ export function formattedDate(): string {
     month: "long",
     day: "numeric",
   });
+}
+
+/**
+ * Width-lerps layout tokens between OG (1200px) and hero 16:10 (1920px) anchors,
+ * bucketed into shape bands for templates that need a layout switch at a given aspect.
+ */
+export function scaleTokens(dims: ImageDimensions): ScaleTokens {
+  const aspect = dims.width / dims.height;
+  const shape: ScaleTokens["shape"] = aspect < 1.85 ? "og" : aspect < 2.1 ? "wide" : "ultrawide";
+  const t = Math.max(0, Math.min(1, (dims.width - 1200) / (1920 - 1200)));
+  const lerp = (a: number, b: number) => Math.round(a + (b - a) * t);
+  return {
+    aspect,
+    shape,
+    pad: lerp(60, 112),
+    gap: lerp(20, 32),
+    maxContentWidth: lerp(860, 1400),
+    display: lerp(96, 150),
+    h1: lerp(72, 120),
+    h2: lerp(56, 88),
+    body: lerp(22, 30),
+    mono: lerp(16, 22),
+    kicker: lerp(14, 20),
+    rule: lerp(1, 2),
+  };
 }

@@ -14,13 +14,12 @@ interface KindSwitcherProps {
 
 function defaultTemplateForKind(kind: ImageKind): string {
   switch (kind) {
-    case "blog_hero":
-      return "hero_editorial";
     case "icon_set":
       return "icon_default";
     case "og":
+    case "blog_hero":
     default:
-      return "gradient_dark";
+      return "editorial";
   }
 }
 

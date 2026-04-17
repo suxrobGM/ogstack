@@ -9,6 +9,7 @@ import { getTemplate, hasTemplate, listTemplates } from "./template.registry";
 import type { FontFamily, RenderOptions, TemplateInfo, TemplateSlug } from "./template.schema";
 import { safeFetchImageDataUrl } from "./template.utils";
 import type { TemplateProps } from "./templates/types";
+import { scaleTokens } from "./templates/utils";
 
 const DEFAULT_ACCENT = "#3B82F6";
 const DEFAULT_LOGO_POSITION = "top-left" as const;
@@ -46,8 +47,8 @@ const FONT_FAMILY_MAP: Record<FontFamily, string> = {
 export class TemplateService {
   private readonly fontCache = new Map<string, ArrayBuffer>();
 
-  list(kind?: ImageKind): TemplateInfo[] {
-    return listTemplates(kind);
+  list(): TemplateInfo[] {
+    return listTemplates();
   }
 
   async render(
@@ -55,6 +56,7 @@ export class TemplateService {
     metadata: UrlMetadata,
     options: RenderOptions = {},
     dimensions: ImageDimensions = OG_DIMENSIONS,
+    kind: ImageKind = "og",
   ): Promise<Buffer> {
     const template = this.resolveRenderer(slug);
     const fontFamily = options.font ?? "inter";
@@ -70,6 +72,9 @@ export class TemplateService {
       dark: options.dark ?? true,
       logoUrl: logoDataUrl ?? undefined,
       logoPosition: options.logoPosition ?? DEFAULT_LOGO_POSITION,
+      kind,
+      dimensions,
+      scale: scaleTokens(dimensions),
     };
 
     const element = template.render(props);

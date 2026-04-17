@@ -21,21 +21,18 @@ export function TemplateField(props: TemplateFieldProps): ReactElement {
         Template
       </Typography>
       <form.Subscribe selector={(s: { values: { kind: ImageKind } }) => s.values.kind}>
-        {(kind: ImageKind) => {
-          const visible = templates.filter((t) => t.supportedKinds.includes(kind));
-          return (
-            <form.Field name="template">
-              {(field) => (
-                <TemplateSelector
-                  templates={visible}
-                  selected={field.state.value}
-                  onSelect={(slug) => field.handleChange(slug)}
-                  kind={kind}
-                />
-              )}
-            </form.Field>
-          );
-        }}
+        {(kind: ImageKind) => (
+          <form.Field name="template">
+            {(field) => (
+              <TemplateSelector
+                templates={templates}
+                selected={field.state.value}
+                onSelect={(slug) => field.handleChange(slug)}
+                kind={kind}
+              />
+            )}
+          </form.Field>
+        )}
       </form.Subscribe>
     </Stack>
   );

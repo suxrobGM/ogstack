@@ -23,24 +23,24 @@ interface TemplateEntry {
 
 const TEMPLATES: TemplateEntry[] = [
   {
-    slug: "gradient_dark",
+    slug: "aurora",
     name: "Aurora",
     description: "Atmospheric dark gradient with accent glow and dot-grid footer.",
   },
   {
-    slug: "gradient_light",
-    name: "Editorial Paper",
-    description: "Warm off-white essay layout with a graceful serif display.",
+    slug: "editorial",
+    name: "Editorial",
+    description: "Warm paper-stock essay layout with a graceful serif display.",
   },
   {
-    slug: "split_hero",
-    name: "Spotlight Split",
-    description: "Left editorial column with tilted accent cards on the right.",
+    slug: "showcase",
+    name: "Showcase",
+    description: "Split editorial + tilted card at OG; centered brand card at hero.",
   },
   {
-    slug: "centered_bold",
+    slug: "billboard",
     name: "Billboard",
-    description: "Oversized gradient type with accent blobs for product moments.",
+    description: "Oversized gradient type with corner marks and radial glows.",
   },
   {
     slug: "blog_card",
@@ -69,8 +69,13 @@ const TEMPLATES: TemplateEntry[] = [
   },
   {
     slug: "minimal",
-    name: "Swiss Grid",
-    description: "Line-numbered gutter and spare typographic composition.",
+    name: "Minimal",
+    description: "Swiss grid at OG, quiet negative space at wider aspects.",
+  },
+  {
+    slug: "panorama",
+    name: "Panorama",
+    description: "Two-column editorial + accent-gradient panel with CTA pill.",
   },
 ];
 

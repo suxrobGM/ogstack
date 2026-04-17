@@ -16,7 +16,7 @@ export function ProjectIntegration(props: ProjectIntegrationProps): ReactElement
   const { project } = props;
 
   const ogEndpoint = API_BASE_URL.replace("/api", "").replace(":4000", ":4000");
-  const metaTag = `<meta property="og:image"\n  content="${ogEndpoint}/og/${project.publicId}?url=https://yoursite.com/page&template=gradient_dark" />`;
+  const metaTag = `<meta property="og:image"\n  content="${ogEndpoint}/og/${project.publicId}?url=https://yoursite.com/page&template=editorial" />`;
 
   return (
     <Box>

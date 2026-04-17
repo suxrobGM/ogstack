@@ -45,14 +45,15 @@ async function main(): Promise<void> {
   const templateService = new TemplateService();
 
   for (const { kind, dimensions } of RENDER_TARGETS) {
-    const templates = listTemplates(kind);
+    const templates = listTemplates();
+    const kindSuffix = kind === "blog_hero" ? "hero" : "og";
     console.log(
       `\nGenerating ${templates.length} ${kind} thumbnails at ${dimensions.width}×${dimensions.height}...`,
     );
 
     for (const template of templates) {
       const slug = template.slug as TemplateSlug;
-      const fileName = slug.replace(/_/g, "-") + ".webp";
+      const fileName = `${slug.replace(/_/g, "-")}-${kindSuffix}.webp`;
       const outputPath = join(OUTPUT_DIR, fileName);
 
       try {
@@ -61,6 +62,7 @@ async function main(): Promise<void> {
           SAMPLE_METADATA,
           { accent: "#3B82F6", dark: true, font: "inter" },
           dimensions,
+          kind,
         );
 
         const webpBuffer = await sharp(pngBuffer)
