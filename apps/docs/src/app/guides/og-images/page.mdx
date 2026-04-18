@@ -1,0 +1,78 @@
+# OG images
+
+`GET /og/{publicId}` returns a 1200×630 PNG suitable for `<meta property="og:image">`. Every option below is a query parameter.
+
+## Minimum request
+
+```
+https://api.ogstack.dev/og/{publicId}?url=https%3A%2F%2Fexample.com%2Fpost
+```
+
+The `url` parameter is required and must be URL-encoded. Its origin must match one of the project's registered domains.
+
+## Query parameters
+
+| Parameter       | Type    | Values                                                                                                   |
+| --------------- | ------- | -------------------------------------------------------------------------------------------------------- |
+| `url`           | string  | Required. URL-encoded target page.                                                                       |
+| `template`      | string  | Template slug (see [Templates](/guides/templates)). Default: `editorial`.                                |
+| `accent`        | hex     | `#RRGGBB`. URL-encode as `%23RRGGBB`.                                                                    |
+| `dark`          | boolean | `true` or `false`. Default: `true`.                                                                      |
+| `font`          | enum    | `inter`, `plus-jakarta-sans`, `space-grotesk`, `jetbrains-mono`, `noto-sans`, `instrument-serif`.        |
+| `logoUrl`       | string  | URL to a logo (PNG/SVG). URL-encoded.                                                                    |
+| `logoPosition`  | enum    | `top-left`, `top-right`, `bottom-left`, `bottom-right`.                                                  |
+| `ai`            | boolean | `true` to enable an AI-generated background with default model.                                          |
+| `aiModel`       | enum    | `standard` (Flux 2) or `pro` (Flux 2 Pro — Pro plan only).                                               |
+| `aiPrompt`      | string  | Up to 500 characters. Blended with page-derived context unless `override` is used in API calls.          |
+
+## Response
+
+- `Content-Type: image/png`
+- Binary PNG body
+- `Cache-Control: public, max-age=86400, s-maxage=604800` (24h browser, 7d edge)
+
+## HTML example
+
+```html
+<meta
+  property="og:image"
+  content="https://api.ogstack.dev/og/cLx8kZ9m?url=https%3A%2F%2Fexample.com%2Fpost&template=aurora&accent=%2310b981"
+/>
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+```
+
+## Next.js metadata API
+
+```tsx
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const pageUrl = `https://example.com/${params.slug}`;
+  const ogImage = new URL(`https://api.ogstack.dev/og/${process.env.OGSTACK_PUBLIC_ID}`);
+  ogImage.searchParams.set("url", pageUrl);
+  ogImage.searchParams.set("template", "editorial");
+
+  return {
+    openGraph: { images: [{ url: ogImage.toString(), width: 1200, height: 630 }] },
+    twitter: { card: "summary_large_image", images: [ogImage.toString()] },
+  };
+}
+```
+
+## Astro example
+
+```astro
+---
+const publicId = import.meta.env.OGSTACK_PUBLIC_ID;
+const pageUrl = Astro.url.toString();
+const og = `https://api.ogstack.dev/og/${publicId}?url=${encodeURIComponent(pageUrl)}`;
+---
+<meta property="og:image" content={og} />
+<meta name="twitter:card" content="summary_large_image" />
+```
+
+## Rate limits
+
+Public endpoints are rate-limited per public ID using the project owner's plan. Common social crawlers (Twitterbot, LinkedInBot, Slackbot, Discordbot, FacebookBot) bypass the limit so your previews still render during traffic spikes. See [Rate limits](/reference/rate-limits).

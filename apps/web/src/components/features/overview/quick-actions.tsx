@@ -8,7 +8,7 @@ import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import { Box, Grid, Link, Stack, Typography } from "@mui/material";
 import { SectionHeader } from "@/components/ui/layout/section-header";
 import { Surface } from "@/components/ui/layout/surface";
-import { ROUTES } from "@/lib/constants";
+import { DOCS_URL, ROUTES } from "@/lib/constants";
 import { line } from "@/theme/palette";
 import { motion } from "@/theme/tokens";
 
@@ -35,7 +35,8 @@ const ACTIONS = [
     icon: <ArticleIcon />,
     title: "Documentation",
     description: "Read the integration guides",
-    href: ROUTES.docs,
+    href: DOCS_URL,
+    external: true,
   },
 ];
 
@@ -48,6 +49,8 @@ export function QuickActions(): ReactElement {
           <Grid key={action.title} size={{ xs: 12, sm: 6, md: 3 }}>
             <Link
               href={action.href}
+              target={action.external ? "_blank" : undefined}
+              rel={action.external ? "noopener noreferrer" : undefined}
               sx={{ textDecoration: "none", display: "block", height: "100%" }}
             >
               <Surface

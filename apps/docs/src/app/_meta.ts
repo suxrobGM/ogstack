@@ -1,7 +1,11 @@
 import type { MetaRecord } from "nextra";
 
 const meta: MetaRecord = {
-  "getting-started": "Getting Started",
+  index: "Introduction",
+  quickstart: "Quickstart",
+  concepts: "Concepts",
+  guides: "Guides",
+  reference: "Reference",
 };
 
 export default meta;

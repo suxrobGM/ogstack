@@ -1,0 +1,98 @@
+# OG audit
+
+Score any URL's Open Graph, Twitter Card, and SEO setup. Returns a 0–100 score with issues and fixes, plus optional AI-written recommendations.
+
+## Endpoint
+
+```bash
+curl -X POST https://api.ogstack.dev/api/audit \
+  -H "Content-Type: application/json" \
+  -d '{ "url": "https://example.com/post", "includeAi": true }'
+```
+
+The audit endpoint is **public** — no API key required. Reports run while signed in are attached to your dashboard history automatically (via the session cookie).
+
+## Fetching a report
+
+```
+GET /api/audit/{id}
+```
+
+No auth required. Audit reports are publicly shareable by ID.
+
+## Response (truncated)
+
+```json
+{
+  "id": "5b5...",
+  "url": "https://example.com/post",
+  "overallScore": 78,
+  "letterGrade": "B+",
+  "categoryScores": { "og": 85, "twitter": 70, "seo": 75 },
+  "metadata": {
+    "title": "How we built OGStack",
+    "description": "From idea to production in six weeks.",
+    "image": "https://example.com/og.png",
+    "twitterCardType": "summary_large_image"
+  },
+  "issues": [
+    {
+      "id": "twitter-creator-missing",
+      "category": "twitter",
+      "severity": "warning",
+      "pass": false,
+      "title": "Missing twitter:creator",
+      "message": "Twitter shows author attribution when twitter:creator is set.",
+      "fix": "Add `<meta name=\"twitter:creator\" content=\"@yourhandle\">`"
+    }
+  ],
+  "aiStatus": "COMPLETED",
+  "aiAnalysis": {
+    "priorityActions": [
+      {
+        "title": "Rewrite og:description for clarity",
+        "rationale": "Current description trails off mid-sentence.",
+        "impact": "high"
+      }
+    ],
+    "suggestedOgTitle": "How we built OGStack in six weeks",
+    "suggestedOgDescription": "The architecture, tradeoffs, and three things we'd do differently.",
+    "audienceFit": "strong",
+    "severity": "low",
+    "confidence": "high"
+  }
+}
+```
+
+## Scoring
+
+The overall score weights three categories:
+
+| Category    | Signals                                                        |
+| ----------- | -------------------------------------------------------------- |
+| `og`        | Image present, 1200×630 dimensions, file size, title, description |
+| `twitter`   | Card type, image, title, description, creator/site handles    |
+| `seo`       | Canonical URL, structured data, heading hierarchy, freshness  |
+
+Letter grades follow common conventions: 90+ = A, 80–89 = B, 70–79 = C, etc.
+
+## AI analysis
+
+Pass `"includeAi": true` to run the scraped content through the analysis model. Output includes:
+
+- **Priority actions** — ranked list of changes with rationale
+- **Suggested rewrites** — copy for `og:title`, `og:description`, `twitter:title`, `twitter:description`, and the SERP snippet
+- **Tone assessment** — how your copy reads
+- **Discoverability gaps** — missing schema.org types, canonical issues, hreflang recommendations
+
+AI analysis requires the Plus or Pro plan to appear in the signed-in user's dashboard history. Anonymous requests run the audit but omit the AI section.
+
+## Dashboard integration
+
+Audit reports are visible in the dashboard at **Tools → Audits**. Each row links to a detailed view with:
+
+- Platform preview cards (X, Facebook, LinkedIn, Slack, Telegram, Discord, Instagram, VK)
+- Issue list filtered by severity
+- AI recommendations panel (Plus/Pro)
+
+The public share URL (`/audit/{id}` on the web app) renders the same report without auth.

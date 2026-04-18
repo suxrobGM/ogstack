@@ -1,0 +1,71 @@
+# Favicons & icon sets
+
+Generate a full favicon bundle from any page. OGStack extracts brand signals (existing favicon, `theme-color`, inferred palette) and produces icons sized for every common placement.
+
+## Endpoint
+
+```bash
+curl -X POST https://api.ogstack.dev/api/images/generate \
+  -H "Authorization: Bearer og_live_xxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://example.com",
+    "projectId": "550e8400-e29b-41d4-a716-446655440000",
+    "kind": "icon_set"
+  }'
+```
+
+Icon sets don't use the `template` or `style` fields — the output is derived from brand signals, not a template layout.
+
+## Response
+
+```json
+{
+  "id": "...",
+  "imageUrl": "https://cdn.ogstack.dev/icons/.../icon-512.png",
+  "kind": "icon_set",
+  "width": 512,
+  "height": 512,
+  "cached": false,
+  "generationMs": 3100,
+  "assets": [
+    { "name": "favicon-16.png", "url": "https://cdn.ogstack.dev/icons/.../favicon-16.png", "width": 16, "height": 16, "sizeBytes": 312 },
+    { "name": "favicon-32.png", "url": "...", "width": 32, "height": 32, "sizeBytes": 820 },
+    { "name": "favicon-48.png", "url": "...", "width": 48, "height": 48, "sizeBytes": 1450 },
+    { "name": "apple-touch-icon.png", "url": "...", "width": 180, "height": 180, "sizeBytes": 6210 },
+    { "name": "icon-192.png", "url": "...", "width": 192, "height": 192, "sizeBytes": 6890 },
+    { "name": "icon-512.png", "url": "...", "width": 512, "height": 512, "sizeBytes": 28400 }
+  ]
+}
+```
+
+The top-level `imageUrl` points at the 512 px canonical render; `assets[]` lists every size.
+
+## Downloading the full bundle
+
+Call `GET /api/images/{id}/download` with JWT auth to get a `.zip` containing every asset plus a `site.webmanifest` ready to drop into `/public`:
+
+```bash
+curl -L \
+  -H "Authorization: Bearer <JWT>" \
+  -o icons.zip \
+  https://api.ogstack.dev/api/images/{imageId}/download
+```
+
+The dashboard also exposes a **Download** button on the image detail page — same endpoint, same zip.
+
+## HTML `<link>` tags
+
+```html
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+```
+
+The generated `site.webmanifest` references the `192` and `512` sizes for installable PWAs.
+
+## Regenerating
+
+Pass `"force": true` in the body to invalidate the cache and re-derive icons. Useful after a rebrand or if the page's `theme-color` meta tag has changed.

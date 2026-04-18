@@ -6,7 +6,11 @@ import { TemplateService } from "./template.service";
 
 const templateService = container.resolve(TemplateService);
 
-export const templateController = new Elysia({ prefix: "/templates", tags: ["Templates"] })
+export const templateController = new Elysia({
+  prefix: "/templates",
+  tags: ["Templates"],
+  detail: { security: [{ bearerAuth: [] }] },
+})
   .use(authGuard)
   .get("/", () => templateService.list(), {
     response: TemplateListResponseSchema,

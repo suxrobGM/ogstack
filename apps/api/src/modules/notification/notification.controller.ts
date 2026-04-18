@@ -16,6 +16,7 @@ const notificationService = container.resolve(NotificationService);
 export const notificationController = new Elysia({
   prefix: "/notifications",
   tags: ["Notifications"],
+  detail: { security: [{ bearerAuth: [] }] },
 })
   .use(authGuard)
   .get("/", ({ user, query }) => notificationService.list(user.id, query), {

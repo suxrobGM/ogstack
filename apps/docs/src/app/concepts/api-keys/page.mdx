@@ -1,0 +1,42 @@
+# API keys
+
+API keys authenticate server-side calls to `POST /api/images/generate` and other authenticated endpoints. They look like `og_live_...` and start with a visible prefix so you can identify them in logs without exposing the secret.
+
+## Scoping
+
+- **Project-scoped**: the key can only generate images for the one project it was created under. Recommended for per-site keys.
+- **Global** (no `projectId` set at creation): the key can target any of the user's projects by passing `projectId` in the body.
+
+Scoped keys that receive a different `projectId` in the body return `403 Forbidden`.
+
+## One-time display
+
+When you create a key, the full token is shown **once** in the dashboard. After you close the dialog, only the prefix (`og_live_xxxx...`) is visible. OGStack stores the hash, not the key — there is no "show" or "recover" option. Lost keys must be rotated.
+
+## Using a key
+
+Send it as a bearer token:
+
+```http
+Authorization: Bearer og_live_xxxxxxxxxxxxxxxx
+```
+
+Do **not** prefix with `ApiKey ` or any other scheme — the guard parses bearer tokens only.
+
+## Rotation
+
+Rotate on any suspected leak, contributor offboarding, or quarterly as routine hygiene:
+
+1. Create a new key with the same scope
+2. Update your secret store / deployment env
+3. Redeploy and confirm new requests succeed
+4. Revoke the old key from the dashboard
+
+The `lastUsedAt` timestamp on each key (updated on every request) is a safe signal that a key is still in use before you revoke it.
+
+## Secrets management
+
+- Treat keys like database passwords
+- Never commit to git
+- Never log the full key — the prefix is fine for debugging
+- Never expose in client-side JavaScript bundles — use the meta-tag integration for public pages instead

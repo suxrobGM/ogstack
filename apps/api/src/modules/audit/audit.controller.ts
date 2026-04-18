@@ -30,7 +30,11 @@ export const auditController = new Elysia({ prefix: "/audit", tags: ["Audit"] })
     {
       body: AuditCreateBodySchema,
       response: AuditReportSchema,
-      detail: { summary: "Run an audit on a URL" },
+      detail: {
+        summary: "Run an audit on a URL",
+        description:
+          "Scrapes a URL and returns a 0–100 score with categorized issues (OG, Twitter, SEO). Public endpoint — no auth required. When called with a session cookie, the report is attached to the user's dashboard history. Pass `includeAi: true` to run AI analysis (Plus/Pro plans).",
+      },
     },
   )
   .get("/:id", ({ params }) => auditService.getById(params.id), {
@@ -40,7 +44,11 @@ export const auditController = new Elysia({ prefix: "/audit", tags: ["Audit"] })
   });
 
 /** /api/audit — authenticated companion for dashboard history. */
-export const auditUserController = new Elysia({ prefix: "/audit", tags: ["Audit"] })
+export const auditUserController = new Elysia({
+  prefix: "/audit",
+  tags: ["Audit"],
+  detail: { security: [{ bearerAuth: [] }] },
+})
   .use(authGuard)
   .use(tieredRateLimiter({ resolvePlan: "user", keyPrefix: "audit-user" }))
   .get("/history", ({ user, query }) => auditService.listForUser(user.id, query), {

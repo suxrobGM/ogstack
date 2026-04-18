@@ -1,0 +1,77 @@
+# Errors
+
+All errors return JSON with a consistent shape:
+
+```json
+{
+  "statusCode": 404,
+  "code": "NOT_FOUND",
+  "message": "Project not found"
+}
+```
+
+## Common status codes
+
+| Status | Code                  | Typical cause                                                                                  |
+| ------ | --------------------- | ---------------------------------------------------------------------------------------------- |
+| 400    | `BAD_REQUEST`         | Malformed body or missing required field                                                       |
+| 400    | `VALIDATION_ERROR`    | Body passes parse but fails schema (e.g., `url` not a valid URL)                               |
+| 400    | `MALFORMED_BODY`      | JSON parse error                                                                               |
+| 401    | `UNAUTHORIZED`        | Missing or invalid JWT / API key                                                               |
+| 402    | `TIER_LOCKED`         | Image was generated on a higher plan than your current subscription                            |
+| 403    | `FORBIDDEN`           | Not the resource owner, or scoped API key targeting a different project                        |
+| 403    | `PLAN_LIMIT_EXCEEDED` | Monthly AI quota or project/domain limit reached                                               |
+| 404    | `NOT_FOUND`           | Resource doesn't exist (bad ID, unknown template slug)                                         |
+| 409    | `CONFLICT`            | Duplicate resource (e.g., email already registered)                                            |
+| 409    | `IMAGE_EXISTS`        | An image already exists for the same `(projectId, url, ...)` — use `force: true` to regenerate |
+| 429    | —                     | Rate limit exceeded — honor `Retry-After`                                                      |
+
+## Handling errors
+
+```ts
+const res = await fetch("https://api.ogstack.dev/api/images/generate", {
+  method: "POST",
+  headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+  body: JSON.stringify({ url, projectId }),
+});
+
+if (!res.ok) {
+  const error = await res.json();
+  switch (error.code) {
+    case "IMAGE_EXISTS":
+      // Image already cached — fetch the existing one or pass force: true
+      break;
+    case "PLAN_LIMIT_EXCEEDED":
+      // Monthly quota hit — upgrade or wait for reset
+      break;
+    case "TIER_LOCKED":
+      // The image was generated on a higher plan; downgrade handling
+      break;
+    default:
+      throw new Error(`${error.code}: ${error.message}`);
+  }
+}
+```
+
+## Retrying
+
+Retry `429` (with `Retry-After`) and transient `5xx` errors. Do **not** retry `4xx` client errors — the request is malformed and will fail again.
+
+For rate-limit-aware retry logic, exponential backoff capped by `Retry-After` is the right default:
+
+```ts
+async function fetchWithBackoff(req: () => Promise<Response>, maxAttempts = 5): Promise<Response> {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const res = await req();
+    if (res.ok || (res.status < 500 && res.status !== 429)) {
+      return res;
+    }
+
+    const retryAfter = Number(res.headers.get("retry-after") ?? 0);
+    const backoffMs = Math.max(retryAfter * 1000, 2 ** attempt * 100);
+    await new Promise((r) => setTimeout(r, backoffMs));
+  }
+
+  throw new Error("Max retries exceeded");
+}
+```

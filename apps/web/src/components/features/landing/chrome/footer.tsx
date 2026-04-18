@@ -3,7 +3,7 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import XIcon from "@mui/icons-material/X";
 import { Box, Container, Grid, IconButton, Link, Stack, Typography } from "@mui/material";
-import { ROUTES } from "@/lib/constants";
+import { API_DOCS_URL, DOCS_URL, ROUTES } from "@/lib/constants";
 import { line } from "@/theme/palette";
 import { fontFamilies } from "@/theme/typography";
 
@@ -41,8 +41,8 @@ const COLUMNS: FooterColumn[] = [
   {
     heading: "Resources",
     links: [
-      { label: "Docs", href: ROUTES.docs },
-      { label: "API reference", href: ROUTES.docs },
+      { label: "Docs", href: DOCS_URL, external: true },
+      { label: "API reference", href: API_DOCS_URL, external: true },
       { label: "GitHub", href: "https://github.com/suxrobgm/ogstack", external: true },
     ],
   },

@@ -48,7 +48,11 @@ export const billingWebhookController = new Elysia({
   },
 );
 
-export const billingController = new Elysia({ prefix: "/billing", tags: ["Billing"] })
+export const billingController = new Elysia({
+  prefix: "/billing",
+  tags: ["Billing"],
+  detail: { security: [{ bearerAuth: [] }] },
+})
   .use(authGuard)
   .get("/plans", () => plansService.listPlans(), {
     response: PlansResponseSchema,

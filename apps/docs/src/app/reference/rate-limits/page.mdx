@@ -1,0 +1,54 @@
+# Rate limits
+
+All authenticated and public endpoints are rate-limited. Limits scale with your plan; social crawlers bypass them entirely so your previews still render during traffic spikes.
+
+## Per-plan limits
+
+| Plan | Requests / minute |
+| ---- | ----------------- |
+| Free | 20                |
+| Plus | 100               |
+| Pro  | 500               |
+
+For API-key requests, the plan is resolved from the key's owner. For public meta-tag requests, the plan is resolved from the project owner.
+
+Non-AI image generation (template-only) and cache hits are **unmetered** on every plan.
+
+## Response headers
+
+Every rate-limited response carries:
+
+```
+X-RateLimit-Limit: 500
+X-RateLimit-Remaining: 487
+X-RateLimit-Reset: 1711036800
+```
+
+When you exceed the limit, the API returns `429 Too Many Requests` with:
+
+```
+Retry-After: 45
+```
+
+`Retry-After` is seconds until the window resets. Honor it with backoff rather than hammering.
+
+## Crawler bypass
+
+Public image endpoints (`GET /og/:publicId`, `GET /hero/:publicId`) bypass rate limits for these user agents:
+
+- `Twitterbot` (X)
+- `LinkedInBot`
+- `Slackbot`
+- `Discordbot`
+- `facebookexternalhit` / `FacebookBot`
+- `WhatsApp`
+- `TelegramBot`
+
+The detection is by user-agent substring. Crawlers are still subject to abuse mitigation (per-IP circuit breakers), but normal social preview traffic won't trip your limit.
+
+## Strategies to stay under
+
+- **Cache URLs in your app**: the CDN-returned URL from `POST /api/images/generate` is permanent — store it on your post/record instead of regenerating
+- **Avoid `force: true` in loops**: every forced regen counts
+- **Use templates over AI** for high-volume content — templates are unmetered
+- **Batch off-peak**: if you're pre-rendering hundreds of posts at build time, the `X-RateLimit-*` headers tell you when to pause

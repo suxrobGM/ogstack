@@ -11,7 +11,11 @@ import { UsageService } from "./usage.service";
 
 const usageService = container.resolve(UsageService);
 
-export const usageController = new Elysia({ prefix: "/usage", tags: ["Usage"] })
+export const usageController = new Elysia({
+  prefix: "/usage",
+  tags: ["Usage"],
+  detail: { security: [{ bearerAuth: [] }] },
+})
   .use(authGuard)
   .get("/stats", ({ user, query }) => usageService.getUsageStats(user.id, query), {
     query: DateRangeQuerySchema,

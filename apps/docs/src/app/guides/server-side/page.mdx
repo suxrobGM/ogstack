@@ -1,0 +1,136 @@
+# Server-side generation
+
+`POST /api/images/generate` is the authenticated counterpart to the public meta-tag endpoint. Use it when:
+
+- The page is dynamic, behind auth, or not on an allowlisted domain
+- You want the persistent CDN URL as an artifact (build-time rendering, newsletter embeds)
+- You need AI prompts, custom styling, or template choices that don't fit cleanly into a query string
+
+## Request
+
+```http
+POST /api/images/generate HTTP/1.1
+Host: api.ogstack.dev
+Authorization: Bearer og_live_xxxxxxxxxxxxxxxx
+Content-Type: application/json
+```
+
+### Body
+
+```ts
+type GenerateBody = {
+  url: string;                   // required, must be a valid URL
+  projectId: string;             // required, project UUID (must match API key scope for scoped keys)
+  kind?: "og" | "blog_hero" | "icon_set";  // default: "og"
+  template?: string;             // template slug; default: "editorial"
+  style?: {
+    accent?: string;             // hex "#RRGGBB"
+    dark?: boolean;              // default: true
+    font?: "inter" | "plus-jakarta-sans" | "space-grotesk"
+         | "jetbrains-mono" | "noto-sans" | "instrument-serif";
+    logo?: {
+      url: string;
+      position?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+    };
+    aspectRatio?: "16:9" | "16:10";  // blog_hero only
+  };
+  ai?: true | {
+    model?: "standard" | "pro";  // pro requires Pro plan
+    prompt?: string;             // max 500 chars
+    override?: boolean;          // if true, use prompt as-is (no page-blended context)
+  };
+  force?: boolean;               // evict cached image and regenerate
+};
+```
+
+### Response
+
+```ts
+type GenerateResponse = {
+  id: string;
+  imageUrl: string;
+  kind: "og" | "blog_hero" | "icon_set";
+  width: number;
+  height: number;
+  cached: boolean;
+  generationMs: number | null;   // null when cached
+  ai: {
+    enabled: boolean;
+    model: string | null;
+    prompt: string | null;
+    fellBack: boolean;           // true if AI failed and template was used
+  } | null;
+  source: {
+    title: string | null;
+    description: string | null;
+    favicon: string | null;
+  };
+  assets: Array<{ name: string; url: string; width: number; height: number; sizeBytes: number }> | null;
+};
+```
+
+## Example: minimal OG
+
+```json
+{
+  "url": "https://example.com/post",
+  "projectId": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+## Example: styled OG with logo
+
+```json
+{
+  "url": "https://example.com/post",
+  "projectId": "550e8400-e29b-41d4-a716-446655440000",
+  "template": "editorial",
+  "style": {
+    "accent": "#10b981",
+    "dark": true,
+    "font": "inter",
+    "logo": {
+      "url": "https://example.com/logo.png",
+      "position": "top-left"
+    }
+  }
+}
+```
+
+## Example: blog hero at 16:10 with AI
+
+```json
+{
+  "url": "https://example.com/blog/launching-v2",
+  "projectId": "550e8400-e29b-41d4-a716-446655440000",
+  "kind": "blog_hero",
+  "style": { "aspectRatio": "16:10" },
+  "ai": { "model": "standard", "prompt": "Abstract network topology with emerald highlights" }
+}
+```
+
+## When to choose this over the meta tag
+
+| Scenario                                   | Meta tag | API |
+| ------------------------------------------ | -------- | --- |
+| Public marketing / blog pages              | ✅       | ok  |
+| Auth-gated pages (dashboards, reports)     | ❌       | ✅  |
+| Pages on a non-allowlisted domain          | ❌       | ✅  |
+| Pre-render at build time, store URL        | ok       | ✅  |
+| Dynamic AI prompts per page                | limited  | ✅  |
+| Newsletter / social-post batch generation  | ❌       | ✅  |
+
+## Error handling
+
+Common status codes:
+
+- `400 BAD_REQUEST` — invalid body shape (missing `url`, bad UUID, etc.)
+- `401 UNAUTHORIZED` — missing or invalid API key
+- `403 FORBIDDEN` — scoped key used against a different project
+- `402 TIER_LOCKED` — image was generated on a higher plan than the current subscription
+- `404 NOT_FOUND` — template slug doesn't exist for this kind
+- `409 CONFLICT` — the image already exists (pass `"force": true` to regenerate)
+- `429` — rate-limit exceeded; see `Retry-After` header
+- `502` — upstream scrape or AI provider failure
+
+See [Errors](/reference/errors) for the JSON shape.

@@ -1,0 +1,37 @@
+# Swagger / OpenAPI
+
+The authoritative endpoint reference lives on the API server itself. It's generated from the same TypeBox schemas used at runtime, so it can never drift from the implementation.
+
+## Where to find it
+
+- **Production**: [https://api.ogstack.dev/swagger](https://api.ogstack.dev/swagger)
+- **Local development**: [http://localhost:5000/swagger](http://localhost:5000/swagger)
+
+## What's included
+
+- Every endpoint grouped by module (Auth, Projects, API Keys, Images, Audit, Page Analysis, Usage, Billing, Notifications, Users, Admin, Templates)
+- Request body schema with field types, formats, and descriptions
+- Response schema per status code
+- Inline examples for the highest-traffic endpoints (auth, generation, audit)
+- Two auth schemes:
+  - **bearerAuth** — JWT access token from `POST /auth/login` or `POST /auth/register`
+  - **apiKeyAuth** — API key (`og_live_...`) for `POST /images/generate`
+
+## Using "Try it out"
+
+1. Click the green **Authorize** button in the top right
+2. For JWT endpoints: paste a token from `POST /auth/login` into `bearerAuth`
+3. For API key endpoints: paste an `og_live_...` key into `apiKeyAuth`
+4. Open any endpoint, click **Try it out**, edit the request, and **Execute**
+5. Copy the generated curl from the result panel
+
+The server dropdown at the top lets you switch between production and local. The lock icon on each endpoint indicates which scheme is required — public endpoints (`GET /og/:publicId`, `POST /audit`) have no lock.
+
+## When to use this instead of the guides
+
+The docs you're reading now focus on workflows and conceptual "why." Swagger is the "what, exactly" — field names, formats, edge cases. Reach for Swagger when:
+
+- You need to know the exact shape of a response
+- You're wiring up a generated client or SDK
+- You're debugging why a request is rejected
+- You want to copy-paste curl for an endpoint not covered by the guides

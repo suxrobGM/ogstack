@@ -12,7 +12,6 @@ const AUTH_ROUTES = [
 
 const PUBLIC_ROUTES = [
   ROUTES.home,
-  ROUTES.docs,
   ROUTES.features,
   ROUTES.howItWorks,
   ROUTES.aiShowcase,

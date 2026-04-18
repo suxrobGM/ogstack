@@ -15,13 +15,14 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { ROUTES } from "@/lib/constants";
+import { DOCS_URL, ROUTES } from "@/lib/constants";
 import { line, surfaces } from "@/theme/palette";
 import { fontFamilies } from "@/theme/typography";
 
 interface NavLink {
   label: string;
   href: string;
+  external?: boolean;
 }
 
 const NAV_LINKS: NavLink[] = [
@@ -30,7 +31,7 @@ const NAV_LINKS: NavLink[] = [
   { label: "AI showcase", href: ROUTES.aiShowcase },
   { label: "Templates", href: ROUTES.templateGallery },
   { label: "Pricing", href: ROUTES.pricing },
-  { label: "Docs", href: ROUTES.docs },
+  { label: "Docs", href: DOCS_URL, external: true },
 ];
 
 export function LandingNavbar(): ReactElement {
@@ -78,6 +79,8 @@ export function LandingNavbar(): ReactElement {
                   variant="body1Muted"
                   component="a"
                   href={link.href}
+                  target={link.external ? "_blank" : undefined}
+                  rel={link.external ? "noopener noreferrer" : undefined}
                   sx={{
                     fontSize: 14,
                     textDecoration: "none",
@@ -130,6 +133,8 @@ export function LandingNavbar(): ReactElement {
                 key={link.href}
                 component="a"
                 href={link.href}
+                target={link.external ? "_blank" : undefined}
+                rel={link.external ? "noopener noreferrer" : undefined}
                 onClick={() => setDrawerOpen(false)}
                 sx={{
                   fontSize: 18,

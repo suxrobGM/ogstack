@@ -1,0 +1,36 @@
+# Projects
+
+A project groups everything tied to one site: generated images, API keys, and the domains allowed to call the public meta-tag endpoint. Every request — meta tag or API — is scoped to exactly one project.
+
+## Public ID vs project ID
+
+Each project has two identifiers:
+
+| Identifier   | Format             | Where it's used                                    |
+| ------------ | ------------------ | -------------------------------------------------- |
+| `id` (UUID)  | `550e8400-...`     | API bodies: `POST /api/images/generate`            |
+| `publicId`   | 8-char slug        | Public meta-tag URL: `/og/{publicId}?url=...`      |
+
+The public ID is safe to expose in HTML; the UUID is only used in authenticated API calls.
+
+## Domain allowlist
+
+Public image endpoints (`GET /og/:publicId`, `GET /hero/:publicId`) only render for URLs whose origin matches one of the project's registered domains. This prevents someone from pointing your project at arbitrary URLs to burn through your quota.
+
+Authenticated API calls (`POST /api/images/generate`) don't check the allowlist — API keys are the authorization.
+
+## Plan limits
+
+| Plan | Projects | Domains per project |
+| ---- | -------- | ------------------- |
+| Free | 1        | 1                   |
+| Plus | 5        | 3                   |
+| Pro  | Unlimited | Unlimited          |
+
+## Creating a project
+
+Dashboard → **Projects** → **New project**. Provide a name and at least one domain. The public ID is generated automatically and cannot be changed.
+
+## Deleting a project
+
+Deletion is permanent and cascades: all API keys scoped to the project are revoked, all generated image records are removed, and the public ID stops working. The dashboard requires typing the project name to confirm.

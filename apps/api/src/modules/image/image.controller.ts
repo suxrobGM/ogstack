@@ -15,7 +15,11 @@ import { ImageService } from "./image.service";
 const imageService = container.resolve(ImageService);
 
 /** /api/images — JWT-authenticated CRUD. Generation lives in image-generation. */
-export const imageController = new Elysia({ prefix: "/images", tags: ["Images"] })
+export const imageController = new Elysia({
+  prefix: "/images",
+  tags: ["Images"],
+  detail: { security: [{ bearerAuth: [] }] },
+})
   .use(authGuard)
   .get("/", ({ user, query }) => imageService.list(user.id, query), {
     query: ImageListQuerySchema,

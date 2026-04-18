@@ -21,19 +21,25 @@ const imageGenerationService = container.resolve(ImageGenerationService);
 export const imageGenerationDashboardController = new Elysia({
   prefix: "/images",
   tags: ["Images"],
+  detail: { security: [{ bearerAuth: [] }] },
 })
   .use(authGuard)
   .use(tieredRateLimiter({ resolvePlan: "user", keyPrefix: "img-dashboard" }))
   .post("/", ({ user, body }) => imageGenerationService.generate({ userId: user.id, ...body }), {
     body: GenerateBodySchema,
     response: GenerateResponseSchema,
-    detail: { summary: "Generate an OG image (dashboard)" },
+    detail: {
+      summary: "Generate an OG image (dashboard)",
+      description:
+        "Dashboard counterpart to `POST /images/generate`. Same request/response shape, but authenticated via the JWT cookie/bearer token set at login instead of an API key.",
+    },
   });
 
 /** POST /api/images/generate — programmatic (API key) generation. */
 export const imageGenerationApiController = new Elysia({
   prefix: "/images/generate",
   tags: ["Images"],
+  detail: { security: [{ apiKeyAuth: [] }] },
 })
   .use(apiKeyGuard)
   .use(tieredRateLimiter({ resolvePlan: "apiKey", keyPrefix: "img-api" }))

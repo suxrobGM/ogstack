@@ -25,7 +25,11 @@ const userService = container.resolve(AdminUserService);
 const statsService = container.resolve(AdminStatsService);
 const imageService = container.resolve(AdminImageService);
 
-export const adminController = new Elysia({ prefix: "/admin", tags: ["Admin"] })
+export const adminController = new Elysia({
+  prefix: "/admin",
+  tags: ["Admin"],
+  detail: { security: [{ bearerAuth: [] }] },
+})
   .use(authGuard)
   .use(requireRole(UserRole.ADMIN))
   .get("/stats", () => statsService.getStats(), {

@@ -1,47 +1,28 @@
-# DepVault Documentation
+# OGStack Docs
 
-DepVault is a platform that analyzes dependencies, detects vulnerabilities, and securely stores environment variables and secret files across any tech stack.
+OGStack is a branded image API for the web. Drop in one meta tag and every link to your site shares a contextual Open Graph image. Call the API and get on-brand blog covers, favicons, and icon sets — designed from your page, not a generic template.
 
-## What is DepVault?
+## Start here
 
-DepVault provides three core tools in one unified platform:
+- [**Meta-tag quickstart**](/quickstart/meta-tag) — the 60-second path. Sign up, paste one meta tag, done.
+- [**API quickstart**](/quickstart/api) — server-side generation with an API key. Great for dynamic or auth-gated pages.
+- [**Concepts**](/concepts/projects) — what projects, API keys, and image kinds are, and how they fit together.
 
-- **Dependency Analysis** — Upload dependency files from 9+ ecosystems (Node.js, Python, .NET, Rust, Go, Java, Kotlin, Ruby, PHP) and get instant reports on outdated packages, known CVEs, and license conflicts.
-- **Encrypted Vault** — Store environment variables and secret files with AES-256-GCM encryption at rest. Manage multiple environments (development, staging, production) with diff views and version history.
-- **Secret Sharing & CI/CD** — Share secrets via one-time encrypted links, inject secrets into CI/CD pipelines with scoped tokens, and scan git repos for accidentally committed credentials.
+## What OGStack generates
 
-## Quick Links
+| Kind        | Size             | Use                                            |
+| ----------- | ---------------- | ---------------------------------------------- |
+| `og`        | 1200 × 630       | Open Graph / Twitter Card previews             |
+| `blog_hero` | 1600×900 or 1920×1080 | Blog post cover images                         |
+| `icon_set`  | 16–512 px zip    | Favicon + Apple touch icon + web manifest     |
 
-- [**Getting Started**](/getting-started) — Create your account, set up your first project, and run your first scan.
-- [**Guides**](/guides) — Feature walkthroughs for the web dashboard and CLI.
-- [**CLI Reference**](/cli) — Install and configure the DepVault CLI.
+Every kind supports 11 built-in templates, custom accent color, light/dark mode, 6 fonts, logo placement, and optional AI-generated backgrounds.
 
-## Platform Overview
+## Two integration styles
 
-| Interface         | Description                                                        |
-| ----------------- | ------------------------------------------------------------------ |
-| **Web Dashboard** | Full-featured web app for managing projects, secrets, and analysis |
-| **CLI**           | Native AOT binary for terminal access and CI/CD pipelines          |
+- **Meta tag**: `GET /og/{publicId}?url=...` — public endpoint, domain-allowlisted, edge-cached. Nothing to run server-side.
+- **API**: `POST /api/images/generate` — authenticated with an API key. Returns JSON with a persistent CDN URL. Use when the page is dynamic, behind auth, or on a non-allowlisted domain.
 
-## Supported Ecosystems
+## Looking for the endpoint reference?
 
-| Ecosystem | Files                                           |
-| --------- | ----------------------------------------------- |
-| Node.js   | `package.json`,                                 |
-| Python    | `requirements.txt`, `pyproject.toml`, `Pipfile` |
-| .NET      | `*.csproj`, `Directory.Packages.props`          |
-| Rust      | `Cargo.toml`                                    |
-| Go        | `go.mod`                                        |
-| Java      | `pom.xml`                                       |
-| Kotlin    | `build.gradle.kts`, `libs.versions.toml`        |
-| Ruby      | `Gemfile`                                       |
-| PHP       | `composer.json`                                 |
-
-## Supported Config Formats
-
-DepVault can import, export, and convert between:
-
-- `.env` (dotenv)
-- `appsettings.json` (ASP.NET)
-- `secrets.yaml` (Kubernetes)
-- `config.toml` (TOML)
+Every endpoint is documented in the live Swagger UI. See [Reference → Swagger](/reference/swagger).

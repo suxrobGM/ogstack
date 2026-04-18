@@ -14,7 +14,11 @@ import { ProjectService } from "./project.service";
 
 const projectService = container.resolve(ProjectService);
 
-export const projectController = new Elysia({ prefix: "/projects", tags: ["Projects"] })
+export const projectController = new Elysia({
+  prefix: "/projects",
+  tags: ["Projects"],
+  detail: { security: [{ bearerAuth: [] }] },
+})
   .use(authGuard)
   .get("/", ({ user, query }) => projectService.list(user.id, query), {
     query: ProjectListQuerySchema,

@@ -1,0 +1,64 @@
+# Caching
+
+OGStack caches at two layers: the origin (by content hash) and the edge (CDN headers). Understanding both is the difference between "fast and fresh" and "why didn't my image update."
+
+## Origin cache (API)
+
+On `POST /api/images/generate`, the service computes a cache key from the full request shape:
+
+- `projectId`
+- `url`
+- `kind`
+- `template`
+- Every `style.*` field
+- Every `ai.*` field
+
+If an image already exists with the same key, the response returns it immediately with:
+
+```json
+{ "cached": true, "generationMs": null, ... }
+```
+
+Fresh generations include `"cached": false` and the real `generationMs`.
+
+## Forcing regeneration
+
+Pass `"force": true` in the request body to evict the cache and regenerate:
+
+```json
+{
+  "url": "https://example.com/post",
+  "projectId": "...",
+  "force": true
+}
+```
+
+Use `force` sparingly — it counts against your rate limit and (for AI images) your monthly AI quota.
+
+## Edge cache (public endpoints)
+
+`GET /og/:publicId` and `GET /hero/:publicId` set long cache headers:
+
+| Endpoint  | Browser (`max-age`) | CDN (`s-maxage`) |
+| --------- | -------------------- | ---------------- |
+| `/og/...` | 24 h                 | 7 days           |
+| `/hero/...` | 24 h               | 30 days          |
+
+Social platforms (Twitter/X, Facebook, Slack, etc.) cache independently. Once a URL has been scraped by a crawler, the preview image is frozen on that platform until its own cache expires — OGStack regenerating the image has no effect. Use each platform's debugger to force a re-scrape:
+
+- **X/Twitter**: Card Validator
+- **Facebook**: Sharing Debugger
+- **LinkedIn**: Post Inspector
+- **Slack**: debounces URL previews per-channel; just re-paste
+
+## What invalidates cache
+
+| Action                               | Origin | Edge       |
+| ------------------------------------ | ------ | ---------- |
+| Identical request                    | hit    | hit        |
+| Different `template` or `style.*`    | miss   | new URL    |
+| `force: true`                        | miss   | unchanged  |
+| Delete image in dashboard            | miss next time | unchanged |
+| Change project domains / name         | no effect | no effect |
+
+For public endpoints, changing any query string parameter produces a new cache URL, so edge caching only applies per exact URL.

@@ -1,0 +1,73 @@
+# Templates & styling
+
+Templates define the layout. Styling options tune the look. Every template supports every kind (`og`, `blog_hero`) and every styling option.
+
+## Templates
+
+| Slug            | Description                                         |
+| --------------- | --------------------------------------------------- |
+| `editorial`     | Classic editorial card — title, description, source. **Default.** |
+| `aurora`        | Aurora-borealis gradient background                 |
+| `billboard`     | Oversized title, minimal chrome                     |
+| `blog_card`     | Author + date + title + site name                   |
+| `changelog`     | Version badge plus release title                    |
+| `docs_page`     | Sidebar-inspired docs layout                        |
+| `github_repo`   | Repository card: owner, name, description, stats    |
+| `minimal`       | Just the title, maximum whitespace                  |
+| `panorama`      | Wide panoramic composition                          |
+| `product_launch` | Hero-style product announcement                    |
+| `showcase`      | Portfolio / case-study card                         |
+
+All templates render at 1200×630 for `og` and 1600×900 / 1920×1080 for `blog_hero`. Icon sets don't use templates.
+
+## Style options
+
+Pass as JSON under `style` in API calls, or as query parameters on public endpoints.
+
+| Field          | Values                                                                                                   |
+| -------------- | -------------------------------------------------------------------------------------------------------- |
+| `accent`       | Hex color `#RRGGBB`. When omitted, OGStack picks from the page's `theme-color` or dominant favicon hue.  |
+| `dark`         | `true` (default) / `false`                                                                               |
+| `font`         | `inter`, `plus-jakarta-sans`, `space-grotesk`, `jetbrains-mono`, `noto-sans`, `instrument-serif`         |
+| `logo.url`     | URL to PNG/SVG. Transparent backgrounds work best.                                                       |
+| `logo.position` | `top-left`, `top-right`, `bottom-left`, `bottom-right`                                                  |
+| `aspectRatio`  | `16:9` (default) or `16:10`. **`blog_hero` only.**                                                       |
+
+## API example
+
+```json
+{
+  "url": "https://example.com/post",
+  "projectId": "550e8400-e29b-41d4-a716-446655440000",
+  "template": "aurora",
+  "style": {
+    "accent": "#10b981",
+    "dark": false,
+    "font": "instrument-serif",
+    "logo": { "url": "https://example.com/logo.svg", "position": "bottom-right" }
+  }
+}
+```
+
+## Public-endpoint equivalent
+
+```
+https://api.ogstack.dev/og/{publicId}
+  ?url=https%3A%2F%2Fexample.com%2Fpost
+  &template=aurora
+  &accent=%2310b981
+  &dark=false
+  &font=instrument-serif
+  &logoUrl=https%3A%2F%2Fexample.com%2Flogo.svg
+  &logoPosition=bottom-right
+```
+
+## Picking a template
+
+- **Long marketing pages** → `editorial`, `aurora`, `panorama`
+- **Changelogs / release notes** → `changelog`, `product_launch`
+- **Blog posts** → `blog_card`, `editorial`, `minimal`
+- **Open-source repos** → `github_repo`
+- **Documentation pages** → `docs_page`, `minimal`
+
+Browse rendered previews in the dashboard **Templates** tab before committing.

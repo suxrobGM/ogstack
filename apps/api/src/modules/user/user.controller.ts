@@ -13,7 +13,11 @@ import { UserService } from "./user.service";
 
 const userService = container.resolve(UserService);
 
-export const userController = new Elysia({ prefix: "/users", tags: ["Users"] })
+export const userController = new Elysia({
+  prefix: "/users",
+  tags: ["Users"],
+  detail: { security: [{ bearerAuth: [] }] },
+})
   .use(authGuard)
   .get("/me", ({ user }) => userService.getProfile(user.id), {
     response: UserProfileSchema,

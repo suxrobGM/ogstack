@@ -1,0 +1,59 @@
+# Meta-tag quickstart
+
+Add branded Open Graph images to any page on your site with one meta tag. No server code, no build step.
+
+## 1. Create a project
+
+Sign in at [ogstack.dev](https://ogstack.dev), go to **Projects**, and create a project. Add the domain your pages are served from (for example, `example.com`). OGStack rejects image requests for URLs that don't match an allowlisted domain.
+
+## 2. Copy the public ID
+
+Each project has a public ID like `cLx8kZ9m`. It's safe to expose — domain allowlisting and rate limits prevent abuse. You'll find it on the project detail page.
+
+## 3. Add the meta tag
+
+Paste into the `<head>` of every page you want to share. Replace `{publicId}` with your project's public ID and URL-encode the page URL.
+
+```html
+<meta
+  property="og:image"
+  content="https://api.ogstack.dev/og/{publicId}?url=https%3A%2F%2Fexample.com%2Fblog%2Fpost"
+/>
+<meta
+  name="twitter:card"
+  content="summary_large_image"
+/>
+```
+
+## 4. Validate
+
+Paste the page URL into the [OG Audit](https://ogstack.dev/audit) tool. You'll see previews for X, Facebook, LinkedIn, Slack, and more, plus a score with actionable fixes.
+
+## Customizing the image
+
+All customization happens in query string parameters. The full list lives in [Guides → OG images](/guides/og-images). A common example:
+
+```html
+<meta
+  property="og:image"
+  content="https://api.ogstack.dev/og/{publicId}?url=https%3A%2F%2Fexample.com%2Fpost&template=editorial&accent=%2310b981&dark=true"
+/>
+```
+
+## Dynamic pages (Next.js, Astro, etc.)
+
+If you build the `<meta>` tag at request time, you can read the current URL and encode it:
+
+```tsx
+// Next.js — app/[slug]/page.tsx
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const url = `https://example.com/${params.slug}`;
+  const ogUrl = `https://api.ogstack.dev/og/cLx8kZ9m?url=${encodeURIComponent(url)}`;
+  return {
+    openGraph: { images: [ogUrl] },
+    twitter: { card: "summary_large_image", images: [ogUrl] },
+  };
+}
+```
+
+When you need more control than query parameters allow — dynamic prompts, auth-gated pages, or batch generation — use the [API quickstart](/quickstart/api) instead.

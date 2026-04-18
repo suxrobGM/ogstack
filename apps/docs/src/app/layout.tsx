@@ -7,23 +7,19 @@ import { getPageMap } from "nextra/page-map";
 
 export const metadata = {
   title: {
-    default: "DepVault Documentation",
-    template: "%s | DepVault Docs",
+    default: "OGStack Docs",
+    template: "%s | OGStack Docs",
   },
-  description: "Documentation for OGStack",
-  icons: {
-    icon: "/depvault-icon.svg",
-  },
+  description:
+    "Branded Open Graph images, blog covers, and favicon sets. AI reads your page, one meta tag renders it.",
 };
 
 const navbar = (
   <Navbar
     logo={
-      <>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/depvault-icon.svg" alt="" width={24} height={24} />
-        <b style={{ marginLeft: 8 }}>DepVault</b>
-      </>
+      <b style={{ fontSize: 16, letterSpacing: "-0.5px" }}>
+        og<span style={{ color: "#10b981" }}>stack</span>
+      </b>
     }
     projectLink="https://github.com/suxrobgm/ogstack"
   />
@@ -31,7 +27,7 @@ const navbar = (
 
 const footer = (
   <Footer>
-    <span>MIT {new Date().getFullYear()} © OGStack</span>
+    <span>© {new Date().getFullYear()} OGStack</span>
   </Footer>
 );
 

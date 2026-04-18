@@ -14,7 +14,11 @@ import { ApiKeyService } from "./api-key.service";
 const apiKeyService = container.resolve(ApiKeyService);
 
 /** Global API key management. Keys may be scoped to a project or apply to all of the user's projects. */
-export const apiKeyController = new Elysia({ prefix: "/api-keys", tags: ["API Keys"] })
+export const apiKeyController = new Elysia({
+  prefix: "/api-keys",
+  tags: ["API Keys"],
+  detail: { security: [{ bearerAuth: [] }] },
+})
   .use(authGuard)
   .post("/", ({ user, body }) => apiKeyService.create(user.id, body), {
     body: CreateApiKeyBodySchema,

@@ -7,7 +7,6 @@ export const ROUTES = {
   forgotPassword: "/forgot-password",
   resetPassword: "/reset-password",
   verifyEmail: "/verify-email",
-  docs: "/docs" as Route,
   overview: "/overview" as Route,
   projects: "/projects" as Route,
   projectDetail: (id: string) => `/projects/${id}` as Route,
@@ -47,3 +46,6 @@ export const PAGINATION_DEFAULTS = {
 } as const;
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+export const DOCS_URL = process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:5002";
+export const API_DOCS_URL = process.env.NEXT_PUBLIC_API_DOCS_URL || "http://localhost:5000/swagger";

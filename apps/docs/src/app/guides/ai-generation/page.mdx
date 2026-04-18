@@ -1,0 +1,96 @@
+# AI generation
+
+Opt into Flux-generated backgrounds that reflect the page's tone and subject. The template still provides text layout; AI replaces the background with a custom render.
+
+## Enabling
+
+Add `ai` to the request body:
+
+```json
+{
+  "url": "https://example.com/post",
+  "projectId": "...",
+  "ai": true
+}
+```
+
+`true` uses defaults: the `standard` model and a page-derived prompt. For finer control:
+
+```json
+{
+  "ai": {
+    "model": "standard",
+    "prompt": "Moody neon grid with emerald highlights"
+  }
+}
+```
+
+## Models
+
+| Model     | Plan required | Notes                                                             |
+| --------- | ------------- | ----------------------------------------------------------------- |
+| `standard` | Free+        | Flux 2. Counts against monthly AI image quota.                    |
+| `pro`      | Pro           | Flux 2 Pro. Higher fidelity. Sub-capped within the AI image quota. |
+
+## Prompt blending
+
+By default, your `prompt` is **blended** with context OGStack synthesizes from the page (headline, tagline, mood, inferred palette). This keeps the output grounded in the page's content.
+
+Pass `"override": true` to use your prompt verbatim, without any page-derived context:
+
+```json
+{
+  "ai": {
+    "prompt": "Abstract fluid gradient, emerald and cyan, soft focus",
+    "override": true
+  }
+}
+```
+
+`override` is for when you want full creative control — typically for marketing pages with a specific creative direction.
+
+## Limits
+
+- `prompt` max 500 characters
+- Monthly AI image quotas: Free 3, Plus 100, Pro 1,000 (Pro includes a 300-image sub-cap for the `pro` model)
+- Prompts are rejected if they violate the provider's content policy
+
+## Fallback behavior
+
+If AI generation fails (quota exhausted, provider error, content-policy rejection), OGStack falls back to a template-only render and the response reflects it:
+
+```json
+{
+  "imageUrl": "...",
+  "ai": {
+    "enabled": true,
+    "model": "standard",
+    "prompt": "...",
+    "fellBack": true
+  }
+}
+```
+
+Check `ai.fellBack` in your code if you need to log or surface this.
+
+## Public endpoint equivalents
+
+On `GET /og/:publicId` / `GET /hero/:publicId`, AI options map to query parameters:
+
+| Body field      | Query parameter |
+| --------------- | --------------- |
+| `ai: true`      | `ai=true`       |
+| `ai.model`      | `aiModel=...`   |
+| `ai.prompt`     | `aiPrompt=...`  |
+
+`override` is only available through the API, not the public meta-tag URL.
+
+## When to use AI
+
+AI backgrounds are expressive but slower (2–5s) and quota-bound. Use them for:
+
+- Landing pages and product launches
+- Long-form articles where the cover matters
+- Newsletter hero images
+
+For high-volume templated content (changelogs, docs pages, generic blog posts), stick with the template-only output — it's instant, unmetered, and brand-consistent.

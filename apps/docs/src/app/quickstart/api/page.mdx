@@ -1,0 +1,77 @@
+# API quickstart
+
+Generate images server-side with an API key. Returns a persistent CDN URL you can store and reuse.
+
+## 1. Create an API key
+
+In the dashboard, go to **API Keys** → **New key**. Give it a name and scope it to a single project (recommended) or leave it global to target any of your projects. The full key is shown **once** and starts with `og_live_...` — copy it into your secret manager before closing the dialog.
+
+## 2. Call the API
+
+```bash
+curl -X POST https://api.ogstack.dev/api/images/generate \
+  -H "Authorization: Bearer og_live_xxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://example.com/blog/post",
+    "projectId": "550e8400-e29b-41d4-a716-446655440000",
+    "kind": "og",
+    "template": "editorial"
+  }'
+```
+
+Response:
+
+```json
+{
+  "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "imageUrl": "https://cdn.ogstack.dev/images/f47ac10b.png",
+  "kind": "og",
+  "width": 1200,
+  "height": 630,
+  "cached": false,
+  "generationMs": 2340,
+  "ai": null,
+  "source": {
+    "title": "How we built OGStack",
+    "description": "From idea to production in six weeks.",
+    "favicon": "https://example.com/favicon.ico"
+  },
+  "assets": null
+}
+```
+
+Store `imageUrl` against your post — it's a permanent CDN URL.
+
+## 3. Use the fetch API
+
+```ts
+const res = await fetch("https://api.ogstack.dev/api/images/generate", {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${process.env.OGSTACK_API_KEY}`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    url: "https://example.com/blog/post",
+    projectId: process.env.OGSTACK_PROJECT_ID,
+    kind: "og",
+  }),
+});
+
+if (!res.ok) {
+  throw new Error(`OGStack ${res.status}: ${await res.text()}`);
+}
+
+const { imageUrl } = await res.json();
+```
+
+## Caching behavior
+
+The first request for a given `(projectId, url, kind, template, style)` combination generates the image. Subsequent identical requests return the cached result with `cached: true` and `generationMs: null`. Pass `"force": true` in the body to invalidate and regenerate.
+
+## Next steps
+
+- [Concepts → API keys](/concepts/api-keys) — scoping, rotating, header format
+- [Guides → Server-side generation](/guides/server-side) — full request body, styling, AI options, error handling
+- [Guides → AI generation](/guides/ai-generation) — opt into Flux-generated backgrounds

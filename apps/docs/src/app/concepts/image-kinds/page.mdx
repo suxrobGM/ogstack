@@ -1,0 +1,45 @@
+# Image kinds
+
+Every image OGStack generates has a `kind`. Kinds differ in size, use case, and which styling options apply.
+
+## Supported kinds
+
+| Kind        | Dimensions                        | Primary use                                    |
+| ----------- | --------------------------------- | ---------------------------------------------- |
+| `og`        | 1200 × 630                        | Open Graph + Twitter Card previews             |
+| `blog_hero` | 1600×900 (16:9) or 1920×1080 (16:10) | Hero/cover images on blog posts              |
+| `icon_set`  | 16, 32, 48, 180, 192, 512 px      | Favicons, Apple touch icons, web manifest     |
+
+The default is `og`. Pass `"kind": "blog_hero"` or `"kind": "icon_set"` to the generation endpoint to switch.
+
+## og
+
+The canonical social-preview size. All 11 templates render at 1200×630. Use for the `<meta property="og:image">` tag and `<meta name="twitter:image">`.
+
+## blog_hero
+
+Wider than OG, designed to sit above the fold on an article page. Two aspect ratios:
+
+- `16:9` → 1600 × 900 (default)
+- `16:10` → 1920 × 1080
+
+Pass `style.aspectRatio` on `POST /api/images/generate` or `aspectRatio` in the query string on `GET /hero/:publicId`.
+
+## icon_set
+
+Returns a bundle of icons derived from the page's brand signals (favicon, theme-color, inferred palette). The response includes an `assets[]` array with one entry per size, plus a downloadable `.zip` containing:
+
+- `favicon-16.png`, `favicon-32.png`, `favicon-48.png`
+- `apple-touch-icon.png` (180 px)
+- `icon-192.png`, `icon-512.png`
+- `site.webmanifest` linking them
+
+Icon sets don't use the template/styling options — the AI pipeline generates them directly from brand signals.
+
+## Choosing a kind
+
+- Building a social preview? **`og`**
+- Adding a banner to an article? **`blog_hero`**
+- Replacing a site's favicon? **`icon_set`**
+
+A single project can generate all three kinds for the same URL; they're stored as separate rows with independent cache keys.
