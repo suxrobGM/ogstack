@@ -67,8 +67,8 @@ export const SIDEBAR_NAV_ITEMS: readonly NavEntry[] = [
     label: "Library",
     icon: <LibraryBooksIcon {...iconProps} />,
     children: [
-      { label: "Templates", href: ROUTES.templates, icon: <LibraryBooksIcon {...iconProps} /> },
       { label: "Gallery", href: ROUTES.images, icon: <PhotoLibraryIcon {...iconProps} /> },
+      { label: "Templates", href: ROUTES.templates, icon: <LibraryBooksIcon {...iconProps} /> },
     ],
   },
   {

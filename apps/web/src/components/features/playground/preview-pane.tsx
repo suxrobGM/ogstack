@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
+import BoltIcon from "@mui/icons-material/Bolt";
+import CachedIcon from "@mui/icons-material/Cached";
 import DownloadIcon from "@mui/icons-material/Download";
 import ImageIcon from "@mui/icons-material/Image";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import { Alert, Box, Button, Skeleton, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, Chip, Skeleton, Stack, Typography } from "@mui/material";
 import { AspectImage, IconPreview } from "@/components/ui/display";
 import { Surface } from "@/components/ui/layout/surface";
-import { line, radii, surfaces, textColors } from "@/theme";
+import { feedback, line, radii, surfaces, textColors } from "@/theme";
 import type { GenerateDto } from "@/types/api";
 import { downloadImage } from "@/utils/download";
 
@@ -90,10 +92,44 @@ export function PreviewPane(props: PreviewPaneProps): ReactElement {
         )}
 
         {result && !isGenerating && (
-          <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap" }}>
-            {result.cached && <Typography variant="captionMuted">Served from cache</Typography>}
-            {result.generationMs != null && (
-              <Typography variant="captionMuted">Generated in {result.generationMs}ms</Typography>
+          <Stack spacing={1.5}>
+            <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", rowGap: 1 }}>
+              {result.cached ? (
+                <Chip
+                  icon={<CachedIcon />}
+                  label="Served from cache"
+                  sx={{
+                    backgroundColor: `${feedback.info}14`,
+                    color: feedback.info,
+                    border: `1px solid ${feedback.info}40`,
+                    "& .MuiChip-icon": { color: feedback.info },
+                  }}
+                />
+              ) : (
+                <Chip
+                  icon={<BoltIcon />}
+                  label="Freshly generated"
+                  sx={{
+                    backgroundColor: `${feedback.success}14`,
+                    color: feedback.success,
+                    border: `1px solid ${feedback.success}40`,
+                    "& .MuiChip-icon": { color: feedback.success },
+                  }}
+                />
+              )}
+              {result.generationMs != null && (
+                <Chip
+                  variant="outlined"
+                  label={`${result.generationMs}ms`}
+                  sx={{ fontFamily: "var(--font-jetbrains-mono)", color: textColors.secondary }}
+                />
+              )}
+            </Stack>
+
+            {result.cached && (
+              <Alert severity="info" icon={<RefreshIcon fontSize="small" />}>
+                Same inputs as before — click <strong>Regenerate</strong> to force a fresh image.
+              </Alert>
             )}
           </Stack>
         )}
