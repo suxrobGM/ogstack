@@ -2,6 +2,7 @@
 
 import { Suspense, useState, type ChangeEvent, type KeyboardEvent, type ReactElement } from "react";
 import { Box, Button, Skeleton, Stack, Typography } from "@mui/material";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { CodeBlock } from "@/components/ui/display/code-block";
 import { ROUTES } from "@/lib/constants";
@@ -209,11 +210,12 @@ export function LandingPlayground(): ReactElement {
           }}
         >
           {imageUrl && (
-            <Box
-              component="img"
+            <Image
               key={imageUrl}
               src={imageUrl}
               alt="Generated OG preview"
+              fill
+              sizes="(max-width: 600px) 100vw, 600px"
               onLoad={() => setIsLoading(false)}
               onError={() => {
                 setIsLoading(false);
@@ -221,12 +223,8 @@ export function LandingPlayground(): ReactElement {
                 setImageUrl(null);
                 setGenerated(null);
               }}
-              sx={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                display: "block",
-              }}
+              style={{ objectFit: "cover" }}
+              unoptimized
             />
           )}
         </Box>

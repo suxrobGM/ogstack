@@ -1,3 +1,4 @@
+import { zipSync } from "fflate";
 import { singleton } from "tsyringe";
 import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
@@ -50,7 +51,7 @@ export class ImageService {
       throw new BadRequestError("This icon set has no assets to bundle.");
     }
 
-    const entries: Record<string, Buffer> = {};
+    const entries: Record<string, Uint8Array> = {};
     for (const asset of assets) {
       const key = `${row.cacheKey}/${asset.name}`;
       const data = await this.storage.get(key);
@@ -58,12 +59,11 @@ export class ImageService {
         logger.warn({ imageId: row.id, key }, "Missing asset during bundle; skipping");
         continue;
       }
-      entries[asset.name] = data;
+      entries[asset.name] = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
     }
 
-    const archive = new Bun.Archive(entries, { compress: "gzip" });
-    const bytes = await archive.bytes();
-    return { buffer: Buffer.from(bytes), filename: "favicons.tar.gz" };
+    const zipped = zipSync(entries);
+    return { buffer: Buffer.from(zipped), filename: "favicons.zip" };
   }
 
   async list(userId: string, query: ImageListQuery): Promise<ImageListResponse> {

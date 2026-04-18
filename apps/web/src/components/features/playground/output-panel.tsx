@@ -4,6 +4,7 @@ import { Suspense, useState, type ReactElement, type SyntheticEvent } from "reac
 import LanguageIcon from "@mui/icons-material/Language";
 import { Box, Skeleton, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { aiModelLabel } from "@ogstack/shared";
+import Image from "next/image";
 import { CodeBlock } from "@/components/ui/display/code-block";
 import { Surface } from "@/components/ui/layout/surface";
 import { textColors } from "@/theme";
@@ -67,7 +68,7 @@ function MetadataView(props: { result: GenerateDto }): ReactElement {
     <Stack spacing={1}>
       {result.source.favicon && (
         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <Box component="img" src={result.source.favicon} alt="" sx={{ width: 16, height: 16 }} />
+          <Image src={result.source.favicon} alt="" width={16} height={16} unoptimized />
           <Typography variant="captionMuted">Favicon</Typography>
         </Stack>
       )}

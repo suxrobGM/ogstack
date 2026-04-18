@@ -1,18 +1,19 @@
-import { client } from "@/lib/api/client";
+import { API_BASE_URL } from "@/lib/api/constants";
+import { fetchWithRefresh } from "@/lib/fetch-with-refresh";
 
 /**
- * Authenticated download of an image bundle. The API download route is behind
- * the auth guard, so we use the Eden Treaty client (same auth flow + cookie
- * handling as the rest of the app). The endpoint returns a Blob whose
- * Content-Disposition header carries the filename.
+ * Fetches the image data for the given image ID and triggers a download in the browser.
+ * The server response must include a `Content-Disposition` header with the filename, or a fallback name will be used.
  */
 export async function downloadImage(imageId: string, fallbackName = "image"): Promise<void> {
-  const { data, error, response } = await client.api.images({ id: imageId }).download.get();
-  if (error) {
-    throw new Error(`Download failed (${error.status})`);
+  const response = await fetchWithRefresh(`${API_BASE_URL}/api/images/${imageId}/download`, {
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error(`Download failed (${response.status})`);
   }
 
-  const blob = data instanceof Blob ? data : new Blob([data as BlobPart]);
+  const blob = await response.blob();
   const filename = parseFilename(response.headers.get("content-disposition")) ?? fallbackName;
 
   const url = URL.createObjectURL(blob);

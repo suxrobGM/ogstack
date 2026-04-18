@@ -29,12 +29,16 @@ export const imageController = new Elysia({ prefix: "/images", tags: ["Images"] 
   })
   .get(
     "/:id/download",
-    async ({ user, params, set }) => {
+    async ({ user, params }) => {
       const bundle = await imageService.buildDownloadBundle(user.id, params.id);
-      const contentType = bundle.filename.endsWith(".tar.gz") ? "application/gzip" : "image/png";
-      set.headers["Content-Type"] = contentType;
-      set.headers["Content-Disposition"] = `attachment; filename="${bundle.filename}"`;
-      return bundle.buffer;
+      const contentType = bundle.filename.endsWith(".zip") ? "application/zip" : "image/png";
+
+      return new Response(new Uint8Array(bundle.buffer), {
+        headers: {
+          "Content-Type": contentType,
+          "Content-Disposition": `attachment; filename="${bundle.filename}"`,
+        },
+      });
     },
     {
       params: UuidIdParamSchema,

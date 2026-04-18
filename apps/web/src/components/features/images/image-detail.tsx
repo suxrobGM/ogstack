@@ -10,18 +10,19 @@ import { Box, Button, Grid, IconButton, Stack, Tooltip, Typography } from "@mui/
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PlatformPreviewCard, PLATFORMS } from "@/components/features/audit/report";
+import { AspectImage, IconPreview } from "@/components/ui/display";
 import { PageHeader } from "@/components/ui/layout/page-header";
 import { Surface } from "@/components/ui/layout/surface";
 import { useApiMutation } from "@/hooks";
 import { client } from "@/lib/api/client";
 import { queryKeys } from "@/lib/query-keys";
 import { useConfirm } from "@/providers/confirm-provider";
+import { surfaces } from "@/theme";
 import type { AuditPreviewMetadata, ImageItem } from "@/types/api";
 import { downloadImage } from "@/utils/download";
 import { ImageEditForm } from "./image-edit-form";
 import { ImageIntegrationSnippet } from "./image-integration-snippet";
 import { ImageMetadata } from "./image-metadata";
-import { ImagePreview } from "./image-preview";
 
 interface ImageDetailProps {
   image: ImageItem;
@@ -103,7 +104,16 @@ export function ImageDetail(props: ImageDetailProps): ReactElement {
           </Stack>
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, md: 7 }}>
-              <ImagePreview image={image} alt={title} />
+              {image.kind === "icon_set" ? (
+                <IconPreview src={image.cdnUrl ?? image.imageUrl} alt={title} />
+              ) : (
+                <AspectImage
+                  src={image.cdnUrl ?? image.imageUrl}
+                  alt={title}
+                  objectFit="contain"
+                  sx={{ backgroundColor: surfaces.elevated }}
+                />
+              )}
             </Grid>
             <Grid size={{ xs: 12, md: 5 }}>
               {mode === "view" ? (
@@ -128,7 +138,7 @@ export function ImageDetail(props: ImageDetailProps): ReactElement {
                 Delete
               </Button>
               <Button startIcon={<DownloadIcon />} onClick={handleDownload} loading={isDownloading}>
-                {image.kind === "icon_set" ? "Download .tar.gz" : "Download"}
+                {image.kind === "icon_set" ? "Download .zip" : "Download"}
               </Button>
               {image.kind !== "icon_set" && (
                 <Button

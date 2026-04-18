@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { DataTable, type Column } from "@/components/ui/data/data-table";
 import { Pagination } from "@/components/ui/data/pagination";
+import { AspectImage } from "@/components/ui/display/aspect-image";
 import { PageHeader } from "@/components/ui/layout/page-header";
 import { useApiMutation, useApiQuery, useDebouncedValue } from "@/hooks";
 import { client } from "@/lib/api/client";
@@ -81,18 +82,7 @@ export function AdminImageList(props: AdminImageListProps): ReactElement {
       width: 96,
       render: (row) =>
         row.cdnUrl ? (
-          <Box
-            component="img"
-            src={row.cdnUrl}
-            alt=""
-            sx={{
-              width: 80,
-              height: 42,
-              objectFit: "cover",
-              borderRadius: 1,
-              display: "block",
-            }}
-          />
+          <AspectImage src={row.cdnUrl} alt="" sizes="80px" sx={{ width: 80, borderRadius: 1 }} />
         ) : (
           <Box sx={{ width: 80, height: 42, bgcolor: "surfaces.elevated", borderRadius: 1 }} />
         ),

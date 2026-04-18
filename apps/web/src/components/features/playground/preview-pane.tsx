@@ -5,6 +5,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import ImageIcon from "@mui/icons-material/Image";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { Alert, Box, Button, Skeleton, Stack, Typography } from "@mui/material";
+import { AspectImage, IconPreview } from "@/components/ui/display";
 import { Surface } from "@/components/ui/layout/surface";
 import { line, radii, surfaces, textColors } from "@/theme";
 import type { GenerateDto } from "@/types/api";
@@ -69,18 +70,15 @@ export function PreviewPane(props: PreviewPaneProps): ReactElement {
         {isGenerating ? (
           <PreviewSkeleton />
         ) : result ? (
-          <Box
-            component="img"
-            src={result.imageUrl}
-            alt="Generated OG image"
-            sx={{
-              width: "100%",
-              aspectRatio: "1200 / 630",
-              objectFit: "cover",
-              borderRadius: `${radii.sm}px`,
-              border: `1px solid ${line.border}`,
-            }}
-          />
+          result.kind === "icon_set" ? (
+            <IconPreview src={result.imageUrl} alt="Generated favicon" bordered />
+          ) : (
+            <AspectImage
+              src={result.imageUrl}
+              alt="Generated OG image"
+              sx={{ borderRadius: `${radii.sm}px`, border: `1px solid ${line.border}` }}
+            />
+          )
         ) : (
           <EmptyPreview />
         )}
@@ -118,7 +116,7 @@ export function PreviewPane(props: PreviewPaneProps): ReactElement {
               disabled={isGenerating || isDownloading}
               fullWidth
             >
-              {result.kind === "icon_set" ? "Download .tar.gz" : "Download"}
+              {result.kind === "icon_set" ? "Download .zip" : "Download"}
             </Button>
           </Stack>
         )}
