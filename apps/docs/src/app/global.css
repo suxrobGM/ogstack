@@ -5,23 +5,75 @@
 }
 
 html[class~="dark"] {
-  --nextra-bg: 10, 14, 23;
+  --nextra-bg: 10, 10, 16;
   --nextra-primary-hue: 160deg;
   --nextra-primary-saturation: 84%;
-  --nextra-primary-lightness: 39%;
+  --nextra-primary-lightness: 50%;
 }
 
 body {
   font-family:
-    var(--font-geist-sans),
+    var(--font-dm-sans),
     ui-sans-serif,
     system-ui,
     -apple-system,
+    "Segoe UI",
     sans-serif;
+  font-feature-settings: "ss01", "cv11";
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.nextra-content h1,
+.nextra-content h2,
+.nextra-content h3,
+.nextra-content h4 {
+  font-family: var(--font-bricolage), var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.015em;
 }
 
 pre,
-code {
+code,
+kbd,
+samp {
   font-family:
-    var(--font-geist-mono), ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-feature-settings: "zero", "ss01";
+}
+
+/* Subtle accent bar above the hero heading on the homepage */
+.nextra-content > h1:first-of-type {
+  position: relative;
+  padding-top: 0.5rem;
+}
+
+.nextra-content > h1:first-of-type::before {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(90deg, #10b981 0%, #22d3ee 100%);
+  border-radius: 2px;
+  margin-bottom: 1rem;
+}
+
+/* Emerald link hover on inline links */
+html[class~="dark"] .nextra-content a[href]:not(.nextra-card):hover {
+  color: hsl(160, 84%, 55%);
+}
+
+/* Softer table header contrast */
+html[class~="dark"] .nextra-content table th {
+  background-color: rgba(16, 185, 129, 0.06);
+  border-bottom-color: rgba(16, 185, 129, 0.2);
+}
+
+/* Tighter code block padding */
+html[class~="dark"] .nextra-code pre {
+  background-color: #14141e;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
