@@ -165,20 +165,35 @@ export function LandingNavbar(): ReactElement {
 
 function Logo(): ReactElement {
   return (
-    <Typography
+    <Box
       component="a"
       href={ROUTES.home}
       sx={{
-        fontFamily: fontFamilies.body,
-        fontWeight: 600,
-        fontSize: 16,
-        letterSpacing: "-0.5px",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 1.25,
         textDecoration: "none",
-        color: "text.primary",
-        "& span": { color: "accent.primary" },
       }}
     >
-      og<span>stack</span>
-    </Typography>
+      <Box
+        component="img"
+        src="/logo-mark.svg"
+        alt=""
+        sx={{ width: 28, height: 28, display: "block" }}
+      />
+      <Typography
+        component="span"
+        sx={{
+          fontFamily: fontFamilies.body,
+          fontWeight: 600,
+          fontSize: 16,
+          letterSpacing: "-0.5px",
+          color: "text.primary",
+          "& span": { color: "accent.primary" },
+        }}
+      >
+        og<span>stack</span>
+      </Typography>
+    </Box>
   );
 }
