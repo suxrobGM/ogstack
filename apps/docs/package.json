@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun --bun next dev -p 4002",
+    "dev": "bun --bun next dev -p 5002",
     "build": "bun --bun next build",
-    "start": "bun --bun next start -p 4002",
+    "start": "bun --bun next start -p 5002",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

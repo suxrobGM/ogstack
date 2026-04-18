@@ -32,9 +32,9 @@ OGStack is a developer-first **branded image API platform** — Open Graph previ
 ## Layout
 
 ```text
-apps/api/        → Elysia REST API (port 4000)
-apps/web/        → Next.js web app (port 4001)
-apps/docs/       → Nextra documentation site (port 4002)
+apps/api/        → Elysia REST API (port 5000)
+apps/web/        → Next.js web app (port 5001)
+apps/docs/       → Nextra documentation site (port 5002)
 packages/shared/ → Shared types & utils
 ```
 

@@ -10,7 +10,7 @@ export class AnthropicPromptProvider implements PromptProvider {
   readonly id = "anthropic";
   readonly model = process.env.ANTHROPIC_MODEL || "claude-haiku-4-5-20251001";
   private readonly apiKey = process.env.ANTHROPIC_API_KEY ?? null;
-  private readonly baseUrl = process.env.ANTHROPIC_BASE_URL || "https://api.anthropic.com";
+  private readonly baseUrl = "https://api.anthropic.com";
 
   isEnabled(): boolean {
     return Boolean(this.apiKey);

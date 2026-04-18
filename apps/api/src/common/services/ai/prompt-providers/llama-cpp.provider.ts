@@ -9,7 +9,7 @@ export class LlamaCppPromptProvider extends OpenAiCompatibleProvider {
   protected readonly config = {
     id: "llamacpp",
     baseUrl: process.env.LLAMACPP_BASE_URL || "",
-    apiKey: process.env.LLAMACPP_API_KEY ?? null,
+    apiKey: null,
     model: process.env.LLAMACPP_MODEL || "local-model",
     requireApiKey: false,
   };

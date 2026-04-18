@@ -11,7 +11,7 @@ export class GitHubOAuthService {
   getAuthUrl(state: string): string {
     const params = new URLSearchParams({
       client_id: process.env.GITHUB_CLIENT_ID ?? "",
-      redirect_uri: `${process.env.CORS_ORIGINS ?? "http://localhost:4000"}/api/auth/github/callback`,
+      redirect_uri: `${process.env.CORS_ORIGINS ?? "http://localhost:5000"}/api/auth/github/callback`,
       scope: "user:email",
       state,
     });

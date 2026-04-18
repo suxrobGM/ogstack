@@ -34,7 +34,7 @@ bun run db:seed
 bun run dev
 ```
 
-The server starts at `http://localhost:4000`. Swagger UI is available at `/swagger`.
+The server starts at `http://localhost:5000`. Swagger UI is available at `/swagger`.
 
 ## Environment Variables
 
@@ -46,9 +46,9 @@ See [.env.example](.env.example) for all variables. Key ones:
 | `JWT_SECRET`           | Secret for signing JWTs         | _(must set)_               |
 | `JWT_EXPIRY`           | Access token lifetime           | `7d`                       |
 | `REFRESH_TOKEN_EXPIRY` | Refresh token lifetime          | `30d`                      |
-| `PORT`                 | Server port                     | `4000`                     |
+| `PORT`                 | Server port                     | `5000`                     |
 | `NODE_ENV`             | Environment                     | `development`              |
-| `CORS_ORIGINS`         | Comma-separated allowed origins | `http://localhost:4001,..` |
+| `CORS_ORIGINS`         | Comma-separated allowed origins | `http://localhost:5001,..` |
 | `LOG_LEVEL`            | pino log level                  | `info`                     |
 
 ## Project Structure

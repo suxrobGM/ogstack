@@ -43,22 +43,21 @@ const EnvSchema = t.Object({
 
   ANTHROPIC_API_KEY: t.Optional(t.String()),
   ANTHROPIC_MODEL: t.Optional(t.String()),
-  ANTHROPIC_BASE_URL: t.Optional(t.String()),
 
   OPENAI_API_KEY: t.Optional(t.String()),
   OPENAI_MODEL: t.Optional(t.String()),
-  OPENAI_BASE_URL: t.Optional(t.String()),
 
   DEEPSEEK_API_KEY: t.Optional(t.String()),
   DEEPSEEK_MODEL: t.Optional(t.String()),
-  DEEPSEEK_BASE_URL: t.Optional(t.String()),
 
   OLLAMA_BASE_URL: t.Optional(t.String()),
   OLLAMA_MODEL: t.Optional(t.String()),
 
   LLAMACPP_BASE_URL: t.Optional(t.String()),
-  LLAMACPP_API_KEY: t.Optional(t.String()),
   LLAMACPP_MODEL: t.Optional(t.String()),
+
+  CLAUDE_CODE_ENABLED: t.Optional(t.String()),
+  CLAUDE_CODE_MODEL: t.Optional(t.String()),
 
   RENDER_PROVIDER: t.Optional(t.String()),
   BROWSERLESS_URL: t.Optional(t.String()),

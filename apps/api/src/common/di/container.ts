@@ -3,6 +3,7 @@ import { container } from "tsyringe";
 import { prisma } from "@/common/database";
 import {
   AnthropicPromptProvider,
+  ClaudeCodePromptProvider,
   DeepSeekPromptProvider,
   FalAiProvider,
   IMAGE_PROVIDER_TOKEN,
@@ -29,5 +30,6 @@ container.register(PROMPT_PROVIDER_TOKEN, { useToken: OpenAiPromptProvider });
 container.register(PROMPT_PROVIDER_TOKEN, { useToken: DeepSeekPromptProvider });
 container.register(PROMPT_PROVIDER_TOKEN, { useToken: OllamaPromptProvider });
 container.register(PROMPT_PROVIDER_TOKEN, { useToken: LlamaCppPromptProvider });
+container.register(PROMPT_PROVIDER_TOKEN, { useToken: ClaudeCodePromptProvider });
 
 export { container };
