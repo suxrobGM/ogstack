@@ -18,10 +18,10 @@ interface InsightsViewProps {
 }
 
 const SUGGESTION_FIELDS = [
-  { key: "suggestedOgTitle", label: "Suggested og:title", limit: 60 },
-  { key: "suggestedOgDescription", label: "Suggested og:description", limit: 160 },
-  { key: "suggestedTwitterTitle", label: "Suggested twitter:title", limit: 70 },
-  { key: "suggestedTwitterDescription", label: "Suggested twitter:description", limit: 200 },
+  { platform: "og", field: "title", label: "Suggested og:title", limit: 60 },
+  { platform: "og", field: "description", label: "Suggested og:description", limit: 160 },
+  { platform: "twitter", field: "title", label: "Suggested twitter:title", limit: 70 },
+  { platform: "twitter", field: "description", label: "Suggested twitter:description", limit: 200 },
 ] as const;
 
 const CANONICAL_HEALTH_COLOR: Record<
@@ -80,14 +80,14 @@ export function InsightsView(props: InsightsViewProps): ReactElement {
         )}
 
         <Stack spacing={2}>
-          {SUGGESTION_FIELDS.map((field) => {
-            const value = insights[field.key];
+          {SUGGESTION_FIELDS.map((spec) => {
+            const value = insights.suggestions[spec.platform][spec.field];
             return (
               <SuggestionBlock
-                key={field.key}
-                label={field.label}
+                key={`${spec.platform}.${spec.field}`}
+                label={spec.label}
                 value={value}
-                hint={`${value.length}/${field.limit} chars`}
+                hint={`${value.length}/${spec.limit} chars`}
               />
             );
           })}

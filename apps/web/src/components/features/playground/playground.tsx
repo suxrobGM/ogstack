@@ -42,9 +42,8 @@ const DEFAULTS: PlaygroundFormValues = {
 
 interface AnalyzeVariables {
   url: string;
-  userPrompt?: string;
-  fullOverride: boolean;
-  skipAi: boolean;
+  customPrompt?: string;
+  mode: "classic" | "ai" | "override";
 }
 
 interface PlaygroundProps {
@@ -117,7 +116,7 @@ export function Playground(props: PlaygroundProps): ReactElement {
   );
 
   const analyzeMutation = useApiMutation<PageAnalysisResponse, AnalyzeVariables>((variables) =>
-    client.api["page-analysis"].analyze.post(variables),
+    client.api.analyses.post(variables),
   );
 
   const submit = (values: PlaygroundFormValues, force: boolean) => {
@@ -130,9 +129,8 @@ export function Playground(props: PlaygroundProps): ReactElement {
     if (values.url && !values.fullOverride) {
       analyzeMutation.mutate({
         url: values.url,
-        userPrompt: values.aiPrompt,
-        fullOverride: values.fullOverride,
-        skipAi: !aiEnabled,
+        customPrompt: values.aiPrompt,
+        mode: aiEnabled ? "ai" : "classic",
       });
     }
 

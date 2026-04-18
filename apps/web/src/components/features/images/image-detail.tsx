@@ -18,7 +18,7 @@ import { client } from "@/lib/api/client";
 import { queryKeys } from "@/lib/query-keys";
 import { useConfirm } from "@/providers/confirm-provider";
 import { surfaces } from "@/theme";
-import type { AuditPreviewMetadata, ImageItem } from "@/types/api";
+import type { ImageItem, PageAuditPreviewMetadata } from "@/types/api";
 import { downloadImage } from "@/utils/download";
 import { ImageEditForm } from "./image-edit-form";
 import { ImageIntegrationSnippet } from "./image-integration-snippet";
@@ -62,7 +62,7 @@ export function ImageDetail(props: ImageDetailProps): ReactElement {
   };
 
   const title = image.title ?? image.sourceUrl ?? "Untitled";
-  const previewMetadata: AuditPreviewMetadata = {
+  const previewMetadata: PageAuditPreviewMetadata = {
     title: image.title ?? null,
     description: image.description ?? null,
     image: image.cdnUrl ?? image.imageUrl,

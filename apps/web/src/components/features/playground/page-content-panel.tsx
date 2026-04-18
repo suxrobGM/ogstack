@@ -24,10 +24,9 @@ export function PageContentPanel(props: PageContentPanelProps): ReactElement {
   const { data, isLoading, isError, onApplyAccent } = props;
   const { user } = useAuth();
   const upgradeRequired = user?.plan === Plan.FREE;
-  const isAi = data?.mode === "ai";
-
   const metadata = data?.metadata;
   const ai = data?.ai;
+  const isAi = Boolean(ai);
   const title = ai?.title ?? metadata?.title;
   const description = ai?.description ?? metadata?.description;
 
@@ -46,7 +45,7 @@ export function PageContentPanel(props: PageContentPanelProps): ReactElement {
           <Typography variant="h6" sx={{ flex: 1 }}>
             Page content
           </Typography>
-          {data?.mode &&
+          {data &&
             (isAi ? (
               <AiChip label="AI enhanced" />
             ) : (

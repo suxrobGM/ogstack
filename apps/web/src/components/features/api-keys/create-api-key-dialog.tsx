@@ -36,7 +36,7 @@ export function CreateApiKeyDialog(props: CreateApiKeyDialogProps): ReactElement
   const [createdKey, setCreatedKey] = useState<string | null>(null);
 
   const mutation = useApiMutation(
-    (data: { name: string; projectId: string | null }) => client.api["api-keys"].post(data),
+    (data: { name: string; projectId: string | null }) => client.api.keys.post(data),
     {
       successMessage: "API key created.",
       invalidateKeys: [queryKeys.apiKeys.all],

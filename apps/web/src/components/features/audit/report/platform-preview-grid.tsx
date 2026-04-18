@@ -1,11 +1,11 @@
 import type { ReactElement } from "react";
 import { Grid } from "@mui/material";
-import type { AuditPreviewMetadata } from "@/types/api";
+import type { PageAuditPreviewMetadata } from "@/types/api";
 import { PlatformPreviewCard } from "./platform-preview-card";
 import { PLATFORMS } from "./platforms";
 
 interface PlatformPreviewGridProps {
-  metadata: AuditPreviewMetadata;
+  metadata: PageAuditPreviewMetadata;
 }
 
 export function PlatformPreviewGrid(props: PlatformPreviewGridProps): ReactElement {

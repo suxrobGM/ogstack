@@ -7,7 +7,7 @@ export default async function ApiKeysPage(): Promise<ReactElement> {
 
   const [projectsRes, keysRes] = await Promise.all([
     client.api.projects.get({ query: { page: 1, limit: 100 } }),
-    client.api["api-keys"].get({ query: {} }),
+    client.api.keys.get({ query: {} }),
   ]);
 
   return <ApiKeyList projects={projectsRes.data?.items ?? []} initialData={keysRes.data ?? null} />;

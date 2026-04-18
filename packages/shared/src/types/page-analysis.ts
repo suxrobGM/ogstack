@@ -1,4 +1,5 @@
-export type PageAnalysisMode = "classic" | "ai";
+export const ANALYZE_MODES = ["classic", "ai", "override"] as const;
+export type AnalyzeMode = (typeof ANALYZE_MODES)[number];
 
 export const PAGE_ANALYSIS_CONFIDENCES = ["high", "medium", "low"] as const;
 export type PageAnalysisConfidence = (typeof PAGE_ANALYSIS_CONFIDENCES)[number];
@@ -110,7 +111,6 @@ export interface PageAnalysisMetadata {
 }
 
 export interface PageAnalysisResult {
-  mode: PageAnalysisMode;
   metadata: PageAnalysisMetadata;
   ai: PageAnalysisAi | null;
   cached: boolean;

@@ -33,9 +33,11 @@ function pushUnique(arr: string[], value: string, limit: number): void {
   arr.push(trimmed);
 }
 
-/** Streams the HTML through Cloudflare's HTMLRewriter, collecting every tag
- *  group we care about in a single pass. Returns metadata + a list of oEmbed
- *  discovery links so the caller can fetch them lazily. */
+/**
+ * Streams the HTML through Cloudflare's HTMLRewriter, collecting every tag
+ * group we care about in a single pass. Returns metadata + a list of oEmbed
+ * discovery links so the caller can fetch them lazily.
+ */
 export async function parseHtml(url: string, html: string): Promise<ParseResult> {
   const metadata = createEmptyMetadata(url);
   const oEmbedLinks: OEmbedLink[] = [];
@@ -89,6 +91,7 @@ export async function parseHtml(url: string, html: string): Promise<ParseResult>
         const property = el.getAttribute("property")?.toLowerCase();
         const name = el.getAttribute("name")?.toLowerCase();
         const content = el.getAttribute("content");
+        if (el.getAttribute("charset")) metadata.hasCharset = true;
         if (!content?.trim()) return;
         const value = content.trim();
         const decoded = decodeHtmlEntities(value);
@@ -96,6 +99,12 @@ export async function parseHtml(url: string, html: string): Promise<ParseResult>
         if (property === "og:title") metadata.ogTitle ??= decoded;
         else if (property === "og:description") metadata.ogDescription ??= decoded;
         else if (property === "og:image" || property === "og:image:url") metadata.ogImage ??= value;
+        else if (property === "og:image:width")
+          metadata.ogImageWidth ??= parseInt(value, 10) || null;
+        else if (property === "og:image:height")
+          metadata.ogImageHeight ??= parseInt(value, 10) || null;
+        else if (property === "og:type") metadata.ogType ??= decoded;
+        else if (property === "og:url") metadata.ogUrl ??= value;
         else if (property === "og:site_name") metadata.ogSiteName ??= decoded;
         else if (property === "og:locale") metadata.locale ??= decoded;
         else if (property === "article:published_time") metadata.publishedTime ??= decoded;
@@ -106,6 +115,8 @@ export async function parseHtml(url: string, html: string): Promise<ParseResult>
         if (name === "description") metadata.description ??= decoded;
         else if (name === "author") metadata.author ??= decoded;
         else if (name === "theme-color") metadata.themeColor ??= decoded;
+        else if (name === "viewport") metadata.hasViewport = true;
+        else if (name === "robots") metadata.robots ??= decoded;
         else if (name === "twitter:card") metadata.twitterCard ??= decoded;
         else if (name === "twitter:title") metadata.twitterTitle ??= decoded;
         else if (name === "twitter:description") metadata.twitterDescription ??= decoded;
@@ -133,7 +144,11 @@ export async function parseHtml(url: string, html: string): Promise<ParseResult>
     .on('link[rel="alternate"]', {
       element(el) {
         const type = el.getAttribute("type")?.toLowerCase();
+        const hreflang = el.getAttribute("hreflang")?.trim();
         const href = el.getAttribute("href");
+        if (hreflang && !metadata.hreflangVariants.includes(hreflang)) {
+          metadata.hreflangVariants.push(hreflang);
+        }
         if (!href?.trim()) return;
         if (type === "application/json+oembed") {
           oEmbedLinks.push({ href: resolveRelative(href, url) ?? href, type: "json" });
@@ -144,6 +159,7 @@ export async function parseHtml(url: string, html: string): Promise<ParseResult>
     })
     .on("h1", {
       element() {
+        metadata.h1Count += 1;
         if (!metadata.h1) capturingH1 = true;
       },
       text(text) {
@@ -155,6 +171,13 @@ export async function parseHtml(url: string, html: string): Promise<ParseResult>
             capturingH1 = false;
           }
         }
+      },
+    })
+    .on("img", {
+      element(el) {
+        metadata.imageCount += 1;
+        const alt = el.getAttribute("alt");
+        if (alt === null || !alt.trim()) metadata.imagesMissingAlt += 1;
       },
     })
     .on("h2", {

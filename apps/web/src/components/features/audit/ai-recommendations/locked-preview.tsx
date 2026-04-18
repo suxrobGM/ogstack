@@ -59,13 +59,13 @@ export function LockedPreview(props: LockedPreviewProps): ReactElement {
           <Stack spacing={2}>
             <SuggestionBlock
               label="Suggested og:title"
-              value={SAMPLE_INSIGHTS.suggestedOgTitle}
-              hint={`${SAMPLE_INSIGHTS.suggestedOgTitle.length}/60 chars`}
+              value={SAMPLE_INSIGHTS.suggestions.og.title}
+              hint={`${SAMPLE_INSIGHTS.suggestions.og.title.length}/60 chars`}
             />
             <SuggestionBlock
               label="Suggested og:description"
-              value={SAMPLE_INSIGHTS.suggestedOgDescription}
-              hint={`${SAMPLE_INSIGHTS.suggestedOgDescription.length}/160 chars`}
+              value={SAMPLE_INSIGHTS.suggestions.og.description}
+              hint={`${SAMPLE_INSIGHTS.suggestions.og.description.length}/160 chars`}
             />
             <Stack spacing={1}>
               {SAMPLE_INSIGHTS.socialCtrTips.map((tip, idx) => (

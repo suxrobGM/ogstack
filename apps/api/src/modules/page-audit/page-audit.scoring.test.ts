@@ -1,39 +1,10 @@
 import { describe, expect, it } from "bun:test";
-import type { AuditMetadata } from "./audit.extractor";
-import { computeScore, runChecks, toLetterGrade } from "./audit.scoring";
+import { createEmptyMetadata, type UrlMetadata } from "@/common/services/scraper";
+import { computeScore, runChecks, toLetterGrade } from "./page-audit.scoring";
 
-function baseMeta(overrides: Partial<AuditMetadata> = {}): AuditMetadata {
+function baseMeta(overrides: Partial<UrlMetadata> = {}): UrlMetadata {
   return {
-    url: "https://example.com",
-    isHttps: true,
-    title: null,
-    titleLength: 0,
-    description: null,
-    descriptionLength: 0,
-    canonical: null,
-    robots: null,
-    lang: null,
-    hasViewport: false,
-    hasCharset: false,
-    favicon: null,
-    h1Count: 0,
-    imageCount: 0,
-    imagesMissingAlt: 0,
-    structuredDataTypes: [],
-    hreflangVariants: [],
-    ogTitle: null,
-    ogDescription: null,
-    ogImage: null,
-    ogType: null,
-    ogUrl: null,
-    ogSiteName: null,
-    twitterCard: null,
-    twitterTitle: null,
-    twitterDescription: null,
-    twitterImage: null,
-    ogImageWidth: null,
-    ogImageHeight: null,
-    ogImageBytes: null,
+    ...createEmptyMetadata("https://example.com"),
     ...overrides,
   };
 }
@@ -89,17 +60,15 @@ describe("audit scoring", () => {
     it("returns ~100 for a fully-populated page", () => {
       const fullyPopulated = baseMeta({
         title: "A great page title",
-        titleLength: 19,
         description:
           "A good description that sits comfortably in the 50-160 range for SEO SERP snippets.",
-        descriptionLength: 82,
-        canonical: "https://example.com",
+        canonicalUrl: "https://example.com",
         lang: "en",
         hasViewport: true,
         hasCharset: true,
         favicon: "https://example.com/favicon.ico",
         h1Count: 1,
-        structuredDataTypes: ["Article"],
+        jsonLd: [{ type: "Article", raw: {} }],
         imageCount: 0,
         ogTitle: "A great page title",
         ogDescription: "A good description.",

@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import { Box, Divider, Grid, Stack, Typography } from "@mui/material";
 import { Surface } from "@/components/ui/layout/surface";
 import { fontFamilies } from "@/theme/typography";
-import type { AuditReportResponse } from "@/types/api";
+import type { PageAuditReportResponse } from "@/types/api";
 import { AiRecommendationsPanel, type AuditViewer } from "../ai-recommendations";
 import { CtaBanner } from "./cta-banner";
 import { IssueList } from "./issue-list";
@@ -10,7 +10,7 @@ import { PlatformPreviewGrid } from "./platform-preview-grid";
 import { ScoreGauge } from "./score-gauge";
 
 interface AuditReportProps {
-  report: AuditReportResponse;
+  report: PageAuditReportResponse;
   viewer: AuditViewer;
 }
 

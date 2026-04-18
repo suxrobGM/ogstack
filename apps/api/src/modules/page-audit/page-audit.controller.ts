@@ -4,32 +4,34 @@ import { authGuard, optionalAuthGuard, rateLimiter } from "@/common/middleware";
 import { tieredRateLimiter } from "@/common/middleware/tiered-rate-limiter";
 import { UuidIdParamSchema } from "@/types/request";
 import {
-  AuditCreateBodySchema,
-  AuditHistoryQuerySchema,
-  AuditHistoryResponseSchema,
-  AuditReportSchema,
-} from "./audit.schema";
-import { AuditService } from "./audit.service";
+  PageAuditCreateBodySchema,
+  PageAuditHistoryQuerySchema,
+  PageAuditHistoryResponseSchema,
+  PageAuditReportSchema,
+} from "./page-audit.schema";
+import { PageAuditService } from "./page-audit.service";
 
-const auditService = container.resolve(AuditService);
+const pageAuditService = container.resolve(PageAuditService);
 
-/** /api/audit — public. Anonymous reports are stored with a null userId; when an
- *  `access_token` cookie is present the report is attached to that user so it
- *  also shows up in dashboard history. */
-export const auditController = new Elysia({ prefix: "/audit", tags: ["Audit"] })
+/**
+ * /api/audit — public. Anonymous reports are stored with a null userId; when an
+ * `access_token` cookie is present the report is attached to that user so it
+ *  also shows up in dashboard history.
+ */
+export const pageAuditController = new Elysia({ prefix: "/audits", tags: ["Audits"] })
   .use(optionalAuthGuard)
   .use(rateLimiter({ max: 10, windowMs: 60_000 }))
   .post(
     "/",
     ({ body, user }) =>
-      auditService.create({
+      pageAuditService.create({
         url: body.url,
         userId: user?.id ?? null,
         includeAi: body.includeAi,
       }),
     {
-      body: AuditCreateBodySchema,
-      response: AuditReportSchema,
+      body: PageAuditCreateBodySchema,
+      response: PageAuditReportSchema,
       detail: {
         summary: "Run an audit on a URL",
         description:
@@ -37,22 +39,22 @@ export const auditController = new Elysia({ prefix: "/audit", tags: ["Audit"] })
       },
     },
   )
-  .get("/:id", ({ params }) => auditService.getById(params.id), {
+  .get("/:id", ({ params }) => pageAuditService.getById(params.id), {
     params: UuidIdParamSchema,
-    response: AuditReportSchema,
+    response: PageAuditReportSchema,
     detail: { summary: "Fetch a persisted audit report" },
   });
 
 /** /api/audit — authenticated companion for dashboard history. */
-export const auditUserController = new Elysia({
-  prefix: "/audit",
-  tags: ["Audit"],
+export const pageAuditUserController = new Elysia({
+  prefix: "/audits",
+  tags: ["Audits"],
   detail: { security: [{ bearerAuth: [] }] },
 })
   .use(authGuard)
   .use(tieredRateLimiter({ resolvePlan: "user", keyPrefix: "audit-user" }))
-  .get("/history", ({ user, query }) => auditService.listForUser(user.id, query), {
-    query: AuditHistoryQuerySchema,
-    response: AuditHistoryResponseSchema,
+  .get("/history", ({ user, query }) => pageAuditService.listForUser(user.id, query), {
+    query: PageAuditHistoryQuerySchema,
+    response: PageAuditHistoryResponseSchema,
     detail: { summary: "List the current user's audit reports" },
   });

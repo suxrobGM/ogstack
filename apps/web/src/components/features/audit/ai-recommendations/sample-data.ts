@@ -1,6 +1,6 @@
-import type { AuditReportResponse } from "@/types/api";
+import type { PageAuditReportResponse } from "@/types/api";
 
-export type AiInsights = NonNullable<AuditReportResponse["aiAnalysis"]>;
+export type AiInsights = NonNullable<NonNullable<PageAuditReportResponse["ai"]>["analysis"]>;
 
 export const SAMPLE_INSIGHTS: AiInsights = {
   priorityActions: [
@@ -22,12 +22,18 @@ export const SAMPLE_INSIGHTS: AiInsights = {
       impact: "medium",
     },
   ],
-  suggestedOgTitle: "Cut LCP to under 1s on Next.js — measured",
-  suggestedOgDescription:
-    "How we shaved 2.3s off Largest Contentful Paint by fixing the image pipeline, moving landing to ISR, and serving OG previews from the edge.",
-  suggestedTwitterTitle: "We got LCP under 1s on Next.js. Here's the before/after.",
-  suggestedTwitterDescription:
-    "A concrete performance overhaul: image pipeline, edge-cached OG previews, ISR landing. Real Speed Insights numbers, not synthetic.",
+  suggestions: {
+    og: {
+      title: "Cut LCP to under 1s on Next.js — measured",
+      description:
+        "How we shaved 2.3s off Largest Contentful Paint by fixing the image pipeline, moving landing to ISR, and serving OG previews from the edge.",
+    },
+    twitter: {
+      title: "We got LCP under 1s on Next.js. Here's the before/after.",
+      description:
+        "A concrete performance overhaul: image pipeline, edge-cached OG previews, ISR landing. Real Speed Insights numbers, not synthetic.",
+    },
+  },
   searchSnippet: {
     suggestedTitle: "Next.js LCP optimization: under 1s with ISR + edge OG",
     suggestedMetaDescription:

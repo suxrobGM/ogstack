@@ -10,7 +10,6 @@ import { validateEnv } from "@/env";
 import { auditCleanupCron } from "@/jobs";
 import { adminController } from "@/modules/admin";
 import { apiKeyController } from "@/modules/api-key";
-import { auditController, auditUserController } from "@/modules/audit";
 import { authController } from "@/modules/auth";
 import {
   billingController,
@@ -26,6 +25,7 @@ import {
 } from "@/modules/image-generation";
 import { notificationController } from "@/modules/notification";
 import { pageAnalysisController } from "@/modules/page-analysis";
+import { pageAuditController, pageAuditUserController } from "@/modules/page-audit";
 import { projectController } from "@/modules/project";
 import { templateController } from "@/modules/template";
 import { usageController } from "@/modules/usage";
@@ -51,8 +51,8 @@ const app = new Elysia()
       .guard({ response: HttpErrorResponses })
       .use(authController)
       .use(apiKeyController)
-      .use(auditController)
-      .use(auditUserController)
+      .use(pageAuditController)
+      .use(pageAuditUserController)
       .use(pageAnalysisController)
       .use(imageGenerationApiController)
       .use(imageGenerationDashboardController)

@@ -7,6 +7,10 @@ export interface UrlMetadata {
   ogTitle: string | null;
   ogDescription: string | null;
   ogImage: string | null;
+  ogImageWidth: number | null;
+  ogImageHeight: number | null;
+  ogType: string | null;
+  ogUrl: string | null;
   ogSiteName: string | null;
 
   twitterTitle: string | null;
@@ -22,6 +26,7 @@ export interface UrlMetadata {
   lang: string | null;
   locale: string | null;
   themeColor: string | null;
+  robots: string | null;
 
   publishedTime: string | null;
   modifiedTime: string | null;
@@ -30,6 +35,13 @@ export interface UrlMetadata {
 
   h1: string | null;
   h2s: string[];
+  h1Count: number;
+  imageCount: number;
+  imagesMissingAlt: number;
+
+  hasViewport: boolean;
+  hasCharset: boolean;
+  hreflangVariants: string[];
 
   jsonLd: JsonLdEntity[];
   oEmbed: OEmbedData | null;
@@ -79,6 +91,10 @@ export function createEmptyMetadata(url: string): UrlMetadata {
     ogTitle: null,
     ogDescription: null,
     ogImage: null,
+    ogImageWidth: null,
+    ogImageHeight: null,
+    ogType: null,
+    ogUrl: null,
     ogSiteName: null,
     twitterTitle: null,
     twitterDescription: null,
@@ -91,12 +107,19 @@ export function createEmptyMetadata(url: string): UrlMetadata {
     lang: null,
     locale: null,
     themeColor: null,
+    robots: null,
     publishedTime: null,
     modifiedTime: null,
     section: null,
     tags: [],
     h1: null,
     h2s: [],
+    h1Count: 0,
+    imageCount: 0,
+    imagesMissingAlt: 0,
+    hasViewport: false,
+    hasCharset: false,
+    hreflangVariants: [],
     jsonLd: [],
     oEmbed: null,
     bodyText: null,

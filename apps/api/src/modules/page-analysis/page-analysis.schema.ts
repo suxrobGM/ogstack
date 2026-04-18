@@ -2,11 +2,16 @@ import { t, type Static } from "elysia";
 
 export const USER_PROMPT_MAX_CHARS = 500;
 
+export const AnalyzeModeSchema = t.Union([
+  t.Literal("classic"),
+  t.Literal("ai"),
+  t.Literal("override"),
+]);
+
 export const AnalyzeRequestSchema = t.Object({
   url: t.String({ format: "uri" }),
-  userPrompt: t.Optional(t.String({ maxLength: USER_PROMPT_MAX_CHARS })),
-  fullOverride: t.Optional(t.Boolean()),
-  skipAi: t.Optional(t.Boolean()),
+  customPrompt: t.Optional(t.String({ maxLength: USER_PROMPT_MAX_CHARS })),
+  mode: t.Optional(AnalyzeModeSchema),
 });
 
 export const PageAnalysisImagePromptSchema = t.Object({
@@ -106,12 +111,12 @@ export const PageAnalysisMetadataSchema = t.Object({
 });
 
 export const PageAnalysisResultSchema = t.Object({
-  mode: t.Union([t.Literal("classic"), t.Literal("ai")]),
   metadata: PageAnalysisMetadataSchema,
   ai: t.Nullable(PageAnalysisAiSchema),
   cached: t.Boolean(),
 });
 
+export type AnalyzeMode = Static<typeof AnalyzeModeSchema>;
 export type AnalyzeRequest = Static<typeof AnalyzeRequestSchema>;
 export type PageAnalysisMetadataDto = Static<typeof PageAnalysisMetadataSchema>;
 export type PageAnalysisResultDto = Static<typeof PageAnalysisResultSchema>;

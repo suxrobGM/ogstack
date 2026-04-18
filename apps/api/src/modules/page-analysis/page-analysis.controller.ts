@@ -8,29 +8,31 @@ import { PageAnalysisService } from "./page-analysis.service";
 const service = container.resolve(PageAnalysisService);
 
 export const pageAnalysisController = new Elysia({
-  prefix: "/page-analysis",
-  tags: ["Page Analysis"],
+  prefix: "/analyses",
+  tags: ["Analyses"],
   detail: { security: [{ bearerAuth: [] }] },
 })
   .use(authGuard)
   .use(tieredRateLimiter({ resolvePlan: "user", keyPrefix: "page-analysis" }))
   .post(
-    "/analyze",
-    ({ body, user }) =>
-      service.analyze({
+    "/",
+    ({ body, user }) => {
+      const mode = body.mode ?? "ai";
+      return service.analyze({
         url: body.url,
-        userPrompt: body.userPrompt,
-        fullOverride: body.fullOverride ?? false,
-        skipAi: body.skipAi ?? false,
+        userPrompt: body.customPrompt,
+        fullOverride: mode === "override",
+        skipAi: mode === "classic",
         userId: user.id,
-      }),
+      });
+    },
     {
       body: AnalyzeRequestSchema,
       response: PageAnalysisResultSchema,
       detail: {
         summary: "Analyze a URL (classic scrape for Free, AI-enhanced for Pro+)",
         description:
-          "Scrapes a URL and returns page metadata plus (for Plus/Pro plans) AI-derived signals: summary, topics, inferred palette, suggested image prompt. Free tier falls back to classic (metadata-only) mode automatically.",
+          'Scrapes a URL and returns page metadata plus (for Plus/Pro plans) AI-derived signals: summary, topics, inferred palette, suggested image prompt. Pass `mode: "classic"` to skip AI, `mode: "override"` when the caller supplies its own prompt, or omit (defaults to `ai`). Free tier falls back to classic automatically.',
       },
     },
   );

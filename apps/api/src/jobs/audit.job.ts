@@ -2,14 +2,14 @@ import { cron, Patterns } from "@elysiajs/cron";
 import { Elysia } from "elysia";
 import { container } from "@/common/di";
 import { logger } from "@/common/logger";
-import { AuditService } from "@/modules/audit";
+import { PageAuditService } from "@/modules/page-audit";
 
 const AUDIT_RETENTION_DAYS = 30;
 
 async function runCleanup(): Promise<void> {
   try {
     const deleted = await container
-      .resolve(AuditService)
+      .resolve(PageAuditService)
       .deleteStaleAnonymous(AUDIT_RETENTION_DAYS);
     if (deleted > 0) {
       logger.info({ deleted, retentionDays: AUDIT_RETENTION_DAYS }, "audit.cleanup completed");

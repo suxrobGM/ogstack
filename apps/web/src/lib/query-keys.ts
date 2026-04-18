@@ -7,7 +7,7 @@ export const queryKeys = {
   },
 
   apiKeys: {
-    all: ["api-keys"] as const,
+    all: ["keys"] as const,
     list: (projectId: string) => [...queryKeys.apiKeys.all, "list", projectId] as const,
   },
 

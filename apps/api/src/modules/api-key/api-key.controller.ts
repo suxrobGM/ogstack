@@ -1,12 +1,12 @@
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { container } from "@/common/di";
 import { authGuard } from "@/common/middleware";
 import { StringIdParamSchema } from "@/types/request";
 import { MessageResponseSchema } from "@/types/response";
 import {
-  ApiKeyCreatedSchema,
   ApiKeyListQuerySchema,
-  ApiKeyListResponseSchema,
+  ApiKeySchema,
+  ApiKeyWithSecretSchema,
   CreateApiKeyBodySchema,
 } from "./api-key.schema";
 import { ApiKeyService } from "./api-key.service";
@@ -15,14 +15,14 @@ const apiKeyService = container.resolve(ApiKeyService);
 
 /** Global API key management. Keys may be scoped to a project or apply to all of the user's projects. */
 export const apiKeyController = new Elysia({
-  prefix: "/api-keys",
-  tags: ["API Keys"],
+  prefix: "/keys",
+  tags: ["Keys"],
   detail: { security: [{ bearerAuth: [] }] },
 })
   .use(authGuard)
   .post("/", ({ user, body }) => apiKeyService.create(user.id, body), {
     body: CreateApiKeyBodySchema,
-    response: ApiKeyCreatedSchema,
+    response: ApiKeyWithSecretSchema,
     detail: {
       summary: "Create API key",
       description:
@@ -31,7 +31,7 @@ export const apiKeyController = new Elysia({
   })
   .get("/", ({ user, query }) => apiKeyService.list(user.id, query.projectId), {
     query: ApiKeyListQuerySchema,
-    response: ApiKeyListResponseSchema,
+    response: t.Array(ApiKeySchema),
     detail: {
       summary: "List API keys",
       description:

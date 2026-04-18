@@ -5,7 +5,7 @@ Score any URL's Open Graph, Twitter Card, and SEO setup. Returns a 0–100 score
 ## Endpoint
 
 ```bash
-curl -X POST https://api.ogstack.dev/api/audit \
+curl -X POST https://api.ogstack.dev/api/audits \
   -H "Content-Type: application/json" \
   -d '{ "url": "https://example.com/post", "includeAi": true }'
 ```
@@ -15,7 +15,7 @@ The audit endpoint is **public** — no API key required. Reports run while sign
 ## Fetching a report
 
 ```
-GET /api/audit/{id}
+GET /api/audits/{id}
 ```
 
 No auth required. Audit reports are publicly shareable by ID.
@@ -46,20 +46,31 @@ No auth required. Audit reports are publicly shareable by ID.
       "fix": "Add `<meta name=\"twitter:creator\" content=\"@yourhandle\">`"
     }
   ],
-  "aiStatus": "COMPLETED",
-  "aiAnalysis": {
-    "priorityActions": [
-      {
-        "title": "Rewrite og:description for clarity",
-        "rationale": "Current description trails off mid-sentence.",
-        "impact": "high"
-      }
-    ],
-    "suggestedOgTitle": "How we built OGStack in six weeks",
-    "suggestedOgDescription": "The architecture, tradeoffs, and three things we'd do differently.",
-    "audienceFit": "strong",
-    "severity": "low",
-    "confidence": "high"
+  "ai": {
+    "status": "READY",
+    "error": null,
+    "analysis": {
+      "priorityActions": [
+        {
+          "title": "Rewrite og:description for clarity",
+          "rationale": "Current description trails off mid-sentence.",
+          "impact": "high"
+        }
+      ],
+      "suggestions": {
+        "og": {
+          "title": "How we built OGStack in six weeks",
+          "description": "The architecture, tradeoffs, and three things we'd do differently."
+        },
+        "twitter": {
+          "title": "How we built OGStack in six weeks",
+          "description": "From idea to production in six weeks — architecture, tradeoffs, and three things we'd do differently."
+        }
+      },
+      "audienceFit": "strong",
+      "severity": "low",
+      "confidence": "high"
+    }
   }
 }
 ```
@@ -78,12 +89,13 @@ Letter grades follow common conventions: 90+ = A, 80–89 = B, 70–79 = C, etc.
 
 ## AI analysis
 
-Pass `"includeAi": true` to run the scraped content through the analysis model. Output includes:
+Pass `"includeAi": true` to run the scraped content through the analysis model. The `ai` object on the response carries:
 
-- **Priority actions** — ranked list of changes with rationale
-- **Suggested rewrites** — copy for `og:title`, `og:description`, `twitter:title`, `twitter:description`, and the SERP snippet
-- **Tone assessment** — how your copy reads
-- **Discoverability gaps** — missing schema.org types, canonical issues, hreflang recommendations
+- `status` — `PENDING`, `READY`, `FAILED`, or `SKIPPED`
+- `analysis.priorityActions` — ranked list of changes with rationale
+- `analysis.suggestions.og` / `analysis.suggestions.twitter` — rewritten `title` + `description` for each platform
+- `analysis.toneAssessment` — how your copy reads
+- `analysis.discoverability` — missing schema.org types, canonical issues, hreflang recommendations
 
 AI analysis requires the Plus or Pro plan to appear in the signed-in user's dashboard history. Anonymous requests run the audit but omit the AI section.
 

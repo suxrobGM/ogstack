@@ -1,5 +1,5 @@
-import type { AuditMetadata } from "./audit.extractor";
-import type { AuditIssue, IssueCategory, IssueSeverity } from "./audit.schema";
+import type { UrlMetadata } from "@/common/services/scraper";
+import type { IssueCategory, IssueSeverity, PageAuditIssue } from "./page-audit.schema";
 
 interface CheckResult {
   pass: boolean;
@@ -13,7 +13,7 @@ interface Check {
   severity: IssueSeverity;
   weight: number;
   title: string;
-  run: (m: AuditMetadata) => CheckResult;
+  run: (m: UrlMetadata) => CheckResult;
 }
 
 interface ScoringResult {
@@ -24,6 +24,21 @@ interface ScoringResult {
 
 const pass = (message: string, fix = ""): CheckResult => ({ pass: true, message, fix });
 const fail = (message: string, fix: string): CheckResult => ({ pass: false, message, fix });
+
+function isHttps(metadata: UrlMetadata): boolean {
+  return metadata.url.startsWith("https://");
+}
+
+/**
+ * Extracts the types of structured data entities present in the page's JSON-LD.
+ */
+export function structuredDataTypes(metadata: UrlMetadata): string[] {
+  const types: string[] = [];
+  for (const entity of metadata.jsonLd) {
+    if (entity.type && !types.includes(entity.type)) types.push(entity.type);
+  }
+  return types;
+}
 
 export const CHECKS: Check[] = [
   // --- OG ---
@@ -216,17 +231,18 @@ export const CHECKS: Check[] = [
     title: "<title> tag with good length",
     run: (m) => {
       if (!m.title) return fail("Missing <title> tag.", "Add a <title> in <head>.");
-      if (m.titleLength < 10)
+      const len = m.title.length;
+      if (len < 10)
         return fail(
-          `Title is too short (${m.titleLength} chars).`,
+          `Title is too short (${len} chars).`,
           "Aim for 10–60 characters — concise but descriptive.",
         );
-      if (m.titleLength > 60)
+      if (len > 60)
         return fail(
-          `Title is too long (${m.titleLength} chars) — search results truncate after ~60.`,
+          `Title is too long (${len} chars) — search results truncate after ~60.`,
           "Shorten to 60 characters or fewer.",
         );
-      return pass(`"${m.title}" (${m.titleLength} chars).`);
+      return pass(`"${m.title}" (${len} chars).`);
     },
   },
   {
@@ -241,17 +257,15 @@ export const CHECKS: Check[] = [
           "Missing meta description.",
           `Add <meta name="description" content="A 50-160 character summary">.`,
         );
-      if (m.descriptionLength < 50)
+      const len = m.description.length;
+      if (len < 50)
+        return fail(`Description is too short (${len} chars).`, "Aim for 50–160 characters.");
+      if (len > 160)
         return fail(
-          `Description is too short (${m.descriptionLength} chars).`,
-          "Aim for 50–160 characters.",
-        );
-      if (m.descriptionLength > 160)
-        return fail(
-          `Description is too long (${m.descriptionLength} chars).`,
+          `Description is too long (${len} chars).`,
           "Trim to 160 characters or fewer to avoid SERP truncation.",
         );
-      return pass(`${m.descriptionLength} chars.`);
+      return pass(`${len} chars.`);
     },
   },
   {
@@ -261,7 +275,7 @@ export const CHECKS: Check[] = [
     weight: 4,
     title: "Canonical URL",
     run: (m) =>
-      m.canonical
+      m.canonicalUrl
         ? pass("Canonical URL is set.")
         : fail(
             'Missing <link rel="canonical">.',
@@ -344,15 +358,15 @@ export const CHECKS: Check[] = [
     severity: "info",
     weight: 3,
     title: "Structured data (JSON-LD)",
-    run: (m) =>
-      m.structuredDataTypes.length > 0
-        ? pass(
-            `JSON-LD structured data detected (${m.structuredDataTypes.slice(0, 3).join(", ")}).`,
-          )
+    run: (m) => {
+      const types = structuredDataTypes(m);
+      return types.length > 0
+        ? pass(`JSON-LD structured data detected (${types.slice(0, 3).join(", ")}).`)
         : fail(
             "No JSON-LD structured data.",
             "Add a schema.org JSON-LD block (e.g. Article, WebSite, Product) to unlock rich results.",
-          ),
+          );
+    },
   },
   {
     id: "seo.robots",
@@ -377,7 +391,7 @@ export const CHECKS: Check[] = [
     weight: 3,
     title: "Served over HTTPS",
     run: (m) =>
-      m.isHttps
+      isHttps(m)
         ? pass("Page is HTTPS.")
         : fail(
             "Page is not HTTPS — many social platforms downrank or reject insecure previews.",
@@ -401,7 +415,7 @@ export const CHECKS: Check[] = [
   },
 ];
 
-export function runChecks(meta: AuditMetadata): AuditIssue[] {
+export function runChecks(meta: UrlMetadata): PageAuditIssue[] {
   return CHECKS.map((check) => {
     const result = check.run(meta);
     return {
@@ -416,7 +430,7 @@ export function runChecks(meta: AuditMetadata): AuditIssue[] {
   });
 }
 
-export function computeScore(issues: AuditIssue[]): ScoringResult {
+export function computeScore(issues: PageAuditIssue[]): ScoringResult {
   const earned: Record<IssueCategory, number> = { og: 0, twitter: 0, seo: 0 };
   const possible: Record<IssueCategory, number> = { og: 0, twitter: 0, seo: 0 };
   let totalEarned = 0;

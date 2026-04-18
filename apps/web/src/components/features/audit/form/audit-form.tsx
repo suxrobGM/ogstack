@@ -19,12 +19,12 @@ import { Surface } from "@/components/ui/layout/surface";
 import { useApiMutation } from "@/hooks";
 import { client } from "@/lib/api/client";
 import { accent, iconSizes, radii } from "@/theme";
-import type { AuditReportResponse } from "@/types/api";
+import type { PageAuditReportResponse } from "@/types/api";
 import { normalizeUrlInput } from "@/utils/url";
 import { auditFormSchema, type AuditFormValues } from "./schema";
 
 interface AuditFormProps {
-  onSuccess: (report: AuditReportResponse) => void;
+  onSuccess: (report: PageAuditReportResponse) => void;
   autoFocus?: boolean;
   initialUrl?: string;
   showAiOption?: boolean;
@@ -38,9 +38,9 @@ interface AuditFormProps {
 export function AuditForm(props: AuditFormProps): ReactElement {
   const { onSuccess, autoFocus, initialUrl, showAiOption, aiAllowed = false } = props;
 
-  const mutation = useApiMutation((body: AuditFormValues) => client.api.audit.post(body), {
+  const mutation = useApiMutation((body: AuditFormValues) => client.api.audits.post(body), {
     errorMessage: (err) => err.message,
-    onSuccess: (data) => onSuccess(data as AuditReportResponse),
+    onSuccess: (data) => onSuccess(data as PageAuditReportResponse),
   });
 
   const defaultValues: AuditFormValues = { url: initialUrl ?? "", includeAi: false };

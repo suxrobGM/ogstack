@@ -16,7 +16,7 @@ export default async function DashboardAuditReportPage(props: PageProps): Promis
   const client = await getServerClient();
 
   const [reportRes, userRes] = await Promise.all([
-    client.api.audit({ id }).get(),
+    client.api.audits({ id }).get(),
     client.api.users.me.get(),
   ]);
 

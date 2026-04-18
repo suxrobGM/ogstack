@@ -7,12 +7,13 @@ import {
   parseJsonResponse,
   PromptProviderService,
 } from "@/common/services/ai";
-import type { AuditMetadata } from "./audit.extractor";
-import type { AuditAiInsights, AuditIssue } from "./audit.schema";
+import type { UrlMetadata } from "@/common/services/scraper";
+import type { PageAuditAiInsights, PageAuditIssue } from "./page-audit.schema";
+import { structuredDataTypes } from "./page-audit.scoring";
 
 interface AnalyzeParams {
-  metadata: AuditMetadata;
-  issues: AuditIssue[];
+  metadata: UrlMetadata;
+  issues: PageAuditIssue[];
   pageAnalysis?: PageAnalysisAi | null;
 }
 
@@ -20,14 +21,14 @@ interface AnalyzeParams {
  *  assessment, content gaps, and CTR tips. Distinct from `PageAnalysisService`,
  *  which is oriented toward image-generation seeding. */
 @singleton()
-export class AuditAnalysisService {
+export class PageAuditAnalysisService {
   constructor(private readonly promptProvider: PromptProviderService) {}
 
   isEnabled(): boolean {
     return this.promptProvider.isEnabled();
   }
 
-  async analyze(params: AnalyzeParams): Promise<AuditAiInsights> {
+  async analyze(params: AnalyzeParams): Promise<PageAuditAiInsights> {
     const raw = await this.promptProvider.chat({
       system: AUDIT_ANALYSIS_SYSTEM_PROMPT,
       user: this.buildUserMessage(params.metadata, params.issues, params.pageAnalysis ?? null),
@@ -42,7 +43,7 @@ export class AuditAnalysisService {
       );
     }
 
-    const parsed = parseJsonResponse<AuditAiInsights>(raw);
+    const parsed = parseJsonResponse<PageAuditAiInsights>(raw);
     if (!parsed) {
       logger.warn({ sample: raw.slice(0, 400) }, "Audit analysis LLM response was not valid JSON");
       const preview = raw.slice(0, 160).replace(/\s+/g, " ").trim();
@@ -53,22 +54,22 @@ export class AuditAnalysisService {
   }
 
   private buildUserMessage(
-    metadata: AuditMetadata,
-    issues: AuditIssue[],
+    metadata: UrlMetadata,
+    issues: PageAuditIssue[],
     pageAnalysis: PageAnalysisAi | null,
   ): string {
     const currentTags = {
       url: metadata.url,
       title: metadata.title,
       description: metadata.description,
-      canonical: metadata.canonical,
+      canonical: metadata.canonicalUrl,
       robots: metadata.robots,
       lang: metadata.lang,
       favicon: metadata.favicon,
       h1Count: metadata.h1Count,
       imageCount: metadata.imageCount,
       imagesMissingAlt: metadata.imagesMissingAlt,
-      structuredDataTypes: metadata.structuredDataTypes,
+      structuredDataTypes: structuredDataTypes(metadata),
       hreflangVariants: metadata.hreflangVariants,
       og: {
         title: metadata.ogTitle,

@@ -1,22 +1,22 @@
 import { singleton } from "tsyringe";
 import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
-import { ScraperService } from "@/common/services/scraper.service";
+import { ScraperService, type UrlMetadata } from "@/common/services/scraper";
 import { AuditAiStatus, Plan, PrismaClient } from "@/generated/prisma";
 import { PageAnalysisService } from "@/modules/page-analysis";
 import { UsageService } from "@/modules/usage";
-import { AuditAnalysisService } from "./audit-analysis.service";
-import { extractAuditMetadata, probeOgImage, type AuditMetadata } from "./audit.extractor";
+import { PageAuditAnalysisService } from "./page-audit-analysis.service";
 import type {
-  AuditAiInsights,
-  AuditHistoryItem,
-  AuditHistoryQuery,
-  AuditHistoryResponse,
-  AuditIssue,
-  AuditPreviewMetadata,
-  AuditReport as AuditReportDto,
-} from "./audit.schema";
-import { computeScore, runChecks } from "./audit.scoring";
+  PageAuditAi,
+  PageAuditAiInsights,
+  PageAuditHistoryItem,
+  PageAuditHistoryQuery,
+  PageAuditHistoryResponse,
+  PageAuditIssue,
+  PageAuditPreviewMetadata,
+  PageAuditReport as PageAuditReportDto,
+} from "./page-audit.schema";
+import { computeScore, runChecks } from "./page-audit.scoring";
 
 type CategoryScores = { og: number; twitter: number; seo: number };
 
@@ -27,32 +27,26 @@ interface CreateAuditParams {
 }
 
 @singleton()
-export class AuditService {
+export class PageAuditService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly scraper: ScraperService,
-    private readonly auditAnalysis: AuditAnalysisService,
+    private readonly auditAnalysis: PageAuditAnalysisService,
     private readonly pageAnalysis: PageAnalysisService,
     private readonly usageService: UsageService,
   ) {}
 
-  async create(params: CreateAuditParams): Promise<AuditReportDto> {
+  async create(params: CreateAuditParams): Promise<PageAuditReportDto> {
     const { url: rawUrl, userId, includeAi } = params;
 
     const shouldEnrich = await this.checkAiEligibility(userId, includeAi);
 
-    const { url, html } = await this.scraper.fetchValidatedHtml(rawUrl);
-    const meta = await extractAuditMetadata(url, html);
-
-    if (meta.ogImage) {
-      const probe = await probeOgImage(meta.ogImage);
-      meta.ogImageBytes = probe.bytes;
-    }
+    const meta = await this.scraper.extractMetadata(rawUrl);
 
     const issues = runChecks(meta);
     const scores = computeScore(issues);
 
-    const metadata: AuditPreviewMetadata = {
+    const metadata: PageAuditPreviewMetadata = {
       title: meta.ogTitle ?? meta.twitterTitle ?? meta.title,
       description: meta.ogDescription ?? meta.twitterDescription ?? meta.description,
       image: meta.ogImage ?? meta.twitterImage,
@@ -70,8 +64,8 @@ export class AuditService {
         url: meta.url,
         overallScore: scores.overall,
         letterGrade: scores.letterGrade,
-        metadata: metadata as unknown as AuditPreviewMetadata,
-        issues: issues as unknown as AuditIssue[],
+        metadata: metadata as unknown as PageAuditPreviewMetadata,
+        issues: issues as unknown as PageAuditIssue[],
         categoryScores: scores.byCategory as unknown as CategoryScores,
         aiStatus,
       },
@@ -90,17 +84,23 @@ export class AuditService {
       metadata,
       issues,
       categoryScores: scores.byCategory,
-      aiStatus,
-      aiAnalysis: null,
-      aiError: null,
+      ai: { status: aiStatus, analysis: null, error: null },
     };
   }
 
   /** Reports are publicly readable by UUID — the ID is unguessable and the
    *  whole point is shareable links. Ownership is enforced only on `listForUser`. */
-  async getById(id: string): Promise<AuditReportDto> {
+  async getById(id: string): Promise<PageAuditReportDto> {
     const row = await this.prisma.auditReport.findUnique({ where: { id } });
     if (!row) throw new NotFoundError("Audit report not found");
+
+    const ai: PageAuditAi | null = row.aiStatus
+      ? {
+          status: row.aiStatus,
+          analysis: (row.aiAnalysis as PageAuditAiInsights | null) ?? null,
+          error: row.aiError ?? null,
+        }
+      : null;
 
     return {
       id: row.id,
@@ -108,16 +108,17 @@ export class AuditService {
       overallScore: row.overallScore,
       letterGrade: row.letterGrade,
       createdAt: row.createdAt,
-      metadata: row.metadata as unknown as AuditPreviewMetadata,
-      issues: row.issues as unknown as AuditIssue[],
+      metadata: row.metadata as unknown as PageAuditPreviewMetadata,
+      issues: row.issues as unknown as PageAuditIssue[],
       categoryScores: row.categoryScores as unknown as CategoryScores,
-      aiStatus: row.aiStatus ?? null,
-      aiAnalysis: (row.aiAnalysis as AuditAiInsights | null) ?? null,
-      aiError: row.aiError ?? null,
+      ai,
     };
   }
 
-  async listForUser(userId: string, query: AuditHistoryQuery): Promise<AuditHistoryResponse> {
+  async listForUser(
+    userId: string,
+    query: PageAuditHistoryQuery,
+  ): Promise<PageAuditHistoryResponse> {
     const { page, limit } = query;
     const skip = (page - 1) * limit;
     const where = { userId };
@@ -141,7 +142,7 @@ export class AuditService {
 
     return {
       items: items.map(
-        (row): AuditHistoryItem => ({
+        (row): PageAuditHistoryItem => ({
           id: row.id,
           url: row.url,
           overallScore: row.overallScore,
@@ -193,8 +194,8 @@ export class AuditService {
   private async enrichWithAi(
     reportId: string,
     userId: string,
-    metadata: AuditMetadata,
-    issues: AuditIssue[],
+    metadata: UrlMetadata,
+    issues: PageAuditIssue[],
   ): Promise<void> {
     try {
       if (!this.auditAnalysis.isEnabled()) {
@@ -203,9 +204,6 @@ export class AuditService {
         );
       }
 
-      // cacheOnly: audit-analysis works without page context, so we reuse the
-      // playground/image-gen cache when warm but don't spend a second LLM call
-      // just to enrich audit recommendations.
       const { ai: pageAnalysis } = await this.pageAnalysis.getPageContext({
         url: metadata.url,
         userId,

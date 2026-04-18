@@ -15,15 +15,15 @@ import {
 import { SectionHeader } from "@/components/ui/layout/section-header";
 import { feedback } from "@/theme";
 import { fontFamilies } from "@/theme/typography";
-import type { AuditIssue } from "@/types/api";
+import type { PageAuditIssue } from "@/types/api";
 
 interface IssueListProps {
-  issues: AuditIssue[];
+  issues: PageAuditIssue[];
   categoryScores: { og: number; twitter: number; seo: number };
 }
 
 interface IssueRowProps {
-  issue: AuditIssue;
+  issue: PageAuditIssue;
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -106,7 +106,7 @@ function IssueRow(props: IssueRowProps): ReactElement {
 export function IssueList(props: IssueListProps): ReactElement {
   const { issues, categoryScores } = props;
 
-  const byCategory = issues.reduce<Record<string, AuditIssue[]>>((acc, issue) => {
+  const byCategory = issues.reduce<Record<string, PageAuditIssue[]>>((acc, issue) => {
     (acc[issue.category] ||= []).push(issue);
     return acc;
   }, {});

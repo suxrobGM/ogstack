@@ -1,11 +1,11 @@
 import type { client } from "@/lib/api/client";
 import type { Data } from "./utils";
 
-export type AuditCreateBody = Parameters<(typeof client)["api"]["audit"]["post"]>[0];
-export type AuditReportResponse = Data<(typeof client)["api"]["audit"]["post"]>;
-export type AuditIssue = AuditReportResponse["issues"][number];
-export type AuditPreviewMetadata = AuditReportResponse["metadata"];
-export type AuditCategoryScores = AuditReportResponse["categoryScores"];
+export type PageAuditCreateBody = Parameters<(typeof client)["api"]["audits"]["post"]>[0];
+export type PageAuditReportResponse = Data<(typeof client)["api"]["audits"]["post"]>;
+export type PageAuditIssue = PageAuditReportResponse["issues"][number];
+export type PageAuditPreviewMetadata = PageAuditReportResponse["metadata"];
+export type PageAuditCategoryScores = PageAuditReportResponse["categoryScores"];
 
-export type AuditHistoryResponse = Data<(typeof client)["api"]["audit"]["history"]["get"]>;
-export type AuditHistoryItem = AuditHistoryResponse["items"][number];
+export type PageAuditHistoryResponse = Data<(typeof client)["api"]["audits"]["history"]["get"]>;
+export type PageAuditHistoryItem = PageAuditHistoryResponse["items"][number];

@@ -40,7 +40,7 @@ export function ApiKeyList(props: ApiKeyListProps): ReactElement {
   const { data, isLoading } = useApiQuery<ApiKeyListResponse>(
     queryKeys.apiKeys.list(filter),
     () =>
-      client.api["api-keys"].get({
+      client.api.keys.get({
         query: projectIdQuery ? { projectId: projectIdQuery } : {},
       }),
     {
@@ -49,7 +49,7 @@ export function ApiKeyList(props: ApiKeyListProps): ReactElement {
     },
   );
 
-  const deleteMutation = useApiMutation((id: string) => client.api["api-keys"]({ id }).delete(), {
+  const deleteMutation = useApiMutation((id: string) => client.api.keys({ id }).delete(), {
     successMessage: "API key revoked.",
     invalidateKeys: [queryKeys.apiKeys.all],
   });
@@ -105,8 +105,8 @@ export function ApiKeyList(props: ApiKeyListProps): ReactElement {
       key: "scope",
       header: "Scope",
       render: (row) =>
-        row.projectName ? (
-          <Chip label={row.projectName} size="small" variant="outlined" />
+        row.project ? (
+          <Chip label={row.project.name} size="small" variant="outlined" />
         ) : (
           <Chip label="All projects" size="small" color="success" variant="outlined" />
         ),

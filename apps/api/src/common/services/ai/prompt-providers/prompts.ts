@@ -110,10 +110,10 @@ Return ONLY valid minified JSON (no markdown fences, no commentary) matching exa
 
 {
   "priorityActions": { "title": string, "rationale": string, "impact": "high" | "medium" | "low" }[],
-  "suggestedOgTitle": string,
-  "suggestedOgDescription": string,
-  "suggestedTwitterTitle": string,
-  "suggestedTwitterDescription": string,
+  "suggestions": {
+    "og": { "title": string, "description": string },
+    "twitter": { "title": string, "description": string }
+  },
   "searchSnippet": {
     "suggestedTitle": string,
     "suggestedMetaDescription": string
@@ -135,10 +135,10 @@ Return ONLY valid minified JSON (no markdown fences, no commentary) matching exa
 
 Rules:
 - priorityActions: exactly 1-3 entries ordered by impact. Each is the single most consequential fix a reader should do next. Rationale is 1 sentence.
-- suggestedOgTitle: <= 60 chars. Specific and benefit-led, not generic. If the current og:title is already strong, return it verbatim.
-- suggestedOgDescription: 120-160 chars. No trailing ellipsis, no marketing fluff, written for a scrolling reader.
-- suggestedTwitterTitle: <= 70 chars. May mirror the OG title but favor punchier phrasing where Twitter allows.
-- suggestedTwitterDescription: <= 200 chars.
+- suggestions.og.title: <= 60 chars. Specific and benefit-led, not generic. If the current og:title is already strong, return it verbatim.
+- suggestions.og.description: 120-160 chars. No trailing ellipsis, no marketing fluff, written for a scrolling reader.
+- suggestions.twitter.title: <= 70 chars. May mirror the OG title but favor punchier phrasing where Twitter allows.
+- suggestions.twitter.description: <= 200 chars.
 - searchSnippet.suggestedTitle: <= 60 chars, search-voice — distinct from social. Lead with the primary keyword / user intent. May equal the og:title when the page is already search-ready.
 - searchSnippet.suggestedMetaDescription: 140-160 chars, informational voice suited to SERP snippets (OG copy is social-voice; this is different).
 - toneAssessment: 1-2 sentences describing the page's current copy tone and whether it matches the apparent audience.

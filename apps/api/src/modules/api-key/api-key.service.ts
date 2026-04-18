@@ -2,7 +2,7 @@ import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors";
 import { generateApiKey, hashSha256 } from "@/common/utils/crypto";
 import { PrismaClient } from "@/generated/prisma";
-import type { ApiKey, ApiKeyCreated, CreateApiKeyBody } from "./api-key.schema";
+import type { ApiKey, ApiKeyWithSecret, CreateApiKeyBody } from "./api-key.schema";
 
 @singleton()
 export class ApiKeyService {
@@ -11,7 +11,7 @@ export class ApiKeyService {
   /**
    * Create a new API key. Returns the raw key once — it is never stored.
    */
-  async create(userId: string, data: CreateApiKeyBody): Promise<ApiKeyCreated> {
+  async create(userId: string, data: CreateApiKeyBody): Promise<ApiKeyWithSecret> {
     const projectId = data.projectId ?? null;
     if (projectId) {
       await this.assertProjectOwner(userId, projectId);
@@ -28,6 +28,7 @@ export class ApiKeyService {
         prefix,
         name: data.name,
       },
+      include: { project: { select: { id: true, name: true } } },
     });
 
     return {
@@ -35,7 +36,7 @@ export class ApiKeyService {
       key: raw,
       prefix: apiKey.prefix,
       name: apiKey.name,
-      projectId: apiKey.projectId,
+      project: apiKey.project ? { id: apiKey.project.id, name: apiKey.project.name } : null,
       createdAt: apiKey.createdAt,
     };
   }
@@ -51,7 +52,7 @@ export class ApiKeyService {
         userId,
         ...(projectId && { projectId }),
       },
-      include: { project: { select: { name: true } } },
+      include: { project: { select: { id: true, name: true } } },
       orderBy: { createdAt: "desc" },
     });
 
@@ -59,8 +60,7 @@ export class ApiKeyService {
       id: k.id,
       prefix: k.prefix,
       name: k.name,
-      projectId: k.projectId,
-      projectName: k.project?.name ?? null,
+      project: k.project ? { id: k.project.id, name: k.project.name } : null,
       lastUsedAt: k.lastUsedAt,
       createdAt: k.createdAt,
     }));

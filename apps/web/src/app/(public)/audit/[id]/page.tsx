@@ -4,15 +4,15 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AuditReport } from "@/components/features/audit";
 import { getServerClient } from "@/lib/api/server";
-import type { AuditReportResponse } from "@/types/api";
+import type { PageAuditReportResponse } from "@/types/api";
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-async function fetchReport(id: string): Promise<AuditReportResponse | null> {
+async function fetchReport(id: string): Promise<PageAuditReportResponse | null> {
   const client = await getServerClient({ auth: false });
-  const { data, error } = await client.api.audit({ id }).get();
+  const { data, error } = await client.api.audits({ id }).get();
   if (error || !data) return null;
   return data;
 }

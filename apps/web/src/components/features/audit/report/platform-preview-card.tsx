@@ -5,12 +5,12 @@ import { PLATFORM_ICONS } from "@/components/icons";
 import { line } from "@/theme/palette";
 import { radii, shadows } from "@/theme/tokens";
 import { fontFamilies } from "@/theme/typography";
-import type { AuditPreviewMetadata } from "@/types/api";
+import type { PageAuditPreviewMetadata } from "@/types/api";
 import { truncate, type PlatformConfig } from "./platforms";
 
 interface PlatformPreviewCardProps {
   platform: PlatformConfig;
-  metadata: AuditPreviewMetadata;
+  metadata: PageAuditPreviewMetadata;
 }
 
 function hostname(url: string): string {

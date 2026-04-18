@@ -7,10 +7,10 @@ import { useRouter } from "next/navigation";
 import { DataTable, type Column } from "@/components/ui/data/data-table";
 import { feedback } from "@/theme";
 import { fontFamilies } from "@/theme/typography";
-import type { AuditHistoryItem } from "@/types/api";
+import type { PageAuditHistoryItem } from "@/types/api";
 
 interface AuditHistoryListProps {
-  items: AuditHistoryItem[];
+  items: PageAuditHistoryItem[];
 }
 
 function gradeColor(score: number): string {
@@ -32,7 +32,7 @@ export function AuditHistoryList(props: AuditHistoryListProps): ReactElement {
   const { items } = props;
   const router = useRouter();
 
-  const columns: Column<AuditHistoryItem>[] = [
+  const columns: Column<PageAuditHistoryItem>[] = [
     {
       key: "url",
       header: "URL",

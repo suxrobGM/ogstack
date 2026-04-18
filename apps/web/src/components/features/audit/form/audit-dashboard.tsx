@@ -7,12 +7,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
-import type { AuditHistoryResponse } from "@/types/api";
+import type { PageAuditHistoryResponse } from "@/types/api";
 import { AuditForm } from "./audit-form";
 import { AuditHistoryList } from "./audit-history-list";
 
 interface AuditDashboardProps {
-  initialHistory: AuditHistoryResponse;
+  initialHistory: PageAuditHistoryResponse;
 }
 
 export function AuditDashboard(props: AuditDashboardProps): ReactElement {

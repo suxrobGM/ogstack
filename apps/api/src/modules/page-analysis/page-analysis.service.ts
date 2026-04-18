@@ -54,7 +54,6 @@ export class PageAnalysisService {
     const { ai, cached } = await this.resolveAi({ ...params, plan, metadata });
 
     return {
-      mode: ai ? "ai" : "classic",
       metadata: toPublicMetadata(metadata),
       ai,
       cached,
