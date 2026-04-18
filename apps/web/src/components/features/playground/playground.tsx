@@ -124,17 +124,18 @@ export function Playground(props: PlaygroundProps): ReactElement {
     setLastFormValues(values);
     setAnalyzed(true);
 
+    // Icon set is always AI and ignores template/styling options.
+    const aiEnabled = values.kind === "icon_set" ? true : values.aiGenerated;
+
     if (values.url && !values.fullOverride) {
       analyzeMutation.mutate({
         url: values.url,
         userPrompt: values.aiPrompt,
         fullOverride: values.fullOverride,
-        skipAi: !values.aiGenerated,
+        skipAi: !aiEnabled,
       });
     }
 
-    // Icon set is always AI and ignores template/styling options.
-    const aiEnabled = values.kind === "icon_set" ? true : values.aiGenerated;
     generateMutation.mutate({
       url: values.url,
       kind: values.kind,
@@ -158,7 +159,7 @@ export function Playground(props: PlaygroundProps): ReactElement {
     });
   };
 
-  const confirmOverride = (): void => {
+  const confirmOverride = () => {
     setOverridePrompt(false);
     if (lastFormValues) submit(lastFormValues, true);
   };

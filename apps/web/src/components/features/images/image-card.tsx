@@ -10,6 +10,7 @@ import { useAuth } from "@/providers/auth-provider";
 import { line, motion, radii, shadows, surfaces } from "@/theme";
 import type { ImageItem } from "@/types/api";
 import { ImageGenerationChip } from "./image-generation-chip";
+import { ImageKindChip } from "./image-kind-chip";
 
 interface ImageCardProps {
   item: ImageItem;
@@ -63,9 +64,14 @@ export function ImageCard(props: ImageCardProps): ReactElement {
         />
       </Box>
 
-      <Box sx={{ position: "absolute", top: 8, right: 8, zIndex: 2 }}>
+      <Stack
+        direction="row"
+        spacing={0.5}
+        sx={{ position: "absolute", top: 8, right: 8, zIndex: 2 }}
+      >
+        <ImageKindChip kind={item.kind} />
         <ImageGenerationChip isAi={isAi} />
-      </Box>
+      </Stack>
 
       <Link
         href={`/images/${item.id}`}

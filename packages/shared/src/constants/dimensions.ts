@@ -20,8 +20,8 @@ export const DEFAULT_BLOG_HERO_ASPECT: BlogHeroAspect = "16:9";
 export const ICON_SIZES = [16, 32, 48, 180, 192, 512] as const;
 export type IconSize = (typeof ICON_SIZES)[number];
 
-/** Master resolution requested from Flux before post-processing. */
-export const ICON_MASTER_SIZE = 1024;
+/** Canonical icon size stored on the Image row and served as the preview. */
+export const ICON_CANONICAL_SIZE = 512;
 
 export function resolveDimensions(
   kind: ImageKind,

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import DownloadIcon from "@mui/icons-material/Download";
 import ImageIcon from "@mui/icons-material/Image";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -8,6 +8,7 @@ import { Alert, Box, Button, Skeleton, Stack, Typography } from "@mui/material";
 import { Surface } from "@/components/ui/layout/surface";
 import { line, radii, surfaces, textColors } from "@/theme";
 import type { GenerateDto } from "@/types/api";
+import { downloadImage } from "@/utils/download";
 
 interface PreviewPaneProps {
   result: GenerateDto | null;
@@ -48,6 +49,17 @@ function EmptyPreview(): ReactElement {
 
 export function PreviewPane(props: PreviewPaneProps): ReactElement {
   const { result, isGenerating, onRegenerate } = props;
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    if (!result) return;
+    setIsDownloading(true);
+    try {
+      await downloadImage(result.id, result.kind === "icon_set" ? "favicons" : "image");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <Surface variant="expressive" sx={{ height: "100%" }}>
@@ -102,15 +114,11 @@ export function PreviewPane(props: PreviewPaneProps): ReactElement {
             <Button
               variant="outlined"
               startIcon={<DownloadIcon />}
-              component="a"
-              href={result.imageUrl}
-              download="og-image.png"
-              target="_blank"
-              rel="noopener noreferrer"
-              disabled={isGenerating}
+              onClick={handleDownload}
+              disabled={isGenerating || isDownloading}
               fullWidth
             >
-              Download
+              {result.kind === "icon_set" ? "Download .tar.gz" : "Download"}
             </Button>
           </Stack>
         )}

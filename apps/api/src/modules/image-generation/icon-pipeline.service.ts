@@ -1,4 +1,4 @@
-import { ICON_MASTER_SIZE, ICON_SIZES, type IconSize } from "@ogstack/shared/constants";
+import { ICON_CANONICAL_SIZE, ICON_SIZES, type IconSize } from "@ogstack/shared/constants";
 import pngToIco from "png-to-ico";
 import sharp from "sharp";
 import { singleton } from "tsyringe";
@@ -74,7 +74,12 @@ export class IconPipelineService {
     });
 
     const resized = await this.resizeToAllSizes(masterPng);
-    const assets = await this.uploadAssets(ctx.cacheKey, resized);
+
+    // Cache busting: append a query-string version to every asset URL so that
+    // clients will fetch the new file after a regeneration,
+    // even if the cacheKey is the same (e.g. due to `force` regeneration or multiple requests in the same minute).
+    const version = Date.now();
+    const assets = await this.uploadAssets(ctx.cacheKey, resized, version);
 
     const generationMs = Math.round(performance.now() - startMs);
 
@@ -84,6 +89,7 @@ export class IconPipelineService {
       canonical,
       "image/png",
     );
+    const canonicalUrl = `${canonicalStored.url}?v=${version}`;
 
     const image = await this.prisma.image.create({
       data: {
@@ -93,12 +99,12 @@ export class IconPipelineService {
         kind: toPrismaImageKind("icon_set"),
         sourceUrl: ctx.url,
         cacheKey: ctx.cacheKey,
-        imageUrl: canonicalStored.url,
+        imageUrl: canonicalUrl,
         title: metadata.ogTitle ?? metadata.title,
         description: metadata.ogDescription ?? metadata.description,
         faviconUrl: metadata.favicon,
-        width: ICON_MASTER_SIZE,
-        height: ICON_MASTER_SIZE,
+        width: ICON_CANONICAL_SIZE,
+        height: ICON_CANONICAL_SIZE,
         format: "PNG",
         fileSize: canonical.length,
         generationMs,
@@ -153,8 +159,10 @@ export class IconPipelineService {
   private async uploadAssets(
     cacheKey: string,
     resized: Map<IconSize, Buffer>,
+    version: number,
   ): Promise<ImageAsset[]> {
     const pngAssets: ImageAsset[] = [];
+    const bust = (url: string) => `${url}?v=${version}`;
 
     await Promise.all(
       ICON_FILES.map(async (plan) => {
@@ -164,7 +172,7 @@ export class IconPipelineService {
         const stored = await this.storage.store(key, buffer, plan.contentType);
         pngAssets.push({
           name: plan.name,
-          url: stored.url,
+          url: bust(stored.url),
           width: plan.size,
           height: plan.size,
           sizeBytes: stored.size,
@@ -183,7 +191,7 @@ export class IconPipelineService {
     );
     pngAssets.push({
       name: "favicon.ico",
-      url: icoStored.url,
+      url: bust(icoStored.url),
       width: 48,
       height: 48,
       sizeBytes: icoStored.size,
@@ -208,7 +216,7 @@ export class IconPipelineService {
     );
     pngAssets.push({
       name: "site.webmanifest",
-      url: manifestStored.url,
+      url: bust(manifestStored.url),
       width: 0,
       height: 0,
       sizeBytes: manifestStored.size,

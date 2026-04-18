@@ -3,6 +3,7 @@
 import { useState, type ReactElement } from "react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteIcon from "@mui/icons-material/Delete";
+import DownloadIcon from "@mui/icons-material/Download";
 import EditIcon from "@mui/icons-material/Edit";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { Box, Button, Grid, IconButton, Stack, Tooltip, Typography } from "@mui/material";
@@ -16,6 +17,7 @@ import { client } from "@/lib/api/client";
 import { queryKeys } from "@/lib/query-keys";
 import { useConfirm } from "@/providers/confirm-provider";
 import type { AuditPreviewMetadata, ImageItem } from "@/types/api";
+import { downloadImage } from "@/utils/download";
 import { ImageEditForm } from "./image-edit-form";
 import { ImageIntegrationSnippet } from "./image-integration-snippet";
 import { ImageMetadata } from "./image-metadata";
@@ -30,6 +32,16 @@ export function ImageDetail(props: ImageDetailProps): ReactElement {
   const router = useRouter();
   const confirm = useConfirm();
   const [mode, setMode] = useState<"view" | "edit">("view");
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    try {
+      await downloadImage(image.id, image.kind === "icon_set" ? "favicons" : "image");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   const deleteMutation = useApiMutation(() => client.api.images({ id: image.id }).delete(), {
     successMessage: "Image deleted.",
@@ -115,14 +127,19 @@ export function ImageDetail(props: ImageDetailProps): ReactElement {
               >
                 Delete
               </Button>
-              <Button
-                startIcon={<OpenInNewIcon />}
-                href={image.cdnUrl ?? image.imageUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Open
+              <Button startIcon={<DownloadIcon />} onClick={handleDownload} loading={isDownloading}>
+                {image.kind === "icon_set" ? "Download .tar.gz" : "Download"}
               </Button>
+              {image.kind !== "icon_set" && (
+                <Button
+                  startIcon={<OpenInNewIcon />}
+                  href={image.cdnUrl ?? image.imageUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Open
+                </Button>
+              )}
             </Stack>
           )}
         </Stack>

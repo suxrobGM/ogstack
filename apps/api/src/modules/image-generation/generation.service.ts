@@ -191,7 +191,9 @@ export class ImageGenerationService {
 
     if (!force) {
       throw new ImageConflictError(
-        "An image already exists for this URL with different settings. Pass force=true to replace it.",
+        kind === "icon_set"
+          ? "A favicon set already exists for this URL. Pass force=true to replace it."
+          : "An image already exists for this URL with different settings. Pass force=true to replace it.",
         existing.id,
       );
     }

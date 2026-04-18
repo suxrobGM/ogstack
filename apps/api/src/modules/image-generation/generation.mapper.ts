@@ -16,6 +16,7 @@ type GenerateResponseExtras =
 
 export function toGenerateResponse(image: Image, extras: GenerateResponseExtras): GenerateResponse {
   const base = {
+    id: image.id,
     kind: fromPrismaImageKind(image.kind),
     width: image.width,
     height: image.height,

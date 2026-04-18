@@ -25,7 +25,6 @@ export function ImageGenerationChip(props: ImageGenerationChipProps): ReactEleme
       label={isAi ? "AI" : "Template"}
       sx={{
         color: "#fff",
-        fontWeight: 600,
         backgroundColor: isAi ? "rgba(16, 185, 129, 0.92)" : "rgba(15, 23, 42, 0.72)",
         backdropFilter: "blur(8px)",
         WebkitBackdropFilter: "blur(8px)",

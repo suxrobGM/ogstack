@@ -1,15 +1,21 @@
 import { singleton } from "tsyringe";
-import { ForbiddenError, NotFoundError } from "@/common/errors";
+import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { ImageStorageService } from "@/common/services/storage";
-import { Prisma, PrismaClient, type Image } from "@/generated/prisma";
+import { ImageKind, Prisma, PrismaClient, type Image } from "@/generated/prisma";
 import {
+  assetsFromImage,
   imageWithRelationsInclude,
   storageKeyFor,
   toImageItem,
   toPrismaImageKind,
 } from "./image.mapper";
 import type { ImageItem, ImageListQuery, ImageListResponse, ImageUpdateBody } from "./image.schema";
+
+export interface ImageBundle {
+  buffer: Buffer;
+  filename: string;
+}
 
 @singleton()
 export class ImageService {
@@ -21,6 +27,43 @@ export class ImageService {
   async findById(userId: string, id: string): Promise<ImageItem> {
     const row = await this.findOwnedImageWithRelations(userId, id);
     return toImageItem(row);
+  }
+
+  /**
+   * Build a downloadable bundle for an image. icon_set images zip every stored
+   * asset (PNGs, favicon.ico, site.webmanifest). Other kinds return the single
+   * PNG so the download button behaves consistently across kinds.
+   */
+  async buildDownloadBundle(userId: string, id: string): Promise<ImageBundle> {
+    const row = await this.assertOwnedImage(userId, id);
+
+    if (row.kind !== ImageKind.ICON_SET) {
+      const buffer = await this.storage.get(storageKeyFor(row.kind, row.cacheKey));
+      if (!buffer) {
+        throw new NotFoundError("Image file is missing from storage.");
+      }
+      return { buffer, filename: `${row.cacheKey}.png` };
+    }
+
+    const assets = assetsFromImage(row) ?? [];
+    if (assets.length === 0) {
+      throw new BadRequestError("This icon set has no assets to bundle.");
+    }
+
+    const entries: Record<string, Buffer> = {};
+    for (const asset of assets) {
+      const key = `${row.cacheKey}/${asset.name}`;
+      const data = await this.storage.get(key);
+      if (!data) {
+        logger.warn({ imageId: row.id, key }, "Missing asset during bundle; skipping");
+        continue;
+      }
+      entries[asset.name] = data;
+    }
+
+    const archive = new Bun.Archive(entries, { compress: "gzip" });
+    const bytes = await archive.bytes();
+    return { buffer: Buffer.from(bytes), filename: "favicons.tar.gz" };
   }
 
   async list(userId: string, query: ImageListQuery): Promise<ImageListResponse> {

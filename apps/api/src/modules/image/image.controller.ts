@@ -27,6 +27,20 @@ export const imageController = new Elysia({ prefix: "/images", tags: ["Images"] 
     response: ImageItemSchema,
     detail: { summary: "Fetch an image by id" },
   })
+  .get(
+    "/:id/download",
+    async ({ user, params, set }) => {
+      const bundle = await imageService.buildDownloadBundle(user.id, params.id);
+      const contentType = bundle.filename.endsWith(".tar.gz") ? "application/gzip" : "image/png";
+      set.headers["Content-Type"] = contentType;
+      set.headers["Content-Disposition"] = `attachment; filename="${bundle.filename}"`;
+      return bundle.buffer;
+    },
+    {
+      params: UuidIdParamSchema,
+      detail: { summary: "Download an image or icon-set bundle" },
+    },
+  )
   .patch("/:id", ({ user, params, body }) => imageService.update(user.id, params.id, body), {
     params: UuidIdParamSchema,
     body: ImageUpdateBodySchema,

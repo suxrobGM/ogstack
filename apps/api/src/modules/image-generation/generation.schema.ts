@@ -75,6 +75,7 @@ const AiOutcomeSchema = t.Object({
 });
 
 export const GenerateResponseSchema = t.Object({
+  id: t.String(),
   imageUrl: t.String(),
   kind: ImageKindSchema,
   width: t.Number(),
