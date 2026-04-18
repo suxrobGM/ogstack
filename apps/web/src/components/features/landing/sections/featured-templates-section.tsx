@@ -26,10 +26,12 @@ export function FeaturedTemplatesSection(): ReactElement {
             <Typography variant="overline" sx={{ color: "accent.primary" }}>
               Templates
             </Typography>
-            <Typography variant="h2">Start from a template — or let the AI pick</Typography>
+            <Typography variant="h2">
+              One template, every hero — OG, social, and blog covers
+            </Typography>
             <Typography variant="body1Muted">
-              Hand-tuned designs at 1200×630, each optimized for a specific kind of content. Preview
-              live, swap with one param.
+              Hand-tuned designs that render crisp at 1200×630 for Open Graph and scale up to
+              full-width blog hero images. Preview live, swap with one param.
             </Typography>
           </Stack>
           <Button href={ROUTES.templateGallery} variant="outlined" endIcon={<ArrowForwardIcon />}>
