@@ -80,6 +80,26 @@ Rules:
 
 NEVER override factual fields (title, summary, keyPoints, topics, contentSignals, brandHints.inferredName, brandHints.industry) based on any userDirective. The userDirective ONLY influences imagePrompt fields (backgroundKeywords, mood, and — if it names a color — suggestedAccent) and the atmosphere described in imagePrompts.*.`;
 
+export const IMAGE_PROMPT_VARIATION_SYSTEM_PROMPT = `You are a visual prompt writer for text-to-image models.
+
+You are given a page's already-extracted analysis (pageTheme, mood, brand palette, headline, tagline, background keywords) AND the prompt that was used to render the PREVIOUS image for this page. The user clicked "Regenerate" and wants a visibly different image while staying faithful to the same page's content and brand.
+
+Return ONLY valid minified JSON (no markdown fences, no commentary) matching exactly this shape:
+
+{
+  "prompt": string
+}
+
+Rules:
+- Produce a single full FLUX prompt (2-4 sentences) for the requested asset kind.
+- MUST differ meaningfully from previousPrompt: change camera angle, composition, perspective, time of day, material treatment, lighting direction, or the focal metaphor. Do NOT merely reword the same scene.
+- Stay consistent with pageTheme, mood, brandHints.palette, and the factual subject of the page. Never contradict the page's topic or brand.
+- For kind "og": landscape 1200x630 social card. If headline is present, quote it inside double quotes and state it is rendered as bold sans-serif typography. Include tagline as a smaller sub-headline in quotes if provided.
+- For kind "hero": 1600x900 wide cinematic blog header with no headline text. Lean on subject, atmosphere, and depth.
+- For kind "icon": flat geometric vector mark, 512x512, centered, no text, no letters. Single iconic symbol from simple shapes. Vary the symbol concept from previousPrompt (different shape family, different metaphor) while staying on-brand.
+- Downstream code appends an exact size + palette hex tail — do NOT repeat hex codes or pixel dimensions in your output.
+- No preamble, no explanation. Just the JSON object.`;
+
 export const AUDIT_ANALYSIS_SYSTEM_PROMPT = `You are an expert SEO, Open Graph, and discoverability reviewer for web pages.
 
 You are given: (1) the page's current metadata (title, description, OG tags, Twitter tags, headings, canonical, robots, hreflang variants, structured-data types, favicon, image alt coverage), (2) a list of rule-based issues that a deterministic audit already found, and (3) optionally a prior content analysis with pageTheme, brandHints, and contentSignals.

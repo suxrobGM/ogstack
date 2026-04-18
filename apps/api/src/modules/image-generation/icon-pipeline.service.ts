@@ -1,3 +1,4 @@
+import type { PageAnalysisAi } from "@ogstack/shared";
 import { ICON_CANONICAL_SIZE, ICON_SIZES, type IconSize } from "@ogstack/shared/constants";
 import pngToIco from "png-to-ico";
 import sharp from "sharp";
@@ -5,6 +6,7 @@ import { singleton } from "tsyringe";
 import { BadRequestError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { ImageProviderService, resolvePrompt } from "@/common/services/ai";
+import { type UrlMetadata } from "@/common/services/scraper";
 import { ImageStorageService } from "@/common/services/storage";
 import { PrismaClient } from "@/generated/prisma";
 import { toPrismaImageKind } from "@/modules/image/image.mapper";
@@ -12,7 +14,7 @@ import type { ImageAsset } from "@/modules/image/image.schema";
 import { PageAnalysisService } from "@/modules/page-analysis";
 import type { RenderContext } from "./context.builder";
 import type { AiRenderOutcome } from "./generation.mapper";
-import type { PipelineResult } from "./pipeline.service";
+import type { PipelineResult, PipelineRunOptions } from "./pipeline.service";
 
 const FAVICON_ICO_SIZES: IconSize[] = [16, 32, 48];
 
@@ -50,7 +52,7 @@ export class IconPipelineService {
     private readonly pageAnalysis: PageAnalysisService,
   ) {}
 
-  async run(ctx: RenderContext): Promise<PipelineResult> {
+  async run(ctx: RenderContext, options: PipelineRunOptions = {}): Promise<PipelineResult> {
     const startMs = performance.now();
 
     if (!ctx.aiModel) {
@@ -65,10 +67,15 @@ export class IconPipelineService {
       skipAi: false,
     });
 
+    const aiForRender =
+      options.forceNewPrompt && ai
+        ? await this.withRefreshedIconPrompt(ai, metadata, ctx.options?.aiPrompt)
+        : ai;
+
     const prompt = resolvePrompt({
       kind: "icon",
       metadata,
-      ai,
+      ai: aiForRender,
       options: { override: ctx.options?.aiPrompt ?? null },
     });
 
@@ -137,6 +144,36 @@ export class IconPipelineService {
     };
 
     return { image, outcome, generationMs };
+  }
+
+  /**
+   * Regenerate flow for icons: ask the LLM for a different symbol metaphor
+   * while keeping the cached brand/theme context. Falls back to the cached
+   * prompt on any failure so regenerate still produces a new image (via the
+   * deterministic tail + watermark variation, even if the prompt is identical).
+   */
+  private async withRefreshedIconPrompt(
+    ai: PageAnalysisAi,
+    metadata: UrlMetadata,
+    userPrompt: string | undefined,
+  ): Promise<PageAnalysisAi> {
+    const previous = ai.imagePrompts?.icon ?? null;
+    const next = await this.pageAnalysis.refreshImagePrompt({
+      kind: "icon",
+      ai,
+      metadata,
+      previousPrompt: previous,
+      userPrompt,
+    });
+    if (!next) {
+      logger.info("Icon prompt variation unavailable — reusing cached prompt");
+      return ai;
+    }
+    logger.info("Generated fresh icon prompt for regenerate");
+    return {
+      ...ai,
+      imagePrompts: { ...(ai.imagePrompts ?? { og: "", hero: "", icon: "" }), icon: next },
+    };
   }
 
   /**

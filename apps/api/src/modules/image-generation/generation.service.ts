@@ -76,6 +76,10 @@ export class ImageGenerationService {
       await this.records.incrementServeCount(cached.id);
       return toGenerateResponse(cached, { fromCache: true });
     }
+    // Only ask for a fresh LLM prompt when the user is explicitly re-running
+    // the same config (same cacheKey). Plain `force` over a different config
+    // is a conflict resolution, not a regenerate — no variation needed.
+    const forceNewPrompt = Boolean(cached && force);
     if (cached && force) {
       await this.records.evict(cached.id, cached.cacheKey, ctx.kind);
     }
@@ -86,7 +90,7 @@ export class ImageGenerationService {
       await this.usageService.enforceAiImageQuota(userId, ctx.aiModel === FAL_MODELS.flux2Pro);
     }
 
-    const { image, outcome, generationMs } = await this.pipeline.run(ctx);
+    const { image, outcome, generationMs } = await this.pipeline.run(ctx, { forceNewPrompt });
 
     await this.usageService.recordUsage(userId, projectId, {
       cacheHit: false,

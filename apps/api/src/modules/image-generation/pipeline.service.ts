@@ -2,6 +2,7 @@ import type { PageAnalysisAi } from "@ogstack/shared";
 import { singleton } from "tsyringe";
 import { logger } from "@/common/logger";
 import { ImageProviderService, resolvePrompt } from "@/common/services/ai";
+import type { PromptAssetKind } from "@/common/services/ai/prompt-builders";
 import { type UrlMetadata } from "@/common/services/scraper";
 import { ImageStorageService } from "@/common/services/storage";
 import { WatermarkService } from "@/common/services/watermark";
@@ -19,6 +20,14 @@ export interface PipelineResult {
   generationMs: number;
 }
 
+export interface PipelineRunOptions {
+  /**
+   * Re-run the image-prompt LLM step to produce a visibly different prompt,
+   * even though page analysis is cached. Set by the regenerate flow.
+   */
+  forceNewPrompt?: boolean;
+}
+
 @singleton()
 export class ImagePipelineService {
   constructor(
@@ -33,9 +42,9 @@ export class ImagePipelineService {
   ) {}
 
   /** Scrape → (optional LLM) → render → store → persist. */
-  async run(ctx: RenderContext): Promise<PipelineResult> {
+  async run(ctx: RenderContext, options: PipelineRunOptions = {}): Promise<PipelineResult> {
     if (ctx.kind === "icon_set") {
-      return this.iconPipeline.run(ctx);
+      return this.iconPipeline.run(ctx, options);
     }
     const startMs = performance.now();
     const { metadata, ai } = await this.pageAnalysis.getPageContext({
@@ -48,7 +57,13 @@ export class ImagePipelineService {
       skipAi: !ctx.aiModel,
     });
 
-    const outcome = await this.renderWithAiFallback(metadata, ai, ctx);
+    const promptAssetKind: PromptAssetKind = ctx.kind === "blog_hero" ? "hero" : "og";
+    const aiForRender =
+      options.forceNewPrompt && ai && ctx.aiModel
+        ? await this.withRefreshedPrompt(ai, metadata, promptAssetKind, ctx.options?.aiPrompt)
+        : ai;
+
+    const outcome = await this.renderWithAiFallback(metadata, aiForRender, ctx);
     const generationMs = Math.round(performance.now() - startMs);
 
     const stored = await this.storage.store(`${ctx.cacheKey}.png`, outcome.pngBuffer);
@@ -91,6 +106,37 @@ export class ImagePipelineService {
     });
 
     return { image, outcome, generationMs };
+  }
+
+  /**
+   * Returns a shallow copy of `ai` with `imagePrompts[kind]` replaced by a
+   * freshly-generated variation. Falls back to the cached `ai` verbatim when
+   * the variation LLM call fails — the image still renders, just without
+   * variation. Never mutates the cached object.
+   */
+  private async withRefreshedPrompt(
+    ai: PageAnalysisAi,
+    metadata: UrlMetadata,
+    kind: PromptAssetKind,
+    userPrompt: string | undefined,
+  ): Promise<PageAnalysisAi> {
+    const previous = ai.imagePrompts?.[kind] ?? null;
+    const next = await this.pageAnalysis.refreshImagePrompt({
+      kind,
+      ai,
+      metadata,
+      previousPrompt: previous,
+      userPrompt,
+    });
+    if (!next) {
+      logger.info({ kind }, "Prompt variation unavailable — reusing cached prompt");
+      return ai;
+    }
+    logger.info({ kind }, "Generated fresh image prompt for regenerate");
+    return {
+      ...ai,
+      imagePrompts: { ...(ai.imagePrompts ?? { og: "", hero: "", icon: "" }), [kind]: next },
+    };
   }
 
   private resolveCategory(ctx: RenderContext): string | null {
