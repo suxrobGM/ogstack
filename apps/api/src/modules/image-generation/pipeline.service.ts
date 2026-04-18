@@ -1,7 +1,7 @@
 import type { PageAnalysisAi } from "@ogstack/shared";
 import { singleton } from "tsyringe";
 import { logger } from "@/common/logger";
-import { buildAiImagePrompt, ImageProviderService } from "@/common/services/ai";
+import { ImageProviderService, resolvePrompt } from "@/common/services/ai";
 import { type UrlMetadata } from "@/common/services/scraper";
 import { ImageStorageService } from "@/common/services/storage";
 import { WatermarkService } from "@/common/services/watermark";
@@ -120,7 +120,12 @@ export class ImagePipelineService {
         },
         "AI image generation starting",
       );
-      const prompt = buildAiImagePrompt(metadata, promptOptions);
+      const prompt = resolvePrompt({
+        kind: ctx.kind === "blog_hero" ? "hero" : "og",
+        metadata,
+        ai,
+        options: promptOptions,
+      });
 
       try {
         const rawBuffer = await this.imageProvider.generate({ model: ctx.aiModel, prompt });

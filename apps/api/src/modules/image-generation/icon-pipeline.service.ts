@@ -4,7 +4,7 @@ import sharp from "sharp";
 import { singleton } from "tsyringe";
 import { BadRequestError } from "@/common/errors";
 import { logger } from "@/common/logger";
-import { buildIconPrompt, ImageProviderService } from "@/common/services/ai";
+import { ImageProviderService, resolvePrompt } from "@/common/services/ai";
 import { ImageStorageService } from "@/common/services/storage";
 import { PrismaClient } from "@/generated/prisma";
 import { toPrismaImageKind } from "@/modules/image/image.mapper";
@@ -34,7 +34,7 @@ const ICON_FILES: IconAssetPlan[] = [
 /**
  * Generates a full favicon + app-icon set from a URL. Always AI-driven:
  * 1. Reuses cached page analysis for brand/palette seeds.
- * 2. Requests a 1024×1024 square master from Flux 2.
+ * 2. Requests a 512×512 square master from Flux 2 (matches ICON_CANONICAL_SIZE).
  * 3. Post-processes with sharp to emit 16/32/48/180/192/512 PNGs.
  * 4. Packages the 16/32/48 PNGs into favicon.ico via png-to-ico.
  * 5. Writes a site.webmanifest referencing the 192/512 sizes.
@@ -65,12 +65,17 @@ export class IconPipelineService {
       skipAi: false,
     });
 
-    const prompt = buildIconPrompt(metadata, ai, ctx.options?.aiPrompt);
+    const prompt = resolvePrompt({
+      kind: "icon",
+      metadata,
+      ai,
+      options: { override: ctx.options?.aiPrompt ?? null },
+    });
 
     const masterPng = await this.imageProvider.generate({
       model: ctx.aiModel,
       prompt,
-      imageSize: "square_hd",
+      imageSize: "square",
     });
 
     const resized = await this.resizeToAllSizes(masterPng);

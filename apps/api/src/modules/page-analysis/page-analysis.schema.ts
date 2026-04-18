@@ -23,6 +23,12 @@ export const PageAnalysisImagePromptSchema = t.Object({
   ]),
 });
 
+export const PageAnalysisImagePromptsSchema = t.Object({
+  og: t.String(),
+  hero: t.String(),
+  icon: t.String(),
+});
+
 export const PageThemeSchema = t.Union([
   t.Literal("editorial"),
   t.Literal("technical"),
@@ -79,6 +85,7 @@ export const PageAnalysisAiSchema = t.Object({
   brandHints: BrandHintsSchema,
   contentSignals: ContentSignalsSchema,
   imagePrompt: PageAnalysisImagePromptSchema,
+  imagePrompts: t.Optional(PageAnalysisImagePromptsSchema),
 });
 
 export const PageAnalysisMetadataSchema = t.Object({

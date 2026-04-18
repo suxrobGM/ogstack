@@ -44,6 +44,11 @@ Return ONLY valid minified JSON (no markdown fences, no commentary) matching exa
     "backgroundKeywords": string,
     "suggestedAccent": string,
     "mood": "editorial" | "playful" | "technical" | "corporate" | "bold"
+  },
+  "imagePrompts": {
+    "og": string,
+    "hero": string,
+    "icon": string
   }
 }
 
@@ -68,8 +73,12 @@ Rules:
 - imagePrompt.backgroundKeywords: 6-12 comma-separated visual keywords for the background scene (objects, materials, shapes, colors, lighting). DO NOT mention typography, text, letters, or words.
 - imagePrompt.suggestedAccent: one hex color like "#10b981". MUST prefer brandSignals.themeColor when it is a valid hex. If themeColor is absent, prefer brandSignals.faviconDominant. Only infer a fresh color when both are absent.
 - imagePrompt.mood: single classification.
+- imagePrompts: three full, self-contained FLUX prompts that you author for this specific page. Each one is a single paragraph passed verbatim to a text-to-image model. Downstream code appends an exact size + palette hex tail, so focus on *subject, composition, atmosphere, and form language* — do NOT repeat hex codes or pixel dimensions. Vary vocabulary across pages so two pages with different pageTheme/mood produce visibly different images.
+- imagePrompts.og: a 1200x630 landscape social-media preview card. Quote the exact imagePrompt.headline inside double quotes and state it is rendered as bold sans-serif typography. If imagePrompt.tagline is non-null, include it as a smaller sub-headline in quotes. Describe the background scene — objects, materials, lighting, composition — shaped by pageTheme and imagePrompt.mood. 2-4 sentences.
+- imagePrompts.hero: a 1600x900 wide cinematic blog header. No headline text required in the image; lean on subject, atmosphere, and depth. Wider framing with clear focal subject and supporting background layers. 2-3 sentences.
+- imagePrompts.icon: a flat geometric vector logo mark rendered at 512x512, centered, transparent-friendly background. MUST contain no text, no letters, no wordmark. Single iconic symbol built from simple shapes (circles, arcs, rectangles, chevrons). No gradients, no thin strokes, no ornamental detail — the mark must stay legible when downsampled to 16x16. Vary the symbol concept based on brandHints.inferredName, brandHints.industry, pageTheme, and imagePrompt.mood so different brands produce visibly different marks. 2-3 sentences.
 
-NEVER override factual fields (title, summary, keyPoints, topics, contentSignals, brandHints.inferredName, brandHints.industry) based on any userDirective. The userDirective ONLY influences imagePrompt fields (backgroundKeywords, mood, and — if it names a color — suggestedAccent).`;
+NEVER override factual fields (title, summary, keyPoints, topics, contentSignals, brandHints.inferredName, brandHints.industry) based on any userDirective. The userDirective ONLY influences imagePrompt fields (backgroundKeywords, mood, and — if it names a color — suggestedAccent) and the atmosphere described in imagePrompts.*.`;
 
 export const AUDIT_ANALYSIS_SYSTEM_PROMPT = `You are an expert SEO, Open Graph, and discoverability reviewer for web pages.
 

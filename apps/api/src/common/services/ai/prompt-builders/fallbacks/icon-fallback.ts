@@ -1,20 +1,20 @@
 import type { PageAnalysisAi } from "@ogstack/shared/types";
 import type { UrlMetadata } from "@/common/services/scraper.service";
-
-const MAX_PROMPT_CHARS = 900;
+import { MAX_ICON_PROMPT_CHARS } from "../constants";
+import { safeHost } from "../helpers";
 
 /**
- * Builds a Flux prompt tuned for *icons* rather than OG preview images. The
- * single biggest quality win is explicit direction against gradients and thin
- * detail — both destroy legibility at 16-32px after downsampling.
+ * Deterministic fallback for icon prompts when the LLM didn't produce a
+ * per-asset prompt. Explicit direction against gradients and thin detail —
+ * both destroy legibility at 16-32px after downsampling.
  */
-export function buildIconPrompt(
+export function buildIconFallback(
   metadata: UrlMetadata,
   ai: PageAnalysisAi | null,
   override?: string | null,
 ): string {
   if (override && override.trim()) {
-    return override.trim().slice(0, MAX_PROMPT_CHARS);
+    return override.trim().slice(0, MAX_ICON_PROMPT_CHARS);
   }
 
   const brand =
@@ -45,13 +45,5 @@ export function buildIconPrompt(
     "High contrast, crisp edges, flat-fill design language. Vector-style illustration.",
   ];
 
-  return lines.join(" ").slice(0, MAX_PROMPT_CHARS);
-}
-
-function safeHost(url: string): string | null {
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return null;
-  }
+  return lines.join(" ").slice(0, MAX_ICON_PROMPT_CHARS);
 }

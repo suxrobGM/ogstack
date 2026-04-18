@@ -46,6 +46,17 @@ export interface PageAnalysisImagePrompt {
   mood: PageAnalysisMood;
 }
 
+/**
+ * Per-asset FLUX prompts authored by the LLM during page analysis. The
+ * pipeline uses these verbatim (plus a deterministic size/palette tail) when
+ * present, and falls back to template builders when absent.
+ */
+export interface PageAnalysisImagePrompts {
+  og: string;
+  hero: string;
+  icon: string;
+}
+
 export interface BrandHints {
   inferredName: string | null;
   palette: string[];
@@ -78,6 +89,7 @@ export interface PageAnalysisAi {
   brandHints: BrandHints;
   contentSignals: ContentSignals;
   imagePrompt: PageAnalysisImagePrompt;
+  imagePrompts?: PageAnalysisImagePrompts;
 }
 
 export interface PageAnalysisMetadata {

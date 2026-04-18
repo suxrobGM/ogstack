@@ -107,6 +107,23 @@ Examples:
 
 - Don't add inline comments that restate what the code already says. Only comment to explain **why**, not **what**. If the code needs a comment to explain what it does, rename the variable or extract a function instead.
 - Add brief JSDoc (`/** ... */`) for public functions or complex logic, but avoid over-commenting. The code should be as self-explanatory as possible.
+- For multiline comments use this style:
+
+```ts
+/**
+ * This function does X, Y, and Z. It takes A and B as parameters and returns C.
+ * The reason we do this is because of D and E.
+ */
+function example(a: TypeA, b: TypeB): TypeC {...}
+```
+
+- Don't use this style:
+
+```ts
+/** This function does X, Y, and Z. It takes A and B as parameters and returns C.
+ *  The reason we do this is because of D and E. */
+function example(a: TypeA, b: TypeB): TypeC {...}
+```
 
 ## File Size Guideline
 
