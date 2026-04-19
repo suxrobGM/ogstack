@@ -1,9 +1,12 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { afterAll, beforeEach, describe, expect, it, mock } from "bun:test";
 import { container } from "@/common/di";
 import { EmailService } from "@/common/services/email.service";
 import { hashPassword, verifyPassword } from "@/common/utils/password";
 import { PrismaClient } from "@/generated/prisma";
+import { restoreMockedModules } from "@/test/setup";
 import { AuthService } from "./auth.service";
+
+afterAll(() => restoreMockedModules("jose", "@/common/utils/password"));
 
 mock.module("@/common/utils/password", () => ({
   hashPassword: mock(() => Promise.resolve("hashed_password_123")),

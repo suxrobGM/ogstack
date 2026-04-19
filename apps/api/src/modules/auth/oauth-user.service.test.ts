@@ -1,8 +1,11 @@
 import { Plan } from "@ogstack/shared";
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { afterAll, beforeEach, describe, expect, it, mock } from "bun:test";
 import { container } from "@/common/di";
 import { PrismaClient } from "@/generated/prisma";
+import { restoreMockedModules } from "@/test/setup";
 import { OAuthUserService, type OAuthProfile } from "./oauth-user.service";
+
+afterAll(() => restoreMockedModules("jose"));
 
 mock.module("jose", () => ({
   SignJWT: class MockSignJWT {
