@@ -7,7 +7,7 @@ import { errorMiddleware } from "@/common/middleware";
 import { corsPlugin, swaggerPlugin, uploadsStaticPlugin } from "@/common/plugins";
 import { logAiServicesAtStartup } from "@/common/services/ai";
 import { validateEnv } from "@/env";
-import { auditCleanupCron } from "@/jobs";
+import { auditCleanupCron, demoProjectCleanupCron } from "@/jobs";
 import { adminController } from "@/modules/admin";
 import { apiKeyController } from "@/modules/api-key";
 import { authController } from "@/modules/auth";
@@ -46,6 +46,7 @@ const app = new Elysia()
   .use(imagePublicController)
   .use(imageHeroPublicController)
   .use(auditCleanupCron)
+  .use(demoProjectCleanupCron)
   .group("/api", (api) =>
     api
       .guard({ response: HttpErrorResponses })

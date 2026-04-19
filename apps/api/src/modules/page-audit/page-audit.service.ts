@@ -88,8 +88,10 @@ export class PageAuditService {
     };
   }
 
-  /** Reports are publicly readable by UUID — the ID is unguessable and the
-   *  whole point is shareable links. Ownership is enforced only on `listForUser`. */
+  /**
+   * Reports are publicly readable by UUID — the ID is unguessable and the
+   * whole point is shareable links. Ownership is enforced only on `listForUser`.
+   */
   async getById(id: string): Promise<PageAuditReportDto> {
     const row = await this.prisma.auditReport.findUnique({ where: { id } });
     if (!row) throw new NotFoundError("Audit report not found");
@@ -159,8 +161,10 @@ export class PageAuditService {
     };
   }
 
-  /** Delete anonymous reports older than the retention window. Authenticated
-   *  users' history is preserved regardless of age. */
+  /**
+   * Delete anonymous reports older than the retention window. Authenticated
+   * users' history is preserved regardless of age.
+   */
   async deleteStaleAnonymous(olderThanDays = 30): Promise<number> {
     const cutoff = new Date(Date.now() - olderThanDays * 24 * 60 * 60 * 1000);
     const { count } = await this.prisma.auditReport.deleteMany({

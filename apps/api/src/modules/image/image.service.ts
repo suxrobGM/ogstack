@@ -151,6 +151,25 @@ export class ImageService {
     return this.deleteImageRow(existing);
   }
 
+  /** Delete a project's images older than the cutoff; per-row failures are logged and skipped. */
+  async deleteStaleForProject(projectId: string, olderThan: Date): Promise<number> {
+    const rows = await this.prisma.image.findMany({
+      where: { projectId, createdAt: { lt: olderThan } },
+      select: { id: true, cacheKey: true, kind: true },
+    });
+
+    let deleted = 0;
+    for (const row of rows) {
+      try {
+        await this.deleteImageRow(row);
+        deleted += 1;
+      } catch (err) {
+        logger.warn({ err, imageId: row.id }, "deleteStaleForProject: row delete failed");
+      }
+    }
+    return deleted;
+  }
+
   private async assertOwnedImage(userId: string, id: string): Promise<Image> {
     const row = await this.prisma.image.findUnique({ where: { id } });
     if (!row) throw new NotFoundError("Image not found");

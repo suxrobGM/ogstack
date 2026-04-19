@@ -8,9 +8,8 @@ const AUDIT_RETENTION_DAYS = 30;
 
 async function runCleanup(): Promise<void> {
   try {
-    const deleted = await container
-      .resolve(PageAuditService)
-      .deleteStaleAnonymous(AUDIT_RETENTION_DAYS);
+    const pageAuditService = container.resolve(PageAuditService);
+    const deleted = await pageAuditService.deleteStaleAnonymous(AUDIT_RETENTION_DAYS);
     if (deleted > 0) {
       logger.info({ deleted, retentionDays: AUDIT_RETENTION_DAYS }, "audit.cleanup completed");
     }
@@ -20,8 +19,8 @@ async function runCleanup(): Promise<void> {
 }
 
 /**
- * Elysia plugin that deletes anonymous audit reports older than the
- * retention window, daily at midnight.
+ * Daily cron that deletes anonymous audit reports older than the retention window, to prevent unbounded storage growth from unauthenticated usage.
+ * Authenticated reports are retained indefinitely since they're tied to user accounts and visible in the dashboard.
  */
 export const auditCleanupCron = new Elysia({ name: "audit-cleanup-cron" }).use(
   cron({

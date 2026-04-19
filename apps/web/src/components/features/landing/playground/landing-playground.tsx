@@ -12,7 +12,7 @@ import { fontFamilies } from "@/theme/typography";
 import { buildOgImageUrl, buildOgMetaTag } from "@/utils/integration-snippet";
 import { normalizeUrlInput, templateThumbnailUrl } from "@/utils/url";
 
-const DEFAULT_URL = "https://my-blog.com/building-with-bun";
+const DEFAULT_URL = "https://bun.sh/blog/bun-v1.3";
 
 const TEMPLATES = [
   "aurora",
