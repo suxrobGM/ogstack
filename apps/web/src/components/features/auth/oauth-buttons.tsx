@@ -34,7 +34,7 @@ export function OAuthButtons(): ReactElement {
       <Stack direction="row" spacing={1.5}>
         <Button
           component="a"
-          href={`${API_BASE_URL}/api/auth/github`}
+          href={`${API_BASE_URL}/auth/github`}
           variant="outlined"
           size="large"
           startIcon={<GitHubIcon />}
@@ -49,7 +49,7 @@ export function OAuthButtons(): ReactElement {
         </Button>
         <Button
           component="a"
-          href={`${API_BASE_URL}/api/auth/google`}
+          href={`${API_BASE_URL}/auth/google`}
           variant="outlined"
           size="large"
           startIcon={<GoogleIcon />}
