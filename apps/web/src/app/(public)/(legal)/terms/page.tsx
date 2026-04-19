@@ -23,69 +23,156 @@ export default function TermsPage(): ReactElement {
       </Stack>
 
       <Typography variant="body1">
-        These terms govern your use of OGStack. By creating an account or calling the API you agree
-        to them.
+        These terms are a binding agreement between you and OGStack (&quot;we&quot;,
+        &quot;us&quot;). By creating an account, calling the API, or embedding a public project ID,
+        you accept them. If you&apos;re signing up on behalf of a company, you confirm you have
+        authority to bind it.
       </Typography>
 
-      <Typography variant="h3">1. The service</Typography>
+      <Typography variant="h3">1. The Service</Typography>
       <Typography variant="body1">
-        OGStack generates Open Graph preview images from URLs you submit. The service includes the
-        API, dashboard, audit tool, and any AI-powered features on the tiers that include them.
+        OGStack generates Open Graph images, favicon bundles, and SEO audits from URLs you submit.
+        Breaking API changes are announced at least 30 days in advance.
       </Typography>
 
       <Typography variant="h3">2. Your account</Typography>
       <ul>
-        <li>You are responsible for everything done under your account and API keys.</li>
-        <li>Keep API keys secret. Rotate immediately if you suspect exposure.</li>
-        <li>You must be 13 or older to create an account.</li>
+        <li>Be at least 13 (16 in the EEA). One person or entity per account.</li>
+        <li>Keep your information accurate and your credentials private.</li>
+        <li>
+          You&apos;re responsible for everything done under your account and API keys. Rotate keys
+          if exposed.
+        </li>
       </ul>
 
       <Typography variant="h3">3. Acceptable use</Typography>
+      <Typography variant="body1">You must not:</Typography>
       <ul>
-        <li>Don&apos;t submit URLs you do not have permission to fetch or represent.</li>
-        <li>Don&apos;t attempt to bypass SSRF protections, rate limits, or quota enforcement.</li>
+        <li>Submit URLs you&apos;re not authorised to fetch or represent.</li>
+        <li>Bypass SSRF protections, rate limits, quotas, or domain allowlists.</li>
         <li>
-          Don&apos;t use AI generation to produce content that violates our moderation policy.
+          Generate content that is unlawful, infringing, defamatory, or otherwise violates our
+          moderation policy.
         </li>
-        <li>Respect the allowed-domain list configured on each project.</li>
+        <li>Launch DoS traffic, scrape, or fuzz the Service.</li>
+        <li>Reverse-engineer the Service except where law forbids that restriction.</li>
+        <li>Resell the Service or use it to build a substantially identical competitor.</li>
+        <li>Use OGStack to send spam, phishing, or malware.</li>
       </ul>
-
-      <Typography variant="h3">4. Ownership of generated images</Typography>
       <Typography variant="body1">
-        You own the generated output for URLs you are entitled to represent. You grant OGStack a
-        limited license to cache, store, and serve those images through our CDN on your behalf.
+        Violations may lead to suspension or termination, and unlawful activity may be reported.
       </Typography>
 
-      <Typography variant="h3">5. Plans, quotas, and billing</Typography>
+      <Typography variant="h3">4. Your content</Typography>
+      <Typography variant="body1">
+        You keep ownership of your URLs and generated output. You grant us a worldwide, royalty-free
+        licence to host, cache, and serve that content through our CDN solely to provide the
+        Service. We never train models on your content or sell it. The licence ends when you delete
+        the content or close your account.
+      </Typography>
+
+      <Typography variant="h3">5. Our IP</Typography>
+      <Typography variant="body1">
+        The Service, templates, docs, and the OGStack name and logo belong to us. You get no rights
+        beyond those in these terms. You may reference OGStack for attribution but not in a way that
+        implies endorsement without consent.
+      </Typography>
+
+      <Typography variant="h3">6. Plans &amp; billing</Typography>
       <ul>
-        <li>Non-AI renders are unlimited on every plan.</li>
-        <li>AI image and AI audit quotas reset monthly.</li>
-        <li>Downgrades take effect at end of billing period.</li>
-        <li>Images generated on a higher tier may be locked after downgrade.</li>
+        <li>
+          Non-AI renders are unlimited; AI quotas reset each billing cycle and don&apos;t roll over.
+        </li>
+        <li>
+          Paid plans auto-renew via Stripe until cancelled. Prices exclude VAT/GST/sales tax, added
+          at checkout.
+        </li>
+        <li>
+          Cancel anytime — your plan remains active until the end of the paid period. Downgrades
+          take effect at period end; higher-tier output may become read-only.
+        </li>
+        <li>
+          Failed payments trigger retries and email notices. Accounts 14+ days overdue may be
+          downgraded to free.
+        </li>
+        <li>
+          No prorated refunds except where required by law. Billing disputes:{" "}
+          <a href="mailto:billing@ogstack.dev">billing@ogstack.dev</a> within 30 days.
+        </li>
       </ul>
 
-      <Typography variant="h3">6. Uptime &amp; support</Typography>
+      <Typography variant="h3">7. Uptime &amp; support</Typography>
       <Typography variant="body1">
-        We target high availability but do not guarantee SLA on self-serve plans. Enterprise SLAs
-        are available on request.
+        We target 99.9% monthly availability without a contractual SLA on self-serve plans. Support:
+        one business day on paid plans, three on free. Enterprise SLAs are available on request.
       </Typography>
 
-      <Typography variant="h3">7. Termination</Typography>
+      <Typography variant="h3">8. Third-party services</Typography>
       <Typography variant="body1">
-        You may cancel at any time from billing settings. We may suspend or terminate accounts that
-        violate these terms or pose a security risk.
+        The Service depends on Cloudflare, Stripe, Resend, and an LLM provider. Their outages may
+        affect us.
       </Typography>
 
-      <Typography variant="h3">8. Liability</Typography>
+      <Typography variant="h3">9. Termination</Typography>
       <Typography variant="body1">
-        The service is provided &quot;as is&quot; without warranties of any kind. Our aggregate
-        liability is limited to fees paid in the 12 months preceding a claim.
+        You may close your account anytime. We may suspend or terminate for material breach,
+        non-payment, or security risk, with notice and cure where reasonable. Fees owed, IP,
+        disclaimers, liability limits, and indemnity survive termination.
       </Typography>
 
-      <Typography variant="h3">9. Changes</Typography>
+      <Typography variant="h3">10. Warranty disclaimer</Typography>
       <Typography variant="body1">
-        We may revise these terms and will update the &quot;last updated&quot; date. Material
-        changes are communicated via email to account holders.
+        The Service is provided <strong>&quot;as is&quot;</strong> without warranties of any kind.
+        Generated output — especially AI-assisted — should be reviewed before publication.
+      </Typography>
+
+      <Typography variant="h3">11. Liability limit</Typography>
+      <Typography variant="body1">
+        To the maximum extent permitted by law, neither party is liable for indirect, incidental, or
+        consequential damages, or lost profits or data. Our aggregate liability is capped at the
+        fees you paid us in the 12 months before the claim. Nothing here excludes liability that
+        cannot be excluded by law.
+      </Typography>
+
+      <Typography variant="h3">12. Indemnity</Typography>
+      <Typography variant="body1">
+        You&apos;ll defend us against third-party claims arising from the URLs or content you
+        submit, your breach of these terms, or your infringement of someone else&apos;s rights.
+      </Typography>
+
+      <Typography variant="h3">13. Feedback</Typography>
+      <Typography variant="body1">
+        Feedback and suggestions are granted to us under a perpetual, royalty-free licence to use
+        without restriction.
+      </Typography>
+
+      <Typography variant="h3">14. Governing law</Typography>
+      <Typography variant="body1">
+        These terms are governed by the laws of OGStack&apos;s jurisdiction of incorporation.
+        Disputes go to its competent courts, except where mandatory consumer law says otherwise.
+      </Typography>
+
+      <Typography variant="h3">15. General</Typography>
+      <ul>
+        <li>No assignment without our consent; we may assign on a corporate transaction.</li>
+        <li>If a clause is unenforceable, the rest stands and it&apos;s reformed minimally.</li>
+        <li>Not enforcing a right once doesn&apos;t waive it later.</li>
+        <li>These terms and the Privacy Policy are the entire agreement on this subject.</li>
+        <li>Neither party is liable for delays caused by events beyond reasonable control.</li>
+      </ul>
+
+      <Typography variant="h3">16. Changes</Typography>
+      <Typography variant="body1">
+        We&apos;ll update this page and email active account holders at least 30 days before
+        material changes take effect. Continued use after that date means you accept the revised
+        terms.
+      </Typography>
+
+      <Typography variant="h3">17. Contact</Typography>
+      <Typography variant="body1">
+        Terms: <a href="mailto:legal@ogstack.dev">legal@ogstack.dev</a>. Billing:{" "}
+        <a href="mailto:billing@ogstack.dev">billing@ogstack.dev</a>. Support:{" "}
+        <a href="mailto:support@ogstack.dev">support@ogstack.dev</a>.
       </Typography>
     </>
   );

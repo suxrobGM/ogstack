@@ -11,27 +11,11 @@ import { PanelHeader } from "./panel-header";
 import { SAMPLE_INSIGHTS } from "./sample-data";
 import { SuggestionBlock } from "./suggestion-block";
 
-type Audience = "anonymous" | "free";
-
-interface LockedPreviewProps {
-  audience: Audience;
-}
-
-const COPY: Record<Audience, { href: string; label: string; body: string }> = {
-  anonymous: {
-    href: "/register?plan=pro",
-    label: "Sign up for Pro",
-    body: "This is a preview. Sign up for Pro to get real AI recommendations for your own pages.",
-  },
-  free: {
-    href: "/billing",
-    label: "Upgrade to Pro",
-    body: "Upgrade to Pro to unlock AI recommendations for your own pages.",
-  },
-};
-
-export function LockedPreview(props: LockedPreviewProps): ReactElement {
-  const { href, label, body } = COPY[props.audience];
+export function LockedPreview(): ReactElement {
+  const href = "/register";
+  const label = "Sign up free";
+  const body =
+    "This is a preview. Create a free account to get 3 AI audit recommendations per month.";
 
   return (
     <Surface sx={{ position: "relative", overflow: "hidden" }}>

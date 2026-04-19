@@ -7,6 +7,7 @@ const PLAN_FEATURES: Record<Plan, string[]> = {
   FREE: [
     "Unlimited non-AI images",
     "3 AI images / month (standard model)",
+    "3 AI audit recommendations / month",
     "All templates",
     "1 project, 1 domain",
     "AI page analysis",

@@ -91,7 +91,19 @@ describe("UsageService", () => {
   });
 
   describe("enforceAiAuditQuota", () => {
-    it("should block FREE users", async () => {
+    it("should allow FREE within quota", async () => {
+      (mockPrisma.usageRecord.findMany as ReturnType<typeof mock>).mockResolvedValue([
+        { imageCount: 0, aiImageCount: 0, aiProImageCount: 0, aiAuditCount: 2, cacheHits: 0 },
+      ]);
+
+      await service.enforceAiAuditQuota("user-1");
+    });
+
+    it("should block FREE over quota", async () => {
+      (mockPrisma.usageRecord.findMany as ReturnType<typeof mock>).mockResolvedValue([
+        { imageCount: 0, aiImageCount: 0, aiProImageCount: 0, aiAuditCount: 3, cacheHits: 0 },
+      ]);
+
       expect(service.enforceAiAuditQuota("user-1")).rejects.toThrow(PlanLimitError);
     });
 
@@ -182,7 +194,7 @@ describe("UsageService", () => {
       expect(result.aiImageCount).toBe(0);
       expect(result.aiImageLimit).toBe(3);
       expect(result.aiProImageLimit).toBe(0);
-      expect(result.aiAuditLimit).toBe(0);
+      expect(result.aiAuditLimit).toBe(3);
       expect(result.cacheHits).toBe(0);
     });
 

@@ -29,8 +29,9 @@ interface AuditFormProps {
   initialUrl?: string;
   showAiOption?: boolean;
   /**
-   * Whether the AI recommendations checkbox is selectable. Callers that know
-   * the viewer's plan pass `true` for Plus/Pro; public usage leaves it off.
+   * Whether the AI recommendations checkbox is selectable. All authenticated
+   * users (including FREE) share a per-plan monthly quota; anonymous callers
+   * pass `false` so the checkbox is disabled.
    */
   aiAllowed?: boolean;
 }
@@ -100,7 +101,7 @@ export function AuditForm(props: AuditFormProps): ReactElement {
             helperText={
               !aiAllowed ? (
                 <>
-                  Pro feature — <MuiLink href="/billing">upgrade to unlock</MuiLink>.
+                  <MuiLink href="/login">Sign in</MuiLink> to include AI recommendations.
                 </>
               ) : undefined
             }

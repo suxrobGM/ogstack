@@ -2,7 +2,6 @@
 
 import type { ReactElement } from "react";
 import { Grid, Stack, Typography } from "@mui/material";
-import { Plan } from "@ogstack/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
@@ -20,7 +19,7 @@ export function AuditDashboard(props: AuditDashboardProps): ReactElement {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const aiAllowed = !!user && user.plan !== Plan.FREE;
+  const aiAllowed = !!user;
 
   return (
     <Grid container spacing={4}>

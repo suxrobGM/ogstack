@@ -1,6 +1,5 @@
 import type { ReactElement } from "react";
 import { Container } from "@mui/material";
-import { Plan } from "@ogstack/shared";
 import { notFound } from "next/navigation";
 import { AuditReport } from "@/components/features/audit";
 import type { AuditViewer } from "@/components/features/audit/ai-recommendations";
@@ -25,11 +24,7 @@ export default async function DashboardAuditReportPage(props: PageProps): Promis
   }
 
   const report = reportRes.data;
-  const viewer: AuditViewer = !userRes.data
-    ? "anonymous"
-    : userRes.data.plan === Plan.FREE
-      ? "free"
-      : "pro";
+  const viewer: AuditViewer = userRes.data ? "authenticated" : "anonymous";
 
   return (
     <>

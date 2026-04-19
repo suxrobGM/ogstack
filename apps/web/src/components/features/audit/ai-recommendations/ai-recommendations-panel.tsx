@@ -8,7 +8,7 @@ import { InsightsView } from "./insights-view";
 import { LockedPreview } from "./locked-preview";
 import { EmptyProView, FailedView, PendingView } from "./status-views";
 
-export type AuditViewer = "anonymous" | "free" | "pro";
+export type AuditViewer = "anonymous" | "authenticated";
 
 interface AiRecommendationsPanelProps {
   report: PageAuditReportResponse;
@@ -47,10 +47,7 @@ export function AiRecommendationsPanel(props: AiRecommendationsPanelProps): Reac
       return <FailedView error={current.ai.error} />;
     default: {
       if (viewer === "anonymous") {
-        return <LockedPreview audience="anonymous" />;
-      }
-      if (viewer === "free") {
-        return <LockedPreview audience="free" />;
+        return <LockedPreview />;
       }
       return <EmptyProView />;
     }

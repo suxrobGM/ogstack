@@ -40,7 +40,7 @@ export const PLAN_CONFIGS: Record<Plan, PlanConfig> = {
     watermark: true,
     aiImageLimit: 3,
     aiImageProLimit: 0,
-    aiAuditLimit: 0,
+    aiAuditLimit: 3,
     projectLimit: 1,
     domainsPerProject: 1,
     prioritySupport: false,

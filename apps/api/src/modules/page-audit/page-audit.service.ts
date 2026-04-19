@@ -1,8 +1,8 @@
 import { singleton } from "tsyringe";
-import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
+import { BadRequestError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { ScraperService, type UrlMetadata } from "@/common/services/scraper";
-import { AuditAiStatus, Plan, PrismaClient } from "@/generated/prisma";
+import { AuditAiStatus, PrismaClient } from "@/generated/prisma";
 import { PageAnalysisService } from "@/modules/page-analysis";
 import { UsageService } from "@/modules/usage";
 import { PageAuditAnalysisService } from "./page-audit-analysis.service";
@@ -171,21 +171,13 @@ export class PageAuditService {
 
   /**
    * Checks whether the requester may enrich this audit with AI. Anonymous
-   * requests silently fall through to `skipped`. FREE users get a 403 so the UI
-   * can surface the upgrade path. Paid users additionally hit the monthly audit
-   * quota — throws PlanLimitError when exhausted.
+   * requests silently fall through to `skipped`. All authenticated users share
+   * a per-plan monthly audit quota — throws PlanLimitError when
+   * exhausted so the UI can surface the upgrade path.
    */
   private async checkAiEligibility(userId: string | null, includeAi = false): Promise<boolean> {
     if (!includeAi) return false;
     if (!userId) return false;
-
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { plan: true },
-    });
-    if (!user || user.plan === Plan.FREE) {
-      throw new ForbiddenError("AI audit recommendations require a Plus plan or higher.");
-    }
 
     await this.usageService.enforceAiAuditQuota(userId);
     return true;

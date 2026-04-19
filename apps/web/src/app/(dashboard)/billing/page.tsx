@@ -25,7 +25,7 @@ export default async function BillingPage(): Promise<ReactElement> {
     aiProImageCount: 0,
     aiProImageLimit: 0,
     aiAuditCount: 0,
-    aiAuditLimit: 0,
+    aiAuditLimit: 3,
     cacheHits: 0,
   };
 
