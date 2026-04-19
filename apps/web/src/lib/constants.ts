@@ -48,4 +48,4 @@ export const PAGINATION_DEFAULTS = {
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export const DOCS_URL = process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:5002";
-export const API_DOCS_URL = process.env.NEXT_PUBLIC_API_DOCS_URL || "http://localhost:5000/swagger";
+export const API_DOCS_URL = `${DOCS_URL}/swagger`;

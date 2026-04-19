@@ -1,0 +1,38 @@
+services:
+  api:
+    image: ghcr.io/${GITHUB_REPOSITORY:-suxrobgm/ogstack}/api:latest
+    ports:
+      - "127.0.0.1:${API_PORT:-5000}:5000"
+    env_file: .env
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+    volumes:
+      - api-uploads:/app/apps/api/uploads
+    restart: unless-stopped
+
+  web:
+    image: ghcr.io/${GITHUB_REPOSITORY:-suxrobgm/ogstack}/web:latest
+    ports:
+      - "127.0.0.1:${WEB_PORT:-5001}:5001"
+    environment:
+      - NODE_ENV=production
+      - PORT=5001
+      - HOSTNAME=0.0.0.0
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  docs:
+    image: ghcr.io/${GITHUB_REPOSITORY:-suxrobgm/ogstack}/docs:latest
+    ports:
+      - "127.0.0.1:${DOCS_PORT:-5002}:5002"
+    environment:
+      - NODE_ENV=production
+      - PORT=5002
+      - HOSTNAME=0.0.0.0
+    restart: unless-stopped
+
+volumes:
+  api-uploads:
