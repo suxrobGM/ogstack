@@ -11,6 +11,7 @@ const EnvSchema = t.Object({
     t.Union([t.Literal("development"), t.Literal("production"), t.Literal("staging")]),
   ),
   CORS_ORIGINS: t.Optional(t.String({ default: "http://localhost:4001" })),
+  API_PUBLIC_URL: t.Optional(t.String({ default: "http://localhost:5000" })),
   LOG_LEVEL: t.Optional(t.String({ default: "info" })),
   UPLOAD_DIR: t.Optional(t.String({ default: "./uploads" })),
 
