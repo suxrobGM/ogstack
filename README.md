@@ -21,7 +21,7 @@ Turn any URL into a gorgeous, on-brand social preview image — automatically. N
 
 ## Why OGStack
 
-Every time a link from your site gets shared on Twitter, LinkedIn, Slack, or Discord, the preview image is your first impression. A missing or ugly preview costs clicks, trust, and brand equity.
+Every time a link from your site gets shared on X, Facebook, LinkedIn, Slack, Discord, or any other social media platform, the preview image is your first impression. A missing or ugly preview costs clicks, trust, and brand equity.
 
 OGStack fixes that in one step. Paste a URL, get a beautiful, contextual image that matches your brand — in seconds, at every scale.
 
@@ -40,7 +40,6 @@ OGStack fixes that in one step. Paste a URL, get a beautiful, contextual image t
 | **Full icon sets**               | Generate favicons, Apple touch icons, and web manifest files from one prompt.                            |
 | **Blog hero images**             | 1600×900 or 1920×1080 covers for articles and landing pages.                                             |
 | **Free OG audit**                | Paste a URL, get a 0–100 score with concrete fixes for how your page appears on every platform.          |
-| **Fair, transparent pricing**    | Generous free tier. Paid plans start at $10/month. No surprise overages.                                 |
 
 ---
 
@@ -75,7 +74,6 @@ Technical details and other guides live in [`docs/`](docs/):
 
 - **[Architecture](docs/architecture.md)** — tech stack, system design, and how the pieces fit together.
 - **[Development](docs/development.md)** — local setup, running the apps, database, and testing.
-- **[Product Spec](docs/prd.md)** — the full product requirements document.
 
 ---
 
