@@ -127,9 +127,6 @@ jobs:
             # Pull new images while old containers are still running
             docker compose pull
 
-            # Apply any pending Prisma migrations before recreating containers
-            docker compose run --rm api bun run db:migrate:apply || true
-
             # Recreate containers with new images (stops old, starts new)
             docker compose up -d --force-recreate --remove-orphans
 

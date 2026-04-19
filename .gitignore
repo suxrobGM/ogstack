@@ -142,3 +142,5 @@ vite.config.ts.timestamp-*
 .github-project-config.json
 
 .VSCodeCounter/
+
+depvault.exe
