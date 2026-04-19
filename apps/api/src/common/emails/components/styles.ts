@@ -1,18 +1,19 @@
 import type { CSSProperties } from "react";
 
 export const brand = {
-  primary: "#2563EB",
-  primaryDark: "#1D4ED8",
-  primaryLight: "#DBEAFE",
-  background: "#F1F5F9",
-  surface: "#FFFFFF",
-  text: "#1E293B",
-  textSecondary: "#64748B",
-  border: "#E2E8F0",
-  success: "#059669",
+  primary: "#B45309",
+  primaryDark: "#92400E",
+  primaryLight: "#FDEBD3",
+  background: "#F7F3ED",
+  surface: "#FFFDF9",
+  surfaceMuted: "#EDE8DF",
+  text: "#2C2825",
+  textSecondary: "#8C8378",
+  border: "#D5CEC3",
+  success: "#15803D",
   successLight: "#ECFDF5",
-  warning: "#D97706",
-  warningLight: "#FFFBEB",
+  warning: "#CA8A04",
+  warningLight: "#FEF3C7",
   error: "#DC2626",
   errorLight: "#FEF2F2",
 } as const;
@@ -89,7 +90,7 @@ export const styles = {
   } satisfies CSSProperties,
 
   card: {
-    backgroundColor: "#F8FAFC",
+    backgroundColor: brand.surfaceMuted,
     border: `1px solid ${brand.border}`,
     borderRadius: "10px",
     padding: "20px 24px",
@@ -146,7 +147,7 @@ export const styles = {
 
   footerSection: {
     padding: "24px 40px 32px",
-    backgroundColor: "#F8FAFC",
+    backgroundColor: brand.surfaceMuted,
   } satisfies CSSProperties,
 
   footer: {

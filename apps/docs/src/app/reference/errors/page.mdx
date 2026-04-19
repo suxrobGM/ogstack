@@ -29,7 +29,7 @@ All errors return JSON with a consistent shape:
 ## Handling errors
 
 ```ts
-const res = await fetch("https://api.ogstack.dev/api/images/generate", {
+const res = await fetch("https://api.ogstack.dev/images/generate", {
   method: "POST",
   headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
   body: JSON.stringify({ url, projectId }),

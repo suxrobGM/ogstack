@@ -5,7 +5,7 @@ Generate a full favicon bundle from any page. OGStack extracts brand signals (ex
 ## Endpoint
 
 ```bash
-curl -X POST https://api.ogstack.dev/api/images/generate \
+curl -X POST https://api.ogstack.dev/images/generate \
   -H "Authorization: Bearer og_live_xxxxxxxxxxxxxxxx" \
   -H "Content-Type: application/json" \
   -d '{
@@ -49,7 +49,7 @@ Call `GET /api/images/{id}/download` with JWT auth to get a `.zip` containing ev
 curl -L \
   -H "Authorization: Bearer <JWT>" \
   -o icons.zip \
-  https://api.ogstack.dev/api/images/{imageId}/download
+  https://api.ogstack.dev/images/{imageId}/download
 ```
 
 The dashboard also exposes a **Download** button on the image detail page — same endpoint, same zip.

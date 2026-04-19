@@ -9,7 +9,7 @@ In the dashboard, go to **API Keys** → **New key**. Give it a name and scope i
 ## 2. Call the API
 
 ```bash
-curl -X POST https://api.ogstack.dev/api/images/generate \
+curl -X POST https://api.ogstack.dev/images/generate \
   -H "Authorization: Bearer og_live_xxxxxxxxxxxxxxxx" \
   -H "Content-Type: application/json" \
   -d '{
@@ -46,7 +46,7 @@ Store `imageUrl` against your post — it's a permanent CDN URL.
 ## 3. Use the fetch API
 
 ```ts
-const res = await fetch("https://api.ogstack.dev/api/images/generate", {
+const res = await fetch("https://api.ogstack.dev/images/generate", {
   method: "POST",
   headers: {
     Authorization: `Bearer ${process.env.OGSTACK_API_KEY}`,
