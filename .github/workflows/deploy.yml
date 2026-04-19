@@ -19,7 +19,7 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [prod]
+    branches: [ prod ]
   workflow_dispatch:
 
 env:
@@ -71,13 +71,16 @@ jobs:
           context: .
           file: ${{ matrix.file }}
           push: true
-          tags: ${{ env.REGISTRY }}/${{ steps.repo.outputs.name }}/${{ matrix.image }}:latest
+          tags: ${{ env.REGISTRY }}/${{ steps.repo.outputs.name }}/${{ matrix.image
+            }}:latest
           build-args: |
             NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
             NEXT_PUBLIC_DEMO_PROJECT_ID=${{ vars.NEXT_PUBLIC_DEMO_PROJECT_ID }}
             NEXT_PUBLIC_DOCS_URL=${{ vars.NEXT_PUBLIC_DOCS_URL }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ steps.repo.outputs.name }}/${{ matrix.image }}:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ steps.repo.outputs.name }}/${{ matrix.image }}:buildcache,mode=max
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ steps.repo.outputs.name
+            }}/${{ matrix.image }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ steps.repo.outputs.name
+            }}/${{ matrix.image }}:buildcache,mode=max
 
   deploy:
     name: Deploy to VPS
@@ -118,9 +121,8 @@ jobs:
           script: |
             cd ${{ env.APP_DIR }}
 
-            # Add GHCR variables for docker-compose image references
-            REPO_LOWER=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')
-            echo "GITHUB_REPOSITORY=$REPO_LOWER" >> .env
+            # GHCR requires lowercase image names.
+            export GITHUB_REPOSITORY=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')
 
             # Pull new images while old containers are still running
             docker compose pull
