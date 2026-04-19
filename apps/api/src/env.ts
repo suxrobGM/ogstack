@@ -11,7 +11,6 @@ const EnvSchema = t.Object({
     t.Union([t.Literal("development"), t.Literal("production"), t.Literal("staging")]),
   ),
   CORS_ORIGINS: t.Optional(t.String({ default: "http://localhost:4001" })),
-  API_PUBLIC_URL: t.Optional(t.String({ default: "http://localhost:5000" })),
   LOG_LEVEL: t.Optional(t.String({ default: "info" })),
   UPLOAD_DIR: t.Optional(t.String({ default: "./uploads" })),
 
@@ -31,9 +30,11 @@ const EnvSchema = t.Object({
 
   GITHUB_CLIENT_ID: t.Optional(t.String()),
   GITHUB_CLIENT_SECRET: t.Optional(t.String()),
+  GITHUB_CALLBACK_URL: t.String({ default: "http://localhost:5000/api/auth/github/callback" }),
 
   GOOGLE_CLIENT_ID: t.Optional(t.String()),
   GOOGLE_CLIENT_SECRET: t.Optional(t.String()),
+  GOOGLE_CALLBACK_URL: t.String({ default: "http://localhost:5000/api/auth/google/callback" }),
 
   STRIPE_SECRET_KEY: t.Optional(t.String()),
   STRIPE_WEBHOOK_SECRET: t.Optional(t.String()),
@@ -75,16 +76,24 @@ declare global {
 }
 
 /**
- * Validates environment variables against the defined schema.
- * Throws an error if validation fails, preventing the application from starting with invalid configuration.
+ * Validates environment variables against the defined schema and writes any
+ * schema-declared defaults back into `process.env`, so consumers can read
+ * `process.env.FOO!` directly without repeating `?? "default"` at every call site.
+ * Throws on validation failure to prevent startup with invalid configuration.
  */
 export function validateEnv(): void {
-  const converted = Value.Convert(EnvSchema, { ...process.env });
-  const defaults = Value.Default(EnvSchema, converted);
+  const converted = Value.Convert(EnvSchema, { ...process.env }) as Record<string, unknown>;
+  const defaults = Value.Default(EnvSchema, converted) as Record<string, unknown>;
   const errors = [...Value.Errors(EnvSchema, defaults)];
 
   if (errors.length) {
     const messages = errors.map((e) => `  ${e.path.slice(1)}: ${e.message}`).join("\n");
     throw new Error(`Environment validation failed:\n${messages}`);
+  }
+
+  for (const [key, value] of Object.entries(defaults)) {
+    if (value !== undefined && !process.env[key]) {
+      process.env[key] = String(value);
+    }
   }
 }

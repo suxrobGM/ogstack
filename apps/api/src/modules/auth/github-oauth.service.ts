@@ -10,8 +10,8 @@ export class GitHubOAuthService {
   /** Build the GitHub authorization URL with a random state parameter. */
   getAuthUrl(state: string): string {
     const params = new URLSearchParams({
-      client_id: process.env.GITHUB_CLIENT_ID ?? "",
-      redirect_uri: `${process.env.API_PUBLIC_URL ?? "http://localhost:5000"}/api/auth/github/callback`,
+      client_id: process.env.GITHUB_CLIENT_ID!,
+      redirect_uri: process.env.GITHUB_CALLBACK_URL!,
       scope: "user:email",
       state,
     });

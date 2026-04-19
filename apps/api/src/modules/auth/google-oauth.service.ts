@@ -10,8 +10,8 @@ export class GoogleOAuthService {
   /** Build the Google authorization URL with a random state parameter. */
   getAuthUrl(state: string): string {
     const params = new URLSearchParams({
-      client_id: process.env.GOOGLE_CLIENT_ID ?? "",
-      redirect_uri: `${process.env.API_PUBLIC_URL ?? "http://localhost:5000"}/api/auth/google/callback`,
+      client_id: process.env.GOOGLE_CLIENT_ID!,
+      redirect_uri: process.env.GOOGLE_CALLBACK_URL!,
       response_type: "code",
       scope: "openid email profile",
       access_type: "offline",
@@ -35,7 +35,7 @@ export class GoogleOAuthService {
         client_secret: process.env.GOOGLE_CLIENT_SECRET,
         code,
         grant_type: "authorization_code",
-        redirect_uri: `${process.env.API_PUBLIC_URL ?? "http://localhost:5000"}/api/auth/google/callback`,
+        redirect_uri: process.env.GOOGLE_CALLBACK_URL,
       }),
     });
 
