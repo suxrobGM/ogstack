@@ -74,10 +74,7 @@ Both servers pre-approved in `.claude/settings.json` to avoid repeated prompts d
 ```json
 {
   "permissions": {
-    "allow": [
-      "mcp__github__*",
-      "mcp__context7__*"
-    ]
+    "allow": ["mcp__github__*", "mcp__context7__*"]
   }
 }
 ```

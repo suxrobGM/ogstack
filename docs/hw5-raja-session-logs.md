@@ -40,18 +40,18 @@ Page "projects" scaffolded successfully!
 
 ### Gaps found in v1 after review:
 
-1. **Wrong server client reference**: The skill template used `apiServer.api.users.me.get()` 
-   but the actual export from `api-server.ts` is `getServerClient()`. Had to read the file 
+1. **Wrong server client reference**: The skill template used `apiServer.api.users.me.get()`
+   but the actual export from `api-server.ts` is `getServerClient()`. Had to read the file
    first to catch this.
 
-2. **No pagination controls**: The list fetched paginated data but never rendered 
-   page navigation — `data.pagination.totalPages` was available but unused. Users 
+2. **No pagination controls**: The list fetched paginated data but never rendered
+   page navigation — `data.pagination.totalPages` was available but unused. Users
    would be stuck on page 1 forever.
 
-3. **Hardcoded limit**: Used `limit: 10` instead of importing `PAGINATION_DEFAULTS` 
+3. **Hardcoded limit**: Used `limit: 10` instead of importing `PAGINATION_DEFAULTS`
    from constants, breaking consistency with the rest of the app.
 
-4. **No create flow**: The --list flag dropped a Button with no handler. For 
+4. **No create flow**: The --list flag dropped a Button with no handler. For
    resource management pages this is almost always needed immediately.
 
 5. **No ROUTES update**: Added the page but forgot to register the route in constants.ts.
@@ -112,7 +112,7 @@ Page "api-keys" scaffolded successfully!
 ### What v2 got right vs v1:
 
 - Correct `getServerClient()` import (read the file before generating)
-- `<Pagination>` component rendered and wired to `totalPages`  
+- `<Pagination>` component rendered and wired to `totalPages`
 - `PAGINATION_DEFAULTS` used instead of hardcoded limit
 - `--crud` flag generated a full `CreateApiKeyDialog` with proper "show key once" UX
 - ROUTES constant updated automatically
