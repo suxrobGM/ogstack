@@ -8,9 +8,17 @@ import type { Metadata } from "next";
 import { Surface } from "@/components/ui/layout/surface";
 
 export const metadata: Metadata = {
-  title: "Contact — OGStack",
+  title: "Contact",
   description:
-    "Talk to OGStack. Email for sales, GitHub for issues, or the in-app feedback menu for product ideas.",
+    "Talk to OGStack. Email for sales, GitHub for issues, or the in-app feedback menu for product ideas and feature requests.",
+  keywords: [
+    "contact ogstack",
+    "ogstack support",
+    "ogstack sales",
+    "og image api contact",
+    "ogstack feedback",
+  ],
+  alternates: { canonical: "/contact" },
 };
 
 interface Channel {

@@ -10,9 +10,7 @@ export interface HeaderAction {
 }
 
 export interface ShellConfig {
-  title: string;
   subtitle?: string;
-  mobileTitle: string;
   navItems: readonly NavEntry[];
   headerAction?: HeaderAction;
   showAdminLink: boolean;
@@ -21,17 +19,13 @@ export interface ShellConfig {
 export function getShellConfig(variant: ShellVariant): ShellConfig {
   if (variant === "admin") {
     return {
-      title: "OGStack",
       subtitle: "Admin",
-      mobileTitle: "OGStack Admin",
       navItems: ADMIN_NAV_ITEMS,
       headerAction: { label: "Back to Dashboard", href: ROUTES.overview, icon: "arrowBack" },
       showAdminLink: false,
     };
   }
   return {
-    title: "OGStack",
-    mobileTitle: "OGStack",
     navItems: SIDEBAR_NAV_ITEMS,
     showAdminLink: true,
   };

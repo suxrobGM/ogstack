@@ -3,9 +3,12 @@ import { Stack, Typography } from "@mui/material";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — OGStack",
+  title: "Terms of Service",
   description:
     "The terms that govern your use of the OGStack API, dashboard, and generated images.",
+  keywords: ["ogstack terms", "terms of service", "api terms", "usage terms"],
+  alternates: { canonical: "/terms" },
+  robots: { index: true, follow: false },
 };
 
 export default function TermsPage(): ReactElement {

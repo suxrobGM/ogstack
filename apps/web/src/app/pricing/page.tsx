@@ -1,7 +1,23 @@
 import type { ReactElement } from "react";
 import { Box, Button, Container, Typography } from "@mui/material";
+import type { Metadata } from "next";
 import { PricingSection } from "@/components/features/landing";
 import { line } from "@/theme/palette";
+
+export const metadata: Metadata = {
+  title: "Pricing",
+  description:
+    "Simple, transparent OGStack pricing. Generous free tier, unlimited non-AI renders on every plan, and metered AI usage. Upgrade for premium AI quality and higher caps.",
+  keywords: [
+    "ogstack pricing",
+    "og image generator pricing",
+    "free og image api",
+    "open graph api pricing",
+    "ai image pricing",
+    "favicon generator pricing",
+  ],
+  alternates: { canonical: "/pricing" },
+};
 
 export default function PricingPage(): ReactElement {
   return (

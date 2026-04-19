@@ -7,7 +7,7 @@ export const UsageStatsSchema = t.Object({
   aiImageCount: t.Number(),
   aiImageLimit: t.Number(),
   aiProImageCount: t.Number(),
-  aiProImageLimit: t.Number({ description: "Sub-cap on Flux 2 Pro; 0 means disabled" }),
+  aiProImageLimit: t.Number({ description: "Sub-cap on Pro model; 0 means disabled" }),
   aiAuditCount: t.Number(),
   aiAuditLimit: t.Number(),
   cacheHits: t.Number(),

@@ -15,6 +15,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import { AppLogo } from "@/components/icons";
 import { DOCS_URL, ROUTES } from "@/lib/constants";
 import { line, surfaces } from "@/theme/palette";
 import { fontFamilies } from "@/theme/typography";
@@ -69,7 +70,7 @@ export function LandingNavbar(): ReactElement {
             py: 2,
           }}
         >
-          <Logo />
+          <AppLogo />
 
           {!isMobile && (
             <Stack direction="row" spacing={3.5} sx={{ alignItems: "center" }}>
@@ -121,7 +122,7 @@ export function LandingNavbar(): ReactElement {
             direction="row"
             sx={{ justifyContent: "space-between", alignItems: "center", px: 3, py: 2 }}
           >
-            <Logo />
+            <AppLogo />
             <IconButton aria-label="Close navigation" onClick={() => setDrawerOpen(false)}>
               <CloseIcon />
             </IconButton>
@@ -159,41 +160,6 @@ export function LandingNavbar(): ReactElement {
           </Stack>
         </Stack>
       </Drawer>
-    </Box>
-  );
-}
-
-function Logo(): ReactElement {
-  return (
-    <Box
-      component="a"
-      href={ROUTES.home}
-      sx={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 1.25,
-        textDecoration: "none",
-      }}
-    >
-      <Box
-        component="img"
-        src="/logo-mark.svg"
-        alt=""
-        sx={{ width: 28, height: 28, display: "block" }}
-      />
-      <Typography
-        component="span"
-        sx={{
-          fontFamily: fontFamilies.body,
-          fontWeight: 600,
-          fontSize: 16,
-          letterSpacing: "-0.5px",
-          color: "text.primary",
-          "& span": { color: "accent.primary" },
-        }}
-      >
-        og<span>stack</span>
-      </Typography>
     </Box>
   );
 }

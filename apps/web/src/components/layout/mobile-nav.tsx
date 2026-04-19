@@ -5,6 +5,7 @@ import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { Box, Divider, List, Stack, Typography } from "@mui/material";
 import { isAdminRole } from "@ogstack/shared";
 import { usePathname } from "next/navigation";
+import { AppLogo } from "@/components/icons/app-logo";
 import { ROUTES } from "@/lib/constants";
 import { useAuth } from "@/providers/auth-provider";
 import { line } from "@/theme/palette";
@@ -31,7 +32,7 @@ export function MobileNav(props: MobileNavProps): ReactElement {
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }} onClick={onClose}>
       <Box sx={{ p: 3, pb: 2 }}>
         <Stack spacing={0.25}>
-          <Typography variant="h5">{config.title}</Typography>
+          <AppLogo />
           {config.subtitle && <Typography variant="overlineMuted">{config.subtitle}</Typography>}
         </Stack>
       </Box>

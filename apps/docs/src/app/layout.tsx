@@ -1,6 +1,7 @@
 import "nextra-theme-docs/style.css";
 import "./global.css";
 import { type PropsWithChildren, type ReactElement } from "react";
+import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Sans, JetBrains_Mono, Newsreader } from "next/font/google";
 import Image from "next/image";
 import { Layout, Navbar } from "nextra-theme-docs";
@@ -28,13 +29,83 @@ const jetBrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-export const metadata = {
+const DOCS_URL = "https://docs.ogstack.dev";
+
+export const metadata: Metadata = {
+  metadataBase: new URL(DOCS_URL),
   title: {
-    default: "OGStack Docs",
-    template: "%s | OGStack Docs",
+    default: "OGStack Docs — Guides, API reference & quickstarts",
+    template: "%s · OGStack Docs",
   },
   description:
-    "Branded Open Graph images, blog covers, and favicon sets. AI reads your page, one meta tag renders it.",
+    "Official OGStack documentation. Guides, quickstarts, concepts, and the full API reference for branded Open Graph images, blog covers, and favicon sets — AI reads your page, one meta tag renders it.",
+  applicationName: "OGStack Docs",
+  authors: [{ name: "OGStack", url: "https://ogstack.dev" }],
+  creator: "OGStack",
+  publisher: "OGStack",
+  keywords: [
+    "ogstack docs",
+    "ogstack documentation",
+    "og image api docs",
+    "open graph api reference",
+    "ogstack quickstart",
+    "ogstack guides",
+    "og image sdk",
+    "meta tag integration",
+    "ai og image api",
+    "favicon api docs",
+    "blog cover api",
+    "developer documentation",
+  ],
+  referrer: "origin-when-cross-origin",
+  formatDetection: { email: false, address: false, telephone: false },
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/apple-icon.svg", type: "image/svg+xml" }],
+    shortcut: [{ url: "/icon.svg", type: "image/svg+xml" }],
+  },
+  openGraph: {
+    type: "website",
+    siteName: "OGStack Docs",
+    locale: "en_US",
+    url: DOCS_URL,
+    images: [
+      {
+        url: "/og-image.svg",
+        width: 1200,
+        height: 630,
+        alt: "OGStack Docs — Guides, API reference, and quickstarts",
+        type: "image/svg+xml",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@ogstack",
+    creator: "@ogstack",
+    images: ["/og-image.svg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-snippet": -1,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+    },
+  },
+  alternates: { canonical: "/" },
+  category: "technology",
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F7F3ED" },
+    { media: "(prefers-color-scheme: dark)", color: "#1C1916" },
+  ],
+  colorScheme: "light dark",
 };
 
 const navbar = (

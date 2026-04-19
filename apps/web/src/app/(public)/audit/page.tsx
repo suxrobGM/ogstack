@@ -4,9 +4,21 @@ import type { Metadata } from "next";
 import { AuditLanding } from "@/components/features/audit/form";
 
 export const metadata: Metadata = {
-  title: "OG Audit — Score your Open Graph & SEO readiness · OGStack",
+  title: "OG Audit — Score your Open Graph & SEO readiness",
   description:
     "Paste any URL to grade its Open Graph tags, Twitter card, and SEO hygiene. See how it previews across X, Facebook, LinkedIn, Slack, Telegram, Discord, and Instagram.",
+  keywords: [
+    "og audit",
+    "open graph checker",
+    "twitter card validator",
+    "seo audit tool",
+    "link preview tester",
+    "social share preview",
+    "og tag checker",
+    "meta tag audit",
+    "free og audit",
+  ],
+  alternates: { canonical: "/audit" },
 };
 
 export default function PublicAuditPage(): ReactElement {

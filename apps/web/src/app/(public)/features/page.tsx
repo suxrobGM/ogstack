@@ -9,9 +9,19 @@ import {
 } from "@/components/features/landing";
 
 export const metadata: Metadata = {
-  title: "Features — OGStack",
+  title: "Features",
   description:
     "Content-aware AI image generation, AI audit recommendations, AI page analysis, hand-crafted templates, sub-500ms rendering, and a single meta tag.",
+  keywords: [
+    "og image features",
+    "ai content-aware images",
+    "og audit",
+    "og templates",
+    "meta tag api",
+    "og image caching",
+    "ogstack features",
+  ],
+  alternates: { canonical: "/features" },
 };
 
 export default function FeaturesPage(): ReactElement {

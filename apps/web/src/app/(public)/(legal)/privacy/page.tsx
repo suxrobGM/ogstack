@@ -3,9 +3,12 @@ import { Stack, Typography } from "@mui/material";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — OGStack",
+  title: "Privacy Policy",
   description:
     "How OGStack collects, uses, and protects data for account holders and URLs submitted to the platform.",
+  keywords: ["ogstack privacy", "privacy policy", "data protection", "gdpr"],
+  alternates: { canonical: "/privacy" },
+  robots: { index: true, follow: false },
 };
 
 export default function PrivacyPage(): ReactElement {

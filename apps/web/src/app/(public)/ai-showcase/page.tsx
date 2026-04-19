@@ -4,9 +4,18 @@ import type { Metadata } from "next";
 import { AiShowcaseSection, FinalCtaSection } from "@/components/features/landing";
 
 export const metadata: Metadata = {
-  title: "AI showcase — OGStack",
+  title: "AI showcase",
   description:
-    "Real URLs, real AI-generated previews. See what OGStack's content-aware image generation produces at Standard and Pro quality.",
+    "Real URLs, real AI-generated previews. See what OGStack's content-aware image generation produces at Standard and Pro quality — no manual prompting required.",
+  keywords: [
+    "ai og image examples",
+    "content-aware ai showcase",
+    "ai generated open graph",
+    "og image samples",
+    "ai preview generator",
+    "pro quality og",
+  ],
+  alternates: { canonical: "/ai-showcase" },
 };
 
 export default function AiShowcasePage(): ReactElement {

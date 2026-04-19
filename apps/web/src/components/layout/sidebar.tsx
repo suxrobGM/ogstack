@@ -9,6 +9,7 @@ import { Box, Button, Divider, IconButton, List, Stack, Tooltip, Typography } fr
 import { isAdminRole } from "@ogstack/shared";
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
+import { AppLogo } from "@/components/icons/app-logo";
 import { ROUTES } from "@/lib/constants";
 import { useAuth } from "@/providers/auth-provider";
 import { line } from "@/theme/palette";
@@ -65,7 +66,7 @@ export function Sidebar(props: SidebarProps): ReactElement {
       >
         {!collapsed && (
           <Stack spacing={0.25}>
-            <Typography variant="h5">{config.title}</Typography>
+            <AppLogo />
             {config.subtitle && <Typography variant="overlineMuted">{config.subtitle}</Typography>}
           </Stack>
         )}

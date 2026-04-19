@@ -5,9 +5,17 @@ import { FinalCtaSection } from "@/components/features/landing";
 import { Surface } from "@/components/ui/layout/surface";
 
 export const metadata: Metadata = {
-  title: "About — OGStack",
+  title: "About",
   description:
     "OGStack is a developer-first API platform for social preview images. Built to erase the design tax on every link you ship.",
+  keywords: [
+    "about ogstack",
+    "og image company",
+    "developer-first og",
+    "social preview platform",
+    "ogstack mission",
+  ],
+  alternates: { canonical: "/about" },
 };
 
 const VALUES = [

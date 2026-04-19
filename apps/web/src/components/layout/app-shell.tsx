@@ -2,7 +2,8 @@
 
 import { useState, type PropsWithChildren, type ReactElement } from "react";
 import MenuIcon from "@mui/icons-material/Menu";
-import { AppBar, Box, Drawer, IconButton, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Drawer, IconButton, Toolbar } from "@mui/material";
+import { AppLogo } from "@/components/icons/app-logo";
 import { line } from "@/theme/palette";
 import { motion } from "@/theme/tokens";
 import { MobileNav } from "./mobile-nav";
@@ -38,7 +39,7 @@ export function AppShell(props: AppShellProps): ReactElement {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h5">{config.mobileTitle}</Typography>
+          <AppLogo />
         </Toolbar>
       </AppBar>
 

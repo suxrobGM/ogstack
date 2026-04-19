@@ -9,9 +9,19 @@ import { fontFamilies } from "@/theme/typography";
 import { templateThumbnailUrl } from "@/utils/url";
 
 export const metadata: Metadata = {
-  title: "Templates — OGStack",
+  title: "Templates",
   description:
-    "Every OGStack template, in one place. Designs for blogs, docs, changelogs, product launches, GitHub repos, and more.",
+    "Every OGStack template in one place. Designs for blogs, docs, changelogs, product launches, GitHub repos, and more — all available on every plan.",
+  keywords: [
+    "og image templates",
+    "open graph templates",
+    "blog cover templates",
+    "social share templates",
+    "twitter card templates",
+    "og template gallery",
+    "ogstack templates",
+  ],
+  alternates: { canonical: "/template-gallery" },
 };
 
 interface TemplateEntry {

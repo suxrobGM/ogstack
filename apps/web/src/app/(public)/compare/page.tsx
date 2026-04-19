@@ -18,9 +18,19 @@ import { FinalCtaSection } from "@/components/features/landing";
 import { Surface } from "@/components/ui/layout/surface";
 
 export const metadata: Metadata = {
-  title: "Compare — OGStack vs. alternatives",
+  title: "Compare OGStack vs. alternatives",
   description:
-    "How OGStack compares to Vercel OG, Cloudinary, and manual screenshots for generating Open Graph images.",
+    "How OGStack compares to Vercel OG, Cloudinary, and manual screenshots for generating Open Graph images — features, pricing, and AI capabilities side-by-side.",
+  keywords: [
+    "ogstack vs vercel og",
+    "ogstack vs cloudinary",
+    "og image comparison",
+    "best og image generator",
+    "vercel og alternative",
+    "cloudinary alternative",
+    "og image api comparison",
+  ],
+  alternates: { canonical: "/compare" },
 };
 
 type Cell = boolean | "partial" | string;

@@ -27,10 +27,10 @@ Add `ai` to the request body:
 
 ## Models
 
-| Model     | Plan required | Notes                                                             |
-| --------- | ------------- | ----------------------------------------------------------------- |
-| `standard` | Free+        | Flux 2. Counts against monthly AI image quota.                    |
-| `pro`      | Pro           | Flux 2 Pro. Higher fidelity. Sub-capped within the AI image quota. |
+| Model      | Plan required | Notes                                                             |
+| ---------- | ------------- | ----------------------------------------------------------------- |
+| `standard` | Free+         | Standard model. Counts against monthly AI image quota.            |
+| `pro`      | Pro           | Pro model. Higher fidelity. Sub-capped within the AI image quota. |
 
 ## Prompt blending
 
@@ -77,11 +77,11 @@ Check `ai.fellBack` in your code if you need to log or surface this.
 
 On `GET /og/:publicId` / `GET /hero/:publicId`, AI options map to query parameters:
 
-| Body field      | Query parameter |
-| --------------- | --------------- |
-| `ai: true`      | `ai=true`       |
-| `ai.model`      | `aiModel=...`   |
-| `ai.prompt`     | `aiPrompt=...`  |
+| Body field  | Query parameter |
+| ----------- | --------------- |
+| `ai: true`  | `ai=true`       |
+| `ai.model`  | `aiModel=...`   |
+| `ai.prompt` | `aiPrompt=...`  |
 
 `override` is only available through the API, not the public meta-tag URL.
 

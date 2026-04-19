@@ -8,9 +8,18 @@ import {
 } from "@/components/features/landing";
 
 export const metadata: Metadata = {
-  title: "How it works — OGStack",
+  title: "How it works",
   description:
-    "From URL to on-brand preview in three steps: scrape, AI page analysis, and cached render. See the full pipeline.",
+    "From URL to on-brand preview in three steps: scrape, AI page analysis, and cached render. See the full OGStack pipeline.",
+  keywords: [
+    "how ogstack works",
+    "og image pipeline",
+    "url scraping og",
+    "ai page analysis",
+    "cached image rendering",
+    "meta tag integration",
+  ],
+  alternates: { canonical: "/how-it-works" },
 };
 
 export default function HowItWorksPage(): ReactElement {

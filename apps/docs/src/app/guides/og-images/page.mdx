@@ -12,18 +12,18 @@ The `url` parameter is required and must be URL-encoded. Its origin must match o
 
 ## Query parameters
 
-| Parameter       | Type    | Values                                                                                                   |
-| --------------- | ------- | -------------------------------------------------------------------------------------------------------- |
-| `url`           | string  | Required. URL-encoded target page.                                                                       |
-| `template`      | string  | Template slug (see [Templates](/guides/templates)). Default: `editorial`.                                |
-| `accent`        | hex     | `#RRGGBB`. URL-encode as `%23RRGGBB`.                                                                    |
-| `dark`          | boolean | `true` or `false`. Default: `true`.                                                                      |
-| `font`          | enum    | `inter`, `plus-jakarta-sans`, `space-grotesk`, `jetbrains-mono`, `noto-sans`, `instrument-serif`.        |
-| `logoUrl`       | string  | URL to a logo (PNG/SVG). URL-encoded.                                                                    |
-| `logoPosition`  | enum    | `top-left`, `top-right`, `bottom-left`, `bottom-right`.                                                  |
-| `ai`            | boolean | `true` to enable an AI-generated background with default model.                                          |
-| `aiModel`       | enum    | `standard` (Flux 2) or `pro` (Flux 2 Pro — Pro plan only).                                               |
-| `aiPrompt`      | string  | Up to 500 characters. Blended with page-derived context unless `override` is used in API calls.          |
+| Parameter      | Type    | Values                                                                                            |
+| -------------- | ------- | ------------------------------------------------------------------------------------------------- |
+| `url`          | string  | Required. URL-encoded target page.                                                                |
+| `template`     | string  | Template slug (see [Templates](/guides/templates)). Default: `editorial`.                         |
+| `accent`       | hex     | `#RRGGBB`. URL-encode as `%23RRGGBB`.                                                             |
+| `dark`         | boolean | `true` or `false`. Default: `true`.                                                               |
+| `font`         | enum    | `inter`, `plus-jakarta-sans`, `space-grotesk`, `jetbrains-mono`, `noto-sans`, `instrument-serif`. |
+| `logoUrl`      | string  | URL to a logo (PNG/SVG). URL-encoded.                                                             |
+| `logoPosition` | enum    | `top-left`, `top-right`, `bottom-left`, `bottom-right`.                                           |
+| `ai`           | boolean | `true` to enable an AI-generated background with default model.                                   |
+| `aiModel`      | enum    | `standard` or `pro` (High fidelity — Pro plan only).                                              |
+| `aiPrompt`     | string  | Up to 500 characters. Blended with page-derived context unless `override` is used in API calls.   |
 
 ## Response
 
@@ -48,7 +48,11 @@ The `url` parameter is required and must be URL-encoded. Its origin must match o
 ```tsx
 import type { Metadata } from "next";
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
   const pageUrl = `https://example.com/${params.slug}`;
   const ogImage = new URL(`https://api.ogstack.dev/og/${process.env.OGSTACK_PUBLIC_ID}`);
   ogImage.searchParams.set("url", pageUrl);

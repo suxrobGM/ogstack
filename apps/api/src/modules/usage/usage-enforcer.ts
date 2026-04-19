@@ -18,11 +18,11 @@ export function assertAiImageAllowed(plan: Plan, totals: UsageTotals, useProMode
   if (useProModel) {
     if (config.aiImageProLimit <= 0) {
       throw new PlanLimitError(
-        "Your plan does not include Flux 2 Pro model access. Upgrade to Pro to use it.",
+        "Your plan does not include Pro model access. Upgrade to Pro to use it.",
       );
     }
     if (totals.aiProImageCount >= config.aiImageProLimit) {
-      throw new PlanLimitError(`Monthly Flux 2 Pro quota of ${config.aiImageProLimit} exceeded.`);
+      throw new PlanLimitError(`Monthly Pro quota of ${config.aiImageProLimit} exceeded.`);
     }
   }
 }

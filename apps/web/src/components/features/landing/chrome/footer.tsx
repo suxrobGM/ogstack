@@ -123,14 +123,14 @@ export function Footer(): ReactElement {
             <Stack direction="row" spacing={0.5}>
               <IconButton
                 size="small"
-                href="https://github.com/"
+                href="https://github.com/suxrobgm/ogstack"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="GitHub"
               >
                 <GitHubIcon fontSize="small" />
               </IconButton>
-              <IconButton
+              {/* <IconButton
                 size="small"
                 href="https://x.com/"
                 target="_blank"
@@ -147,7 +147,7 @@ export function Footer(): ReactElement {
                 aria-label="LinkedIn"
               >
                 <LinkedInIcon fontSize="small" />
-              </IconButton>
+              </IconButton> */}
             </Stack>
           </Stack>
         </Container>
