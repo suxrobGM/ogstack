@@ -69,9 +69,11 @@ jobs:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
           JWT_SECRET: ci-test-jwt-secret-not-real
 
-      - name: Lint web
-        run: bun run lint
-        working-directory: apps/web
+      # Temporarily disabled: eslint-plugin-react 7.37.5 is incompatible with ESLint 10.
+      # Re-enable once eslint-plugin-react ships a fix for the `contextOrFilename.getFilename` API removal.
+      # - name: Lint web
+      #   run: bun run lint
+      #   working-directory: apps/web
 
       - name: Build web
         run: bun run build
