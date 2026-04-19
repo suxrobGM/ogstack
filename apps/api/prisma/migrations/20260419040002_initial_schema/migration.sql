@@ -5,6 +5,9 @@ CREATE TYPE "AuditAiStatus" AS ENUM ('PENDING', 'READY', 'FAILED', 'SKIPPED');
 CREATE TYPE "ImageFormat" AS ENUM ('PNG', 'JPEG', 'WEBP');
 
 -- CreateEnum
+CREATE TYPE "ImageKind" AS ENUM ('OG', 'BLOG_HERO', 'ICON_SET');
+
+-- CreateEnum
 CREATE TYPE "NotificationType" AS ENUM ('USAGE_ALERT', 'QUOTA_EXCEEDED', 'BILLING_EVENT', 'SYSTEM_ANNOUNCEMENT');
 
 -- CreateEnum
@@ -53,6 +56,7 @@ CREATE TABLE "images" (
     "project_id" UUID,
     "api_key_id" UUID,
     "template_id" UUID,
+    "kind" "ImageKind" NOT NULL DEFAULT 'OG',
     "category" TEXT,
     "source_url" TEXT,
     "cache_key" TEXT NOT NULL,
@@ -65,6 +69,7 @@ CREATE TABLE "images" (
     "height" INTEGER NOT NULL DEFAULT 630,
     "format" "ImageFormat" NOT NULL DEFAULT 'PNG',
     "file_size" INTEGER,
+    "assets" JSONB,
     "ai_model" TEXT,
     "ai_prompt" TEXT,
     "ai_enabled" BOOLEAN NOT NULL DEFAULT false,
@@ -284,6 +289,9 @@ CREATE INDEX "images_user_id_created_at_idx" ON "images"("user_id", "created_at"
 
 -- CreateIndex
 CREATE INDEX "images_user_id_category_idx" ON "images"("user_id", "category");
+
+-- CreateIndex
+CREATE INDEX "images_user_id_kind_idx" ON "images"("user_id", "kind");
 
 -- CreateIndex
 CREATE INDEX "images_source_url_idx" ON "images"("source_url");

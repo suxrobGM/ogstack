@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ci-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v5
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Format check
+        run: bun run prettier --check "**/*.{js,jsx,ts,tsx,css,json,md}"
+
+      - name: Generate Prisma client
+        run: bun run db:generate
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+
+      - name: Typecheck api
+        run: bun run typecheck
+        working-directory: apps/api
+
+      - name: Build api type declarations
+        run: bun run build:types
+        working-directory: apps/api
+
+      - name: Typecheck shared
+        run: bun run typecheck
+        working-directory: packages/shared
+
+      - name: Typecheck web
+        run: bun run typecheck
+        working-directory: apps/web
+
+      - name: Typecheck docs
+        run: bun run typecheck
+        working-directory: apps/docs
+
+      - name: Test api
+        run: bun test
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+          JWT_SECRET: ci-test-jwt-secret-not-real
+
+      - name: Lint web
+        run: bun run lint
+        working-directory: apps/web
+
+      - name: Build web
+        run: bun run build
+        working-directory: apps/web
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:5000
+          NEXT_PUBLIC_DEMO_PROJECT_ID: ""
+          NEXT_PUBLIC_DOCS_URL: http://localhost:5002
+
+      - name: Build docs
+        run: bun run build
+        working-directory: apps/docs
+
+      - name: Secret scanning
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Dependency audit
+        run: bun audit || echo "bun audit found issues (non-blocking for now)"
