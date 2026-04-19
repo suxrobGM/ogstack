@@ -21,6 +21,7 @@ import {
   OAuthRedirectQuerySchema,
   RefreshBodySchema,
   RegisterBodySchema,
+  RegisterResponseSchema,
   ResendVerificationBodySchema,
   ResetPasswordBodySchema,
   VerifyEmailBodySchema,
@@ -36,23 +37,15 @@ const WEBSITE_URL = process.env.WEBSITE_URL ?? "http://localhost:4001";
 
 export const authController = new Elysia({ prefix: "/auth", tags: ["Auth"] })
   .use(rateLimiter({ max: 10, windowMs: 60_000 }))
-  .post(
-    "/register",
-    async ({ body, cookie }) => {
-      const result = await authService.register(body);
-      setAuthCookies(cookie as Record<string, Cookie<unknown>>, result);
-      return result;
+  .post("/register", async ({ body }) => authService.register(body), {
+    body: RegisterBodySchema,
+    response: RegisterResponseSchema,
+    detail: {
+      summary: "Register a new user",
+      description:
+        "Create a new user account and send an email verification link. The user must verify their email before they can log in — no tokens are issued here.",
     },
-    {
-      body: RegisterBodySchema,
-      response: AuthResponseSchema,
-      detail: {
-        summary: "Register a new user",
-        description:
-          "Create a new user account with email and password. Automatically creates a default project and returns JWT access and refresh tokens.",
-      },
-    },
-  )
+  })
   .post(
     "/login",
     async ({ body, cookie }) => {

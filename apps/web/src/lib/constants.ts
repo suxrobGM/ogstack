@@ -7,6 +7,7 @@ export const ROUTES = {
   forgotPassword: "/forgot-password",
   resetPassword: "/reset-password",
   verifyEmail: "/verify-email",
+  verifyEmailSent: "/verify-email-sent",
   overview: "/overview" as Route,
   projects: "/projects" as Route,
   projectDetail: (id: string) => `/projects/${id}` as Route,

@@ -12,6 +12,7 @@ import type {
   ForgotPasswordBody,
   LoginBody,
   RegisterBody,
+  RegisterResponse,
   ResendVerificationBody,
   ResetPasswordBody,
   VerifyEmailBody,
@@ -28,8 +29,11 @@ export class AuthService {
     private readonly emailService: EmailService,
   ) {}
 
-  /** Register a new user and return auth tokens. */
-  async register(data: RegisterBody): Promise<AuthResponse> {
+  /**
+   * Register a new user. Sends a verification email and does NOT log the user
+   * in — tokens are only issued after the email has been verified.
+   */
+  async register(data: RegisterBody): Promise<RegisterResponse> {
     const { email, password, firstName, lastName } = data;
 
     const existing = await this.prisma.user.findUnique({ where: { email } });
@@ -43,12 +47,12 @@ export class AuthService {
       data: { email, passwordHash, firstName, lastName },
     });
 
-    const result = await buildAuthResponse(user);
+    await this.sendVerificationEmail(user.id);
 
-    // Send verification email (fire-and-forget)
-    void this.sendVerificationEmail(result.user.id);
-
-    return result;
+    return {
+      message: "Account created. Please check your email to verify your address before signing in.",
+      email: user.email,
+    };
   }
 
   /** Authenticate a user by email and password. */
@@ -63,6 +67,12 @@ export class AuthService {
     const valid = await verifyPassword(password, user.passwordHash);
     if (!valid) {
       throw new UnauthorizedError("Invalid email or password");
+    }
+
+    if (!user.emailVerified) {
+      throw new UnauthorizedError(
+        "Please verify your email address before signing in. Check your inbox for the verification link.",
+      );
     }
 
     return buildAuthResponse(user);

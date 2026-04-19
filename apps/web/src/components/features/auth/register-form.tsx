@@ -8,21 +8,26 @@ import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api/client";
 import { ROUTES } from "@/lib/constants";
-import { useAuth } from "@/providers/auth-provider";
-import type { AuthResponse } from "@/types/api";
 import { registerSchema } from "./schema";
 import type { RegisterPayload } from "./types";
 
+interface RegisterResponse {
+  message: string;
+  email: string;
+}
+
 export function RegisterForm(): ReactElement {
   const router = useRouter();
-  const { setUser } = useAuth();
 
-  const mutation = useApiMutation<AuthResponse, RegisterPayload>(
+  const mutation = useApiMutation<RegisterResponse, RegisterPayload>(
     (values) => client.api.auth.register.post(values),
     {
       onSuccess: (data) => {
-        setUser(data.user);
-        router.push(ROUTES.overview);
+        router.push(
+          `${ROUTES.verifyEmailSent}?email=${encodeURIComponent(data.email)}` as Parameters<
+            typeof router.push
+          >[0],
+        );
       },
       errorMessage: "Registration failed",
     },

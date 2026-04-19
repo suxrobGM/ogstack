@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, use, useState, type PropsWithChildren, type ReactElement } from "react";
-import { useRouter } from "next/navigation";
 import { client } from "@/lib/api/client";
 import { ROUTES } from "@/lib/constants";
 import type { AuthUser } from "@/types/api";
@@ -22,7 +21,6 @@ interface AuthProviderProps extends PropsWithChildren {
 
 export function AuthProvider(props: AuthProviderProps): ReactElement {
   const { initialUser, children } = props;
-  const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(initialUser);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -33,7 +31,9 @@ export function AuthProvider(props: AuthProviderProps): ReactElement {
     } finally {
       setUser(null);
       setIsLoading(false);
-      router.push(ROUTES.login);
+
+      // Redirect to login page after logout to clear any protected routes and reset state.
+      window.location.assign(ROUTES.login);
     }
   };
 

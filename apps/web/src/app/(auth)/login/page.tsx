@@ -1,4 +1,4 @@
-import { Suspense, type ReactElement } from "react";
+import type { ReactElement } from "react";
 import { AuthCard } from "@/components/features/auth/auth-card";
 import { LoginForm } from "@/components/features/auth/login-form";
 import { OAuthButtons } from "@/components/features/auth/oauth-buttons";
@@ -12,9 +12,7 @@ export default function LoginPage(): ReactElement {
       description="Sign in to your OGStack account"
       footer={{ text: "Don't have an account?", linkText: "Create one", href: ROUTES.register }}
     >
-      <Suspense>
-        <OAuthError />
-      </Suspense>
+      <OAuthError />
       <OAuthButtons />
       <LoginForm />
     </AuthCard>

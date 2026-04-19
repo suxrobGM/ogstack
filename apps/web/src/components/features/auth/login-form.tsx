@@ -1,7 +1,7 @@
 "use client";
 
-import type { ReactElement } from "react";
-import { Button, Link, Stack } from "@mui/material";
+import { useState, type ReactElement } from "react";
+import { Alert, Button, Link, Stack } from "@mui/material";
 import { isAdminRole } from "@ogstack/shared";
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
@@ -10,15 +10,18 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api/client";
 import { ROUTES } from "@/lib/constants";
 import { useAuth } from "@/providers/auth-provider";
-import { useToast } from "@/providers/notification-provider";
 import type { AuthResponse } from "@/types/api";
 import { loginSchema } from "./schema";
 import type { LoginPayload } from "./types";
 
+function isUnverifiedEmailError(message?: string | null): boolean {
+  return !!message && /verify your email/i.test(message);
+}
+
 export function LoginForm(): ReactElement {
   const router = useRouter();
   const { setUser } = useAuth();
-  const toast = useToast();
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
 
   const mutation = useApiMutation<AuthResponse, LoginPayload>(
     (values) => client.api.auth.login.post(values),
@@ -35,7 +38,14 @@ export function LoginForm(): ReactElement {
     defaultValues: { email: "", password: "" },
     validators: { onSubmit: loginSchema },
     onSubmit: async ({ value }) => {
-      mutation.mutate(value);
+      setUnverifiedEmail(null);
+      mutation.mutate(value, {
+        onError: (error) => {
+          if (isUnverifiedEmailError(error.message)) {
+            setUnverifiedEmail(value.email);
+          }
+        },
+      });
     },
   });
 
@@ -47,6 +57,18 @@ export function LoginForm(): ReactElement {
       }}
     >
       <Stack spacing={2.5}>
+        {unverifiedEmail && (
+          <Alert severity="warning" sx={{ borderRadius: 2 }}>
+            Please verify your email before signing in.{" "}
+            <Link
+              href={`${ROUTES.verifyEmailSent}?email=${encodeURIComponent(unverifiedEmail)}`}
+              underline="hover"
+            >
+              Resend verification email
+            </Link>
+            .
+          </Alert>
+        )}
         <FormTextField
           form={form}
           name="email"

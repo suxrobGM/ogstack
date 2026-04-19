@@ -3,6 +3,11 @@ import { mock } from "bun:test";
 import * as jose from "jose";
 import * as passwordUtils from "@/common/utils/password";
 
+process.env.DATABASE_URL ??= "postgresql://test:test@localhost:5432/test";
+process.env.JWT_SECRET ??= "test-jwt-secret";
+process.env.GITHUB_CALLBACK_URL ??= "http://localhost:5000/api/auth/github/callback";
+process.env.GOOGLE_CALLBACK_URL ??= "http://localhost:5000/api/auth/google/callback";
+
 /**
  * Capture real module exports BEFORE any test file calls mock.module().
  * Bun's mock.module() is process-global and persists across test files, so

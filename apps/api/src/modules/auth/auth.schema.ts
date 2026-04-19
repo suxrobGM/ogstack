@@ -32,6 +32,11 @@ export const AuthResponseSchema = t.Object({
   refreshToken: t.String(),
 });
 
+export const RegisterResponseSchema = t.Object({
+  message: t.String(),
+  email: t.String(),
+});
+
 export const ForgotPasswordBodySchema = t.Object({
   email: t.String({ format: "email" }),
 });
@@ -67,4 +72,5 @@ export type VerifyEmailBody = Static<typeof VerifyEmailBodySchema>;
 export type ResendVerificationBody = Static<typeof ResendVerificationBodySchema>;
 export type AuthUser = Static<typeof AuthUserSchema>;
 export type AuthResponse = Static<typeof AuthResponseSchema>;
+export type RegisterResponse = Static<typeof RegisterResponseSchema>;
 export type OAuthCallbackQuery = Static<typeof OAuthCallbackQuerySchema>;

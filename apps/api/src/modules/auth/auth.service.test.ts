@@ -56,7 +56,7 @@ function createMockUser(overrides = {}) {
     role: "USER",
     passwordHash: "hashed_password_123",
     avatarUrl: null,
-    emailVerified: false,
+    emailVerified: true,
     deletedAt: null,
     passwordResetToken: null,
     passwordResetExpiresAt: null,
@@ -95,7 +95,7 @@ describe("AuthService", () => {
   });
 
   describe("register", () => {
-    it("should register a new user and return tokens", async () => {
+    it("should register a new user and send a verification email without issuing tokens", async () => {
       const result = await authService.register({
         email: "test@example.com",
         password: "securePassword123",
@@ -103,12 +103,13 @@ describe("AuthService", () => {
         lastName: "User",
       });
 
-      expect(result).toHaveProperty("user");
-      expect(result).toHaveProperty("accessToken");
-      expect(result).toHaveProperty("refreshToken");
-      expect(result.user.email).toBe("test@example.com");
-      expect(result.user.firstName).toBe("Test");
-      expect(result.user.role).toBe("USER");
+      expect(result).toEqual({
+        message: expect.any(String),
+        email: "test@example.com",
+      });
+      expect(result).not.toHaveProperty("accessToken");
+      expect(result).not.toHaveProperty("refreshToken");
+      expect(mockEmailService.send).toHaveBeenCalled();
     });
 
     it("should throw ConflictError if email already exists", async () => {
@@ -200,6 +201,19 @@ describe("AuthService", () => {
           password: "securePassword123",
         }),
       ).rejects.toThrow("Invalid email or password");
+    });
+
+    it("should throw UnauthorizedError when email is not verified", () => {
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(
+        createMockUser({ emailVerified: false }),
+      );
+
+      expect(
+        authService.login({
+          email: "test@example.com",
+          password: "securePassword123",
+        }),
+      ).rejects.toThrow("verify your email");
     });
   });
 
