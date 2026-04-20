@@ -24,3 +24,15 @@ export function templateThumbnailUrl(slug: string, kind: ImageKind = "og"): stri
   const kindSuffix = kind === "blog_hero" ? "hero" : "og";
   return `/images/templates/${slug.replace(/_/g, "-")}-${kindSuffix}.webp`;
 }
+
+/**
+ * Appends a `t=<timestamp>` query param to a URL so browsers and CDNs re-fetch
+ * fresh bytes instead of serving a stale cached response. Used when displaying
+ * externally-hosted images that may have been regenerated under the same URL
+ * (e.g. scraped `og:image` values in the social preview and audit report).
+ */
+export function withCacheBust(url: string | null | undefined): string | null {
+  if (!url) return null;
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}t=${Date.now()}`;
+}

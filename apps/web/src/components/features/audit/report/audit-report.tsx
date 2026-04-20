@@ -3,6 +3,7 @@ import { Box, Divider, Grid, Stack, Typography } from "@mui/material";
 import { Surface } from "@/components/ui/layout/surface";
 import { fontFamilies } from "@/theme/typography";
 import type { PageAuditReportResponse } from "@/types/api";
+import { withCacheBust } from "@/utils/url";
 import { AiRecommendationsPanel, type AuditViewer } from "../ai-recommendations";
 import { CtaBanner } from "./cta-banner";
 import { IssueList } from "./issue-list";
@@ -17,6 +18,7 @@ interface AuditReportProps {
 export function AuditReport(props: AuditReportProps): ReactElement {
   const { report, viewer } = props;
   const failing = report.issues.filter((i) => !i.pass).length;
+  const previewMetadata = { ...report.metadata, image: withCacheBust(report.metadata.image) };
 
   return (
     <Stack spacing={5}>
@@ -67,7 +69,7 @@ export function AuditReport(props: AuditReportProps): ReactElement {
           How this URL appears when shared. Titles and descriptions reflect each platform&apos;s
           truncation rules.
         </Typography>
-        <PlatformPreviewGrid metadata={report.metadata} />
+        <PlatformPreviewGrid metadata={previewMetadata} />
       </Box>
 
       <Box>

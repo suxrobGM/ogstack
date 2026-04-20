@@ -10,7 +10,7 @@ import { Surface } from "@/components/ui/layout";
 import { useApiMutation } from "@/hooks";
 import { client } from "@/lib/api/client";
 import type { PageAuditPreviewMetadata } from "@/types/api";
-import { normalizeUrlInput } from "@/utils/url";
+import { normalizeUrlInput, withCacheBust } from "@/utils/url";
 import { socialPreviewSchema, type SocialPreviewValues } from "./schema";
 
 export function SocialPreviewTool(): ReactElement {
@@ -20,7 +20,8 @@ export function SocialPreviewTool(): ReactElement {
     (body: SocialPreviewValues) => client.api.audits.preview.post(body),
     {
       errorMessage: (err) => err.message,
-      onSuccess: (data) => setMetadata(data.metadata),
+      onSuccess: (data) =>
+        setMetadata({ ...data.metadata, image: withCacheBust(data.metadata.image) }),
     },
   );
 
