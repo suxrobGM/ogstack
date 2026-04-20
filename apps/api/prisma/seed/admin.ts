@@ -19,6 +19,7 @@ export async function seedAdmin(): Promise<void> {
       passwordHash,
       role: "SUPER_ADMIN",
       deletedAt: null,
+      emailVerified: true,
     },
     create: {
       email,
@@ -26,6 +27,7 @@ export async function seedAdmin(): Promise<void> {
       firstName: "Admin",
       lastName: "",
       role: "SUPER_ADMIN",
+      emailVerified: true,
     },
   });
 

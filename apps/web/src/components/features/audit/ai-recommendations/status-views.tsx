@@ -10,7 +10,7 @@ export function PendingView(): ReactElement {
         <PanelHeader />
         <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
           <CircularProgress size={18} />
-          <Typography variant="body2Muted">Analyzing with AI — usually 5–15 seconds.</Typography>
+          <Typography variant="body2Muted">Analyzing with AI - usually 30-60 seconds.</Typography>
         </Stack>
       </Stack>
     </Surface>

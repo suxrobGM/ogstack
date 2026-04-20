@@ -21,7 +21,6 @@ interface PageContextParams extends AnalyzeParams {
 }
 
 interface ResolveAiParams extends PageContextParams {
-  plan: Plan;
   metadata: UrlMetadata;
 }
 
@@ -50,8 +49,8 @@ export class PageAnalysisService {
   ) {}
 
   async analyze(params: AnalyzeParams): Promise<PageAnalysisResult> {
-    const { plan, metadata } = await this.scrapeForPlan(params.userId, params.url);
-    const { ai, cached } = await this.resolveAi({ ...params, plan, metadata });
+    const metadata = await this.scraper.extractMetadata(params.url);
+    const { ai, cached } = await this.resolveAi({ ...params, metadata });
 
     return {
       metadata: toPublicMetadata(metadata),
@@ -70,8 +69,8 @@ export class PageAnalysisService {
     metadata: UrlMetadata;
     ai: PageAnalysisAi | null;
   }> {
-    const { plan, metadata } = await this.scrapeForPlan(params.userId, params.url);
-    const { ai } = await this.resolveAi({ ...params, plan, metadata });
+    const metadata = await this.scraper.extractMetadata(params.url);
+    const { ai } = await this.resolveAi({ ...params, metadata });
     return { metadata, ai };
   }
 
@@ -91,9 +90,9 @@ export class PageAnalysisService {
   private async resolveAi(
     params: ResolveAiParams,
   ): Promise<{ ai: PageAnalysisAi | null; cached: boolean }> {
-    const { plan, metadata, url, userId, userPrompt, fullOverride, skipAi, cacheOnly } = params;
+    const { metadata, url, userId, userPrompt, fullOverride, skipAi, cacheOnly } = params;
 
-    const canUseAi = plan !== Plan.FREE && this.analyzer.isEnabled() && !skipAi;
+    const canUseAi = this.analyzer.isEnabled() && !skipAi;
     if (fullOverride || !canUseAi) {
       return { ai: null, cached: false };
     }
@@ -123,17 +122,6 @@ export class PageAnalysisService {
     });
 
     return { ai, cached: false };
-  }
-
-  private async scrapeForPlan(
-    userId: string | null,
-    url: string,
-  ): Promise<{ plan: Plan; metadata: UrlMetadata }> {
-    const plan = await this.resolvePlan(userId);
-    const metadata = await this.scraper.extractMetadata(url, {
-      allowHeadless: plan !== Plan.FREE,
-    });
-    return { plan, metadata };
   }
 
   private async resolvePlan(userId: string | null): Promise<Plan> {
