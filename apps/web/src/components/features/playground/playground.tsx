@@ -190,7 +190,7 @@ export function Playground(props: PlaygroundProps): ReactElement {
       : null;
 
   return (
-    <Grid container spacing={3}>
+    <Grid container spacing={{ xs: 2, md: 3 }}>
       {usageStats && (
         <Grid size={{ xs: 12 }}>
           <UsageMeter stats={usageStats} />

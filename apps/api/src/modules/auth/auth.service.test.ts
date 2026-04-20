@@ -70,6 +70,7 @@ function createMockPrisma() {
   return {
     user: {
       findUnique: mock(() => Promise.resolve(null)),
+      findFirst: mock(() => Promise.resolve(null)),
       create: mock(() => Promise.resolve(createMockUser())),
       update: mock(() => Promise.resolve(createMockUser())),
     },
@@ -113,7 +114,7 @@ describe("AuthService", () => {
     });
 
     it("should throw ConflictError if email already exists", async () => {
-      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValueOnce({
+      (mockPrisma.user.findFirst as ReturnType<typeof mock>).mockResolvedValueOnce({
         id: "existing-user",
         email: "taken@example.com",
       });
@@ -139,6 +140,22 @@ describe("AuthService", () => {
       expect(hashPassword).toHaveBeenCalledWith("securePassword123");
     });
 
+    it("should normalize email to lowercase on register", async () => {
+      await authService.register({
+        email: "  Mixed@Case.COM  ",
+        password: "securePassword123",
+        firstName: "Test",
+        lastName: "User",
+      });
+
+      expect(mockPrisma.user.findFirst).toHaveBeenCalledWith({
+        where: { email: { equals: "Mixed@Case.COM", mode: "insensitive" } },
+      });
+      const createCall = (mockPrisma.user.create as ReturnType<typeof mock>).mock.calls[0];
+      const createData = (createCall as unknown[])[0] as { data: { email: string } };
+      expect(createData.data.email).toBe("mixed@case.com");
+    });
+
     it("should not create a default project for the new user", async () => {
       await authService.register({
         email: "test@example.com",
@@ -153,7 +170,7 @@ describe("AuthService", () => {
 
   describe("login", () => {
     it("should login with valid credentials and return tokens", async () => {
-      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(createMockUser());
+      (mockPrisma.user.findFirst as ReturnType<typeof mock>).mockResolvedValue(createMockUser());
 
       const result = await authService.login({
         email: "test@example.com",
@@ -166,8 +183,21 @@ describe("AuthService", () => {
       expect(result.user.email).toBe("test@example.com");
     });
 
+    it("should match email case-insensitively and trim whitespace", async () => {
+      (mockPrisma.user.findFirst as ReturnType<typeof mock>).mockResolvedValue(createMockUser());
+
+      await authService.login({
+        email: "  TEST@Example.COM  ",
+        password: "securePassword123",
+      });
+
+      expect(mockPrisma.user.findFirst).toHaveBeenCalledWith({
+        where: { email: { equals: "TEST@Example.COM", mode: "insensitive" } },
+      });
+    });
+
     it("should throw UnauthorizedError for non-existent email", () => {
-      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
+      (mockPrisma.user.findFirst as ReturnType<typeof mock>).mockResolvedValue(null);
 
       expect(
         authService.login({
@@ -178,7 +208,7 @@ describe("AuthService", () => {
     });
 
     it("should throw UnauthorizedError for wrong password", () => {
-      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(createMockUser());
+      (mockPrisma.user.findFirst as ReturnType<typeof mock>).mockResolvedValue(createMockUser());
 
       (verifyPassword as ReturnType<typeof mock>).mockResolvedValueOnce(false);
 
@@ -191,7 +221,7 @@ describe("AuthService", () => {
     });
 
     it("should throw UnauthorizedError for deleted user", () => {
-      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(
+      (mockPrisma.user.findFirst as ReturnType<typeof mock>).mockResolvedValue(
         createMockUser({ deletedAt: new Date() }),
       );
 
@@ -204,7 +234,7 @@ describe("AuthService", () => {
     });
 
     it("should throw UnauthorizedError when email is not verified", () => {
-      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(
+      (mockPrisma.user.findFirst as ReturnType<typeof mock>).mockResolvedValue(
         createMockUser({ emailVerified: false }),
       );
 

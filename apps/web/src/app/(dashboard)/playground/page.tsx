@@ -27,7 +27,7 @@ export default async function PlaygroundPage(props: PlaygroundPageProps): Promis
   ]);
 
   return (
-    <Stack spacing={3}>
+    <Stack spacing={{ xs: 2, md: 3 }}>
       <PageHeader
         title="Playground"
         description="Preview and customize OG images, blog heroes, and favicon sets for any URL."

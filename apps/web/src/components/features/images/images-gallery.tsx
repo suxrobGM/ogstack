@@ -140,7 +140,7 @@ export function ImagesGallery(props: ImagesGalleryProps): ReactElement {
   };
 
   return (
-    <Stack spacing={3}>
+    <Stack spacing={{ xs: 2, md: 3 }}>
       {!hideHeader && (
         <PageHeader
           title="Generated Images"

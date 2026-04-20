@@ -37,14 +37,14 @@ export function TemplateGallery(props: TemplateGalleryProps): ReactElement {
     ASPECT_PREVIEW_OPTIONS.find((o) => o.value === aspectPreview)?.cssAspect ?? "1200 / 630";
 
   return (
-    <Stack spacing={3}>
+    <Stack spacing={{ xs: 2, md: 3 }}>
       <PageHeader
         title="Templates"
         description="Browse our template library and preview with your content. Every template renders at any supported size — pick your aspect at render time."
       />
 
       <Stack spacing={1.5}>
-        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
+        <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
           {ASPECT_PREVIEW_OPTIONS.map((option) => (
             <Chip
               key={option.value}
@@ -56,7 +56,7 @@ export function TemplateGallery(props: TemplateGalleryProps): ReactElement {
           ))}
         </Stack>
 
-        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
+        <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
           <Chip
             label="All"
             color={selectedCategory === "all" ? "primary" : "default"}
@@ -75,7 +75,7 @@ export function TemplateGallery(props: TemplateGalleryProps): ReactElement {
         </Stack>
       </Stack>
 
-      <Grid container spacing={2}>
+      <Grid container spacing={{ xs: 1.5, sm: 2 }}>
         {visible.map((template) => (
           <Grid key={template.slug} size={{ xs: 12, sm: 6, md: 4 }}>
             <Box

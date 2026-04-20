@@ -35,8 +35,11 @@ export class AuthService {
    */
   async register(data: RegisterBody): Promise<RegisterResponse> {
     const { email, password, firstName, lastName } = data;
+    const trimmedEmail = email.trim();
 
-    const existing = await this.prisma.user.findUnique({ where: { email } });
+    const existing = await this.prisma.user.findFirst({
+      where: { email: { equals: trimmedEmail, mode: "insensitive" } },
+    });
     if (existing) {
       throw new ConflictError("A user with this email already exists");
     }
@@ -44,7 +47,7 @@ export class AuthService {
     const passwordHash = await hashPassword(password);
 
     const user = await this.prisma.user.create({
-      data: { email, passwordHash, firstName, lastName },
+      data: { email: trimmedEmail.toLowerCase(), passwordHash, firstName, lastName },
     });
 
     await this.sendVerificationEmail(user.id);
@@ -59,7 +62,9 @@ export class AuthService {
   async login(data: LoginBody): Promise<AuthResponse> {
     const { email, password } = data;
 
-    const user = await this.prisma.user.findUnique({ where: { email } });
+    const user = await this.prisma.user.findFirst({
+      where: { email: { equals: email.trim(), mode: "insensitive" } },
+    });
     if (!user || user.deletedAt || !user.passwordHash) {
       throw new UnauthorizedError("Invalid email or password");
     }
