@@ -4,7 +4,6 @@ import { useState, type ReactElement } from "react";
 import { Alert, Button, Link, Stack } from "@mui/material";
 import { isAdminRole } from "@ogstack/shared";
 import { useForm } from "@tanstack/react-form";
-import { useRouter } from "next/navigation";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useRecaptcha } from "@/hooks/use-recaptcha";
@@ -20,7 +19,6 @@ function isUnverifiedEmailError(message?: string | null): boolean {
 }
 
 export function LoginForm(): ReactElement {
-  const router = useRouter();
   const { setUser } = useAuth();
   const { executeRecaptcha } = useRecaptcha();
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
@@ -30,7 +28,11 @@ export function LoginForm(): ReactElement {
     {
       onSuccess: (data) => {
         setUser(data.user);
-        router.push(isAdminRole(data.user.role) ? ROUTES.adminOverview : ROUTES.overview);
+
+        // Full redirect to dashboard page to avoid stale Next.js cache after login
+        window.location.assign(
+          isAdminRole(data.user.role) ? ROUTES.adminOverview : ROUTES.overview,
+        );
       },
       errorMessage: "Invalid email or password",
     },
