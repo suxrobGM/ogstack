@@ -49,7 +49,7 @@ export function RegisterForm(): ReactElement {
       }}
     >
       <Stack spacing={2.5}>
-        <Stack direction="row" spacing={2}>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={{ xs: 2.5, sm: 2 }}>
           <FormTextField
             form={form}
             name="firstName"

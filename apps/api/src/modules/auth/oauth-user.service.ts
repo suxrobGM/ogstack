@@ -25,6 +25,7 @@ export class OAuthUserService {
     profile: OAuthProfile,
   ): Promise<AuthResponse> {
     const providerIdField = provider === "github" ? "githubId" : "googleId";
+    const normalizedEmail = profile.email.trim().toLowerCase();
 
     const existingByProvider = await this.prisma.user.findUnique({
       where: { [providerIdField]: profile.id } as any,
@@ -43,8 +44,8 @@ export class OAuthUserService {
       return buildAuthResponse(existingByProvider);
     }
 
-    const existingByEmail = await this.prisma.user.findUnique({
-      where: { email: profile.email },
+    const existingByEmail = await this.prisma.user.findFirst({
+      where: { email: { equals: normalizedEmail, mode: "insensitive" } },
     });
 
     if (existingByEmail) {
@@ -64,7 +65,7 @@ export class OAuthUserService {
 
     const user = await this.prisma.user.create({
       data: {
-        email: profile.email,
+        email: normalizedEmail,
         firstName: profile.firstName,
         lastName: profile.lastName,
         [providerIdField]: profile.id,

@@ -13,8 +13,17 @@ export function AuthCard(props: AuthCardProps): ReactElement {
   const { title, description, children, footer } = props;
 
   return (
-    <Surface variant="expressive" padding={5} sx={{ width: "100%", maxWidth: 440 }}>
-      <Stack spacing={3}>
+    <Surface
+      variant="expressive"
+      padding={0}
+      sx={{
+        width: "100%",
+        maxWidth: 440,
+        px: { xs: 2.5, sm: 4, md: 5 },
+        py: { xs: 3, sm: 4, md: 5 },
+      }}
+    >
+      <Stack spacing={{ xs: 2.5, sm: 3 }}>
         <Box>
           <Typography variant="h3" sx={{ mb: 1 }}>
             {title}

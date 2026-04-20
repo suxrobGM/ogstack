@@ -16,8 +16,8 @@ export default function AuthLayout(props: PropsWithChildren): ReactElement {
             alignItems: "center",
             justifyContent: "center",
             minHeight: "100vh",
-            px: 2,
-            py: 6,
+            px: { xs: 1.5, sm: 2 },
+            py: { xs: 3, sm: 6 },
             bgcolor: "surfaces.base",
           }}
         >

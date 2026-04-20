@@ -56,6 +56,7 @@ function createMockPrisma() {
   return {
     user: {
       findUnique: mock(() => Promise.resolve(null)),
+      findFirst: mock(() => Promise.resolve(null)),
       create: mock(() => Promise.resolve(createMockUser())),
       update: mock(() => Promise.resolve(createMockUser())),
     },
@@ -95,10 +96,10 @@ describe("OAuthUserService", () => {
     });
 
     it("should link provider to existing user found by email", async () => {
-      // First findUnique (by provider ID) returns null
-      (mockPrisma.user.findUnique as ReturnType<typeof mock>)
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(createMockUser({ githubId: null }));
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValueOnce(null);
+      (mockPrisma.user.findFirst as ReturnType<typeof mock>).mockResolvedValueOnce(
+        createMockUser({ githubId: null }),
+      );
 
       const result = await service.findOrCreateUser("github", githubProfile);
 
@@ -106,18 +107,37 @@ describe("OAuthUserService", () => {
       expect(mockPrisma.user.update).toHaveBeenCalled();
     });
 
+    it("should link provider to existing user when email case differs", async () => {
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValueOnce(null);
+      (mockPrisma.user.findFirst as ReturnType<typeof mock>).mockResolvedValueOnce(
+        createMockUser({ email: "OAuth@Example.com", githubId: "gh-existing", googleId: null }),
+      );
+
+      const result = await service.findOrCreateUser("google", {
+        ...githubProfile,
+        id: "google-456",
+        email: "oauth@example.com",
+      });
+
+      expect(mockPrisma.user.findFirst).toHaveBeenCalledWith({
+        where: { email: { equals: "oauth@example.com", mode: "insensitive" } },
+      });
+      expect(mockPrisma.user.update).toHaveBeenCalled();
+      expect(result).toHaveProperty("accessToken");
+    });
+
     it("should throw for deactivated user found by email", () => {
-      (mockPrisma.user.findUnique as ReturnType<typeof mock>)
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(createMockUser({ deletedAt: new Date() }));
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValueOnce(null);
+      (mockPrisma.user.findFirst as ReturnType<typeof mock>).mockResolvedValueOnce(
+        createMockUser({ deletedAt: new Date() }),
+      );
 
       expect(service.findOrCreateUser("github", githubProfile)).rejects.toThrow("deactivated");
     });
 
     it("should create a new user when no match", async () => {
-      (mockPrisma.user.findUnique as ReturnType<typeof mock>)
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(null);
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValueOnce(null);
+      (mockPrisma.user.findFirst as ReturnType<typeof mock>).mockResolvedValueOnce(null);
 
       const result = await service.findOrCreateUser("github", githubProfile);
 
@@ -138,9 +158,8 @@ describe("OAuthUserService", () => {
     });
 
     it("should work with google provider", async () => {
-      (mockPrisma.user.findUnique as ReturnType<typeof mock>)
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(null);
+      (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValueOnce(null);
+      (mockPrisma.user.findFirst as ReturnType<typeof mock>).mockResolvedValueOnce(null);
 
       const result = await service.findOrCreateUser("google", {
         ...githubProfile,
