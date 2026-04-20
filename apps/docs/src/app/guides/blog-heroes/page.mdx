@@ -2,13 +2,25 @@
 
 Hero images for article pages. Wider than OG — ideal for above-the-fold banners on long-form posts.
 
-## Endpoint
+Unlike OG images, hero images aren't consumed by social crawlers, so there's no public `GET` endpoint. Generate them server-side with an API key and embed the returned CDN URL directly in your HTML.
 
-```
-GET /hero/{publicId}?url={pageUrl}&aspectRatio=16:9
+## Generate
+
+```http
+POST /api/images/generate
+Authorization: Bearer ogsk_live_...
+Content-Type: application/json
+
+{
+  "projectId": "...",
+  "url": "https://example.com/blog/post-title",
+  "kind": "blog_hero",
+  "template": "panorama",
+  "style": { "aspectRatio": "16:9" }
+}
 ```
 
-Returns a PNG directly, same as [OG images](/guides/og-images). All style and AI query parameters are identical; the only new one is `aspectRatio`.
+The response includes a `cdnUrl` — a permanent link to the rendered PNG on `cdn.ogstack.dev`. Store it alongside your post and serve it directly; no further API calls are needed to display the image.
 
 ## Aspect ratios
 
@@ -19,38 +31,45 @@ Returns a PNG directly, same as [OG images](/guides/og-images). All style and AI
 
 Default is `16:9`. Pick `16:10` when your layout has a wider hero slot.
 
-## Cache
-
-`Cache-Control: public, max-age=86400, s-maxage=2592000` — 30-day edge cache (longer than OG, since blog covers rarely change).
-
 ## Next.js app router example
 
 ```tsx
 // app/blog/[slug]/page.tsx
 import Image from "next/image";
+import { getPost } from "@/lib/posts";
 
 export default async function Post({ params }: { params: { slug: string } }) {
-  const pageUrl = `https://example.com/blog/${params.slug}`;
-  const hero = `https://api.ogstack.dev/hero/${process.env.OGSTACK_PUBLIC_ID}?url=${encodeURIComponent(pageUrl)}&aspectRatio=16:9`;
-
+  const post = await getPost(params.slug);
   return (
     <article>
-      <Image src={hero} alt="" width={1600} height={900} priority />
-      <h1>{/* ... */}</h1>
+      <Image src={post.heroUrl} alt="" width={1600} height={900} priority />
+      <h1>{post.title}</h1>
     </article>
   );
 }
 ```
 
-## Markdown front matter pattern
+`post.heroUrl` is the `cdnUrl` returned at publish time and persisted with the post.
 
-If your static site reads cover images from front matter, skip hardcoding a URL — build it from the slug:
+## Build-time generation
+
+If you pre-render posts at build time, call the API in your build script and cache the returned URL as a build artifact:
 
 ```ts
-// in your build step
-const cover = `https://api.ogstack.dev/hero/${PUBLIC_ID}?url=${encodeURIComponent(pageUrl)}&template=panorama`;
+const res = await fetch("https://api.ogstack.dev/api/images/generate", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${process.env.OGSTACK_API_KEY}`,
+  },
+  body: JSON.stringify({
+    projectId: process.env.OGSTACK_PROJECT_ID,
+    url: pageUrl,
+    kind: "blog_hero",
+    template: "panorama",
+  }),
+});
+const { cdnUrl } = await res.json();
 ```
 
-## Use the API for batch builds
-
-If you're pre-rendering hundreds of posts at build time, prefer [server-side generation](/guides/server-side) with an API key. You get back a stable CDN URL you can cache as a build artifact, avoiding re-scrape traffic on every build.
+Cache `cdnUrl` so you only pay for generation once per post.

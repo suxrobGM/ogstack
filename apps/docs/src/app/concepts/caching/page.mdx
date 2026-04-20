@@ -35,14 +35,9 @@ Pass `"force": true` in the request body to evict the cache and regenerate:
 
 Use `force` sparingly — it counts against your rate limit and (for AI images) your monthly AI quota.
 
-## Edge cache (public endpoints)
+## Edge cache (public endpoint)
 
-`GET /og/:publicId` and `GET /hero/:publicId` set long cache headers:
-
-| Endpoint  | Browser (`max-age`) | CDN (`s-maxage`) |
-| --------- | -------------------- | ---------------- |
-| `/og/...` | 24 h                 | 7 days           |
-| `/hero/...` | 24 h               | 30 days          |
+`GET /og/:publicId` sets long cache headers — 24 h browser (`max-age=86400`) and 7 days CDN (`s-maxage=604800`).
 
 Social platforms (Twitter/X, Facebook, Slack, etc.) cache independently. Once a URL has been scraped by a crawler, the preview image is frozen on that platform until its own cache expires — OGStack regenerating the image has no effect. Use each platform's debugger to force a re-scrape:
 

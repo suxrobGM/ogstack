@@ -124,12 +124,9 @@ OGStack evolves from an OG image API into the **visual identity layer for the in
 ```text
 # OG
 GET https://api.ogstack.dev/og/{publicProjectId}?url=https://myblog.com/post-title&template=gradient_dark
-
-# Blog hero
-GET https://api.ogstack.dev/hero/{publicProjectId}?url=https://myblog.com/post-title&template=hero_editorial&aspectRatio=16:9
 ```
 
-No API key required. The public project ID in the URL path identifies the user's account and plan. Developers copy the generated link from the dashboard playground and paste it directly into their `<meta>` tag (OG) or `<img src>` (hero). Icon sets are not served from a public endpoint — they're downloaded once from the dashboard.
+No API key required. The public project ID in the URL path identifies the user's account and plan. Developers copy the generated link from the dashboard playground and paste it directly into their `<meta>` tag. Only OG images are served through this mode — blog heroes and icon sets are generated through the authenticated API and embedded via their returned `cdnUrl`.
 
 The API scrapes the target URL, extracts meta tags (title, description, favicon, author, theme-color, JSON-LD, Twitter card), runs an LLM page analysis (when AI is enabled) to derive pageTheme + brandHints + contentSignals, and generates the appropriate image. Full customization via query parameters.
 
@@ -154,7 +151,7 @@ Authorization: Bearer og_live_abc123xyz
 
 `kind` defaults to `"og"`. For `icon_set`, `template` is omitted and AI is always on — the response includes an `assets[]` array enumerating every file in the set. Requires a secret API key passed via `Authorization: Bearer` header.
 
-**API Response:** JSON `{ imageUrl, kind, width, height, cached, assets?, metadata, aiEnabled, ... }`. The public `/og/:publicId` and `/hero/:publicId` endpoints return PNG directly for meta-tag / img-src usage.
+**API Response:** JSON `{ imageUrl, kind, width, height, cached, assets?, metadata, aiEnabled, ... }`. The public `/og/:publicId` endpoint returns PNG directly for meta-tag usage.
 
 **Technical Flow:**
 

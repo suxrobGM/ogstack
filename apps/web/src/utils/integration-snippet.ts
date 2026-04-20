@@ -23,12 +23,15 @@ const FAVICON_TAG_ORDER = [
   "site.webmanifest",
 ];
 
-/**
- * Production CDN host that customers paste into their `<head>`. The dashboard
- * meta-tag output points here regardless of the running API base URL so the
- * snippet is copy-paste ready for real sites.
- */
-const OG_PRODUCTION_HOST = "https://api.ogstack.dev";
+function serializeOgQuery(params: Record<string, string>): string {
+  return new URLSearchParams(params)
+    .toString()
+    .replace(/%3A/g, ":")
+    .replace(/%2F/g, "/")
+    .replace(/%40/g, "@")
+    .replace(/%2B/g, "+")
+    .replace(/%2C/g, ",");
+}
 
 function pickAssets(assets: readonly Asset[] | null | undefined): Map<string, string> {
   const map = new Map<string, string>();
@@ -42,29 +45,14 @@ function pickAssets(assets: readonly Asset[] | null | undefined): Map<string, st
   return map;
 }
 
-/**
- * Build a full OG image URL for a given public ID and query params, using the production host by default since these are meant to be shared as meta tags. The
- * public ID is the opaque identifier returned from the API after generation, not
- * the user-friendly template slug.
- */
-export function buildOgImageUrl(
-  publicId: string,
-  params: URLSearchParams,
-  baseUrl: string = API_BASE_URL,
-): string {
-  const query = params
-    .toString()
-    .replace(/%3A/g, ":")
-    .replace(/%2F/g, "/")
-    .replace(/%40/g, "@")
-    .replace(/%2B/g, "+")
-    .replace(/%2C/g, ",");
-  return `${baseUrl}/og/${publicId}?${query}`;
+/** OG image URL — `${API_BASE_URL}/api/og/:publicId`. Used for copy-paste snippets and internal previews alike. */
+export function buildOgImageUrl(publicId: string, params: Record<string, string>): string {
+  return `${API_BASE_URL}/api/og/${publicId}?${serializeOgQuery(params)}`;
 }
 
-/** Wrap a full image URL in a `<meta property="og:image" …>` tag. */
-export function buildOgMetaTag(imageUrl: string): string {
-  return `<meta property="og:image" content="${imageUrl}" />`;
+/** `<meta property="og:image" …>` tag for the given project + query params. */
+export function buildOgMetaTag(publicId: string, params: Record<string, string>): string {
+  return `<meta property="og:image" content="${buildOgImageUrl(publicId, params)}" />`;
 }
 
 export function buildFaviconTags(assets: readonly Asset[] | null | undefined): string {
@@ -109,13 +97,12 @@ export function buildPlaygroundSnippet(params: {
   kind: ImageKind;
   result: GenerateDto;
   publicProjectId: string | null;
-  ogParams: URLSearchParams;
+  ogParams: Record<string, string>;
 }): IntegrationSnippet | null {
   const { kind, result, publicProjectId, ogParams } = params;
   if (kind === "og") {
     if (!publicProjectId) return null;
-    const url = buildOgImageUrl(publicProjectId, ogParams, OG_PRODUCTION_HOST);
-    return { code: buildOgMetaTag(url), language: "html", label: "Meta Tag" };
+    return { code: buildOgMetaTag(publicProjectId, ogParams), language: "html", label: "Meta Tag" };
   }
 
   if (kind === "blog_hero") {
@@ -138,16 +125,19 @@ export function buildImageSnippet(image: ImageItem): IntegrationSnippet | null {
     }
 
     const sourceUrl = image.sourceUrl ?? "https://yoursite.com/page";
-    const params = new URLSearchParams({ url: sourceUrl });
+    const params: Record<string, string> = { url: sourceUrl };
 
     if (image.aiModel) {
-      params.set("ai", "true");
+      params.ai = "true";
     } else if (image.template?.slug) {
-      params.set("template", image.template.slug);
+      params.template = image.template.slug;
     }
 
-    const url = buildOgImageUrl(image.publicProjectId, params);
-    return { code: buildOgMetaTag(url), language: "html", label: "Meta tag" };
+    return {
+      code: buildOgMetaTag(image.publicProjectId, params),
+      language: "html",
+      label: "Meta tag",
+    };
   }
 
   if (image.kind === "blog_hero") {

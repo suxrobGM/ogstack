@@ -23,7 +23,7 @@ Wider than OG, designed to sit above the fold on an article page. Two aspect rat
 - `16:9` → 1600 × 900 (default)
 - `16:10` → 1920 × 1080
 
-Pass `style.aspectRatio` on `POST /api/images/generate` or `aspectRatio` in the query string on `GET /hero/:publicId`.
+Pass `style.aspectRatio` on `POST /api/images/generate`. Unlike OG images, hero images have no public `GET` endpoint — generate them server-side with an API key and embed the returned `cdnUrl`. See [Blog heroes](/guides/blog-heroes).
 
 ## icon_set
 

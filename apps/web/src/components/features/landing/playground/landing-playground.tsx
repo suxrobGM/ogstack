@@ -28,7 +28,7 @@ const DEMO_PUBLIC_ID = process.env.NEXT_PUBLIC_DEMO_PROJECT_ID;
 
 function demoImageUrl(url: string, template: string): string | null {
   if (!DEMO_PUBLIC_ID) return null;
-  return buildOgImageUrl(DEMO_PUBLIC_ID, new URLSearchParams({ url, template }));
+  return buildOgImageUrl(DEMO_PUBLIC_ID, { url, template });
 }
 
 export function LandingPlayground(): ReactElement {
@@ -63,8 +63,13 @@ export function LandingPlayground(): ReactElement {
     setImageUrl(`${built}&_t=${Date.now()}`);
   };
 
-  const generatedImageUrl = generated ? demoImageUrl(generated.url, generated.template) : null;
-  const metaTag = generatedImageUrl && !error ? buildOgMetaTag(generatedImageUrl) : null;
+  const metaTag =
+    generated && !error && DEMO_PUBLIC_ID
+      ? buildOgMetaTag(DEMO_PUBLIC_ID, {
+          url: generated.url,
+          template: generated.template,
+        })
+      : null;
 
   return (
     <Box

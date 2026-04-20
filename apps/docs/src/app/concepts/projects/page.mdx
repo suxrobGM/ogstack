@@ -15,7 +15,7 @@ The public ID is safe to expose in HTML; the UUID is only used in authenticated 
 
 ## Domain allowlist
 
-Public image endpoints (`GET /og/:publicId`, `GET /hero/:publicId`) only render for URLs whose origin matches one of the project's registered domains. This prevents someone from pointing your project at arbitrary URLs to burn through your quota.
+The public OG endpoint (`GET /og/:publicId`) only renders for URLs whose origin matches one of the project's registered domains. This prevents someone from pointing your project at arbitrary URLs to burn through your quota.
 
 Authenticated API calls (`POST /api/images/generate`) don't check the allowlist — API keys are the authorization.
 

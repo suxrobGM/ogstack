@@ -20,7 +20,6 @@ import { imageController } from "@/modules/image";
 import {
   imageGenerationApiController,
   imageGenerationDashboardController,
-  imageHeroPublicController,
   imagePublicController,
 } from "@/modules/image-generation";
 import { notificationController } from "@/modules/notification";
@@ -43,8 +42,6 @@ const app = new Elysia()
     await prisma.$disconnect();
   })
   .get("/health", () => ({ status: "ok", timestamp: new Date().toISOString() }))
-  .use(imagePublicController)
-  .use(imageHeroPublicController)
   .use(auditCleanupCron)
   .use(demoProjectCleanupCron)
   .group("/api", (api) =>
@@ -57,6 +54,7 @@ const app = new Elysia()
       .use(pageAnalysisController)
       .use(imageGenerationApiController)
       .use(imageGenerationDashboardController)
+      .use(imagePublicController)
       .use(imageController)
       .use(projectController)
       .use(templateController)

@@ -1,4 +1,3 @@
-import type { ImageKind } from "@ogstack/shared/constants";
 import { Elysia } from "elysia";
 import { container } from "@/common/di";
 import { ForbiddenError } from "@/common/errors";
@@ -62,50 +61,6 @@ export const imageGenerationApiController = new Elysia({
     },
   );
 
-interface PublicRouteOptions {
-  prefix: string;
-  kind: ImageKind;
-  cacheControl: string;
-  keyPrefix: string;
-  summary: string;
-  description: string;
-}
-
-function publicImageRoute(opts: PublicRouteOptions) {
-  return new Elysia({ prefix: opts.prefix, tags: ["Images"] })
-    .use(
-      tieredRateLimiter({
-        resolvePlan: "publicId",
-        keyPrefix: opts.keyPrefix,
-        keyFn: (ctx) => {
-          const params = ctx.params as { publicId?: string } | undefined;
-          return params?.publicId ?? "unknown";
-        },
-      }),
-    )
-    .get(
-      "/:publicId",
-      async ({ params, query, set }) => {
-        const pngBuffer = await imageGenerationService.generateByPublicId({
-          publicId: params.publicId,
-          url: query.url,
-          kind: opts.kind,
-          template: query.template,
-          style: styleFromQuery(query) ?? undefined,
-          ai: aiFromQuery(query) ?? undefined,
-        });
-        set.headers["content-type"] = "image/png";
-        set.headers["cache-control"] = opts.cacheControl;
-        return pngBuffer;
-      },
-      {
-        params: PublicGenerateParamsSchema,
-        query: PublicGenerateQuerySchema,
-        detail: { summary: opts.summary, description: opts.description },
-      },
-    );
-}
-
 function styleFromQuery(query: PublicGenerateQuery): StyleOptions | null {
   const logo = query.logoUrl ? { url: query.logoUrl, position: query.logoPosition } : null;
 
@@ -138,24 +93,44 @@ function aiFromQuery(query: PublicGenerateQuery): AiOptions | null {
   };
 }
 
-/** /og/:publicId — unauthenticated CDN endpoint, returns a PNG directly. */
-export const imagePublicController = publicImageRoute({
-  prefix: "/og",
-  kind: "og",
-  cacheControl: "public, max-age=86400, s-maxage=604800",
-  keyPrefix: "og-public",
-  summary: "Generate OG image (public)",
-  description:
-    "Public meta-tag mode. Returns the PNG directly with long cache headers. Rate-limited per publicId by project owner's plan.",
-});
-
-/** /hero/:publicId — unauthenticated CDN endpoint for blog hero/cover images. */
-export const imageHeroPublicController = publicImageRoute({
-  prefix: "/hero",
-  kind: "blog_hero",
-  cacheControl: "public, max-age=86400, s-maxage=2592000",
-  keyPrefix: "hero-public",
-  summary: "Generate blog hero image (public)",
-  description:
-    "Public endpoint for blog cover / hero images (1600x900 or 1920x1080). Returns the PNG directly with 30d edge cache.",
-});
+/**
+ * /api/og/:publicId — unauthenticated image endpoint, returns a PNG directly.
+ * Reached externally as `api.ogstack.dev/og/:publicId` via nginx rewriting, or
+ * as `ogstack.dev/api/og/:publicId` from the landing playground.
+ */
+export const imagePublicController = new Elysia({ prefix: "/og", tags: ["Images"] })
+  .use(
+    tieredRateLimiter({
+      resolvePlan: "publicId",
+      keyPrefix: "og-public",
+      keyFn: (ctx) => {
+        const params = ctx.params as { publicId?: string } | undefined;
+        return params?.publicId ?? "unknown";
+      },
+    }),
+  )
+  .get(
+    "/:publicId",
+    async ({ params, query, set }) => {
+      const pngBuffer = await imageGenerationService.generateByPublicId({
+        publicId: params.publicId,
+        url: query.url,
+        kind: "og",
+        template: query.template,
+        style: styleFromQuery(query) ?? undefined,
+        ai: aiFromQuery(query) ?? undefined,
+      });
+      set.headers["content-type"] = "image/png";
+      set.headers["cache-control"] = "public, max-age=86400, s-maxage=604800";
+      return pngBuffer;
+    },
+    {
+      params: PublicGenerateParamsSchema,
+      query: PublicGenerateQuerySchema,
+      detail: {
+        summary: "Generate OG image (public)",
+        description:
+          "Public meta-tag mode. Returns the PNG directly with long cache headers. Rate-limited per publicId by project owner's plan.",
+      },
+    },
+  );

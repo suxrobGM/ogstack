@@ -56,20 +56,19 @@ interface PlaygroundProps {
 
 /** Serialize only the params that differ from backend defaults, so the meta
  *  tag stays as short as possible in the customer's HTML. */
-function toOgParams(values: PlaygroundFormValues): URLSearchParams {
-  const params = new URLSearchParams();
-  params.set("url", values.url);
-  if (values.template !== "editorial") params.set("template", values.template);
-  if (values.accent !== "#3B82F6") params.set("accent", values.accent);
-  if (!values.dark) params.set("dark", "false");
-  if (values.font !== "inter") params.set("font", values.font);
-  if (values.logoUrl) params.set("logoUrl", values.logoUrl);
-  if (values.logoPosition !== "top-left") params.set("logoPosition", values.logoPosition);
+function toOgParams(values: PlaygroundFormValues): Record<string, string> {
+  const params: Record<string, string> = { url: values.url };
+  if (values.template !== "editorial") params.template = values.template;
+  if (values.accent !== "#3B82F6") params.accent = values.accent;
+  if (!values.dark) params.dark = "false";
+  if (values.font !== "inter") params.font = values.font;
+  if (values.logoUrl) params.logoUrl = values.logoUrl;
+  if (values.logoPosition !== "top-left") params.logoPosition = values.logoPosition;
   if (values.aiGenerated) {
-    params.set("ai", "true");
-    if (values.aiModel !== "standard") params.set("aiModel", values.aiModel);
+    params.ai = "true";
+    if (values.aiModel !== "standard") params.aiModel = values.aiModel;
   }
-  if (values.aiPrompt) params.set("aiPrompt", values.aiPrompt);
+  if (values.aiPrompt) params.aiPrompt = values.aiPrompt;
   return params;
 }
 

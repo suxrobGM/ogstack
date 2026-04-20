@@ -5,8 +5,8 @@ import { Box, Stack, Typography } from "@mui/material";
 import { CodeBlock } from "@/components/ui/display/code-block";
 import { MonoId } from "@/components/ui/display/mono-id";
 import { SectionHeader } from "@/components/ui/layout/section-header";
-import { API_BASE_URL } from "@/lib/constants";
 import type { Project } from "@/types/api";
+import { buildOgMetaTag } from "@/utils/integration-snippet";
 
 interface ProjectIntegrationProps {
   project: Project;
@@ -15,8 +15,10 @@ interface ProjectIntegrationProps {
 export function ProjectIntegration(props: ProjectIntegrationProps): ReactElement {
   const { project } = props;
 
-  const ogEndpoint = API_BASE_URL.replace("/api", "").replace(":4000", ":4000");
-  const metaTag = `<meta property="og:image"\n  content="${ogEndpoint}/og/${project.publicId}?url=https://yoursite.com/page&template=editorial" />`;
+  const metaTag = buildOgMetaTag(project.publicId, {
+    url: "https://yoursite.com/page",
+    template: "editorial",
+  });
 
   return (
     <Box>
