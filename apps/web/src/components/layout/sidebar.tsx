@@ -118,7 +118,7 @@ export function Sidebar(props: SidebarProps): ReactElement {
                 label={item.label}
                 icon={item.icon}
                 collapsed={collapsed}
-                children={item.children.map((child) => ({
+                items={item.children.map((child) => ({
                   label: child.label,
                   href: child.href,
                   icon: child.icon,

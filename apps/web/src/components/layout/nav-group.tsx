@@ -28,14 +28,15 @@ interface NavGroupChild {
 interface NavGroupProps {
   label: string;
   icon?: ReactNode;
-  children: NavGroupChild[];
+  items: NavGroupChild[];
   collapsed?: boolean;
+  onNavigate?: () => void;
 }
 
 export function NavGroupItem(props: NavGroupProps): ReactElement {
-  const { label, icon, children, collapsed = false } = props;
+  const { label, icon, items, collapsed = false, onNavigate } = props;
   const pathname = usePathname();
-  const hasActiveChild = children.some(
+  const hasActiveChild = items.some(
     (child) => pathname === child.href || pathname.startsWith(child.href + "/"),
   );
   const [expanded, setExpanded] = useState(hasActiveChild);
@@ -53,13 +54,6 @@ export function NavGroupItem(props: NavGroupProps): ReactElement {
               px: 1.5,
               mb: 0.5,
               justifyContent: "center",
-              "&.Mui-selected": {
-                bgcolor: "rgba(180,83,9,0.08)",
-                "&:hover": { bgcolor: "rgba(180,83,9,0.12)" },
-              },
-              "&:hover:not(.Mui-selected)": {
-                bgcolor: "rgba(44,40,37,0.04)",
-              },
             }}
           >
             {icon && (
@@ -83,20 +77,18 @@ export function NavGroupItem(props: NavGroupProps): ReactElement {
           transformOrigin={{ vertical: "top", horizontal: "left" }}
           slotProps={{ paper: { sx: { ml: 0.5, minWidth: 180, p: 1 } } }}
         >
-          <Typography
-            variant="caption"
-            sx={{ px: 1.5, py: 0.5, color: "text.secondary", display: "block" }}
-          >
+          <Typography variant="captionMuted" sx={{ px: 1.5, py: 0.5, display: "block" }}>
             {label}
           </Typography>
           <List dense onClick={() => setAnchorEl(null)}>
-            {children.map((child) => (
+            {items.map((child) => (
               <NavItem
                 key={child.href}
                 label={child.label}
                 href={child.href}
                 icon={child.icon}
                 active={pathname === child.href || pathname.startsWith(child.href + "/")}
+                onNavigate={onNavigate}
               />
             ))}
           </List>
@@ -113,7 +105,6 @@ export function NavGroupItem(props: NavGroupProps): ReactElement {
           borderRadius: `${radii.md}px`,
           px: 2,
           mb: 0.5,
-          "&:hover": { bgcolor: "rgba(44,40,37,0.04)" },
         }}
       >
         {icon && (
@@ -148,13 +139,14 @@ export function NavGroupItem(props: NavGroupProps): ReactElement {
             ml: 2,
           }}
         >
-          {children.map((child) => (
+          {items.map((child) => (
             <NavItem
               key={child.href}
               label={child.label}
               href={child.href}
               icon={child.icon}
               active={pathname === child.href || pathname.startsWith(child.href + "/")}
+              onNavigate={onNavigate}
             />
           ))}
         </List>

@@ -44,7 +44,7 @@ export function QuickActions(): ReactElement {
   return (
     <Stack spacing={2.5}>
       <SectionHeader title="Quick actions" />
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 1.5, sm: 2, md: 3 }}>
         {ACTIONS.map((action) => (
           <Grid key={action.title} size={{ xs: 12, sm: 6, md: 3 }}>
             <Link

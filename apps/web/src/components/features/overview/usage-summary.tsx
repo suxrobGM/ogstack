@@ -34,7 +34,7 @@ export function UsageSummary(props: UsageSummaryProps): ReactElement {
           </Link>
         }
       />
-      <Grid container spacing={3} sx={{ alignItems: "stretch" }}>
+      <Grid container spacing={{ xs: 1.5, sm: 2, md: 3 }} sx={{ alignItems: "stretch" }}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Surface padding={3} sx={{ height: "100%" }}>
             <Stack

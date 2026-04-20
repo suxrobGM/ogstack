@@ -29,7 +29,7 @@ export function MobileNav(props: MobileNavProps): ReactElement {
   const isAdmin = isAdminRole(user?.role);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }} onClick={onClose}>
+    <Stack direction="column" sx={{ height: "100%" }}>
       <Box sx={{ p: 3, pb: 2 }}>
         <Stack spacing={0.25}>
           <AppLogo />
@@ -45,11 +45,12 @@ export function MobileNav(props: MobileNavProps): ReactElement {
                 key={item.label}
                 label={item.label}
                 icon={item.icon}
-                children={item.children.map((child) => ({
+                items={item.children.map((child) => ({
                   label: child.label,
                   href: child.href,
                   icon: child.icon,
                 }))}
+                onNavigate={onClose}
               />
             );
           }
@@ -60,6 +61,7 @@ export function MobileNav(props: MobileNavProps): ReactElement {
               href={item.href}
               icon={item.icon}
               active={pathname === item.href || pathname.startsWith(item.href + "/")}
+              onNavigate={onClose}
             />
           );
         })}
@@ -69,18 +71,19 @@ export function MobileNav(props: MobileNavProps): ReactElement {
             href={ROUTES.adminOverview}
             icon={<AdminPanelSettingsIcon fontSize="small" />}
             active={false}
+            onNavigate={onClose}
           />
         )}
       </List>
       <Divider sx={{ borderColor: line.divider }} />
-      <List sx={{ px: 1.5, py: 1 }} onClick={(e) => e.stopPropagation()}>
+      <List sx={{ px: 1.5, py: 1 }}>
         <FeedbackMenu />
         <NotificationBell />
       </List>
       <Divider sx={{ borderColor: line.divider }} />
-      <Box sx={{ p: 1.5 }} onClick={(e) => e.stopPropagation()}>
+      <Box sx={{ p: 1.5 }}>
         <UserMenu />
       </Box>
-    </Box>
+    </Stack>
   );
 }

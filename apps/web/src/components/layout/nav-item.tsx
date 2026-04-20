@@ -18,14 +18,16 @@ interface NavItemProps {
   active: boolean;
   icon?: ReactNode;
   collapsed?: boolean;
+  onNavigate?: () => void;
 }
 
 export function NavItem(props: NavItemProps): ReactElement {
-  const { label, href, active, icon, collapsed = false } = props;
+  const { label, href, active, icon, collapsed = false, onNavigate } = props;
 
   const button = (
     <Link
       href={href}
+      onClick={onNavigate}
       sx={{
         textDecoration: "none",
         color: "inherit",

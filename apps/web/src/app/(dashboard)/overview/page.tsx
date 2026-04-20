@@ -25,13 +25,13 @@ export default async function OverviewPage(): Promise<ReactElement> {
   const fullName = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
 
   return (
-    <Stack spacing={4}>
+    <Stack spacing={{ xs: 3, md: 4 }}>
       {user && usage && (
         <OverviewHero name={fullName || user.email} plan={user.plan} period={usage.period} />
       )}
       {usage && <UsageSummary usage={usage} />}
       <QuickActions />
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, md: 3 }}>
         <Grid size={{ xs: 12, md: 6 }}>
           <RecentProjects projects={projects} />
         </Grid>
