@@ -6,7 +6,7 @@ import { IMAGE_KINDS, type ImageKind } from "@ogstack/shared";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormToggleField } from "@/components/ui/form";
 import type { AnyReactForm } from "@/components/ui/form/types";
-import { IMAGE_KIND_LABELS } from "../schema";
+import { IMAGE_KIND_LABELS } from "@/types/image-kinds";
 
 interface KindSwitcherProps {
   form: AnyReactForm;

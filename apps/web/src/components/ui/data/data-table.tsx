@@ -6,7 +6,7 @@ import { EmptyState } from "./empty-state";
 
 export interface Column<T> {
   key: string;
-  header: string;
+  header: ReactNode;
   align?: "left" | "right" | "center";
   width?: number | string;
   render?: (row: T) => ReactNode;

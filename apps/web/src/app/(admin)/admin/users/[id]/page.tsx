@@ -1,11 +1,13 @@
 import type { ReactElement } from "react";
 import { Stack } from "@mui/material";
 import { notFound } from "next/navigation";
-import { AdminUserActions } from "@/components/features/admin/admin-user-actions";
-import { AdminUserApiKeys } from "@/components/features/admin/admin-user-api-keys";
-import { AdminUserProfile } from "@/components/features/admin/admin-user-profile";
-import { AdminUserProjects } from "@/components/features/admin/admin-user-projects";
-import { AdminUserUsage } from "@/components/features/admin/admin-user-usage";
+import {
+  AdminUserActions,
+  AdminUserApiKeys,
+  AdminUserProfile,
+  AdminUserProjects,
+  AdminUserUsage,
+} from "@/components/features/admin";
 import { PageHeader } from "@/components/ui/layout/page-header";
 import { getServerClient } from "@/lib/api/server";
 

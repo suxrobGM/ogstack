@@ -1,6 +1,8 @@
 import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors";
+import { logger } from "@/common/logger";
 import { Prisma, PrismaClient, type UserRole } from "@/generated/prisma";
+import { toPrismaImageKind } from "@/modules/image/image.mapper";
 import { ImageService } from "@/modules/image/image.service";
 import type { PaginatedResponse } from "@/types/response";
 import type { AdminImage, AdminImageListQuery } from "./admin.schema";
@@ -13,12 +15,24 @@ export class AdminImageService {
   ) {}
 
   async listImages(query: AdminImageListQuery): Promise<PaginatedResponse<AdminImage>> {
-    const { page, limit, search, userId, projectId } = query;
+    const { page, limit, search, userId, projectId, kind, templateSlug, aiEnabled, from, to } =
+      query;
     const skip = (page - 1) * limit;
 
     const where: Prisma.ImageWhereInput = {
       ...(userId && { userId }),
       ...(projectId && { projectId }),
+      ...(kind && { kind: toPrismaImageKind(kind) }),
+      ...(templateSlug && { template: { slug: templateSlug } }),
+      ...(aiEnabled !== undefined && { aiEnabled }),
+      ...(from || to
+        ? {
+            createdAt: {
+              ...(from && { gte: from }),
+              ...(to && { lte: to }),
+            },
+          }
+        : {}),
       ...(search && {
         OR: [
           { sourceUrl: { contains: search, mode: "insensitive" as const } },
@@ -89,5 +103,42 @@ export class AdminImageService {
     });
 
     return result;
+  }
+
+  async bulkDeleteImages(
+    ids: string[],
+    actorId: string,
+    actorRole: UserRole,
+  ): Promise<{ success: true; deleted: number }> {
+    const rows = await this.prisma.image.findMany({
+      where: { id: { in: ids } },
+      select: { id: true, userId: true, projectId: true, cacheKey: true, kind: true },
+    });
+
+    let deleted = 0;
+    for (const row of rows) {
+      try {
+        await this.imageService.deleteAsAdmin(row.id);
+        await this.prisma.auditLog.create({
+          data: {
+            actorId,
+            actorRole,
+            action: "DELETE_IMAGE",
+            entityType: "Image",
+            entityId: row.id,
+            metadata: {
+              ownerUserId: row.userId,
+              projectId: row.projectId,
+              cacheKey: row.cacheKey,
+              bulk: true,
+            },
+          },
+        });
+        deleted += 1;
+      } catch (err) {
+        logger.warn({ err, imageId: row.id }, "bulkDeleteImages: row delete failed");
+      }
+    }
+    return { success: true, deleted };
   }
 }

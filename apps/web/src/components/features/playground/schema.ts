@@ -3,7 +3,6 @@ import {
   IMAGE_KINDS,
   isValidHttpUrl,
   type BlogHeroAspect,
-  type ImageKind,
 } from "@ogstack/shared";
 import { z } from "zod/v4";
 
@@ -38,12 +37,6 @@ export const LOGO_POSITION_LABELS: Record<LogoPosition, string> = {
   "top-right": "Top Right",
   "bottom-left": "Bottom Left",
   "bottom-right": "Bottom Right",
-};
-
-export const IMAGE_KIND_LABELS: Record<ImageKind, string> = {
-  og: "OG Image",
-  blog_hero: "Blog Hero",
-  icon_set: "Favicon Set",
 };
 
 export const BLOG_HERO_ASPECT_LABELS: Record<BlogHeroAspect, string> = {

@@ -8,6 +8,8 @@ import { AdminImageService } from "./admin-image.service";
 import { AdminStatsService } from "./admin-stats.service";
 import { AdminUserService } from "./admin-user.service";
 import {
+  AdminImageBulkDeleteBodySchema,
+  AdminImageBulkDeleteResponseSchema,
   AdminImageDeleteResponseSchema,
   AdminImageListQuerySchema,
   AdminImageListResponseSchema,
@@ -56,6 +58,18 @@ export const adminController = new Elysia({
       detail: {
         summary: "Delete an image (admin)",
         description: "Remove a generated image regardless of owner. Logged to audit trail.",
+      },
+    },
+  )
+  .delete(
+    "/images",
+    ({ body, user }) => imageService.bulkDeleteImages(body.ids, user.id, user.role as UserRole),
+    {
+      body: AdminImageBulkDeleteBodySchema,
+      response: AdminImageBulkDeleteResponseSchema,
+      detail: {
+        summary: "Bulk delete images (admin)",
+        description: "Remove up to 100 images in one call. Each deletion is audit-logged.",
       },
     },
   )

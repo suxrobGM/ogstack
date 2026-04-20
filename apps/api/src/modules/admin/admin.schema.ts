@@ -1,7 +1,9 @@
-import { Plan } from "@ogstack/shared";
+import { IMAGE_KINDS, Plan } from "@ogstack/shared";
 import { t, type Static } from "elysia";
 import { PaginationQueryBaseSchema } from "@/types/pagination";
 import { PaginatedResponseSchema } from "@/types/response";
+
+const ImageKindEnum = t.Union(IMAGE_KINDS.map((k) => t.Literal(k)));
 
 // ── Shared enums ──
 
@@ -115,8 +117,22 @@ export const AdminImageListQuerySchema = t.Composite([
     search: t.Optional(t.String({ description: "Search by source URL or title" })),
     userId: t.Optional(t.String()),
     projectId: t.Optional(t.String()),
+    kind: t.Optional(ImageKindEnum),
+    templateSlug: t.Optional(t.String()),
+    aiEnabled: t.Optional(t.Boolean()),
+    from: t.Optional(t.Date()),
+    to: t.Optional(t.Date()),
   }),
 ]);
+
+export const AdminImageBulkDeleteBodySchema = t.Object({
+  ids: t.Array(t.String({ format: "uuid" }), { minItems: 1, maxItems: 100 }),
+});
+
+export const AdminImageBulkDeleteResponseSchema = t.Object({
+  success: t.Literal(true),
+  deleted: t.Number(),
+});
 
 export const AdminImageSchema = t.Object({
   id: t.String(),
@@ -162,3 +178,4 @@ export type AdminUserSuspendResponse = Static<typeof AdminUserSuspendResponseSch
 export type AdminStatsResponse = Static<typeof AdminStatsResponseSchema>;
 export type AdminImageListQuery = Static<typeof AdminImageListQuerySchema>;
 export type AdminImage = Static<typeof AdminImageSchema>;
+export type AdminImageBulkDeleteBody = Static<typeof AdminImageBulkDeleteBodySchema>;

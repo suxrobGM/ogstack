@@ -1,17 +1,17 @@
 # OGStack
 
-![OGStack](apps/web/public/logo.svg)
-
-**Beautiful social previews. Zero effort.**
-
-Turn any URL into a gorgeous, on-brand social preview image - automatically. No designers. No build steps. Just one line of code.
-
 [![CI](https://github.com/suxrobGM/ogstack/actions/workflows/ci.yml/badge.svg)](https://github.com/suxrobGM/ogstack/actions/workflows/ci.yml)
 [![Deploy](https://github.com/suxrobGM/ogstack/actions/workflows/deploy.yml/badge.svg)](https://github.com/suxrobGM/ogstack/actions/workflows/deploy.yml)
 [![Bun](https://img.shields.io/badge/runtime-Bun-black?logo=bun)](https://bun.sh)
 [![Elysia](https://img.shields.io/badge/api-Elysia-8b5cf6)](https://elysiajs.com)
 [![Next.js](https://img.shields.io/badge/web-Next.js%2016-000000?logo=nextdotjs)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+
+![OGStack](apps/web/public/logo.svg)
+
+**Beautiful social previews. Zero effort.**
+
+Turn any URL into a gorgeous, on-brand social preview image - automatically. No designers. No build steps. Just one line of code.
 
 [![Visit Website](https://img.shields.io/badge/Website-ogstack.dev-FF7A1A?style=for-the-badge&logo=vercel&logoColor=white)](https://ogstack.dev)
 [![Read the Docs](https://img.shields.io/badge/Docs-Read%20now-10B981?style=for-the-badge&logo=readthedocs&logoColor=white)](https://docs.ogstack.dev)

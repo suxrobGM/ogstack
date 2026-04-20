@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { AdminUserList } from "@/components/features/admin/admin-user-list";
+import { AdminUserList } from "@/components/features/admin";
 import { getServerClient } from "@/lib/api/server";
 
 export default async function AdminUsersPage(): Promise<ReactElement> {

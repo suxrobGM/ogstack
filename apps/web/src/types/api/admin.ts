@@ -17,3 +17,6 @@ export type AdminImageItem = AdminImageListResponse["items"][number];
 export type AdminUserPlanResponse = Data<AdminUserById["plan"]["patch"]>;
 export type AdminUserSuspendResponse = Data<AdminUserById["suspend"]["post"]>;
 export type AdminImageDeleteResponse = Data<AdminImageById["delete"]>;
+export type AdminImageBulkDeleteResponse = Data<
+  (typeof client)["api"]["admin"]["images"]["delete"]
+>;

@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { AdminImageList } from "@/components/features/admin/admin-image-list";
+import { AdminImageList } from "@/components/features/admin";
 import { getServerClient } from "@/lib/api/server";
 
 interface PageProps {

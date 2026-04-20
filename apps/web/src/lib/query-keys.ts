@@ -62,7 +62,16 @@ export const queryKeys = {
       [...queryKeys.admin.all, "users", "list", params] as const,
     userDetail: (id: string) => [...queryKeys.admin.all, "users", id] as const,
     imagesAll: () => [...queryKeys.admin.all, "images"] as const,
-    imagesList: (params: { page: number; search: string; userId: string; projectId: string }) =>
-      [...queryKeys.admin.all, "images", "list", params] as const,
+    imagesList: (params: {
+      page: number;
+      search: string;
+      userId: string;
+      projectId: string;
+      kind: string;
+      templateSlug: string;
+      ai: string;
+      from: string;
+      to: string;
+    }) => [...queryKeys.admin.all, "images", "list", params] as const,
   },
 } as const;

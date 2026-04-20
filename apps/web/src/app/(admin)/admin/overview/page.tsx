@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { notFound } from "next/navigation";
-import { AdminOverview } from "@/components/features/admin/admin-overview";
+import { AdminOverview } from "@/components/features/admin";
 import { getServerClient } from "@/lib/api/server";
 
 export default async function AdminOverviewPage(): Promise<ReactElement> {

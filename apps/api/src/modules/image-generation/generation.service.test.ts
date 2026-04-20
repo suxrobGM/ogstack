@@ -252,8 +252,10 @@ describe("ImageGenerationService", () => {
     });
 
     it("should return cached buffer from storage on cache hit", async () => {
-      (mockPrisma.image.findUnique as ReturnType<typeof mock>).mockResolvedValue({
+      (mockPrisma.image.findFirst as ReturnType<typeof mock>).mockResolvedValue({
         id: "img-cached",
+        cacheKey: "cache-abc",
+        kind: "OG",
         imageUrl: "/uploads/images/cached.png",
         cdnUrl: null,
         serveCount: 3,
@@ -267,8 +269,8 @@ describe("ImageGenerationService", () => {
       expect(mockTemplateService.render).not.toHaveBeenCalled();
     });
 
-    it("evicts stale row and regenerates when blob is missing", async () => {
-      (mockPrisma.image.findUnique as ReturnType<typeof mock>).mockResolvedValue({
+    it("evicts stale row and signals retry when blob is missing", async () => {
+      (mockPrisma.image.findFirst as ReturnType<typeof mock>).mockResolvedValue({
         id: "img-cached",
         cacheKey: "cache-abc",
         kind: "OG",
@@ -276,11 +278,11 @@ describe("ImageGenerationService", () => {
       });
       (mockStorage.get as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      const result = await service.generateByPublicId(publicParams);
-
-      expect(result).toBeInstanceOf(Buffer);
+      await expect(service.generateByPublicId(publicParams)).rejects.toThrow(
+        "Image is being regenerated",
+      );
       expect(mockPrisma.image.delete).toHaveBeenCalled();
-      expect(mockTemplateService.render).toHaveBeenCalled();
+      expect(mockTemplateService.render).not.toHaveBeenCalled();
     });
 
     it("should throw NotFoundError for unknown publicId", async () => {

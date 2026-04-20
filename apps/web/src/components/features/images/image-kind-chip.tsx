@@ -3,7 +3,7 @@
 import type { ReactElement } from "react";
 import { Chip } from "@mui/material";
 import type { ImageKind } from "@ogstack/shared";
-import { IMAGE_KIND_LABELS } from "../playground/schema";
+import { IMAGE_KIND_LABELS } from "@/types/image-kinds";
 
 interface ImageKindChipProps {
   kind: ImageKind;
