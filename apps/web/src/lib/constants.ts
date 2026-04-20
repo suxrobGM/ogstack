@@ -25,6 +25,7 @@ export const ROUTES = {
   auditDetail: (id: string) => `/audit/${id}` as Route,
   audits: "/audits" as Route,
   auditsDetail: (id: string) => `/audits/${id}` as Route,
+  socialPreview: "/social-preview" as Route,
   pricing: "/pricing" as Route,
   features: "/features" as Route,
   howItWorks: "/how-it-works" as Route,

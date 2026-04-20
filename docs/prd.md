@@ -156,7 +156,7 @@ Authorization: Bearer og_live_abc123xyz
 **Technical Flow:**
 
 1. Receive request → resolve project ID (GET) or validate API key (POST) → load user plan → check rate limits
-2. Validate domain: for GET requests, verify the `url` param domain matches the project's registered domains
+2. Validate domain: for GET requests, if the project has a non-empty domain allowlist, verify the `url` param host matches one of the registered domains. An empty allowlist allows any URL (opt-in restriction, not default).
 3. Check cache for existing image — cache key = SHA256(projectId + url + kind + template + options + aiModel + watermark)
 4. Cache HIT → serve from CDN (< 100ms)
 5. Cache MISS → scrape URL for metadata; when AI is enabled, run page analysis (cached 24h) to extract pageTheme, brandHints, contentSignals
@@ -273,9 +273,9 @@ OGStack uses a split authentication model optimized for the two primary use case
 
 - Each user gets a default project on signup with a unique public project ID (e.g., `cLx8kZ9m`)
 - Users can create multiple projects (e.g., one per site)
-- Each project has a **domain allowlist** — GET requests are only served if the `url` parameter matches a registered domain
+- Each project has an **optional domain allowlist**. When empty, the public GET endpoint serves images for any URL. When non-empty, GET requests are rejected unless the `url` parameter's host matches a registered domain. Image generation is never blocked by the allowlist.
 - Projects are tied to the user's plan and usage quota
-- Project IDs are public and safe to embed in HTML — abuse is prevented via domain allowlisting and rate limiting
+- Project IDs are public and safe to embed in HTML — abuse is prevented via rate limiting, quotas, and the optional domain allowlist
 
 **API Keys (for programmatic POST endpoint only):**
 
@@ -286,8 +286,10 @@ OGStack uses a split authentication model optimized for the two primary use case
 
 **Abuse Prevention for Public Project IDs:**
 
-- Domain allowlisting: GET requests rejected if `url` domain is not in the project's registered domains
+- Optional domain allowlist — when configured, GET requests are rejected if the `url` host doesn't match a registered domain. Empty = no restriction.
 - Rate limiting per project ID + IP
+- Plan-based monthly generation quotas
+- Google reCAPTCHA Enterprise (invisible, score-based) on `register`, `login`, `forgot-password`, and `resend-verification` to block bot account creation and email-flood abuse
 - Referrer/origin validation for additional protection
 - Known social crawler user agents (Twitterbot, LinkedInBot, Slackbot) are always allowed
 
@@ -457,7 +459,7 @@ The authoritative schema lives under [apps/api/prisma/schema/](../apps/api/prism
 | Model          | Purpose                                                                                                                                                                                                 |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `User`         | Account, plan (FREE/PLUS/PRO), role (USER/ADMIN/SUPER_ADMIN), Stripe customer+subscription ids, OAuth ids                                                                                               |
-| `Project`      | Owned by a user; carries `publicId` (unguessable), domains[] allowlist, is active flag                                                                                                                  |
+| `Project`      | Owned by a user; carries `publicId` (unguessable), optional `domains[]` allowlist (empty = allow all), is active flag                                                                                   |
 | `ApiKey`       | Hashed bearer token; optionally scoped to a single project                                                                                                                                              |
 | `Template`     | DB-backed template registry (category, name, description); seeded from the code registries                                                                                                              |
 | `Image`        | One row per generation. `kind` (OG/BLOG_HERO/ICON_SET), `cacheKey` (unique), `imageUrl`, `assets` (Json, icon sets), `width/height`, `aiModel`, `aiPrompt`, `generatedOnPlan`, `fileSize`, `serveCount` |
@@ -497,18 +499,18 @@ GET https://cdn.ogstack.dev/p/{projectId}/generate?url={url}&template={template}
 
 This is the primary integration point. Developers copy this URL from the dashboard and paste it into their `<meta og:image>` tag. No API key needed — the project ID identifies the account.
 
-| Parameter  | Type              | Required | Default          | Description                                                            |
-| ---------- | ----------------- | -------- | ---------------- | ---------------------------------------------------------------------- |
-| `url`      | string            | Yes      | —                | URL to generate OG image for (must match project's registered domains) |
-| `template` | string            | No       | User's default   | Template slug                                                          |
-| `theme`    | `dark` \| `light` | No       | `dark`           | Color theme                                                            |
-| `ai`       | boolean           | No       | `false`          | Enable AI background                                                   |
-| `accent`   | string            | No       | Template default | Hex color code                                                         |
-| `font`     | string            | No       | Template default | Font family name                                                       |
-| `format`   | `png` \| `jpeg`   | No       | `png`            | Output format                                                          |
-| `width`    | number            | No       | `1200`           | Image width                                                            |
-| `height`   | number            | No       | `630`            | Image height                                                           |
-| `cache`    | boolean           | No       | `true`           | Use cached version if available                                        |
+| Parameter  | Type              | Required | Default          | Description                                                                                                                                    |
+| ---------- | ----------------- | -------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `url`      | string            | Yes      | —                | URL to generate OG image for. If the project has a domain allowlist, the URL host must match one of the entries; otherwise any URL is allowed. |
+| `template` | string            | No       | User's default   | Template slug                                                                                                                                  |
+| `theme`    | `dark` \| `light` | No       | `dark`           | Color theme                                                                                                                                    |
+| `ai`       | boolean           | No       | `false`          | Enable AI background                                                                                                                           |
+| `accent`   | string            | No       | Template default | Hex color code                                                                                                                                 |
+| `font`     | string            | No       | Template default | Font family name                                                                                                                               |
+| `format`   | `png` \| `jpeg`   | No       | `png`            | Output format                                                                                                                                  |
+| `width`    | number            | No       | `1200`           | Image width                                                                                                                                    |
+| `height`   | number            | No       | `630`            | Image height                                                                                                                                   |
+| `cache`    | boolean           | No       | `true`           | Use cached version if available                                                                                                                |
 
 **Response:** `200 OK` with `Content-Type: image/png` (binary image data)
 
@@ -622,6 +624,36 @@ Content-Type: application/json
 }
 ```
 
+#### Social Preview (POST — Auth Required, Free)
+
+```http
+POST https://api.ogstack.dev/api/audits/preview
+```
+
+Returns OG, Twitter, and favicon metadata for a URL so the client can render per-platform social cards (Facebook, Twitter, LinkedIn, Slack, Discord, …). Unlike `POST /api/audits`, this endpoint does no scoring and never persists results — every call re-scrapes the URL. Free for all plans; rate-limited to 10 requests per minute per user.
+
+Request body:
+
+```json
+{ "url": "https://example.com/post" }
+```
+
+Response:
+
+```json
+{
+  "metadata": {
+    "title": "Example post",
+    "description": "A short summary",
+    "image": "https://example.com/og.jpg",
+    "siteName": "Example",
+    "url": "https://example.com/post",
+    "favicon": "https://example.com/favicon.ico",
+    "twitterCardType": "summary_large_image"
+  }
+}
+```
+
 ### 10.3 Rate Limits
 
 | Tier       | Requests/minute | Requests/day |
@@ -641,17 +673,17 @@ X-RateLimit-Reset: 1711036800
 
 ### 10.4 Error Codes
 
-| Code                  | Status | Description                                                   |
-| --------------------- | ------ | ------------------------------------------------------------- |
-| `invalid_api_key`     | 401    | API key is missing, invalid, or revoked (POST endpoints only) |
-| `invalid_project`     | 404    | Project ID not found or inactive                              |
-| `rate_limit_exceeded` | 429    | Too many requests                                             |
-| `quota_exceeded`      | 402    | Monthly image quota exceeded                                  |
-| `invalid_url`         | 400    | URL is malformed or unreachable                               |
-| `scrape_failed`       | 422    | Could not extract metadata from URL                           |
-| `template_not_found`  | 404    | Template slug does not exist                                  |
-| `generation_failed`   | 500    | Image generation failed (AI or rendering error)               |
-| `domain_not_allowed`  | 403    | URL domain not in project's registered domains                |
+| Code                  | Status | Description                                                                              |
+| --------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| `invalid_api_key`     | 401    | API key is missing, invalid, or revoked (POST endpoints only)                            |
+| `invalid_project`     | 404    | Project ID not found or inactive                                                         |
+| `rate_limit_exceeded` | 429    | Too many requests                                                                        |
+| `quota_exceeded`      | 402    | Monthly image quota exceeded                                                             |
+| `invalid_url`         | 400    | URL is malformed or unreachable                                                          |
+| `scrape_failed`       | 422    | Could not extract metadata from URL                                                      |
+| `template_not_found`  | 404    | Template slug does not exist                                                             |
+| `generation_failed`   | 500    | Image generation failed (AI or rendering error)                                          |
+| `domain_not_allowed`  | 403    | URL host not in project's domain allowlist (only raised when the allowlist is non-empty) |
 
 ---
 
@@ -671,7 +703,8 @@ X-RateLimit-Reset: 1711036800
 
 - All API communication over HTTPS (TLS 1.3)
 - API keys hashed in database (bcrypt); only shown once on creation
-- Public project IDs are non-secret identifiers — abuse prevention relies on domain allowlisting, rate limiting, and referrer validation (same model as Google Fonts, Vercel Analytics)
+- Public project IDs are non-secret identifiers — abuse prevention relies on rate limiting, plan quotas, optional domain allowlisting, and referrer validation (same model as Google Fonts, Vercel Analytics)
+- Auth endpoints (`/auth/register`, `/auth/login`, `/auth/forgot-password`, `/auth/resend-verification`) are protected with Google reCAPTCHA v3 (invisible) to block automated signups and email-flood abuse
 - URL scraping: sanitize and validate all input URLs; block private IP ranges (SSRF protection)
 - Image generation: content moderation on AI outputs (reject NSFW/harmful content)
 - Rate limiting per project ID + IP (GET endpoint) and per API key (POST endpoint)

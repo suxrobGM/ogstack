@@ -1,10 +1,13 @@
 import { afterAll, beforeEach, describe, expect, it, mock } from "bun:test";
 import { container } from "@/common/di";
 import { EmailService } from "@/common/services/email.service";
+import { RecaptchaService } from "@/common/services/recaptcha.service";
 import { hashPassword, verifyPassword } from "@/common/utils/password";
 import { PrismaClient } from "@/generated/prisma";
 import { restoreMockedModules } from "@/test/setup";
 import { AuthService } from "./auth.service";
+
+const TEST_RECAPTCHA_TOKEN = "test-recaptcha-token";
 
 afterAll(() => restoreMockedModules("jose", "@/common/utils/password"));
 
@@ -81,17 +84,24 @@ function createMockEmailService() {
   return { send: mock(() => Promise.resolve()) } as unknown as EmailService;
 }
 
+function createMockRecaptchaService() {
+  return { verify: mock(() => Promise.resolve()) } as unknown as RecaptchaService;
+}
+
 describe("AuthService", () => {
   let authService: AuthService;
   let mockPrisma: ReturnType<typeof createMockPrisma>;
   let mockEmailService: ReturnType<typeof createMockEmailService>;
+  let mockRecaptcha: ReturnType<typeof createMockRecaptchaService>;
 
   beforeEach(() => {
     container.clearInstances();
     mockPrisma = createMockPrisma();
     mockEmailService = createMockEmailService();
+    mockRecaptcha = createMockRecaptchaService();
     container.registerInstance(PrismaClient, mockPrisma as unknown as PrismaClient);
     container.registerInstance(EmailService, mockEmailService as unknown as EmailService);
+    container.registerInstance(RecaptchaService, mockRecaptcha as unknown as RecaptchaService);
     authService = container.resolve(AuthService);
   });
 
@@ -102,6 +112,7 @@ describe("AuthService", () => {
         password: "securePassword123",
         firstName: "Test",
         lastName: "User",
+        recaptchaToken: TEST_RECAPTCHA_TOKEN,
       });
 
       expect(result).toEqual({
@@ -125,6 +136,7 @@ describe("AuthService", () => {
           password: "securePassword123",
           firstName: "Test",
           lastName: "User",
+          recaptchaToken: TEST_RECAPTCHA_TOKEN,
         }),
       ).rejects.toThrow("email already exists");
     });
@@ -135,6 +147,7 @@ describe("AuthService", () => {
         password: "securePassword123",
         firstName: "Test",
         lastName: "User",
+        recaptchaToken: TEST_RECAPTCHA_TOKEN,
       });
 
       expect(hashPassword).toHaveBeenCalledWith("securePassword123");
@@ -146,6 +159,7 @@ describe("AuthService", () => {
         password: "securePassword123",
         firstName: "Test",
         lastName: "User",
+        recaptchaToken: TEST_RECAPTCHA_TOKEN,
       });
 
       expect(mockPrisma.user.findFirst).toHaveBeenCalledWith({
@@ -162,6 +176,7 @@ describe("AuthService", () => {
         password: "securePassword123",
         firstName: "Test",
         lastName: "User",
+        recaptchaToken: TEST_RECAPTCHA_TOKEN,
       });
 
       expect((mockPrisma as any).project).toBeUndefined();
@@ -175,6 +190,7 @@ describe("AuthService", () => {
       const result = await authService.login({
         email: "test@example.com",
         password: "securePassword123",
+        recaptchaToken: TEST_RECAPTCHA_TOKEN,
       });
 
       expect(result).toHaveProperty("user");
@@ -189,6 +205,7 @@ describe("AuthService", () => {
       await authService.login({
         email: "  TEST@Example.COM  ",
         password: "securePassword123",
+        recaptchaToken: TEST_RECAPTCHA_TOKEN,
       });
 
       expect(mockPrisma.user.findFirst).toHaveBeenCalledWith({
@@ -203,6 +220,7 @@ describe("AuthService", () => {
         authService.login({
           email: "noone@example.com",
           password: "securePassword123",
+          recaptchaToken: TEST_RECAPTCHA_TOKEN,
         }),
       ).rejects.toThrow("Invalid email or password");
     });
@@ -216,6 +234,7 @@ describe("AuthService", () => {
         authService.login({
           email: "test@example.com",
           password: "wrongPassword",
+          recaptchaToken: TEST_RECAPTCHA_TOKEN,
         }),
       ).rejects.toThrow("Invalid email or password");
     });
@@ -229,6 +248,7 @@ describe("AuthService", () => {
         authService.login({
           email: "test@example.com",
           password: "securePassword123",
+          recaptchaToken: TEST_RECAPTCHA_TOKEN,
         }),
       ).rejects.toThrow("Invalid email or password");
     });
@@ -242,6 +262,7 @@ describe("AuthService", () => {
         authService.login({
           email: "test@example.com",
           password: "securePassword123",
+          recaptchaToken: TEST_RECAPTCHA_TOKEN,
         }),
       ).rejects.toThrow("verify your email");
     });
@@ -292,7 +313,10 @@ describe("AuthService", () => {
     it("should send reset email for existing user", async () => {
       (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(createMockUser());
 
-      await authService.forgotPassword({ email: "test@example.com" });
+      await authService.forgotPassword({
+        email: "test@example.com",
+        recaptchaToken: TEST_RECAPTCHA_TOKEN,
+      });
 
       expect(mockPrisma.user.update).toHaveBeenCalled();
       expect(mockEmailService.send).toHaveBeenCalled();
@@ -301,7 +325,10 @@ describe("AuthService", () => {
     it("should not throw for non-existent email", async () => {
       (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      await authService.forgotPassword({ email: "noone@example.com" });
+      await authService.forgotPassword({
+        email: "noone@example.com",
+        recaptchaToken: TEST_RECAPTCHA_TOKEN,
+      });
 
       expect(mockPrisma.user.update).not.toHaveBeenCalled();
       expect(mockEmailService.send).not.toHaveBeenCalled();
@@ -312,7 +339,10 @@ describe("AuthService", () => {
         createMockUser({ passwordHash: null }),
       );
 
-      await authService.forgotPassword({ email: "test@example.com" });
+      await authService.forgotPassword({
+        email: "test@example.com",
+        recaptchaToken: TEST_RECAPTCHA_TOKEN,
+      });
 
       expect(mockPrisma.user.update).not.toHaveBeenCalled();
       expect(mockEmailService.send).not.toHaveBeenCalled();
@@ -323,7 +353,10 @@ describe("AuthService", () => {
         createMockUser({ deletedAt: new Date() }),
       );
 
-      await authService.forgotPassword({ email: "test@example.com" });
+      await authService.forgotPassword({
+        email: "test@example.com",
+        recaptchaToken: TEST_RECAPTCHA_TOKEN,
+      });
 
       expect(mockPrisma.user.update).not.toHaveBeenCalled();
       expect(mockEmailService.send).not.toHaveBeenCalled();

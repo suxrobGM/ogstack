@@ -38,8 +38,15 @@ export default function PrivacyPage(): ReactElement {
           never touch our servers.
         </li>
         <li>
-          <strong>Projects:</strong> names, allowed domains, public IDs, and hashed API key
-          fingerprints. Raw keys are shown once and never stored.
+          <strong>Projects:</strong> names, optional domain allowlists, public IDs, and hashed API
+          key fingerprints. Raw keys are shown once and never stored.
+        </li>
+        <li>
+          <strong>Bot protection:</strong> our registration, login, password reset, and resend
+          verification flows run Google reCAPTCHA Enterprise (invisible, score-based). reCAPTCHA
+          collects hardware and software information (browser, plugins, cookies, mouse/keyboard
+          movement) and sends it to Google to produce a risk score; we only receive the score, not
+          the raw signals.
         </li>
         <li>
           <strong>Submitted URLs:</strong> we fetch the public page, parse its metadata, and store
@@ -116,6 +123,18 @@ export default function PrivacyPage(): ReactElement {
         </li>
         <li>
           <strong>LLM provider</strong> - AI-enabled generations and audits only.
+        </li>
+        <li>
+          <strong>Google reCAPTCHA</strong> - bot protection on authentication flows. See
+          Google&apos;s{" "}
+          <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">
+            Privacy Policy
+          </a>{" "}
+          and{" "}
+          <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer">
+            Terms of Service
+          </a>
+          .
         </li>
       </ul>
       <Typography variant="body1">

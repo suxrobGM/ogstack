@@ -28,14 +28,14 @@ const DomainStringSchema = t.String({
 export const CreateProjectBodySchema = t.Object({
   name: t.String({ minLength: 1, maxLength: 100 }),
   domains: t.Array(DomainStringSchema, {
-    minItems: 1,
-    description: "At least one domain is required. Used to authorize public OG requests.",
+    description:
+      "Optional. Leave empty to serve OG images for any URL. Add domains to restrict the public GET endpoint to those hosts.",
   }),
 });
 
 export const UpdateProjectBodySchema = t.Object({
   name: t.Optional(t.String({ minLength: 1, maxLength: 100 })),
-  domains: t.Optional(t.Array(DomainStringSchema, { minItems: 1 })),
+  domains: t.Optional(t.Array(DomainStringSchema)),
 });
 
 export const ProjectListResponseSchema = PaginatedResponseSchema(ProjectSchema);

@@ -1,0 +1,52 @@
+# Social preview
+
+Paste a URL and see how it will render across Facebook, Twitter/X, LinkedIn, Slack, Discord, Telegram, Instagram, and VK. The tool live-fetches the target page, parses its OG/Twitter/favicon tags, and renders platform-accurate previews side by side — no scoring, no history, no cache.
+
+Use it to sanity-check a page before you share it, or to compare two variations without saving them to an audit report.
+
+## How it differs from an audit
+
+| Feature               | Audit               | Social preview             |
+| --------------------- | ------------------- | -------------------------- |
+| 0–100 score           | Yes                 | No                         |
+| Per-platform previews | Yes                 | Yes                        |
+| AI recommendations    | Plus / Pro          | —                          |
+| Saved to history      | Yes                 | No                         |
+| Cached                | Report is persisted | No — every click refetches |
+
+Reach for **audit** when you want a graded report you can share or revisit. Reach for **social preview** when you just want the cards and want to re-fetch on each change.
+
+## Using the tool
+
+1. Sign in to the dashboard.
+2. Open **Tools → Social Preview** in the sidebar.
+3. Paste a full URL (`https://…`) and hit **Preview**.
+4. Each platform card renders with the exact metadata that social crawlers will see.
+
+## API
+
+```http
+POST /api/audits/preview
+Content-Type: application/json
+Cookie: access_token=…
+
+{ "url": "https://example.com/post" }
+```
+
+Response:
+
+```json
+{
+  "metadata": {
+    "title": "Example post",
+    "description": "A short summary",
+    "image": "https://example.com/og.jpg",
+    "siteName": "Example",
+    "url": "https://example.com/post",
+    "favicon": "https://example.com/favicon.ico",
+    "twitterCardType": "summary_large_image"
+  }
+}
+```
+
+Free for all plans. Rate-limited to 10 requests per minute per user.

@@ -109,8 +109,17 @@ export default function TermsPage(): ReactElement {
 
       <Typography variant="h3">8. Third-party services</Typography>
       <Typography variant="body1">
-        The Service depends on Cloudflare, Stripe, Resend, and an LLM provider. Their outages may
-        affect us.
+        The Service depends on Cloudflare, Stripe, Resend, Google reCAPTCHA, and an LLM provider.
+        Their outages may affect us. Signing in or registering through our site runs Google
+        reCAPTCHA, which is subject to Google&apos;s{" "}
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">
+          Privacy Policy
+        </a>{" "}
+        and{" "}
+        <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer">
+          Terms of Service
+        </a>
+        .
       </Typography>
 
       <Typography variant="h3">9. Termination</Typography>

@@ -5,6 +5,9 @@
 # - SSH_USER: SSH username
 # - SSH_KEY: SSH private key for VPS access
 # - ENV_DOCKER: Full contents of the production .env file
+# - GCP_SA_KEY: JSON contents of a Google Cloud service account key with the
+#   "reCAPTCHA Enterprise Agent" role. Mounted into the api container as
+#   /run/secrets/gcp-credentials.json (GOOGLE_APPLICATION_CREDENTIALS).
 #
 # Uses the built-in GITHUB_TOKEN for GHCR auth — no PAT needed.
 # The GHCR package must be set to "public" in the repo's Packages settings so
@@ -14,6 +17,7 @@
 # - NEXT_PUBLIC_API_URL: Public backend API URL (e.g. https://ogstack.dev)
 # - NEXT_PUBLIC_DEMO_PROJECT_ID: Public project ID used by the playground demo
 # - NEXT_PUBLIC_DOCS_URL: Public docs URL (e.g. https://docs.ogstack.dev)
+# - NEXT_PUBLIC_RECAPTCHA_SITE_KEY: reCAPTCHA Enterprise site key (public, baked into web bundle)
 
 name: Build and Deploy
 
@@ -71,16 +75,14 @@ jobs:
           context: .
           file: ${{ matrix.file }}
           push: true
-          tags: ${{ env.REGISTRY }}/${{ steps.repo.outputs.name }}/${{ matrix.image
-            }}:latest
+          tags: ${{ env.REGISTRY }}/${{ steps.repo.outputs.name }}/${{matrix.image}}:latest
           build-args: |
             NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
             NEXT_PUBLIC_DEMO_PROJECT_ID=${{ vars.NEXT_PUBLIC_DEMO_PROJECT_ID }}
             NEXT_PUBLIC_DOCS_URL=${{ vars.NEXT_PUBLIC_DOCS_URL }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ steps.repo.outputs.name
-            }}/${{ matrix.image }}:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ steps.repo.outputs.name
-            }}/${{ matrix.image }}:buildcache,mode=max
+            NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${{ vars.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{steps.repo.outputs.name}}/${{ matrix.image }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{steps.repo.outputs.name}}/${{ matrix.image }}:buildcache,mode=max
 
   deploy:
     name: Deploy to VPS
@@ -99,13 +101,18 @@ jobs:
           mkdir -p deploy
           printf '%s' "${{ secrets.ENV_DOCKER }}" > deploy/.env
 
-      - name: Copy docker-compose to VPS
+      - name: Write GCP service account credentials
+        run: |
+          printf '%s' '${{ secrets.GCP_SA_KEY }}' > deploy/gcp-credentials.json
+          chmod 600 deploy/gcp-credentials.json
+
+      - name: Copy docker-compose and secrets to VPS
         uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          source: "deploy/docker-compose.yml,deploy/.env"
+          source: "deploy/docker-compose.yml,deploy/.env,deploy/gcp-credentials.json"
           target: ${{ env.APP_DIR }}
           strip_components: 1
 

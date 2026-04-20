@@ -1,8 +1,13 @@
 "use client";
 
 import type { ReactElement } from "react";
-import { Stack, Typography } from "@mui/material";
-import { BLOG_HERO_ASPECTS, type ImageKind } from "@ogstack/shared";
+import { Alert, Stack, Typography } from "@mui/material";
+import {
+  BLOG_HERO_ASPECTS,
+  hostMatchesDomain,
+  isValidHttpUrl,
+  type ImageKind,
+} from "@ogstack/shared";
 import { FormSelectField } from "@/components/ui/form/form-select-field";
 import { FormTextField } from "@/components/ui/form/form-text-field";
 import type { AnyReactForm } from "@/components/ui/form/types";
@@ -27,11 +32,22 @@ const ASPECT_RATIO_ITEMS = BLOG_HERO_ASPECTS.map((value) => ({
 interface ControlsPanelProps {
   form: AnyReactForm;
   templates: TemplateInfo[];
-  projects: Pick<Project, "id" | "name">[];
+  projects: Pick<Project, "id" | "name" | "domains">[];
   selectedProjectId: string;
   onProjectChange: (id: string) => void;
   isGenerating: boolean;
   onGenerate: () => void;
+}
+
+function getMismatchedHostname(url: string, domains: string[]): string | null {
+  if (domains.length === 0 || !isValidHttpUrl(url)) return null;
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    const matches = domains.some((d) => hostMatchesDomain(host, d));
+    return matches ? null : host;
+  } catch {
+    return null;
+  }
 }
 
 export function ControlsPanel(props: ControlsPanelProps): ReactElement {
@@ -44,6 +60,8 @@ export function ControlsPanel(props: ControlsPanelProps): ReactElement {
     isGenerating,
     onGenerate,
   } = props;
+
+  const selectedProject = projects.find((p) => p.id === selectedProjectId);
 
   return (
     <Surface sx={{ height: "100%" }}>
@@ -65,6 +83,22 @@ export function ControlsPanel(props: ControlsPanelProps): ReactElement {
           placeholder="https://example.com/page"
           transform={normalizeUrlInput}
         />
+
+        <form.Subscribe selector={(s: { values: { url: string } }) => s.values.url}>
+          {(url: string) => {
+            const mismatch = getMismatchedHostname(url, selectedProject?.domains ?? []);
+            if (!mismatch) {
+              return null;
+            }
+            return (
+              <Alert severity="info" sx={{ mt: -1 }}>
+                <strong>{mismatch}</strong> isn&apos;t in this project&apos;s domain allowlist. The
+                image will still generate, but the public meta tag won&apos;t serve on that domain.
+                Add it under Project → Settings if you plan to use this image there.
+              </Alert>
+            );
+          }}
+        </form.Subscribe>
 
         <form.Subscribe selector={(s: { values: { kind: ImageKind } }) => s.values.kind}>
           {(kind: ImageKind) => {

@@ -11,6 +11,7 @@ import PaymentIcon from "@mui/icons-material/Payment";
 import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import SettingsIcon from "@mui/icons-material/Settings";
+import ShareIcon from "@mui/icons-material/Share";
 import StarsIcon from "@mui/icons-material/Stars";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
@@ -61,6 +62,11 @@ export const SIDEBAR_NAV_ITEMS: readonly NavEntry[] = [
         icon: <StarsIcon {...iconProps} />,
       },
       { label: "Audits", href: ROUTES.audits, icon: <VerifiedIcon {...iconProps} /> },
+      {
+        label: "Social Preview",
+        href: ROUTES.socialPreview,
+        icon: <ShareIcon {...iconProps} />,
+      },
     ],
   },
   {

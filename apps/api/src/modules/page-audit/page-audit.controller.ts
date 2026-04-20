@@ -8,6 +8,8 @@ import {
   PageAuditHistoryQuerySchema,
   PageAuditHistoryResponseSchema,
   PageAuditReportSchema,
+  PreviewUrlBodySchema,
+  PreviewUrlResponseSchema,
 } from "./page-audit.schema";
 import { PageAuditService } from "./page-audit.service";
 
@@ -57,4 +59,25 @@ export const pageAuditUserController = new Elysia({
     query: PageAuditHistoryQuerySchema,
     response: PageAuditHistoryResponseSchema,
     detail: { summary: "List the current user's audit reports" },
+  });
+
+/**
+ * /api/audits/preview - free social-preview tool. Auth-only but not plan-gated;
+ * a flat per-user rate limit applies regardless of plan.
+ */
+export const socialPreviewController = new Elysia({
+  prefix: "/audits",
+  tags: ["Audits"],
+  detail: { security: [{ bearerAuth: [] }] },
+})
+  .use(authGuard)
+  .use(rateLimiter({ max: 10, windowMs: 60_000 }))
+  .post("/preview", ({ body }) => pageAuditService.previewUrl(body.url), {
+    body: PreviewUrlBodySchema,
+    response: PreviewUrlResponseSchema,
+    detail: {
+      summary: "Scrape URL metadata for a social preview",
+      description:
+        "Returns OG/Twitter/favicon metadata for a URL without scoring or persistence. Powers the Social Preview tool. Auth required, free for all plans.",
+    },
   });

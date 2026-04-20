@@ -6,6 +6,7 @@ import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
+import { useRecaptcha } from "@/hooks/use-recaptcha";
 import { client } from "@/lib/api/client";
 import { ROUTES } from "@/lib/constants";
 import { registerSchema } from "./schema";
@@ -18,6 +19,7 @@ interface RegisterResponse {
 
 export function RegisterForm(): ReactElement {
   const router = useRouter();
+  const { executeRecaptcha } = useRecaptcha();
 
   const mutation = useApiMutation<RegisterResponse, RegisterPayload>(
     (values) => client.api.auth.register.post(values),
@@ -34,10 +36,11 @@ export function RegisterForm(): ReactElement {
   );
 
   const form = useForm({
-    defaultValues: { firstName: "", lastName: "", email: "", password: "" },
+    defaultValues: { firstName: "", lastName: "", email: "", password: "", recaptchaToken: "" },
     validators: { onSubmit: registerSchema },
     onSubmit: async ({ value }) => {
-      mutation.mutate(value);
+      const recaptchaToken = await executeRecaptcha("register");
+      mutation.mutate({ ...value, recaptchaToken });
     },
   });
 

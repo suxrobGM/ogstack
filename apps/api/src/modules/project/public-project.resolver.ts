@@ -1,4 +1,4 @@
-import { isPlanAtLeast, Plan } from "@ogstack/shared";
+import { hostMatchesDomain, isPlanAtLeast, Plan } from "@ogstack/shared";
 import { singleton } from "tsyringe";
 import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
 import { PrismaClient } from "@/generated/prisma";
@@ -11,19 +11,16 @@ function isLocalHostname(hostname: string): boolean {
   return false;
 }
 
-function hostMatchesDomain(hostname: string, domain: string): boolean {
-  const normalized = domain.toLowerCase();
-  return hostname === normalized || hostname.endsWith(`.${normalized}`);
-}
-
 @singleton()
 export class PublicProjectResolver {
   constructor(private readonly prisma: PrismaClient) {}
 
   /**
-   * Resolves a project by public ID and enforces domain allowlist on the
-   * requested URL. Domains are mandatory; an empty list means something went
-   * wrong at project creation. In development, localhost URLs bypass the check.
+   * Resolves a project by public ID and optionally enforces a domain allowlist
+   * on the requested URL. Rules:
+   *   - Empty `domains` → allow any URL (no allowlist configured).
+   *   - Non-empty `domains` → URL hostname must match one entry or be a subdomain.
+   * In development, localhost URLs bypass the check.
    */
   async resolveAndValidate(publicId: string, url: string) {
     const project = await this.prisma.project.findUnique({
@@ -47,14 +44,8 @@ export class PublicProjectResolver {
       return project;
     }
 
-    if (project.allowAnyDomain) {
-      return project;
-    }
-
     if (project.domains.length === 0) {
-      throw new ForbiddenError(
-        "Project has no allowed domains configured. Add at least one domain to serve images.",
-      );
+      return project;
     }
 
     const allowed = project.domains.some((d) => hostMatchesDomain(hostname, d));

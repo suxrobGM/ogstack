@@ -24,7 +24,11 @@ import {
 } from "@/modules/image-generation";
 import { notificationController } from "@/modules/notification";
 import { pageAnalysisController } from "@/modules/page-analysis";
-import { pageAuditController, pageAuditUserController } from "@/modules/page-audit";
+import {
+  pageAuditController,
+  pageAuditUserController,
+  socialPreviewController,
+} from "@/modules/page-audit";
 import { projectController } from "@/modules/project";
 import { templateController } from "@/modules/template";
 import { usageController } from "@/modules/usage";
@@ -51,6 +55,7 @@ const app = new Elysia()
       .use(apiKeyController)
       .use(pageAuditController)
       .use(pageAuditUserController)
+      .use(socialPreviewController)
       .use(pageAnalysisController)
       .use(imageGenerationApiController)
       .use(imageGenerationDashboardController)

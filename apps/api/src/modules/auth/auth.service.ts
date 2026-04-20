@@ -3,6 +3,7 @@ import { EmailVerificationEmail } from "@/common/emails/templates/email-verifica
 import { PasswordResetEmail } from "@/common/emails/templates/password-reset";
 import { BadRequestError, ConflictError, UnauthorizedError } from "@/common/errors";
 import { EmailService } from "@/common/services/email.service";
+import { RecaptchaService } from "@/common/services/recaptcha.service";
 import { generateRandomToken } from "@/common/utils/crypto";
 import { buildAuthResponse, verifyToken } from "@/common/utils/jwt";
 import { hashPassword, verifyPassword } from "@/common/utils/password";
@@ -27,6 +28,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly emailService: EmailService,
+    private readonly recaptcha: RecaptchaService,
   ) {}
 
   /**
@@ -34,6 +36,8 @@ export class AuthService {
    * in — tokens are only issued after the email has been verified.
    */
   async register(data: RegisterBody): Promise<RegisterResponse> {
+    await this.recaptcha.verify(data.recaptchaToken, "register");
+
     const { email, password, firstName, lastName } = data;
     const trimmedEmail = email.trim();
 
@@ -60,6 +64,8 @@ export class AuthService {
 
   /** Authenticate a user by email and password. */
   async login(data: LoginBody): Promise<AuthResponse> {
+    await this.recaptcha.verify(data.recaptchaToken, "login");
+
     const { email, password } = data;
 
     const user = await this.prisma.user.findFirst({
@@ -109,6 +115,8 @@ export class AuthService {
 
   /** Generate a password reset token and send reset email. */
   async forgotPassword(data: ForgotPasswordBody): Promise<void> {
+    await this.recaptcha.verify(data.recaptchaToken, "forgot_password");
+
     const user = await this.prisma.user.findUnique({ where: { email: data.email } });
 
     // Always return success to prevent email enumeration
@@ -194,6 +202,8 @@ export class AuthService {
 
   /** Resend the verification email. */
   async resendVerification(data: ResendVerificationBody): Promise<void> {
+    await this.recaptcha.verify(data.recaptchaToken, "resend_verification");
+
     const user = await this.prisma.user.findUnique({ where: { email: data.email } });
 
     // Always return success to prevent email enumeration

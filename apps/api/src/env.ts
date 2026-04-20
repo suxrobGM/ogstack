@@ -65,6 +65,11 @@ const EnvSchema = t.Object({
   BROWSERLESS_URL: t.Optional(t.String()),
   BROWSERLESS_TOKEN: t.Optional(t.String()),
   SCRAPINGBEE_API_KEY: t.Optional(t.String()),
+
+  RECAPTCHA_PROJECT_ID: t.Optional(t.String()),
+  RECAPTCHA_SITE_KEY: t.Optional(t.String()),
+  RECAPTCHA_MIN_SCORE: t.Optional(t.String({ default: "0.5" })),
+  GOOGLE_APPLICATION_CREDENTIALS: t.Optional(t.String()),
 });
 
 export type Env = Static<typeof EnvSchema>;

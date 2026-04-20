@@ -8,6 +8,7 @@ const meta: MetaRecord = {
   templates: "Templates & styling",
   "ai-generation": "AI generation",
   audit: "OG audit",
+  "social-preview": "Social preview",
 };
 
 export default meta;

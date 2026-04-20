@@ -13,6 +13,16 @@ export function isValidDomain(domain: string): boolean {
 }
 
 /**
+ * True when `hostname` is equal to `domain` or a subdomain of it.
+ * Both inputs are compared case-insensitively.
+ */
+export function hostMatchesDomain(hostname: string, domain: string): boolean {
+  const host = hostname.toLowerCase();
+  const normalized = domain.toLowerCase();
+  return host === normalized || host.endsWith(`.${normalized}`);
+}
+
+/**
  * http(s) URL with a real-looking hostname. Rejects whitespace and junk authorities
  *  that WHATWG's URL parser otherwise tolerates (e.g. `https://foo.com$`).
  */

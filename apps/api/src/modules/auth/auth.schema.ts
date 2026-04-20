@@ -6,11 +6,13 @@ export const RegisterBodySchema = t.Object({
   password: t.String({ minLength: 8, maxLength: 128 }),
   firstName: t.String({ minLength: 1, maxLength: 50 }),
   lastName: t.String({ minLength: 1, maxLength: 50 }),
+  recaptchaToken: t.String({ minLength: 1 }),
 });
 
 export const LoginBodySchema = t.Object({
   email: t.String({ format: "email" }),
   password: t.String(),
+  recaptchaToken: t.String({ minLength: 1 }),
 });
 
 export const RefreshBodySchema = t.Object({
@@ -39,6 +41,7 @@ export const RegisterResponseSchema = t.Object({
 
 export const ForgotPasswordBodySchema = t.Object({
   email: t.String({ format: "email" }),
+  recaptchaToken: t.String({ minLength: 1 }),
 });
 
 export const ResetPasswordBodySchema = t.Object({
@@ -52,6 +55,7 @@ export const VerifyEmailBodySchema = t.Object({
 
 export const ResendVerificationBodySchema = t.Object({
   email: t.String({ format: "email" }),
+  recaptchaToken: t.String({ minLength: 1 }),
 });
 
 export const OAuthRedirectQuerySchema = t.Object({

@@ -117,6 +117,16 @@ export const PageAuditHistoryItemSchema = t.Object({
 export const PageAuditHistoryResponseSchema = PaginatedResponseSchema(PageAuditHistoryItemSchema);
 export const PageAuditHistoryQuerySchema = PaginationQueryBaseSchema;
 
+export const PreviewUrlBodySchema = t.Object({
+  url: t.String({ format: "uri", minLength: 1 }),
+});
+
+export const PreviewUrlResponseSchema = t.Object({
+  metadata: PageAuditPreviewMetadataSchema,
+});
+
+export type PreviewUrlBody = Static<typeof PreviewUrlBodySchema>;
+export type PreviewUrlResponse = Static<typeof PreviewUrlResponseSchema>;
 export type PageAuditCreateBody = Static<typeof PageAuditCreateBodySchema>;
 export type PageAuditAi = Static<typeof PageAuditAiSchema>;
 export type PageAuditAiInsights = Static<typeof PageAuditAiInsightsSchema>;

@@ -15,6 +15,7 @@ import type {
   PageAuditIssue,
   PageAuditPreviewMetadata,
   PageAuditReport as PageAuditReportDto,
+  PreviewUrlResponse,
 } from "./page-audit.schema";
 import { computeScore, runChecks } from "./page-audit.scoring";
 
@@ -24,6 +25,18 @@ interface CreateAuditParams {
   url: string;
   userId: string | null;
   includeAi?: boolean;
+}
+
+function toPreviewMetadata(meta: UrlMetadata): PageAuditPreviewMetadata {
+  return {
+    title: meta.ogTitle ?? meta.twitterTitle ?? meta.title,
+    description: meta.ogDescription ?? meta.twitterDescription ?? meta.description,
+    image: meta.ogImage ?? meta.twitterImage,
+    siteName: meta.ogSiteName,
+    url: meta.url,
+    favicon: meta.favicon,
+    twitterCardType: meta.twitterCard,
+  };
 }
 
 @singleton()
@@ -46,15 +59,7 @@ export class PageAuditService {
     const issues = runChecks(meta);
     const scores = computeScore(issues);
 
-    const metadata: PageAuditPreviewMetadata = {
-      title: meta.ogTitle ?? meta.twitterTitle ?? meta.title,
-      description: meta.ogDescription ?? meta.twitterDescription ?? meta.description,
-      image: meta.ogImage ?? meta.twitterImage,
-      siteName: meta.ogSiteName,
-      url: meta.url,
-      favicon: meta.favicon,
-      twitterCardType: meta.twitterCard,
-    };
+    const metadata = toPreviewMetadata(meta);
 
     const aiStatus: AuditAiStatus = shouldEnrich ? AuditAiStatus.PENDING : AuditAiStatus.SKIPPED;
 
@@ -86,6 +91,16 @@ export class PageAuditService {
       categoryScores: scores.byCategory,
       ai: { status: aiStatus, analysis: null, error: null },
     };
+  }
+
+  /**
+   * Scrape-only preview — no scoring, no persistence. Powers the Social
+   * Preview tool which just needs OG/Twitter/favicon metadata to render
+   * platform cards.
+   */
+  async previewUrl(rawUrl: string): Promise<PreviewUrlResponse> {
+    const meta = await this.scraper.extractMetadata(rawUrl);
+    return { metadata: toPreviewMetadata(meta) };
   }
 
   /**

@@ -89,7 +89,7 @@ export function ProjectSettings(props: ProjectSettingsProps): ReactElement {
                 label="Project Name"
                 required
               />
-              <FormDomainField form={form as unknown as AnyReactForm} name="domains" required />
+              <FormDomainField form={form as unknown as AnyReactForm} name="domains" />
               <Box>
                 <Button type="submit" variant="contained" loading={updateMutation.isPending}>
                   Save Changes

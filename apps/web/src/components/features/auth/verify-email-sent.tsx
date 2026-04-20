@@ -4,16 +4,24 @@ import { type ReactElement } from "react";
 import { Alert, Button, Stack, Typography } from "@mui/material";
 import { useSearchParams } from "next/navigation";
 import { useApiMutation } from "@/hooks/use-api-mutation";
+import { useRecaptcha } from "@/hooks/use-recaptcha";
 import { client } from "@/lib/api/client";
+import type { MessageResponse, ResendVerificationBody } from "@/types/api";
 
 export function VerifyEmailSent(): ReactElement {
   const searchParams = useSearchParams();
   const email = searchParams.get("email") ?? "";
+  const { executeRecaptcha } = useRecaptcha();
 
-  const resendMutation = useApiMutation<{ message: string }, { email: string }>(
+  const resendMutation = useApiMutation<MessageResponse, ResendVerificationBody>(
     (values) => client.api.auth["resend-verification"].post(values),
     { errorMessage: "Could not resend verification email" },
   );
+
+  const handleResend = async () => {
+    const recaptchaToken = await executeRecaptcha("resend_verification");
+    resendMutation.mutate({ email, recaptchaToken });
+  };
 
   return (
     <Stack spacing={2.5}>
@@ -39,7 +47,7 @@ export function VerifyEmailSent(): ReactElement {
         variant="outlined"
         size="large"
         disabled={!email || resendMutation.isPending}
-        onClick={() => resendMutation.mutate({ email })}
+        onClick={handleResend}
       >
         {resendMutation.isPending ? "Sending…" : "Resend verification email"}
       </Button>

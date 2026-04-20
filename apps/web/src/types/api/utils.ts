@@ -18,3 +18,10 @@ export type ExtractData<T, Method extends string> = Method extends keyof T
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Data<T extends (...args: any[]) => any> = NonNullable<Treaty.Data<T>>;
+
+/**
+ * Extract the request body type from an Eden Treaty POST/PATCH/PUT endpoint.
+ * Usage: Body<typeof client.api.auth.login.post>
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Body<T extends (...args: any[]) => any> = NonNullable<Parameters<T>[0]>;

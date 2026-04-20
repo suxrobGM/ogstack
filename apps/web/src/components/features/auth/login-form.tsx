@@ -7,6 +7,7 @@ import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
+import { useRecaptcha } from "@/hooks/use-recaptcha";
 import { client } from "@/lib/api/client";
 import { ROUTES } from "@/lib/constants";
 import { useAuth } from "@/providers/auth-provider";
@@ -21,6 +22,7 @@ function isUnverifiedEmailError(message?: string | null): boolean {
 export function LoginForm(): ReactElement {
   const router = useRouter();
   const { setUser } = useAuth();
+  const { executeRecaptcha } = useRecaptcha();
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
 
   const mutation = useApiMutation<AuthResponse, LoginPayload>(
@@ -35,17 +37,22 @@ export function LoginForm(): ReactElement {
   );
 
   const form = useForm({
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: "", password: "", recaptchaToken: "" },
     validators: { onSubmit: loginSchema },
     onSubmit: async ({ value }) => {
       setUnverifiedEmail(null);
-      mutation.mutate(value, {
-        onError: (error) => {
-          if (isUnverifiedEmailError(error.message)) {
-            setUnverifiedEmail(value.email);
-          }
+      const recaptchaToken = await executeRecaptcha("login");
+
+      mutation.mutate(
+        { ...value, recaptchaToken },
+        {
+          onError: (error) => {
+            if (isUnverifiedEmailError(error.message)) {
+              setUnverifiedEmail(value.email);
+            }
+          },
         },
-      });
+      );
     },
   });
 

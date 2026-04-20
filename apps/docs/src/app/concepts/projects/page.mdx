@@ -6,30 +6,32 @@ A project groups everything tied to one site: generated images, API keys, and th
 
 Each project has two identifiers:
 
-| Identifier   | Format             | Where it's used                                    |
-| ------------ | ------------------ | -------------------------------------------------- |
-| `id` (UUID)  | `550e8400-...`     | API bodies: `POST /api/images/generate`            |
-| `publicId`   | 8-char slug        | Public meta-tag URL: `/og/{publicId}?url=...`      |
+| Identifier  | Format         | Where it's used                               |
+| ----------- | -------------- | --------------------------------------------- |
+| `id` (UUID) | `550e8400-...` | API bodies: `POST /api/images/generate`       |
+| `publicId`  | 8-char slug    | Public meta-tag URL: `/og/{publicId}?url=...` |
 
 The public ID is safe to expose in HTML; the UUID is only used in authenticated API calls.
 
 ## Domain allowlist
 
-The public OG endpoint (`GET /og/:publicId`) only renders for URLs whose origin matches one of the project's registered domains. This prevents someone from pointing your project at arbitrary URLs to burn through your quota.
+The public OG endpoint (`GET /og/:publicId`) optionally enforces a per-project domain allowlist. Leave the list empty and any URL is served; add one or more domains and requests whose URL host doesn't match are rejected with `403 domain_not_allowed`. Matching is host-based — `example.com` covers `example.com` and any subdomain (e.g. `www.example.com`, `blog.example.com`).
 
-Authenticated API calls (`POST /api/images/generate`) don't check the allowlist — API keys are the authorization.
+Generation is never blocked by the allowlist — the check only runs when the public GET endpoint serves an image. Authenticated API calls (`POST /api/images/generate`) ignore the allowlist entirely; API keys are the authorization there.
+
+Leaving the allowlist empty is fine for most projects. Add domains when you want to stop someone else from pasting your public ID into their `<meta>` tag and burning your quota.
 
 ## Plan limits
 
-| Plan | Projects | Domains per project |
-| ---- | -------- | ------------------- |
-| Free | 1        | 1                   |
-| Plus | 5        | 3                   |
-| Pro  | Unlimited | Unlimited          |
+| Plan | Projects  | Domains per project |
+| ---- | --------- | ------------------- |
+| Free | 1         | 1                   |
+| Plus | 5         | 3                   |
+| Pro  | Unlimited | Unlimited           |
 
 ## Creating a project
 
-Dashboard → **Projects** → **New project**. Provide a name and at least one domain. The public ID is generated automatically and cannot be changed.
+Dashboard → **Projects** → **New project**. Provide a name; domains are optional. The public ID is generated automatically and cannot be changed.
 
 ## Deleting a project
 

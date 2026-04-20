@@ -83,7 +83,7 @@ export function ProjectDialog(props: ProjectDialogProps): ReactElement {
               required
               autoFocus
             />
-            <FormDomainField form={form as unknown as AnyReactForm} name="domains" required />
+            <FormDomainField form={form as unknown as AnyReactForm} name="domains" />
           </Stack>
         </DialogContent>
         <DialogActions>

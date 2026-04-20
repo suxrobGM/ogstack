@@ -14,7 +14,6 @@ interface FormDomainFieldProps {
   name: string;
   label?: string;
   placeholder?: string;
-  required?: boolean;
   /** Show the "X / cap on Plan" counter and upgrade CTA. Default: true. */
   showPlanCap?: boolean;
   /** Default helper text shown when there's no error. */
@@ -33,7 +32,6 @@ export function FormDomainField(props: FormDomainFieldProps): ReactElement {
     name,
     label = "Allowed Domains",
     placeholder = "example.com",
-    required,
     showPlanCap = true,
     helperText,
   } = props;
@@ -46,7 +44,7 @@ export function FormDomainField(props: FormDomainFieldProps): ReactElement {
 
   const defaultHelper =
     helperText ??
-    "Press Enter to add. Requests from other domains get a 403 from the public OG endpoint.";
+    "Optional. Leave empty to serve OG images for any URL. Add domains to restrict the public endpoint to those hosts.";
 
   const normalizeAutoCompleteValues = (field: AnyFieldApi, next: string[]) => {
     const normalized = Array.from(
@@ -109,10 +107,6 @@ export function FormDomainField(props: FormDomainFieldProps): ReactElement {
                   placeholder={value.length === 0 ? placeholder : ""}
                   error={overCap || invalidEntries.length > 0 || Boolean(submitError)}
                   helperText={resolvedHelper}
-                  slotProps={{
-                    ...params.slotProps,
-                    inputLabel: { ...params.slotProps?.inputLabel, required },
-                  }}
                 />
               )}
             />
