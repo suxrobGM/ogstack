@@ -24,7 +24,7 @@ function cookieOptions(path: string, maxAge: number) {
   return {
     httpOnly: true,
     secure: IS_PROD,
-    sameSite: IS_PROD ? ("strict" as const) : ("lax" as const),
+    sameSite: "lax" as const,
     path,
     maxAge,
   };
@@ -65,7 +65,7 @@ export function clearAuthCookies(cookie: Record<string, Cookie<unknown>>) {
  */
 export function setOAuthStateCookie(cookie: Record<string, Cookie<unknown>>, state: string) {
   cookie.oauth_state!.value = state;
-  cookie.oauth_state!.set({ ...cookieOptions("/api/auth", 600), sameSite: "lax" });
+  cookie.oauth_state!.set(cookieOptions("/api/auth", 600));
 }
 
 /**
@@ -74,7 +74,7 @@ export function setOAuthStateCookie(cookie: Record<string, Cookie<unknown>>, sta
  */
 export function clearOAuthStateCookie(cookie: Record<string, Cookie<unknown>>) {
   cookie.oauth_state!.value = "";
-  cookie.oauth_state!.set({ ...cookieOptions("/api/auth", 0), sameSite: "lax" });
+  cookie.oauth_state!.set(cookieOptions("/api/auth", 0));
 }
 
 /**
@@ -88,7 +88,7 @@ export function getOAuthStateCookie(cookie: Record<string, Cookie<unknown>>): st
 /** Stores the post-OAuth redirect path (e.g. /settings/security for account linking). */
 export function setOAuthRedirectCookie(cookie: Record<string, Cookie<unknown>>, path: string) {
   cookie.oauth_redirect!.value = path;
-  cookie.oauth_redirect!.set({ ...cookieOptions("/api/auth", 600), sameSite: "lax" });
+  cookie.oauth_redirect!.set(cookieOptions("/api/auth", 600));
 }
 
 export function getOAuthRedirectCookie(
@@ -99,5 +99,5 @@ export function getOAuthRedirectCookie(
 
 export function clearOAuthRedirectCookie(cookie: Record<string, Cookie<unknown>>) {
   cookie.oauth_redirect!.value = "";
-  cookie.oauth_redirect!.set({ ...cookieOptions("/api/auth", 0), sameSite: "lax" });
+  cookie.oauth_redirect!.set(cookieOptions("/api/auth", 0));
 }
