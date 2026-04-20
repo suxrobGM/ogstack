@@ -14,8 +14,8 @@ export function WatermarkBadge(props: WatermarkBadgeProps): ReactElement {
         alignItems: "center",
         width: `${width}px`,
         height: `${height}px`,
-        padding: "0 10px",
-        gap: "6px",
+        padding: "0 14px",
+        gap: "8px",
         borderRadius: "999px",
         backgroundColor: "rgba(0, 0, 0, 0.42)",
       }}
@@ -23,8 +23,8 @@ export function WatermarkBadge(props: WatermarkBadgeProps): ReactElement {
       <div
         style={{
           display: "flex",
-          width: "5px",
-          height: "5px",
+          width: "7px",
+          height: "7px",
           borderRadius: "999px",
           backgroundColor: "rgba(255,255,255,0.85)",
         }}
@@ -32,7 +32,7 @@ export function WatermarkBadge(props: WatermarkBadgeProps): ReactElement {
       <div
         style={{
           display: "flex",
-          fontSize: "11px",
+          fontSize: "16px",
           fontWeight: 600,
           letterSpacing: "0.02em",
           color: "rgba(255,255,255,0.9)",

@@ -11,9 +11,9 @@ export function shouldWatermark(plan: Plan): boolean {
   return plan === Plan.FREE || plan === Plan.PLUS;
 }
 
-const WATERMARK_WIDTH = 96;
-const WATERMARK_HEIGHT = 22;
-const MARGIN = 20;
+const WATERMARK_WIDTH = 140;
+const WATERMARK_HEIGHT = 32;
+const MARGIN = 24;
 const FONT_URL = "https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap";
 const FONT_UA =
   "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; de-at) AppleWebKit/533.21.1 (KHTML, like Gecko) Version/5.0.5 Safari/533.21.1";
