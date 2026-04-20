@@ -73,7 +73,7 @@ export function ImageDetail(props: ImageDetailProps): ReactElement {
   };
 
   return (
-    <Stack spacing={3}>
+    <Stack spacing={{ xs: 2, md: 3 }}>
       <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
         <IconButton
           component={Link}
@@ -89,7 +89,7 @@ export function ImageDetail(props: ImageDetailProps): ReactElement {
       </Stack>
 
       <Surface>
-        <Stack spacing={3}>
+        <Stack spacing={{ xs: 2, md: 3 }}>
           <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
             <Typography variant="h6" sx={{ flex: 1 }}>
               Image
@@ -102,7 +102,7 @@ export function ImageDetail(props: ImageDetailProps): ReactElement {
               </Tooltip>
             )}
           </Stack>
-          <Grid container spacing={3}>
+          <Grid container spacing={{ xs: 2, md: 3 }}>
             <Grid size={{ xs: 12, md: 7 }}>
               {image.kind === "icon_set" ? (
                 <IconPreview src={image.cdnUrl ?? image.imageUrl} alt={title} />
@@ -128,7 +128,15 @@ export function ImageDetail(props: ImageDetailProps): ReactElement {
             </Grid>
           </Grid>
           {mode === "view" && (
-            <Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end" }}>
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                justifyContent: { xs: "flex-start", sm: "flex-end" },
+                flexWrap: "wrap",
+                gap: 1,
+              }}
+            >
               <Button
                 color="error"
                 startIcon={<DeleteIcon />}

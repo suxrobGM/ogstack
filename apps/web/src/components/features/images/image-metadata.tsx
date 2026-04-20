@@ -101,10 +101,18 @@ function GenerationChip(props: { image: ImageItem }): ReactElement {
 
 function MetaRow(props: { label: string; children: ReactNode }): ReactElement {
   return (
-    <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start" }}>
+    <Stack
+      direction={{ xs: "column", sm: "row" }}
+      spacing={{ xs: 0.5, sm: 2 }}
+      sx={{ alignItems: { xs: "stretch", sm: "flex-start" } }}
+    >
       <Typography
         variant="captionMuted"
-        sx={{ minWidth: 140, textTransform: "uppercase", letterSpacing: "0.05em" }}
+        sx={{
+          minWidth: { sm: 140 },
+          textTransform: "uppercase",
+          letterSpacing: "0.05em",
+        }}
       >
         {props.label}
       </Typography>
