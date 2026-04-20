@@ -47,6 +47,10 @@ export class PublicProjectResolver {
       return project;
     }
 
+    if (project.allowAnyDomain) {
+      return project;
+    }
+
     if (project.domains.length === 0) {
       throw new ForbiddenError(
         "Project has no allowed domains configured. Add at least one domain to serve images.",

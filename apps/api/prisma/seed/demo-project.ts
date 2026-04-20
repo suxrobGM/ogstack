@@ -5,10 +5,7 @@ import { generatePublicId } from "@/common/utils/crypto";
 const DEMO_USER_EMAIL = "demo@ogstack.dev";
 const DEMO_PROJECT_NAME = "Public Playground";
 
-/** Allowlisted domains for the landing playground; must include the default demo URL's host. */
-const DEMO_ALLOWED_DOMAINS = ["bun.sh", "elysiajs.com", "nextjs.org", "vercel.com", "github.com"];
-
-/** Seeds the public playground project. Idempotent — refreshes allowed domains on reruns. */
+/** Seeds the public playground project with `allowAnyDomain` so visitors can paste any URL. */
 export async function seedDemoProject(): Promise<void> {
   const user = await prisma.user.upsert({
     where: { email: DEMO_USER_EMAIL },
@@ -28,14 +25,15 @@ export async function seedDemoProject(): Promise<void> {
   const project = existing
     ? await prisma.project.update({
         where: { id: existing.id },
-        data: { domains: DEMO_ALLOWED_DOMAINS },
+        data: { allowAnyDomain: true },
       })
     : await prisma.project.create({
         data: {
           userId: user.id,
           publicId: generatePublicId(),
           name: DEMO_PROJECT_NAME,
-          domains: DEMO_ALLOWED_DOMAINS,
+          domains: [],
+          allowAnyDomain: true,
         },
       });
 

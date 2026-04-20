@@ -1,10 +1,11 @@
 model Project {
-  id       String   @id @default(uuid()) @db.Uuid
-  userId   String   @map("user_id") @db.Uuid
-  publicId String   @unique @map("public_id")
-  name     String
-  domains  String[]
-  isActive Boolean  @default(true) @map("is_active")
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  publicId       String   @unique @map("public_id")
+  name           String
+  domains        String[]
+  isActive       Boolean  @default(true) @map("is_active")
+  allowAnyDomain Boolean  @default(false) @map("allow_any_domain")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
