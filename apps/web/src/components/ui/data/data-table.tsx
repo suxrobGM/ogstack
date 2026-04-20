@@ -23,7 +23,7 @@ interface DataTableProps<T> {
 }
 
 /**
- * Quiet data table wrapper — renders MUI Table inside a flat Surface with
+ * Quiet data table wrapper - renders MUI Table inside a flat Surface with
  * skeleton loading rows and an embedded EmptyState on empty result sets.
  *
  * Columns are generic over row type `T`; access either via `column.key` as
@@ -94,7 +94,7 @@ function renderDefaultCell<T>(row: T, key: string): ReactNode {
   if (value == null)
     return (
       <Box component="span" sx={{ opacity: 0.4 }}>
-        —
+        -
       </Box>
     );
   if (typeof value === "string" || typeof value === "number") {

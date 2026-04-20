@@ -23,7 +23,7 @@ export function FailedView(props: { error: string | null }): ReactElement {
       <Stack spacing={2}>
         <PanelHeader />
         <Alert severity="info" variant="outlined">
-          AI analysis unavailable — the rule-based audit above is complete.
+          AI analysis unavailable - the rule-based audit above is complete.
           {props.error && (
             <Typography variant="caption" sx={{ display: "block", mt: 0.5, opacity: 0.7 }}>
               {props.error}

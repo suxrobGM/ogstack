@@ -16,7 +16,7 @@ interface SurfaceProps {
  *
  * Defaults to the "quiet" mode (flat, hairline border, subtle shadow) used in
  * dense data zones. Opt-in to "expressive" for landing, hero, playground,
- * and empty-state surfaces — adds an accent border and stronger shadow.
+ * and empty-state surfaces - adds an accent border and stronger shadow.
  */
 export function Surface(props: SurfaceProps): ReactElement {
   const { variant = "quiet", padding = 3, children, sx, className } = props;

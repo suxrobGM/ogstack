@@ -18,7 +18,7 @@ interface FormToggleFieldProps<V> {
   items: ReadonlyArray<ToggleItem<V>>;
   fullWidth?: boolean;
   size?: "small" | "medium" | "large";
-  /** Called after the field value changes — use for visibility toggles or other side effects. */
+  /** Called after the field value changes - use for visibility toggles or other side effects. */
   onChange?: (value: V) => void;
 }
 

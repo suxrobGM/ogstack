@@ -10,7 +10,7 @@ interface ImageKindChipProps {
 }
 
 // Opaque backdrops so the chip stays legible over any image. Matches the
-// frosted style of ImageGenerationChip — see image-generation-chip.tsx.
+// frosted style of ImageGenerationChip - see image-generation-chip.tsx.
 const KIND_BACKGROUND: Record<ImageKind, string> = {
   og: "rgba(59, 130, 246, 0.92)", // blue
   blog_hero: "rgba(139, 92, 246, 0.92)", // violet

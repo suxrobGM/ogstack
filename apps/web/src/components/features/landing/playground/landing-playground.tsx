@@ -48,7 +48,7 @@ export function LandingPlayground(): ReactElement {
     const trimmed = url.trim();
     if (!trimmed) return;
 
-    // No demo project configured — route the CTA to register so the user can
+    // No demo project configured - route the CTA to register so the user can
     // try the real playground rather than leaving them with a disabled button.
     if (!hasDemo) {
       router.push(ROUTES.register);
@@ -235,7 +235,7 @@ export function LandingPlayground(): ReactElement {
         </Box>
       </Box>
 
-      {/* Meta tag snippet — shown once a preview has been generated so users
+      {/* Meta tag snippet - shown once a preview has been generated so users
           can copy the exact tag they'd paste into their own <head>. */}
       {metaTag && (
         <Box sx={{ px: 3, pb: 3 }}>

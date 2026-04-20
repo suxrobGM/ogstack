@@ -80,7 +80,7 @@ export function RecentImages(props: RecentImagesProps): ReactElement {
                   </Box>
                   <Box sx={{ p: 1.5 }}>
                     <Typography variant="overlineMuted" sx={{ display: "block" }}>
-                      {image.template?.name ?? "—"}
+                      {image.template?.name ?? "-"}
                     </Typography>
                     <Typography variant="body2" noWrap sx={{ mt: 0.5 }}>
                       {image.title ?? image.sourceUrl}

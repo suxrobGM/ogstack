@@ -48,7 +48,7 @@ function Meter(props: MeterProps): ReactElement {
         >
           {used.toLocaleString()}
         </Typography>
-        <Typography variant="body2Muted">/ {hasLimit ? limit.toLocaleString() : "—"}</Typography>
+        <Typography variant="body2Muted">/ {hasLimit ? limit.toLocaleString() : "-"}</Typography>
       </Stack>
       {hasLimit ? (
         <LinearProgress

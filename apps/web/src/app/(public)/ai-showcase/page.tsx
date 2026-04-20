@@ -6,7 +6,7 @@ import { AiShowcaseSection, FinalCtaSection } from "@/components/features/landin
 export const metadata: Metadata = {
   title: "AI showcase",
   description:
-    "Real URLs, real AI-generated previews. See what OGStack's content-aware image generation produces at Standard and Pro quality — no manual prompting required.",
+    "Real URLs, real AI-generated previews. See what OGStack's content-aware image generation produces at Standard and Pro quality - no manual prompting required.",
   keywords: [
     "ai og image examples",
     "content-aware ai showcase",

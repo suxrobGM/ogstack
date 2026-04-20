@@ -27,7 +27,7 @@ const VALUES = [
   {
     title: "AI that earns its keep",
     description:
-      "We don't bolt AI on top. The LLM reads the page and grounds every decision in real content — nothing hallucinated.",
+      "We don't bolt AI on top. The LLM reads the page and grounds every decision in real content - nothing hallucinated.",
   },
   {
     title: "Honest pricing",

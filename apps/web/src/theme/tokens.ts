@@ -1,5 +1,5 @@
 /**
- * Design tokens — gradients, motion, shadows, radii, icon sizes.
+ * Design tokens - gradients, motion, shadows, radii, icon sizes.
  * Attached to the MUI theme via module augmentation in `augment.d.ts`.
  */
 

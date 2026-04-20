@@ -46,7 +46,7 @@ const STATUS_CONFIG: Record<
 
 /**
  * Canonical status pill for OGStack image / job states.
- * Fixed color mapping per status — consumers pass only the `status` value.
+ * Fixed color mapping per status - consumers pass only the `status` value.
  */
 export function StatusChip(props: StatusChipProps): ReactElement {
   const { status, size = "small" } = props;

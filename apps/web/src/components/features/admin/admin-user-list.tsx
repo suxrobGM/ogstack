@@ -68,7 +68,7 @@ export function AdminUserList(props: AdminUserListProps): ReactElement {
       header: "Name",
       render: (row) => (
         <Typography variant="body2">
-          {row.firstName || row.lastName ? `${row.firstName} ${row.lastName}`.trim() : "—"}
+          {row.firstName || row.lastName ? `${row.firstName} ${row.lastName}`.trim() : "-"}
         </Typography>
       ),
     },

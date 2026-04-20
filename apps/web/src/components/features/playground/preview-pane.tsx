@@ -87,7 +87,7 @@ export function PreviewPane(props: PreviewPaneProps): ReactElement {
 
         {result?.ai?.fellBack && (
           <Alert severity="warning" variant="outlined">
-            AI generation unavailable — rendered template fallback.
+            AI generation unavailable - rendered template fallback.
           </Alert>
         )}
 
@@ -128,7 +128,7 @@ export function PreviewPane(props: PreviewPaneProps): ReactElement {
 
             {result.cached && (
               <Alert severity="info" icon={<RefreshIcon fontSize="small" />}>
-                Same inputs as before — click <strong>Regenerate</strong> to force a fresh image.
+                Same inputs as before - click <strong>Regenerate</strong> to force a fresh image.
               </Alert>
             )}
           </Stack>

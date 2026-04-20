@@ -24,7 +24,7 @@ export const SAMPLE_INSIGHTS: AiInsights = {
   ],
   suggestions: {
     og: {
-      title: "Cut LCP to under 1s on Next.js — measured",
+      title: "Cut LCP to under 1s on Next.js - measured",
       description:
         "How we shaved 2.3s off Largest Contentful Paint by fixing the image pipeline, moving landing to ISR, and serving OG previews from the edge.",
     },
@@ -49,7 +49,7 @@ export const SAMPLE_INSIGHTS: AiInsights = {
   ],
   socialCtrTips: [
     "Lead with the outcome (under 1s) before the method",
-    "Name the stack explicitly — developers scan for it",
+    "Name the stack explicitly - developers scan for it",
     "Quantify the delta (2.3s) in the first 60 chars",
   ],
   discoverability: {

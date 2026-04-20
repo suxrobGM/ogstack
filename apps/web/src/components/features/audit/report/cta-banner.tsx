@@ -25,7 +25,7 @@ export function CtaBanner(props: CtaBannerProps): ReactElement {
           <Stack spacing={0.5}>
             <Typography variant="h5">Fix it in seconds with OGStack</Typography>
             <Typography variant="body2Muted">
-              Generate a beautiful OG image for this URL — no design work, one meta tag to paste.
+              Generate a beautiful OG image for this URL - no design work, one meta tag to paste.
             </Typography>
           </Stack>
         </Stack>

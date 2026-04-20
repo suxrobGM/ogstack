@@ -27,7 +27,7 @@ export function FeaturedTemplatesSection(): ReactElement {
               Templates
             </Typography>
             <Typography variant="h2">
-              One template, every hero — OG, social, and blog covers
+              One template, every hero - OG, social, and blog covers
             </Typography>
             <Typography variant="body1Muted">
               Hand-tuned designs that render crisp at 1200×630 for Open Graph and scale up to

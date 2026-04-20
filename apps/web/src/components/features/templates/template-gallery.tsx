@@ -40,7 +40,7 @@ export function TemplateGallery(props: TemplateGalleryProps): ReactElement {
     <Stack spacing={{ xs: 2, md: 3 }}>
       <PageHeader
         title="Templates"
-        description="Browse our template library and preview with your content. Every template renders at any supported size — pick your aspect at render time."
+        description="Browse our template library and preview with your content. Every template renders at any supported size - pick your aspect at render time."
       />
 
       <Stack spacing={1.5}>

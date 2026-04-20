@@ -14,7 +14,7 @@ interface PeriodSummaryProps {
 
 export function PeriodSummary(props: PeriodSummaryProps): ReactElement {
   const { usage, avgGenerationMs } = props;
-  const avgLabel = avgGenerationMs ? `${Math.round(avgGenerationMs)}ms` : "—";
+  const avgLabel = avgGenerationMs ? `${Math.round(avgGenerationMs)}ms` : "-";
 
   return (
     <Grid container spacing={3}>

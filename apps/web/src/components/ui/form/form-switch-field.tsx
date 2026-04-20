@@ -12,7 +12,7 @@ interface FormSwitchFieldProps {
   description?: ReactNode;
   disabled?: boolean;
   labelPlacement?: "start" | "end";
-  /** Called after the field value changes — use for visibility toggles or other side effects. */
+  /** Called after the field value changes - use for visibility toggles or other side effects. */
   onChange?: (checked: boolean) => void;
 }
 

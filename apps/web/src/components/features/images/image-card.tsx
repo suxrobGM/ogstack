@@ -23,7 +23,7 @@ export function ImageCard(props: ImageCardProps): ReactElement {
   const { user } = useAuth();
   const isAi = Boolean(item.aiModel);
   const title = item.title ?? item.sourceUrl ?? "Untitled";
-  const caption = item.template?.name ?? item.category ?? "—";
+  const caption = item.template?.name ?? item.category ?? "-";
 
   const generatedOnPlan = (item.generatedOnPlan ?? Plan.FREE) as Plan;
   const currentPlan = (user?.plan ?? Plan.FREE) as Plan;

@@ -27,7 +27,7 @@ export function ResetPasswordForm(): ReactElement {
     validators: { onSubmit: resetPasswordSchema },
     onSubmit: async ({ value }) => {
       if (!token) {
-        toast.error("Invalid reset link — no token found");
+        toast.error("Invalid reset link - no token found");
         return;
       }
       mutation.mutate({ token, password: value.password });

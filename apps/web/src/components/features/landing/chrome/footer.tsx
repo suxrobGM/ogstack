@@ -118,7 +118,7 @@ export function Footer(): ReactElement {
             sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}
           >
             <Typography variant="captionMuted">
-              © {COPYRIGHT_YEAR} ogstack.dev — Crafted for developers.
+              © {COPYRIGHT_YEAR} ogstack.dev - Crafted for developers.
             </Typography>
             <Stack direction="row" spacing={0.5}>
               <IconButton

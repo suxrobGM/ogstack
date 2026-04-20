@@ -33,7 +33,7 @@ export default function HowItWorksPage(): ReactElement {
           <Typography variant="h1">From URL to preview image</Typography>
           <Typography variant="body1Muted" sx={{ maxWidth: 640 }}>
             Three steps. No design tooling, no manual prompting, no CDN to set up. Paste a URL and
-            we take care of the rest — complete with caching and SSRF-safe scraping.
+            we take care of the rest - complete with caching and SSRF-safe scraping.
           </Typography>
         </Stack>
       </Container>

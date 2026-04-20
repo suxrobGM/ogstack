@@ -125,7 +125,7 @@ export function PlatformPreviewCard(props: PlatformPreviewCardProps): ReactEleme
     );
   }
 
-  // compact (Slack / Telegram / Discord) — real unfurls put text first with a
+  // compact (Slack / Telegram / Discord) - real unfurls put text first with a
   // small square thumbnail on the right, not a full-width image below.
   return shell(
     <Stack direction="row" spacing={1.5} sx={{ p: 1.5, alignItems: "stretch" }}>

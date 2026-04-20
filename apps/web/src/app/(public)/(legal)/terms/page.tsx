@@ -88,7 +88,7 @@ export default function TermsPage(): ReactElement {
           at checkout.
         </li>
         <li>
-          Cancel anytime — your plan remains active until the end of the paid period. Downgrades
+          Cancel anytime - your plan remains active until the end of the paid period. Downgrades
           take effect at period end; higher-tier output may become read-only.
         </li>
         <li>
@@ -123,7 +123,7 @@ export default function TermsPage(): ReactElement {
       <Typography variant="h3">10. Warranty disclaimer</Typography>
       <Typography variant="body1">
         The Service is provided <strong>&quot;as is&quot;</strong> without warranties of any kind.
-        Generated output — especially AI-assisted — should be reviewed before publication.
+        Generated output - especially AI-assisted - should be reviewed before publication.
       </Typography>
 
       <Typography variant="h3">11. Liability limit</Typography>

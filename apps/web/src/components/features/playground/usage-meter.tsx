@@ -38,7 +38,7 @@ export function UsageMeter(props: UsageMeterProps): ReactElement {
           <Typography variant="captionMuted">{stats.plan}</Typography>
         </Stack>
         <Typography variant="caption" sx={{ fontFamily: "monospace" }}>
-          {hasAiLimit ? `${stats.aiImageCount} / ${stats.aiImageLimit}` : "—"}
+          {hasAiLimit ? `${stats.aiImageCount} / ${stats.aiImageLimit}` : "-"}
         </Typography>
       </Stack>
       {hasAiLimit && (

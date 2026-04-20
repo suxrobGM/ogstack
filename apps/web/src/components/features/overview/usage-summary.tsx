@@ -58,7 +58,7 @@ export function UsageSummary(props: UsageSummaryProps): ReactElement {
                 {usage.aiImageCount.toLocaleString()}
               </Typography>
               <Typography variant="body2Muted">
-                / {usage.aiImageLimit > 0 ? usage.aiImageLimit.toLocaleString() : "—"}
+                / {usage.aiImageLimit > 0 ? usage.aiImageLimit.toLocaleString() : "-"}
               </Typography>
             </Stack>
             {usage.aiImageLimit > 0 ? (
@@ -95,7 +95,7 @@ export function UsageSummary(props: UsageSummaryProps): ReactElement {
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard
             label={`AI audits (${usage.aiAuditLimit})`}
-            value={`${usage.aiAuditCount.toLocaleString()} / ${usage.aiAuditLimit > 0 ? usage.aiAuditLimit.toLocaleString() : "—"}`}
+            value={`${usage.aiAuditCount.toLocaleString()} / ${usage.aiAuditLimit > 0 ? usage.aiAuditLimit.toLocaleString() : "-"}`}
             icon={<RateReviewIcon />}
             sx={{ height: "100%" }}
           />

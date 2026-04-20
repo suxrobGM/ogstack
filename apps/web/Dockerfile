@@ -1,7 +1,7 @@
 FROM oven/bun:1 AS base
 WORKDIR /app
 
-# Build stage — install deps, generate backend types for Eden Treaty, build Next.js
+# Build stage - install deps, generate backend types for Eden Treaty, build Next.js
 FROM base AS build
 
 ARG NEXT_PUBLIC_API_URL
@@ -33,7 +33,7 @@ RUN bun build:types
 WORKDIR /app/apps/web
 RUN bun run build
 
-# Runtime — standalone Next.js output
+# Runtime - standalone Next.js output
 FROM oven/bun:1-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production

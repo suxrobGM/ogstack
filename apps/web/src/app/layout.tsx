@@ -33,7 +33,7 @@ const SITE_URL = "https://ogstack.dev";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "OGStack — Branded OG images, blog covers & favicons for any URL",
+    default: "OGStack - Branded OG images, blog covers & favicons for any URL",
     template: "%s · OGStack",
   },
   description:
@@ -81,7 +81,7 @@ export const metadata: Metadata = {
         url: "/og-image.svg",
         width: 1200,
         height: 630,
-        alt: "OGStack — Branded OG images, blog covers & favicons",
+        alt: "OGStack - Branded OG images, blog covers & favicons",
         type: "image/svg+xml",
       },
     ],

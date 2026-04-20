@@ -23,7 +23,7 @@ const FEATURES: Feature[] = [
     icon: PhotoFilterIcon,
     title: "OG preview images",
     description:
-      "1200×630 social previews. Template or AI. One meta tag covers Twitter, LinkedIn, Slack, Discord, iMessage — every platform a crawler visits.",
+      "1200×630 social previews. Template or AI. One meta tag covers Twitter, LinkedIn, Slack, Discord, iMessage - every platform a crawler visits.",
   },
   {
     icon: LandscapeIcon,
@@ -41,7 +41,7 @@ const FEATURES: Feature[] = [
     icon: AutoAwesomeIcon,
     title: "Content-aware AI images",
     description:
-      "Our LLM reads the page, extracts the key message, and prompts a best-in-class image model to render on-brand output — no design effort required.",
+      "Our LLM reads the page, extracts the key message, and prompts a best-in-class image model to render on-brand output - no design effort required.",
   },
   {
     icon: InsightsIcon,
@@ -53,7 +53,7 @@ const FEATURES: Feature[] = [
     icon: PsychologyIcon,
     title: "AI page analysis",
     description:
-      "Structured extraction of headline, tagline, topics, pageTheme, brand palette, and content signals — reused across image generation and audits.",
+      "Structured extraction of headline, tagline, topics, pageTheme, brand palette, and content signals - reused across image generation and audits.",
   },
   {
     icon: DashboardCustomizeIcon,
@@ -71,7 +71,7 @@ const FEATURES: Feature[] = [
     icon: CodeIcon,
     title: "One meta tag, full API",
     description:
-      'Drop a GET URL into <meta property="og:image"> or call the POST endpoint from your backend. Either way — it\'s one line.',
+      'Drop a GET URL into <meta property="og:image"> or call the POST endpoint from your backend. Either way - it\'s one line.',
   },
 ];
 

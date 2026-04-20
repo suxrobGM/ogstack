@@ -11,17 +11,17 @@ interface FormSelectFieldProps {
   label?: string;
   items: ReadonlyArray<{ value: number | string; label: string }>;
   /**
-   * `"float"` (default) — floating label inside a `TextField select`.
-   * `"above"` — plain text label above a bare `Select`, useful in compact dialogs.
+   * `"float"` (default) - floating label inside a `TextField select`.
+   * `"above"` - plain text label above a bare `Select`, useful in compact dialogs.
    */
   labelPlacement?: "float" | "above";
   /**
-   * When true, prepends a "— none —" option with value "".
+   * When true, prepends a "- none -" option with value "".
    * When false (default), the field is disabled with a helper message when items is empty.
    * Only applies when `labelPlacement="float"`.
    */
   optional?: boolean;
-  /** Label for the empty option when optional=true. Defaults to "— none —". */
+  /** Label for the empty option when optional=true. Defaults to "- none -". */
   emptyLabel?: string;
   /** Helper text shown below the field when optional=false and items is empty. */
   emptyMessage?: string;
@@ -40,7 +40,7 @@ export function FormSelectField(props: FormSelectFieldProps): ReactElement {
     items,
     labelPlacement = "float",
     optional = false,
-    emptyLabel = "— none —",
+    emptyLabel = "- none -",
     emptyMessage,
     autoFocus,
     disabled = false,

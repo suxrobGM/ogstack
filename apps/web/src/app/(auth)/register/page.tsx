@@ -8,7 +8,7 @@ export default function RegisterPage(): ReactElement {
   return (
     <AuthCard
       title="Create your account"
-      description="Start generating branded images — OG, blog heroes, and favicon sets — in minutes"
+      description="Start generating branded images - OG, blog heroes, and favicon sets - in minutes"
       footer={{ text: "Already have an account?", linkText: "Sign in", href: ROUTES.login }}
     >
       <OAuthButtons />

@@ -41,7 +41,7 @@ export function HeroSection(): ReactElement {
             lineHeight: 1.65,
           }}
         >
-          Paste a URL. We generate OG images, blog covers, and full favicon sets — the AI reads the
+          Paste a URL. We generate OG images, blog covers, and full favicon sets - the AI reads the
           content, picks the headline, tone, and palette, and renders designed assets in seconds.
         </Typography>
         <Stack

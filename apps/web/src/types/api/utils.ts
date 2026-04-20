@@ -13,7 +13,7 @@ export type ExtractData<T, Method extends string> = Method extends keyof T
   : never;
 
 /**
- * Shorthand for Treaty.Data — extracts data from an endpoint method reference.
+ * Shorthand for Treaty.Data - extracts data from an endpoint method reference.
  * Usage: Data<typeof client.api.auth.login.post>
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -11,7 +11,7 @@ interface SectionHeaderProps {
 }
 
 /**
- * Section intro block — optional mono overline + display title + description.
+ * Section intro block - optional mono overline + display title + description.
  * Expressive variant applies the hero text gradient to the title.
  */
 export function SectionHeader(props: SectionHeaderProps): ReactElement {

@@ -34,7 +34,7 @@ const CHANNELS: Channel[] = [
     icon: EmailIcon,
     title: "Email",
     description:
-      "Sales, partnerships, custom pricing, SSO, or SLA questions — we usually reply within one business day.",
+      "Sales, partnerships, custom pricing, SSO, or SLA questions - we usually reply within one business day.",
     href: "mailto:hello@ogstack.dev",
     linkLabel: "hello@ogstack.dev",
   },
@@ -65,7 +65,7 @@ export default function ContactPage(): ReactElement {
           </Typography>
           <Typography variant="h1">Talk to the team</Typography>
           <Typography variant="body1Muted" sx={{ maxWidth: 620 }}>
-            Pick the channel that fits what you're after. We read everything.
+            Pick the channel that fits what you&apos;re after. We read everything.
           </Typography>
         </Stack>
       </Container>

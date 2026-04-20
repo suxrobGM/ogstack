@@ -34,7 +34,7 @@
       "file": "visa-bulletin__docs_page__pro.png",
       "seeds": {
         "headline": "Visa Bulletin",
-        "tagline": "U.S. Department of State — Bureau of Consular Affairs",
+        "tagline": "U.S. Department of State - Bureau of Consular Affairs",
         "mood": "official, reference"
       }
     },
@@ -45,7 +45,7 @@
       "quality": "pro",
       "file": "prisma-release__changelog__pro.png",
       "seeds": {
-        "headline": "Prisma 7 — Adapters & Faster Migrations",
+        "headline": "Prisma 7 - Adapters & Faster Migrations",
         "tagline": "Next-generation Node.js and TypeScript ORM",
         "mood": "release, precise"
       }

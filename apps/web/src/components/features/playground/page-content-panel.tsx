@@ -67,7 +67,7 @@ export function PageContentPanel(props: PageContentPanelProps): ReactElement {
             {metadata.isThinHtml && (
               <Alert severity="info">
                 {metadata.renderedWithJs
-                  ? "This page uses JavaScript — rendered before analyzing."
+                  ? "This page uses JavaScript - rendered before analyzing."
                   : "This page appears to require JavaScript. The preview may be limited."}
               </Alert>
             )}
@@ -80,7 +80,7 @@ export function PageContentPanel(props: PageContentPanelProps): ReactElement {
                 Title
               </Typography>
               <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                {title || "—"}
+                {title || "-"}
               </Typography>
             </Stack>
 

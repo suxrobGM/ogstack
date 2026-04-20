@@ -45,7 +45,7 @@ function pickAssets(assets: readonly Asset[] | null | undefined): Map<string, st
   return map;
 }
 
-/** OG image URL — `${API_BASE_URL}/api/og/:publicId`. Used for copy-paste snippets and internal previews alike. */
+/** OG image URL - `${API_BASE_URL}/api/og/:publicId`. Used for copy-paste snippets and internal previews alike. */
 export function buildOgImageUrl(publicId: string, params: Record<string, string>): string {
   return `${API_BASE_URL}/api/og/${publicId}?${serializeOgQuery(params)}`;
 }

@@ -100,7 +100,7 @@ export function AdminImageList(props: AdminImageListProps): ReactElement {
             whiteSpace: "nowrap",
           }}
         >
-          {row.sourceUrl ?? "—"}
+          {row.sourceUrl ?? "-"}
         </Typography>
       ),
     },
@@ -112,14 +112,14 @@ export function AdminImageList(props: AdminImageListProps): ReactElement {
     {
       key: "projectName",
       header: "Project",
-      render: (row) => <Typography variant="body2Muted">{row.projectName || "—"}</Typography>,
+      render: (row) => <Typography variant="body2Muted">{row.projectName || "-"}</Typography>,
     },
     {
       key: "template",
       header: "Template",
       width: 140,
       render: (row) =>
-        row.template ? <Chip size="small" label={row.template} variant="outlined" /> : "—",
+        row.template ? <Chip size="small" label={row.template} variant="outlined" /> : "-",
     },
     {
       key: "serveCount",

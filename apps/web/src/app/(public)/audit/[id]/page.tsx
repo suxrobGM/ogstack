@@ -22,7 +22,7 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const report = await fetchReport(id);
   if (!report) return { title: "Audit not found · OGStack" };
   return {
-    title: `${report.overallScore}/100 — Audit for ${report.url} · OGStack`,
+    title: `${report.overallScore}/100 - Audit for ${report.url} · OGStack`,
     description: `OG + SEO audit. Grade ${report.letterGrade}. ${report.issues.filter((i) => !i.pass).length} issues found.`,
   };
 }

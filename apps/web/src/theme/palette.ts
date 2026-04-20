@@ -1,5 +1,5 @@
 /**
- * OGStack palette — Warm Studio direction.
+ * OGStack palette - Warm Studio direction.
  *
  * Cream/sand base with amber accent and charcoal text.
  * Named `textColors` instead of `text` to avoid shadowing MUI's `palette.text`

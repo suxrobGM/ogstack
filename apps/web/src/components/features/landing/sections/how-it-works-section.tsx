@@ -21,7 +21,7 @@ const STEPS: Step[] = [
     step: "01",
     title: "Paste a URL",
     description:
-      "Any public page. We scrape the DOM, extract Open Graph tags, key content, and the real article body — safely, with SSRF protection on.",
+      "Any public page. We scrape the DOM, extract Open Graph tags, key content, and the real article body - safely, with SSRF protection on.",
     detail: "Avg. 200–400ms",
   },
   {
@@ -29,7 +29,7 @@ const STEPS: Step[] = [
     step: "02",
     title: "AI reads the content",
     description:
-      "An LLM runs page analysis and produces structured seeds: headline, tagline, topics, tone, suggested palette, and mood — cached per URL.",
+      "An LLM runs page analysis and produces structured seeds: headline, tagline, topics, tone, suggested palette, and mood - cached per URL.",
     detail: "Runs on every AI generation + audit",
   },
   {

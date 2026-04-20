@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { AuditLanding } from "@/components/features/audit/form";
 
 export const metadata: Metadata = {
-  title: "OG Audit — Score your Open Graph & SEO readiness",
+  title: "OG Audit - Score your Open Graph & SEO readiness",
   description:
     "Paste any URL to grade its Open Graph tags, Twitter card, and SEO hygiene. See how it previews across X, Facebook, LinkedIn, Slack, Telegram, Discord, and Instagram.",
   keywords: [
@@ -33,7 +33,7 @@ export default function PublicAuditPage(): ReactElement {
             Audit your Open Graph &amp; SEO
           </Typography>
           <Typography variant="body1Muted" sx={{ maxWidth: 560, mx: "auto" }}>
-            Paste a URL. We grade your OG tags, Twitter card, and SEO hygiene — and show you exactly
+            Paste a URL. We grade your OG tags, Twitter card, and SEO hygiene - and show you exactly
             how the page will appear on X, Facebook, LinkedIn, Slack, Telegram, Discord, and
             Instagram.
           </Typography>

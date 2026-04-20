@@ -15,7 +15,7 @@ interface StatCardProps {
 }
 
 /**
- * Metric tile — label + large value + optional trend delta.
+ * Metric tile - label + large value + optional trend delta.
  * Used for overview dashboards, billing summaries, analytics.
  */
 export function StatCard(props: StatCardProps): ReactElement {

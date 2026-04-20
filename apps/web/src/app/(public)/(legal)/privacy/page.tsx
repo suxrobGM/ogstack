@@ -24,13 +24,13 @@ export default function PrivacyPage(): ReactElement {
 
       <Typography variant="body1">
         This policy covers what OGStack collects, why, how long we keep it, and the controls you
-        have — for account holders and for the URLs submitted to our API.
+        have - for account holders and for the URLs submitted to our API.
       </Typography>
 
       <Typography variant="h3">1. What we collect</Typography>
       <ul>
         <li>
-          <strong>Account:</strong> email, name, password hash, and — for OAuth sign-in — the
+          <strong>Account:</strong> email, name, password hash, and - for OAuth sign-in - the
           provider&apos;s subject ID. We never see your OAuth password.
         </li>
         <li>
@@ -50,7 +50,7 @@ export default function PrivacyPage(): ReactElement {
           deleted.
         </li>
         <li>
-          <strong>Request logs:</strong> IP, user-agent, endpoint, status, latency — for rate
+          <strong>Request logs:</strong> IP, user-agent, endpoint, status, latency - for rate
           limits, abuse prevention, and billing reconciliation.
         </li>
       </ul>
@@ -62,7 +62,7 @@ export default function PrivacyPage(): ReactElement {
         <li>Enforce quotas and bill correctly.</li>
         <li>Detect and prevent abuse (SSRF checks, rate limits, AI moderation).</li>
         <li>
-          Send transactional email only — verification, password reset, receipts, security alerts.
+          Send transactional email only - verification, password reset, receipts, security alerts.
           No marketing without explicit opt-in.
         </li>
       </ul>
@@ -71,7 +71,7 @@ export default function PrivacyPage(): ReactElement {
       <Typography variant="body1">
         <strong>Contract</strong> to provide the service, <strong>legitimate interest</strong> for
         security and analytics, <strong>legal obligation</strong> for tax records, and{" "}
-        <strong>consent</strong> for any optional marketing — withdrawable anytime.
+        <strong>consent</strong> for any optional marketing - withdrawable anytime.
       </Typography>
 
       <Typography variant="h3">4. AI processing</Typography>
@@ -106,19 +106,19 @@ export default function PrivacyPage(): ReactElement {
       <Typography variant="h3">6. Sub-processors</Typography>
       <ul>
         <li>
-          <strong>Cloudflare</strong> — R2 storage and CDN.
+          <strong>Cloudflare</strong> - R2 storage and CDN.
         </li>
         <li>
-          <strong>Stripe</strong> — payments and subscriptions.
+          <strong>Stripe</strong> - payments and subscriptions.
         </li>
         <li>
-          <strong>Resend</strong> — transactional email.
+          <strong>Resend</strong> - transactional email.
         </li>
         <li>
-          <strong>LLM provider</strong> — AI-enabled generations and audits only.
+          <strong>LLM provider</strong> - AI-enabled generations and audits only.
         </li>
         <li>
-          <strong>Hosting</strong> — managed EU infrastructure for the API and database.
+          <strong>Hosting</strong> - managed EU infrastructure for the API and database.
         </li>
       </ul>
       <Typography variant="body1">
@@ -161,7 +161,7 @@ export default function PrivacyPage(): ReactElement {
           (30-day response).
         </li>
         <li>
-          EU/UK residents may lodge a complaint with their DPA — please contact us first so we can
+          EU/UK residents may lodge a complaint with their DPA - please contact us first so we can
           try to resolve it.
         </li>
       </ul>

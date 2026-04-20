@@ -26,7 +26,7 @@ export function ImageMetadata(props: ImageMetadataProps): ReactElement {
       <MetaRow label="Source URL">
         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
           <Typography variant="body2" sx={{ wordBreak: "break-all" }}>
-            {image.sourceUrl ?? "—"}
+            {image.sourceUrl ?? "-"}
           </Typography>
           {image.sourceUrl && <CopyButton text={image.sourceUrl} />}
         </Stack>
@@ -47,12 +47,12 @@ export function ImageMetadata(props: ImageMetadataProps): ReactElement {
           <Typography variant="body2">
             {image.template
               ? `${image.template.name} (${image.template.slug})`
-              : (image.category ?? "—")}
+              : (image.category ?? "-")}
           </Typography>
         </MetaRow>
       )}
       <MetaRow label="Project">
-        <Typography variant="body2">{image.projectName ?? "—"}</Typography>
+        <Typography variant="body2">{image.projectName ?? "-"}</Typography>
       </MetaRow>
       <MetaRow label="Dimensions">
         <Typography variant="body2">

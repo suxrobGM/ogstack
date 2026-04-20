@@ -11,7 +11,7 @@ import { templateThumbnailUrl } from "@/utils/url";
 export const metadata: Metadata = {
   title: "Templates",
   description:
-    "Every OGStack template in one place. Designs for blogs, docs, changelogs, product launches, GitHub repos, and more — all available on every plan.",
+    "Every OGStack template in one place. Designs for blogs, docs, changelogs, product launches, GitHub repos, and more - all available on every plan.",
   keywords: [
     "og image templates",
     "open graph templates",
@@ -54,7 +54,7 @@ const TEMPLATES: TemplateEntry[] = [
   {
     slug: "blog_card",
     name: "Magazine",
-    description: "Category pill, serif headline, and author byline — built for posts.",
+    description: "Category pill, serif headline, and author byline - built for posts.",
   },
   {
     slug: "docs_page",
@@ -99,7 +99,7 @@ export default function TemplateGalleryPage(): ReactElement {
           <Typography variant="h1">Every template. One meta tag.</Typography>
           <Typography variant="body1Muted" sx={{ maxWidth: 640 }}>
             Each template is tuned for a specific kind of content. Swap one URL parameter to change
-            styles. All tiers include every template — the AI can also pick the right one for you.
+            styles. All tiers include every template - the AI can also pick the right one for you.
           </Typography>
         </Stack>
       </Container>

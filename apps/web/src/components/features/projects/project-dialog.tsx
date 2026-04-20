@@ -89,7 +89,7 @@ export function ProjectDialog(props: ProjectDialogProps): ReactElement {
             />
             <Typography variant="captionMuted" sx={{ mt: -1 }}>
               Comma-separated list of domains allowed to use the public OG endpoint. Your plan caps
-              how many domains you can add per project — upgrade to fit more.
+              how many domains you can add per project - upgrade to fit more.
             </Typography>
           </Stack>
         </DialogContent>

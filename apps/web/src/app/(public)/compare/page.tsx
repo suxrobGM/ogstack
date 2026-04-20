@@ -20,7 +20,7 @@ import { Surface } from "@/components/ui/layout/surface";
 export const metadata: Metadata = {
   title: "Compare OGStack vs. alternatives",
   description:
-    "How OGStack compares to Vercel OG, Cloudinary, and manual screenshots for generating Open Graph images — features, pricing, and AI capabilities side-by-side.",
+    "How OGStack compares to Vercel OG, Cloudinary, and manual screenshots for generating Open Graph images - features, pricing, and AI capabilities side-by-side.",
   keywords: [
     "ogstack vs vercel og",
     "ogstack vs cloudinary",
@@ -70,8 +70,8 @@ export default function ComparePage(): ReactElement {
           </Typography>
           <Typography variant="h1">OGStack vs. the alternatives</Typography>
           <Typography variant="body1Muted" sx={{ maxWidth: 640 }}>
-            Every team solves Open Graph differently. Here's an honest side-by-side of what you get
-            — and don't — across the common options.
+            Every team solves Open Graph differently. Here&apos;s an honest side-by-side of what you
+            get - and don&apos;t - across the common options.
           </Typography>
         </Stack>
       </Container>
@@ -113,8 +113,8 @@ export default function ComparePage(): ReactElement {
           </Surface>
           <Typography variant="captionMuted" sx={{ mt: 2, display: "block" }}>
             Data reflects publicly documented features as of this writing. Vercel OG, Cloudinary,
-            and manual-screenshot workflows remain great for specific use cases — OGStack is
-            designed for teams who'd rather not build the AI + scraping + template pipeline
+            and manual-screenshot workflows remain great for specific use cases - OGStack is
+            designed for teams who&apos;d rather not build the AI + scraping + template pipeline
             themselves.
           </Typography>
         </Container>

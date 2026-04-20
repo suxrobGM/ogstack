@@ -2,7 +2,7 @@ import type { TypographyVariantsOptions } from "@mui/material/styles";
 import { textColors } from "./palette";
 
 /**
- * Font families — referenced via CSS custom properties set by next/font
+ * Font families - referenced via CSS custom properties set by next/font
  * in `app/layout.tsx`. Newsreader (serif) for headings, IBM Plex Sans for body.
  */
 export const fontFamilies = {

@@ -49,7 +49,7 @@ export function AdminUserApiKeys(props: AdminUserApiKeysProps): ReactElement {
                     <MonoId id={k.prefix} />
                   </TableCell>
                   <TableCell sx={{ px: 3 }}>
-                    {k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleDateString() : "—"}
+                    {k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleDateString() : "-"}
                   </TableCell>
                   <TableCell sx={{ px: 3 }}>
                     {k.revokedAt ? (

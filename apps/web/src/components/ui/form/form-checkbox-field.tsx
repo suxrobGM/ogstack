@@ -11,7 +11,7 @@ interface FormCheckboxFieldProps {
   label: ReactNode;
   disabled?: boolean;
   helperText?: ReactNode;
-  /** Called after the field value changes — use for visibility toggles or other side effects. */
+  /** Called after the field value changes - use for visibility toggles or other side effects. */
   onChange?: (checked: boolean) => void;
 }
 

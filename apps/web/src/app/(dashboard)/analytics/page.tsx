@@ -103,13 +103,13 @@ export default async function AnalyticsPage(props: AnalyticsPageProps): Promise<
         const iso = d.date.toISOString().slice(0, 10);
         return {
           label: iso.slice(5),
-          tooltip: `${iso} — ${d.imageCount} image${d.imageCount === 1 ? "" : "s"}`,
+          tooltip: `${iso} - ${d.imageCount} image${d.imageCount === 1 ? "" : "s"}`,
           value: d.imageCount,
         };
       })
     : history.map((h) => ({
         label: h.period,
-        tooltip: `${formatPeriod(h.period)} — ${h.imageCount} image${h.imageCount === 1 ? "" : "s"}`,
+        tooltip: `${formatPeriod(h.period)} - ${h.imageCount} image${h.imageCount === 1 ? "" : "s"}`,
         value: h.imageCount,
       }));
 

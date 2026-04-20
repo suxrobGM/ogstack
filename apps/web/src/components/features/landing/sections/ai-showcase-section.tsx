@@ -31,7 +31,7 @@ export function AiShowcaseSection(props: AiShowcaseSectionProps): ReactElement {
           <Typography variant="h2">See the AI read actual pages</Typography>
           <Typography variant="body1Muted" sx={{ maxWidth: 620 }}>
             Each card below is a real URL our pipeline scraped, analyzed, and rendered. The seeds
-            are exactly what the language model extracted — no manual prompting.
+            are exactly what the language model extracted - no manual prompting.
           </Typography>
         </Stack>
 

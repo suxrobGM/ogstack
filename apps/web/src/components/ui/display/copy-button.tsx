@@ -14,7 +14,7 @@ interface CopyButtonProps {
 
 /**
  * Icon button that copies a string to clipboard and shows a toast confirmation.
- * Silent on SSR — relies on `navigator.clipboard` which is available in the browser.
+ * Silent on SSR - relies on `navigator.clipboard` which is available in the browser.
  */
 export function CopyButton(props: CopyButtonProps): ReactElement {
   const { text, tooltip = "Copy to clipboard", size = "small", onCopied } = props;

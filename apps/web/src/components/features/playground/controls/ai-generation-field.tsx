@@ -71,7 +71,7 @@ export function AiGenerationField(props: AiGenerationFieldProps): ReactElement {
                   <Stack spacing={0}>
                     <Typography variant="body2">Use prompt as full override</Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Ignore page content — use your prompt as-is for the image.
+                      Ignore page content - use your prompt as-is for the image.
                     </Typography>
                   </Stack>
                 }

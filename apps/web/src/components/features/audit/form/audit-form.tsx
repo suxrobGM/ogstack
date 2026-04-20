@@ -125,7 +125,7 @@ export function AuditForm(props: AuditFormProps): ReactElement {
         {isPending && (
           <Box sx={{ textAlign: "center" }}>
             <Typography variant="captionMuted">
-              Fetching the page, parsing metadata, and grading it — usually 3–8 seconds.
+              Fetching the page, parsing metadata, and grading it - usually 3–8 seconds.
             </Typography>
           </Box>
         )}

@@ -15,10 +15,10 @@ import {
 
 export const metadata: Metadata = {
   title: {
-    absolute: "OGStack — Branded OG images, blog covers & favicons for any URL",
+    absolute: "OGStack - Branded OG images, blog covers & favicons for any URL",
   },
   description:
-    "A single API platform for on-brand social previews. Content-aware AI renders Open Graph images, blog covers, and favicon sets from any URL — via one meta tag or a POST request.",
+    "A single API platform for on-brand social previews. Content-aware AI renders Open Graph images, blog covers, and favicon sets from any URL - via one meta tag or a POST request.",
   keywords: [
     "og image generator",
     "open graph images",

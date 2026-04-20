@@ -13,7 +13,7 @@ const HIGHLIGHTS = [
   "24 checks across Open Graph, Twitter card, and SEO hygiene",
   "Live previews for X, Facebook, LinkedIn, Instagram, Slack, Telegram, Discord",
   "Concrete fix recommendations for every failing check",
-  "Free, no signup — shareable report URL",
+  "Free, no signup - shareable report URL",
 ];
 
 export function AuditPromoSection(): ReactElement {
@@ -78,7 +78,7 @@ export function AuditPromoSection(): ReactElement {
                     size="large"
                     endIcon={<ArrowForwardIcon />}
                   >
-                    Audit a URL — free
+                    Audit a URL - free
                   </Button>
                   <Button href={ROUTES.register} variant="outlined" size="large">
                     Create account
