@@ -37,7 +37,7 @@ export default function TermsPage(): ReactElement {
 
       <Typography variant="h3">2. Your account</Typography>
       <ul>
-        <li>Be at least 13 (16 in the EEA). One person or entity per account.</li>
+        <li>One person or entity per account.</li>
         <li>Keep your information accurate and your credentials private.</li>
         <li>
           You&apos;re responsible for everything done under your account and API keys. Rotate keys

@@ -117,22 +117,13 @@ export default function PrivacyPage(): ReactElement {
         <li>
           <strong>LLM provider</strong> - AI-enabled generations and audits only.
         </li>
-        <li>
-          <strong>Hosting</strong> - managed EU infrastructure for the API and database.
-        </li>
       </ul>
       <Typography variant="body1">
         We never sell your data or share it with advertisers. Legal disclosures are made only when
         compelled, and we notify affected users where permitted.
       </Typography>
 
-      <Typography variant="h3">7. International transfers</Typography>
-      <Typography variant="body1">
-        Primary infrastructure is in the EU. Transfers to US-based sub-processors rely on Standard
-        Contractual Clauses and, where applicable, the EU–US Data Privacy Framework.
-      </Typography>
-
-      <Typography variant="h3">8. Security</Typography>
+      <Typography variant="h3">7. Security</Typography>
       <ul>
         <li>TLS 1.2+ and HSTS for all traffic.</li>
         <li>bcrypt for passwords; SHA-256 fingerprints for API keys.</li>
@@ -142,13 +133,13 @@ export default function PrivacyPage(): ReactElement {
         <li>Rate limiting on authentication and generation endpoints.</li>
       </ul>
 
-      <Typography variant="h3">9. Breach notification</Typography>
+      <Typography variant="h3">8. Breach notification</Typography>
       <Typography variant="body1">
         If a breach affects your personal data, we notify affected users and, where required,
         supervisory authorities within 72 hours of discovery.
       </Typography>
 
-      <Typography variant="h3">10. Your rights</Typography>
+      <Typography variant="h3">9. Your rights</Typography>
       <Typography variant="body1">
         You can access, correct, delete, export, restrict, or object to processing of your data.
       </Typography>
@@ -160,31 +151,21 @@ export default function PrivacyPage(): ReactElement {
           For anything else, email <a href="mailto:privacy@ogstack.dev">privacy@ogstack.dev</a>{" "}
           (30-day response).
         </li>
-        <li>
-          EU/UK residents may lodge a complaint with their DPA - please contact us first so we can
-          try to resolve it.
-        </li>
       </ul>
 
-      <Typography variant="h3">11. Cookies</Typography>
+      <Typography variant="h3">10. Cookies</Typography>
       <Typography variant="body1">
         Strictly necessary only: httpOnly access and refresh tokens for sessions, plus a CSRF token
         on sensitive forms. No advertising, tracking, or third-party analytics cookies.
       </Typography>
 
-      <Typography variant="h3">12. Children</Typography>
-      <Typography variant="body1">
-        OGStack is not intended for children under 13 (16 in the EEA). Contact us if you believe a
-        minor has created an account and we&apos;ll remove it.
-      </Typography>
-
-      <Typography variant="h3">13. Changes</Typography>
+      <Typography variant="h3">11. Changes</Typography>
       <Typography variant="body1">
         We update this page when material changes occur. Significant changes are emailed to active
         account holders at least 14 days before taking effect.
       </Typography>
 
-      <Typography variant="h3">14. Contact</Typography>
+      <Typography variant="h3">12. Contact</Typography>
       <Typography variant="body1">
         Privacy and data requests: <a href="mailto:privacy@ogstack.dev">privacy@ogstack.dev</a>.
         General support: <a href="mailto:support@ogstack.dev">support@ogstack.dev</a>.
