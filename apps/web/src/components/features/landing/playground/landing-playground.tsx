@@ -12,6 +12,8 @@ import { fontFamilies } from "@/theme/typography";
 import { buildFrameworkSnippets } from "@/utils/framework-snippets";
 import { buildOgImageUrl } from "@/utils/integration-snippet";
 import { normalizeUrlInput, templateThumbnailUrl } from "@/utils/url";
+import { BrowserBar } from "./browser-bar";
+import { useOgPreview } from "./use-og-preview";
 
 const DEFAULT_URL = "https://bun.sh/blog/bun-v1.3";
 
@@ -27,53 +29,38 @@ const TEMPLATES = [
 
 const DEMO_PUBLIC_ID = process.env.NEXT_PUBLIC_DEMO_PROJECT_ID;
 
-function demoImageUrl(url: string, template: string): string | null {
-  if (!DEMO_PUBLIC_ID) return null;
-  return buildOgImageUrl(DEMO_PUBLIC_ID, { url, template });
-}
-
 export function LandingPlayground(): ReactElement {
   const router = useRouter();
+  const { imageUrl, isLoading, error, generated, generate } = useOgPreview(DEMO_PUBLIC_ID);
 
   const [url, setUrl] = useState(DEFAULT_URL);
   const [template, setTemplate] = useState<string>(TEMPLATES[0]);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [generated, setGenerated] = useState<{ url: string; template: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const hasDemo = Boolean(DEMO_PUBLIC_ID);
+  const hasSnippet = Boolean(generated) && !error && DEMO_PUBLIC_ID;
   const canGenerate = url.trim().length > 0;
+
+  const frameworkSnippets = hasSnippet
+    ? buildFrameworkSnippets({
+        kind: "og",
+        ogUrl: buildOgImageUrl(DEMO_PUBLIC_ID, {
+          url: generated!.url,
+          template: generated!.template,
+        }),
+      })
+    : [];
 
   const handleGenerate = () => {
     const trimmed = url.trim();
     if (!trimmed) return;
-
     // No demo project configured - route the CTA to register so the user can
     // try the real playground rather than leaving them with a disabled button.
     if (!hasDemo) {
       router.push(ROUTES.register);
       return;
     }
-
-    const built = demoImageUrl(trimmed, template);
-    if (!built) return;
-    setError(null);
-    setIsLoading(true);
-    setGenerated({ url: trimmed, template });
-    setImageUrl(`${built}&_t=${Date.now()}`);
+    void generate(trimmed, template);
   };
-
-  const frameworkSnippets =
-    generated && !error && DEMO_PUBLIC_ID
-      ? buildFrameworkSnippets({
-          kind: "og",
-          ogUrl: buildOgImageUrl(DEMO_PUBLIC_ID, {
-            url: generated.url,
-            template: generated.template,
-          }),
-        })
-      : [];
 
   return (
     <Box
@@ -84,42 +71,7 @@ export function LandingPlayground(): ReactElement {
         overflow: "hidden",
       }}
     >
-      {/* Browser bar */}
-      <Stack
-        direction="row"
-        sx={{
-          alignItems: "center",
-          gap: 0.75,
-          px: 2,
-          py: 1.5,
-          bgcolor: surfaces.elevated,
-          borderBottom: `1px solid ${line.border}`,
-        }}
-      >
-        {["#FECACA", "#FEF08A", "#BBF7D0"].map((bg, i) => (
-          <Box
-            key={i}
-            sx={{
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              bgcolor: bg,
-              border: `1.5px solid ${["#F87171", "#FACC15", "#4ADE80"][i]}`,
-            }}
-          />
-        ))}
-        <Typography
-          sx={{
-            flex: 1,
-            textAlign: "center",
-            fontFamily: fontFamilies.mono,
-            fontSize: 12,
-            color: "text.secondary",
-          }}
-        >
-          ogstack.dev/playground
-        </Typography>
-      </Stack>
+      <BrowserBar url="ogstack.dev/playground" />
 
       {/* Input row */}
       <Stack
@@ -225,13 +177,6 @@ export function LandingPlayground(): ReactElement {
               alt="Generated OG preview"
               fill
               sizes="(max-width: 600px) 100vw, 600px"
-              onLoad={() => setIsLoading(false)}
-              onError={() => {
-                setIsLoading(false);
-                setError("Preview generation failed. Try a different URL.");
-                setImageUrl(null);
-                setGenerated(null);
-              }}
               style={{ objectFit: "cover" }}
               unoptimized
             />

@@ -45,7 +45,7 @@ const FONT_FAMILY_MAP: Record<FontFamily, string> = {
 
 @singleton()
 export class TemplateService {
-  private readonly fontCache = new Map<string, ArrayBuffer>();
+  private readonly fontCache = new Map<string, ArrayBuffer[]>();
 
   list(): TemplateInfo[] {
     return listTemplates();
@@ -125,13 +125,15 @@ export class TemplateService {
     const loaded = await Promise.all(
       requests.map(async (req) => {
         try {
-          const data = await this.fetchFont(req.family, req.weight, req.style ?? "normal");
-          return {
-            name: req.family,
-            data,
-            weight: req.weight,
-            style: req.style ?? "normal",
-          } as FontData;
+          const files = await this.fetchFont(req.family, req.weight, req.style ?? "normal");
+          return files.map(
+            (data): FontData => ({
+              name: req.family,
+              data,
+              weight: req.weight,
+              style: req.style ?? "normal",
+            }),
+          );
         } catch (error) {
           logger.warn(
             { family: req.family, weight: req.weight, err: (error as Error).message },
@@ -142,14 +144,15 @@ export class TemplateService {
       }),
     );
 
-    return loaded.filter((f): f is FontData => f !== null);
+    return loaded.filter((f): f is FontData[] => f !== null).flat();
   }
 
+  /** Returns every subset WOFF Google serves for the weight (latin, cyrillic, greek, …). */
   private async fetchFont(
     family: string,
     weight: FontWeight,
     style: "normal" | "italic",
-  ): Promise<ArrayBuffer> {
+  ): Promise<ArrayBuffer[]> {
     const cacheKey = `${family}-${weight}-${style}`;
     const cached = this.fontCache.get(cacheKey);
     if (cached) return cached;
@@ -158,9 +161,9 @@ export class TemplateService {
     const url = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:${italicAxis}${weight}&display=swap`;
 
     const cssResponse = await fetch(url, {
+      // FF38 is pre-WOFF2, so Google serves WOFF (Satori can't parse WOFF2).
       headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; de-at) AppleWebKit/533.21.1 (KHTML, like Gecko) Version/5.0.5 Safari/533.21.1",
+        "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:38.0) Gecko/20100101 Firefox/38.0",
       },
     });
 
@@ -169,18 +172,22 @@ export class TemplateService {
     }
 
     const css = await cssResponse.text();
-    const fontUrlMatch = css.match(/src:\s*url\(([^)]+)\)/);
-    if (!fontUrlMatch?.[1]) {
-      throw new Error(`Could not parse font URL from CSS for ${family}`);
+    const urls = Array.from(css.matchAll(/src:\s*url\(([^)]+)\)/g), (m) => m[1]!);
+    if (urls.length === 0) {
+      throw new Error(`Could not parse font URLs from CSS for ${family}`);
     }
 
-    const fontResponse = await fetch(fontUrlMatch[1]);
-    if (!fontResponse.ok) {
-      throw new Error(`Failed to fetch font file for ${family}`);
-    }
+    const files = await Promise.all(
+      urls.map(async (fontUrl) => {
+        const response = await fetch(fontUrl);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch font file ${fontUrl}`);
+        }
+        return response.arrayBuffer();
+      }),
+    );
 
-    const data = await fontResponse.arrayBuffer();
-    this.fontCache.set(cacheKey, data);
-    return data;
+    this.fontCache.set(cacheKey, files);
+    return files;
   }
 }
