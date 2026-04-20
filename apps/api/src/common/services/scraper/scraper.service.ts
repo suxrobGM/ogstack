@@ -79,14 +79,15 @@ export class ScraperService {
           redirect: "manual",
           signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
         });
-      } catch {
-        throw new BadRequestError("We couldn't reach that URL. Make sure it's public and online.");
+      } catch (error) {
+        logger.warn(error, "Failed to fetch URL");
+        throw new BadRequestError(`We couldn't reach ${url}. Make sure it's public and online.`);
       }
 
       if (response.status >= 300 && response.status < 400) {
         const location = response.headers.get("location");
         if (!location) {
-          throw new BadRequestError("That URL returned a broken redirect (no Location header).");
+          throw new BadRequestError(`${url} returned a broken redirect (no Location header).`);
         }
 
         const redirectUrl = new URL(location, currentUrl);
@@ -98,43 +99,39 @@ export class ScraperService {
       if (!response.ok) {
         const status = response.status;
         if (status === 404) {
-          throw new BadRequestError(
-            "We couldn't find that page (404). Check the URL and try again.",
-          );
+          throw new BadRequestError(`We couldn't find ${url} (404). Check the URL and try again.`);
         }
         if (status === 401 || status === 403) {
           throw new BadRequestError(
-            "That page requires authentication and isn't publicly accessible.",
+            `${url} requires authentication and isn't publicly accessible.`,
           );
         }
         if (status >= 500) {
-          throw new BadRequestError(
-            `The target site returned an error (HTTP ${status}). Try again later.`,
-          );
+          throw new BadRequestError(`${url} returned an error (HTTP ${status}). Try again later.`);
         }
-        throw new BadRequestError(`The target site returned HTTP ${status}.`);
+        throw new BadRequestError(`${url} returned HTTP ${status}.`);
       }
 
       const contentType = response.headers.get("content-type") ?? "";
       if (!contentType.includes("text/html") && !contentType.includes("application/xhtml")) {
         throw new BadRequestError(
-          "That URL doesn't return an HTML page — we can only preview web pages.",
+          `${url} doesn't return an HTML page — we can only preview web pages.`,
         );
       }
 
       const contentLength = response.headers.get("content-length");
       if (contentLength && parseInt(contentLength, 10) > MAX_BODY_SIZE) {
-        throw new BadRequestError("That page is too large to preview (over 2 MB).");
+        throw new BadRequestError(`${url} is too large to preview (over 2 MB).`);
       }
 
       const body = await response.text();
       if (body.length > MAX_BODY_SIZE) {
-        throw new BadRequestError("That page is too large to preview (over 2 MB).");
+        throw new BadRequestError(`${url} is too large to preview (over 2 MB).`);
       }
 
       return { html: body, contentType };
     }
 
-    throw new BadRequestError("That URL redirects too many times.");
+    throw new BadRequestError(`${url} redirects too many times.`);
   }
 }

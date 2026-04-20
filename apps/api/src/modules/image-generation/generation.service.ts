@@ -4,12 +4,12 @@ import { ImageConflictError, NotFoundError, TierLockedError } from "@/common/err
 import { logger } from "@/common/logger";
 import { FAL_MODELS } from "@/common/services/ai";
 import { ImageStorageService } from "@/common/services/storage";
-import { PrismaClient } from "@/generated/prisma";
-import { toPrismaImageKind } from "@/modules/image/image.mapper";
+import { PrismaClient, type Image } from "@/generated/prisma";
+import { fromPrismaImageKind, toPrismaImageKind } from "@/modules/image/image.mapper";
 import { PublicProjectResolver } from "@/modules/project/public-project.resolver";
 import type { RenderOptions } from "@/modules/template";
 import { UsageService } from "@/modules/usage";
-import { RenderContextBuilder } from "./context.builder";
+import { RenderContextBuilder, type RenderContext } from "./context.builder";
 import { toGenerateResponse } from "./generation.mapper";
 import type { AiOptions, AiParam, GenerateResponse, StyleOptions } from "./generation.schema";
 import { ImagePipelineService } from "./pipeline.service";
@@ -24,8 +24,7 @@ interface GenerateParams {
   template?: string;
   style?: StyleOptions;
   ai?: AiParam;
-  /** Evict any existing image at (projectId, url) and regenerate. Covers both
-   *  same-cacheKey and different-cacheKey-same-URL collisions. */
+  /** Forces regeneration even if an image (og and favicons) already exists for the URL with a different cache key. */
   force?: boolean;
 }
 
@@ -38,8 +37,13 @@ interface GenerateByPublicIdParams {
   ai?: AiParam;
 }
 
+type PublicProject = Awaited<ReturnType<PublicProjectResolver["resolveAndValidate"]>>;
+
 @singleton()
 export class ImageGenerationService {
+  /** Single-flight per URL to coalesce concurrent crawler hits. */
+  private readonly inflightPublic = new Map<string, Promise<Buffer>>();
+
   constructor(
     private readonly prisma: PrismaClient,
     private readonly usageService: UsageService,
@@ -76,9 +80,8 @@ export class ImageGenerationService {
       await this.records.incrementServeCount(cached.id);
       return toGenerateResponse(cached, { fromCache: true });
     }
-    // Only ask for a fresh LLM prompt when the user is explicitly re-running
-    // the same config (same cacheKey). Plain `force` over a different config
-    // is a conflict resolution, not a regenerate — no variation needed.
+
+    // Only ask for a fresh LLM prompt when the user is explicitly re-running the same config (same cacheKey)
     const forceNewPrompt = Boolean(cached && force);
     if (cached && force) {
       await this.records.evict(cached.id, cached.cacheKey, ctx.kind);
@@ -117,40 +120,65 @@ export class ImageGenerationService {
   async generateByPublicId(params: GenerateByPublicIdParams): Promise<Buffer> {
     const { publicId, url, kind, template, style, ai } = params;
     const project = await this.publicResolver.resolveAndValidate(publicId, url);
+    const resolvedKind = kind ?? "og";
+
+    // One image per (projectId, url, kind) is enforced for OG, so the saved
+    // row is canonical - the meta-tag query string need not match cacheKey.
+    const existing = await this.findByUrl(project.id, url, resolvedKind);
+    if (existing) {
+      return this.serveExisting(project, existing);
+    }
 
     const ctx = await this.contextBuilder.build({
       userId: project.user.id,
       projectId: project.id,
       apiKeyId: undefined,
       url,
-      kind: kind ?? "og",
+      kind: resolvedKind,
       template,
       options: flattenRenderOptions(style, normalizeAi(ai)),
       fullOverride: false,
     });
 
-    const cached = await this.records.find(ctx.cacheKey);
-    if (cached) {
-      if (!isPlanAtLeast(project.user.plan, cached.generatedOnPlan)) {
-        throw new TierLockedError(
-          "This image was generated on a higher tier. Re-subscribe to serve it.",
-        );
-      }
-      const buffer = await this.storage.get(`${cached.cacheKey}.png`);
-      if (buffer) {
-        await this.usageService.recordUsage(project.user.id, project.id, { cacheHit: true });
-        await this.records.incrementServeCount(cached.id);
-        return buffer;
-      }
-      // Row exists but blob is gone — evict before regenerating to avoid the
-      // unique-cacheKey constraint when the pipeline creates a fresh row.
-      logger.warn(
-        { cacheKey: ctx.cacheKey, imageId: cached.id },
-        "Cache row without blob, evicting and regenerating",
-      );
-      await this.records.evict(cached.id, cached.cacheKey, ctx.kind);
+    const flightKey = `${project.id}:${resolvedKind}:${url}`;
+    const inflight = this.inflightPublic.get(flightKey);
+    if (inflight) {
+      return inflight;
     }
 
+    const task = this.renderPublicImage(project, ctx).finally(() => {
+      this.inflightPublic.delete(flightKey);
+    });
+    this.inflightPublic.set(flightKey, task);
+    return task;
+  }
+
+  private async findByUrl(projectId: string, url: string, kind: ImageKind) {
+    return this.prisma.image.findFirst({
+      where: { projectId, sourceUrl: url, kind: toPrismaImageKind(kind) },
+    });
+  }
+
+  private async serveExisting(project: PublicProject, image: Image): Promise<Buffer> {
+    if (!isPlanAtLeast(project.user.plan, image.generatedOnPlan)) {
+      throw new TierLockedError(
+        "This image was generated on a higher tier. Re-subscribe to serve it.",
+      );
+    }
+    const buffer = await this.storage.get(`${image.cacheKey}.png`);
+
+    if (buffer) {
+      await this.usageService.recordUsage(project.user.id, project.id, { cacheHit: true });
+      await this.records.incrementServeCount(image.id);
+      return buffer;
+    }
+
+    logger.warn({ cacheKey: image.cacheKey, imageId: image.id }, "Row without blob, evicting");
+    await this.records.evict(image.id, image.cacheKey, fromPrismaImageKind(image.kind));
+    throw new NotFoundError("Image is being regenerated, retry shortly.");
+  }
+
+  private async renderPublicImage(project: PublicProject, ctx: RenderContext): Promise<Buffer> {
     if (ctx.aiModel) {
       await this.usageService.enforceAiImageQuota(
         project.user.id,
@@ -165,8 +193,14 @@ export class ImageGenerationService {
       aiEnabled: outcome.aiEnabled,
       aiProModel: ctx.aiModel === FAL_MODELS.flux2Pro,
     });
+
     logger.info(
-      { cacheKey: ctx.cacheKey, generationMs, template, aiEnabled: outcome.aiEnabled },
+      {
+        cacheKey: ctx.cacheKey,
+        generationMs,
+        template: ctx.template,
+        aiEnabled: outcome.aiEnabled,
+      },
       "OG image generated (public)",
     );
     return outcome.pngBuffer;
@@ -175,7 +209,7 @@ export class ImageGenerationService {
   /**
    * When an image of the same kind already exists for (projectId, url) but
    * with a different cache key, require `force`. Blog heroes skip the check
-   * entirely — multiple covers per URL are allowed since they're standalone
+   * entirely - multiple covers per URL are allowed since they're standalone
    * assets, not tied to a single meta tag.
    */
   private async handleDuplicateUrl(

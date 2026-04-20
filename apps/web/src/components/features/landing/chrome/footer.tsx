@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import XIcon from "@mui/icons-material/X";
+// import LinkedInIcon from "@mui/icons-material/LinkedIn";
+// import XIcon from "@mui/icons-material/X";
 import { Box, Container, Grid, IconButton, Link, Stack, Typography } from "@mui/material";
 import { API_DOCS_URL, DOCS_URL, ROUTES } from "@/lib/constants";
 import { line } from "@/theme/palette";

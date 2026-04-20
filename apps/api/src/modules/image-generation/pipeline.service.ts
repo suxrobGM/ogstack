@@ -78,32 +78,48 @@ export class ImagePipelineService {
 
     const category = this.resolveCategory(ctx);
 
-    const image = await this.prisma.image.create({
-      data: {
-        userId: ctx.userId,
-        projectId: ctx.projectId,
-        apiKeyId: ctx.apiKeyId ?? null,
-        templateId: templateRecord?.id ?? null,
-        kind: toPrismaImageKind(ctx.kind),
-        sourceUrl: ctx.url,
-        cacheKey: ctx.cacheKey,
-        imageUrl,
-        title: metadata.ogTitle ?? metadata.title,
-        description: metadata.ogDescription ?? metadata.description,
-        faviconUrl: metadata.favicon,
-        width: ctx.dimensions.width,
-        height: ctx.dimensions.height,
-        format: "PNG",
-        fileSize: stored.size,
-        generationMs,
-        serveCount: 1,
-        category,
-        aiEnabled: outcome.aiEnabled,
-        aiModel: outcome.aiModel,
-        aiPrompt: outcome.aiPrompt,
-        generatedOnPlan: ctx.plan,
-      },
-    });
+    const data = {
+      userId: ctx.userId,
+      projectId: ctx.projectId,
+      apiKeyId: ctx.apiKeyId ?? null,
+      templateId: templateRecord?.id ?? null,
+      kind: toPrismaImageKind(ctx.kind),
+      sourceUrl: ctx.url,
+      cacheKey: ctx.cacheKey,
+      imageUrl,
+      title: metadata.ogTitle ?? metadata.title,
+      description: metadata.ogDescription ?? metadata.description,
+      faviconUrl: metadata.favicon,
+      width: ctx.dimensions.width,
+      height: ctx.dimensions.height,
+      format: "PNG" as const,
+      fileSize: stored.size,
+      generationMs,
+      serveCount: 1,
+      category,
+      aiEnabled: outcome.aiEnabled,
+      aiModel: outcome.aiModel,
+      aiPrompt: outcome.aiPrompt,
+      generatedOnPlan: ctx.plan,
+    };
+
+    let image: Image;
+    try {
+      image = await this.prisma.image.create({ data });
+    } catch (error) {
+      if (isCacheKeyUniqueConstraint(error)) {
+        const winner = await this.prisma.image.findUnique({ where: { cacheKey: ctx.cacheKey } });
+
+        if (winner) {
+          logger.info(
+            { cacheKey: ctx.cacheKey, imageId: winner.id },
+            "Concurrent generation race - using winner's row",
+          );
+          return { image: winner, outcome, generationMs };
+        }
+      }
+      throw error;
+    }
 
     return { image, outcome, generationMs };
   }
@@ -215,4 +231,25 @@ export class ImagePipelineService {
       aiPrompt: null,
     };
   }
+}
+
+/**
+ * Detects whether an error is a Prisma unique constraint violation on the cacheKey field,
+ * which indicates a concurrent generation race.
+ */
+function isCacheKeyUniqueConstraint(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) {
+    return false;
+  }
+  const e = error as { code?: unknown; meta?: { target?: unknown } };
+
+  if (e.code !== "P2002") {
+    return false;
+  }
+
+  const target = e.meta?.target;
+  if (Array.isArray(target)) {
+    return target.includes("cache_key") || target.includes("cacheKey");
+  }
+  return target === "cache_key" || target === "cacheKey";
 }
