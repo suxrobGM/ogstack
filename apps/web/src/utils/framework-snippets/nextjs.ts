@@ -1,11 +1,11 @@
-import { indent, type FaviconUrls, type FrameworkPlugin } from "./types";
+import { indent, type FrameworkPlugin } from "./types";
 
 export const nextjsPlugin: FrameworkPlugin = {
   id: "nextjs",
   label: "Next.js",
   language: "tsx",
   buildOg(url) {
-    return `// app/page.tsx (or any route)
+    return `// app/layout.tsx (or any route)
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

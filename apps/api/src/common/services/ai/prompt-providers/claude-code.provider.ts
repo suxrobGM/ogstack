@@ -2,26 +2,18 @@ import { singleton } from "tsyringe";
 import type { ChatRequest, PromptProvider } from "./utils";
 
 /**
- * Claude Code CLI (`claude -p`) adapter for local development. Lets you run
- * the page-analysis and prompt-variation LLM calls against whatever Claude
- * Code subscription you already have, with no API key wired into the server.
+ * Local-dev adapter that shells out to `claude -p`, reusing your Claude Code
+ * subscription instead of an API key. Not for production: ~1-2s CLI startup
+ * per call, no streaming. `temperature`/`maxTokens` are ignored; `json: true`
+ * is enforced via a system-prompt suffix.
  *
- * Not for production: spawns a subprocess per call, so latency is dominated
- * by CLI startup (~1-2s) and the provider has no streaming / batching.
- *
- * Enable with `CLAUDE_CODE_ENABLED=true`. Override the model with
- * `CLAUDE_CODE_MODEL=sonnet` (or `opus`, `haiku`, or a full model id).
- * The `claude` binary is expected to be on PATH.
- *
- * `temperature` and `maxTokens` from `ChatRequest` are IGNORED — the CLI
- * doesn't expose them. `json: true` is honored by appending a JSON-only
- * instruction to the system prompt (the CLI has no native JSON-output mode
- * for `-p` that matches our raw-text contract).
+ * Enable with `CLAUDE_CODE_ENABLED=true`; set `CLAUDE_CODE_MODEL` to an alias
+ * (`opus`, `sonnet`, `haiku`) or full model id. `claude` must be on PATH.
  */
 @singleton()
 export class ClaudeCodePromptProvider implements PromptProvider {
   readonly id = "claude-code";
-  readonly model = process.env.CLAUDE_CODE_MODEL || "opus-4-7";
+  readonly model = process.env.CLAUDE_CODE_MODEL!;
   private readonly enabled = process.env.CLAUDE_CODE_ENABLED === "true";
 
   isEnabled(): boolean {
@@ -66,9 +58,8 @@ export class ClaudeCodePromptProvider implements PromptProvider {
     ]);
 
     if (exitCode !== 0) {
-      throw new Error(
-        `claude -p exited with code ${exitCode}: ${stderr.slice(0, 500) || "(no stderr)"}`,
-      );
+      const detail = stderr.trim() || stdout.trim() || "(no output)";
+      throw new Error(`claude -p exited with code ${exitCode}: ${detail.slice(0, 500)}`);
     }
     return stdout.trim();
   }

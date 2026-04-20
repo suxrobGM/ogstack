@@ -78,11 +78,10 @@ export const metadata: Metadata = {
     url: SITE_URL,
     images: [
       {
-        url: "/og-image.svg",
+        url: "https://ogstack.dev/api/og/ab27c3e75809?url=https://ogstack.dev&ai=true",
         width: 1200,
         height: 630,
         alt: "OGStack - Branded OG images, blog covers & favicons",
-        type: "image/svg+xml",
       },
     ],
   },
@@ -90,7 +89,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@ogstack",
     creator: "@ogstack",
-    images: ["/og-image.svg"],
+    images: ["https://ogstack.dev/api/og/ab27c3e75809?url=https://ogstack.dev&ai=true"],
   },
   robots: {
     index: true,
