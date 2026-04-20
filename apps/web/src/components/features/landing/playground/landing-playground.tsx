@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ChangeEvent, type KeyboardEvent, type ReactElement } from "react";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Link, Stack, Typography } from "@mui/material";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FrameworkSnippetTabs } from "@/components/ui/display/framework-snippet-tabs";
@@ -269,6 +269,15 @@ export function LandingPlayground(): ReactElement {
         >
           <Typography variant="captionMuted">
             {error ?? "Live preview is disabled. Sign up to try the full playground."}
+          </Typography>
+        </Box>
+      )}
+
+      {hasDemo && !error && (
+        <Box sx={{ px: 3, pb: 2, textAlign: "center" }}>
+          <Typography variant="captionMuted">
+            Heads up: images generated here are deleted after 24 hours.{" "}
+            <Link href={ROUTES.register}>Create an account</Link> to keep them.
           </Typography>
         </Box>
       )}

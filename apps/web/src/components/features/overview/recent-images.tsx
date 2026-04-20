@@ -48,7 +48,7 @@ export function RecentImages(props: RecentImagesProps): ReactElement {
             <Grid key={image.id} size={{ xs: 6 }}>
               <Link
                 href={image.projectId ? ROUTES.projectDetail(image.projectId) : ROUTES.images}
-                sx={{ textDecoration: "none", display: "block" }}
+                sx={{ display: "block" }}
               >
                 <Surface
                   padding={0}

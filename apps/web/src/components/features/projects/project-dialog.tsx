@@ -1,21 +1,15 @@
 "use client";
 
 import { useEffect, type ReactElement } from "react";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Stack,
-  Typography,
-} from "@mui/material";
-import { parseDomainList } from "@ogstack/shared";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from "@mui/material";
+import { Plan, PLAN_CONFIGS, UNLIMITED } from "@ogstack/shared";
 import { useForm } from "@tanstack/react-form";
-import { FormTextField } from "@/components/ui/form";
+import { FormDomainField, FormTextField } from "@/components/ui/form";
+import type { AnyReactForm } from "@/components/ui/form/types";
 import { useApiMutation } from "@/hooks";
 import { client } from "@/lib/api/client";
 import { queryKeys } from "@/lib/query-keys";
+import { useAuth } from "@/providers/auth-provider";
 import type { Project } from "@/types/api";
 import { projectFormSchema } from "./schema";
 
@@ -32,6 +26,9 @@ interface ProjectDialogProps {
 export function ProjectDialog(props: ProjectDialogProps): ReactElement {
   const { project, open, onClose } = props;
   const isEdit = !!project;
+  const { user } = useAuth();
+  const cap = PLAN_CONFIGS[user?.plan ?? Plan.FREE].domainsPerProject;
+  const isUnlimited = cap === UNLIMITED;
 
   const mutation = useApiMutation(
     (data: { name: string; domains: string[] }) =>
@@ -46,11 +43,11 @@ export function ProjectDialog(props: ProjectDialogProps): ReactElement {
   const form = useForm({
     defaultValues: {
       name: project?.name ?? "",
-      domains: project?.domains.join(", ") ?? "",
+      domains: project?.domains ?? [],
     },
     validators: { onSubmit: projectFormSchema },
     onSubmit: async ({ value }) => {
-      mutation.mutate({ name: value.name, domains: parseDomainList(value.domains) });
+      mutation.mutate({ name: value.name, domains: value.domains });
     },
   });
 
@@ -58,7 +55,7 @@ export function ProjectDialog(props: ProjectDialogProps): ReactElement {
     if (open) {
       form.reset({
         name: project?.name ?? "",
-        domains: project?.domains.join(", ") ?? "",
+        domains: project?.domains ?? [],
       });
     }
   }, [project, open]);
@@ -79,25 +76,33 @@ export function ProjectDialog(props: ProjectDialogProps): ReactElement {
         <DialogTitle>{isEdit ? "Edit Project" : "New Project"}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
-            <FormTextField form={form} name="name" label="Project Name" required autoFocus />
             <FormTextField
-              form={form}
-              name="domains"
-              label="Allowed Domains"
-              placeholder="example.com, app.example.com"
+              form={form as unknown as AnyReactForm}
+              name="name"
+              label="Project Name"
               required
+              autoFocus
             />
-            <Typography variant="captionMuted" sx={{ mt: -1 }}>
-              Comma-separated list of domains allowed to use the public OG endpoint. Your plan caps
-              how many domains you can add per project - upgrade to fit more.
-            </Typography>
+            <FormDomainField form={form as unknown as AnyReactForm} name="domains" required />
           </Stack>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button type="submit" variant="contained" loading={mutation.isPending}>
-            {isEdit ? "Save" : "Create"}
-          </Button>
+          <form.Subscribe selector={(s) => s.values.domains}>
+            {(domains) => {
+              const overCap = !isUnlimited && domains.length > cap;
+              return (
+                <Button
+                  type="submit"
+                  variant="contained"
+                  loading={mutation.isPending}
+                  disabled={overCap}
+                >
+                  {isEdit ? "Save" : "Create"}
+                </Button>
+              );
+            }}
+          </form.Subscribe>
         </DialogActions>
       </form>
     </Dialog>

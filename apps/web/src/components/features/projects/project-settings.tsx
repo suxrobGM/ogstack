@@ -2,10 +2,10 @@
 
 import type { ReactElement } from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { parseDomainList } from "@ogstack/shared";
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
-import { FormTextField } from "@/components/ui/form";
+import { FormDomainField, FormTextField } from "@/components/ui/form";
+import type { AnyReactForm } from "@/components/ui/form/types";
 import { SectionHeader } from "@/components/ui/layout/section-header";
 import { Surface } from "@/components/ui/layout/surface";
 import { useApiMutation } from "@/hooks";
@@ -43,11 +43,11 @@ export function ProjectSettings(props: ProjectSettingsProps): ReactElement {
   const form = useForm({
     defaultValues: {
       name: project.name,
-      domains: project.domains.join(", "),
+      domains: project.domains as string[],
     },
     validators: { onSubmit: projectFormSchema },
     onSubmit: ({ value }) => {
-      updateMutation.mutate({ name: value.name, domains: parseDomainList(value.domains) });
+      updateMutation.mutate({ name: value.name, domains: value.domains });
     },
   });
 
@@ -83,16 +83,13 @@ export function ProjectSettings(props: ProjectSettingsProps): ReactElement {
             }}
           >
             <Stack spacing={3}>
-              <FormTextField form={form} name="name" label="Project Name" required />
               <FormTextField
-                form={form}
-                name="domains"
-                label="Allowed Domains"
-                placeholder="example.com, app.example.com"
+                form={form as unknown as AnyReactForm}
+                name="name"
+                label="Project Name"
+                required
               />
-              <Typography variant="caption" sx={{ color: "text.secondary", mt: -1 }}>
-                Comma-separated list of domains. Leave empty to allow all domains.
-              </Typography>
+              <FormDomainField form={form as unknown as AnyReactForm} name="domains" required />
               <Box>
                 <Button type="submit" variant="contained" loading={updateMutation.isPending}>
                   Save Changes

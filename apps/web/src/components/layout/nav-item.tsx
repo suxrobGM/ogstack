@@ -29,12 +29,10 @@ export function NavItem(props: NavItemProps): ReactElement {
       href={href}
       onClick={onNavigate}
       sx={{
-        textDecoration: "none",
         color: "inherit",
         display: "block",
         mb: 0.5,
         borderRadius: `${radii.md}px`,
-        "&:hover": { textDecoration: "none" },
       }}
     >
       <ListItemButton

@@ -51,7 +51,7 @@ export function QuickActions(): ReactElement {
               href={action.href}
               target={action.external ? "_blank" : undefined}
               rel={action.external ? "noopener noreferrer" : undefined}
-              sx={{ textDecoration: "none", display: "block", height: "100%" }}
+              sx={{ display: "block", height: "100%" }}
             >
               <Surface
                 variant="quiet"

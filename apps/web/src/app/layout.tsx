@@ -117,7 +117,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: PropsWithChildren): ReactElement {
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <body
         className={`${newsreader.variable} ${ibmPlexSans.variable} ${jetbrainsMono.variable} antialiased`}
       >

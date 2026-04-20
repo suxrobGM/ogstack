@@ -25,8 +25,6 @@ Every time a link from your site gets shared on X, Facebook, LinkedIn, Slack, Di
 
 OGStack fixes that in one step. Paste a URL, get a beautiful, contextual image that matches your brand - in seconds, at every scale.
 
-> _"Every link shared on the internet should look beautiful - automatically."_
-
 ---
 
 ## What You Get

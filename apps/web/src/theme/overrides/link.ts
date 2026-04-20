@@ -5,4 +5,9 @@ export const linkOverrides: Components<Theme>["MuiLink"] = {
   defaultProps: {
     component: NextLink,
   },
+  styleOverrides: {
+    root: {
+      textDecoration: "none",
+    },
+  },
 };
