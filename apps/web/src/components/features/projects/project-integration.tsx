@@ -2,11 +2,12 @@
 
 import type { ReactElement } from "react";
 import { Box, Stack, Typography } from "@mui/material";
-import { CodeBlock } from "@/components/ui/display/code-block";
+import { FrameworkSnippetTabs } from "@/components/ui/display/framework-snippet-tabs";
 import { MonoId } from "@/components/ui/display/mono-id";
 import { SectionHeader } from "@/components/ui/layout/section-header";
 import type { Project } from "@/types/api";
-import { buildOgMetaTag } from "@/utils/integration-snippet";
+import { buildFrameworkSnippets } from "@/utils/framework-snippets";
+import { buildOgImageUrl } from "@/utils/integration-snippet";
 
 interface ProjectIntegrationProps {
   project: Project;
@@ -15,23 +16,25 @@ interface ProjectIntegrationProps {
 export function ProjectIntegration(props: ProjectIntegrationProps): ReactElement {
   const { project } = props;
 
-  const metaTag = buildOgMetaTag(project.publicId, {
+  const ogUrl = buildOgImageUrl(project.publicId, {
     url: "https://yoursite.com/page",
     template: "editorial",
   });
+
+  const snippets = buildFrameworkSnippets({ kind: "og", ogUrl });
 
   return (
     <Box>
       <SectionHeader
         title="Integration"
-        description="Add this meta tag to your HTML to generate OG images for any page."
+        description="Drop the OG image into any framework. Pick yours below — the public ID and template are pre-filled."
       />
       <Stack spacing={2} sx={{ mt: 2 }}>
         <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
           <Typography variant="body2Muted">Public ID:</Typography>
           <MonoId id={project.publicId} copyable />
         </Stack>
-        <CodeBlock code={metaTag} language="html" />
+        <FrameworkSnippetTabs snippets={snippets} />
       </Stack>
     </Box>
   );

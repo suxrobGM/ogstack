@@ -15,6 +15,7 @@ import type {
   TemplateInfo,
   UsageStatsResponse,
 } from "@/types/api";
+import { buildPlaygroundFrameworkSnippets } from "@/utils/framework-snippets";
 import { buildPlaygroundSnippet } from "@/utils/integration-snippet";
 import { ControlsPanel } from "./controls-panel";
 import { OutputPanel } from "./output-panel";
@@ -189,6 +190,16 @@ export function Playground(props: PlaygroundProps): ReactElement {
         })
       : null;
 
+  const frameworkSnippets =
+    result && lastFormValues
+      ? buildPlaygroundFrameworkSnippets({
+          kind: lastFormValues.kind,
+          result,
+          publicProjectId: selectedProject?.publicId ?? null,
+          ogParams: toOgParams(lastFormValues),
+        })
+      : [];
+
   return (
     <Grid container spacing={{ xs: 2, md: 3 }}>
       {usageStats && (
@@ -230,7 +241,11 @@ export function Playground(props: PlaygroundProps): ReactElement {
 
       {result && (
         <Grid size={{ xs: 12 }}>
-          <OutputPanel result={result} integration={integration} />
+          <OutputPanel
+            result={result}
+            integration={integration}
+            frameworkSnippets={frameworkSnippets}
+          />
         </Grid>
       )}
 

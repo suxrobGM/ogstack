@@ -6,20 +6,23 @@ import { Box, Skeleton, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { aiModelLabel } from "@ogstack/shared";
 import Image from "next/image";
 import { CodeBlock } from "@/components/ui/display/code-block";
+import { FrameworkSnippetTabs } from "@/components/ui/display/framework-snippet-tabs";
 import { Surface } from "@/components/ui/layout/surface";
 import { textColors } from "@/theme";
 import type { GenerateDto } from "@/types/api";
+import type { FrameworkSnippet } from "@/utils/framework-snippets";
 import type { IntegrationSnippet } from "@/utils/integration-snippet";
 
 interface OutputPanelProps {
   result: GenerateDto | null;
   integration: IntegrationSnippet | null;
+  frameworkSnippets: FrameworkSnippet[];
 }
 
 type TabId = "metadata" | "integration" | "ai-prompt";
 
 export function OutputPanel(props: OutputPanelProps): ReactElement {
-  const { result, integration } = props;
+  const { result, integration, frameworkSnippets } = props;
   const [tab, setTab] = useState<TabId>("metadata");
 
   if (!result) {
@@ -27,13 +30,15 @@ export function OutputPanel(props: OutputPanelProps): ReactElement {
   }
 
   const hasMetadata = Boolean(result.source?.title || result.source?.description);
-  const hasIntegration = Boolean(integration);
+  const hasFrameworks = frameworkSnippets.length > 0;
+  const hasIntegration = hasFrameworks || Boolean(integration);
   const hasAiPrompt = Boolean(result.ai?.prompt);
 
   if (!hasMetadata && !hasIntegration && !hasAiPrompt) {
     return <></>;
   }
 
+  const integrationLabel = hasFrameworks ? "Integration" : (integration?.label ?? "Integration");
   const handleChange = (_: SyntheticEvent, value: TabId) => setTab(value);
 
   return (
@@ -41,7 +46,7 @@ export function OutputPanel(props: OutputPanelProps): ReactElement {
       <Stack spacing={2}>
         <Tabs value={tab} onChange={handleChange} variant="scrollable" allowScrollButtonsMobile>
           {hasMetadata && <Tab value="metadata" label="Metadata" />}
-          {hasIntegration && integration && <Tab value="integration" label={integration.label} />}
+          {hasIntegration && <Tab value="integration" label={integrationLabel} />}
           {hasAiPrompt && (
             <Tab
               value="ai-prompt"
@@ -52,7 +57,12 @@ export function OutputPanel(props: OutputPanelProps): ReactElement {
 
         <Box>
           {tab === "metadata" && hasMetadata && <MetadataView result={result} />}
-          {tab === "integration" && integration && <IntegrationView snippet={integration} />}
+          {tab === "integration" && hasFrameworks && (
+            <FrameworkSnippetTabs snippets={frameworkSnippets} />
+          )}
+          {tab === "integration" && !hasFrameworks && integration && (
+            <IntegrationView snippet={integration} />
+          )}
           {tab === "ai-prompt" && hasAiPrompt && result.ai?.prompt && (
             <AiPromptView prompt={result.ai.prompt} />
           )}

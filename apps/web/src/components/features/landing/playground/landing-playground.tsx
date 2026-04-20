@@ -1,15 +1,16 @@
 "use client";
 
-import { Suspense, useState, type ChangeEvent, type KeyboardEvent, type ReactElement } from "react";
-import { Box, Button, Skeleton, Stack, Typography } from "@mui/material";
+import { useState, type ChangeEvent, type KeyboardEvent, type ReactElement } from "react";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { CodeBlock } from "@/components/ui/display/code-block";
+import { FrameworkSnippetTabs } from "@/components/ui/display/framework-snippet-tabs";
 import { ROUTES } from "@/lib/constants";
 import { line, surfaces } from "@/theme/palette";
 import { radii } from "@/theme/tokens";
 import { fontFamilies } from "@/theme/typography";
-import { buildOgImageUrl, buildOgMetaTag } from "@/utils/integration-snippet";
+import { buildFrameworkSnippets } from "@/utils/framework-snippets";
+import { buildOgImageUrl } from "@/utils/integration-snippet";
 import { normalizeUrlInput, templateThumbnailUrl } from "@/utils/url";
 
 const DEFAULT_URL = "https://bun.sh/blog/bun-v1.3";
@@ -63,13 +64,16 @@ export function LandingPlayground(): ReactElement {
     setImageUrl(`${built}&_t=${Date.now()}`);
   };
 
-  const metaTag =
+  const frameworkSnippets =
     generated && !error && DEMO_PUBLIC_ID
-      ? buildOgMetaTag(DEMO_PUBLIC_ID, {
-          url: generated.url,
-          template: generated.template,
+      ? buildFrameworkSnippets({
+          kind: "og",
+          ogUrl: buildOgImageUrl(DEMO_PUBLIC_ID, {
+            url: generated.url,
+            template: generated.template,
+          }),
         })
-      : null;
+      : [];
 
   return (
     <Box
@@ -235,9 +239,9 @@ export function LandingPlayground(): ReactElement {
         </Box>
       </Box>
 
-      {/* Meta tag snippet - shown once a preview has been generated so users
-          can copy the exact tag they'd paste into their own <head>. */}
-      {metaTag && (
+      {/* Framework-aware integration snippet, shown once a preview has been
+          generated so users can copy the right code for their stack. */}
+      {frameworkSnippets.length > 0 && (
         <Box sx={{ px: 3, pb: 3 }}>
           <Typography
             variant="body1Muted"
@@ -251,13 +255,7 @@ export function LandingPlayground(): ReactElement {
           >
             Drop this into your &lt;head&gt;
           </Typography>
-          <Suspense
-            fallback={
-              <Skeleton variant="rectangular" height={72} sx={{ borderRadius: `${radii.sm}px` }} />
-            }
-          >
-            <CodeBlock code={metaTag} language="html" />
-          </Suspense>
+          <FrameworkSnippetTabs snippets={frameworkSnippets} />
         </Box>
       )}
 

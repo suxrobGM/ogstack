@@ -1,3 +1,5 @@
+import { Tabs } from 'nextra/components'
+
 # Favicons & icon sets
 
 Generate a full favicon bundle from any page. OGStack extracts brand signals (existing favicon, `theme-color`, inferred palette) and produces icons sized for every common placement.
@@ -54,15 +56,154 @@ curl -L \
 
 The dashboard also exposes a **Download** button on the image detail page — same endpoint, same zip.
 
-## HTML `<link>` tags
+## Framework integration
 
+Drop the bundle into your stack. Examples assume the assets live at `/` (e.g. `/favicon.ico`); swap the paths for your CDN URLs if you serve them from elsewhere.
+
+<Tabs items={['HTML', 'Next.js', 'Nuxt 4', 'Astro', 'SvelteKit', 'Remix', 'Vue 3', 'React (Vite)', 'Angular']}>
+<Tabs.Tab>
 ```html
+<link rel="icon" href="/favicon.ico" sizes="any" />
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
-<link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
 <link rel="manifest" href="/site.webmanifest" />
 ```
+</Tabs.Tab>
+<Tabs.Tab>
+```tsx
+// app/layout.tsx
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-16.png", type: "image/png", sizes: "16x16" },
+      { url: "/favicon-32.png", type: "image/png", sizes: "32x32" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icon-512.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
+  },
+  manifest: "/site.webmanifest",
+};
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```vue
+<script setup lang="ts">
+useHead({
+  link: [
+    { rel: "icon", href: "/favicon.ico", sizes: "any" },
+    { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16.png" },
+    { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32.png" },
+    { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
+    { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },
+    { rel: "icon", type: "image/png", sizes: "512x512", href: "/icon-512.png" },
+    { rel: "manifest", href: "/site.webmanifest" },
+  ],
+});
+</script>
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```astro
+---
+// src/layouts/Layout.astro (inside <head>)
+---
+<link rel="icon" href="/favicon.ico" sizes="any" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+<link rel="manifest" href="/site.webmanifest" />
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```html
+<!-- src/app.html -->
+<svelte:head>
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+</svelte:head>
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```tsx
+// app/root.tsx
+import type { LinksFunction } from "@remix-run/node";
+
+export const links: LinksFunction = () => [
+  { rel: "icon", href: "/favicon.ico", sizes: "any" },
+  { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16.png" },
+  { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32.png" },
+  { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
+  { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },
+  { rel: "icon", type: "image/png", sizes: "512x512", href: "/icon-512.png" },
+  { rel: "manifest", href: "/site.webmanifest" },
+];
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```vue
+<script setup lang="ts">
+import { useHead } from "@unhead/vue";
+
+useHead({
+  link: [
+    { rel: "icon", href: "/favicon.ico", sizes: "any" },
+    { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16.png" },
+    { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32.png" },
+    { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
+    { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },
+    { rel: "icon", type: "image/png", sizes: "512x512", href: "/icon-512.png" },
+    { rel: "manifest", href: "/site.webmanifest" },
+  ],
+});
+</script>
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```tsx
+import { Helmet } from "react-helmet-async";
+
+export function PageIcons() {
+  return (
+    <Helmet>
+      <link rel="icon" href="/favicon.ico" sizes="any" />
+      <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+      <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+      <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+      <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+      <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+      <link rel="manifest" href="/site.webmanifest" />
+    </Helmet>
+  );
+}
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```html
+<!-- src/index.html (inside <head>) -->
+<link rel="icon" href="/favicon.ico" sizes="any" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+<link rel="manifest" href="/site.webmanifest" />
+```
+</Tabs.Tab>
+</Tabs>
 
 The generated `site.webmanifest` references the `192` and `512` sizes for installable PWAs.
 

@@ -1,3 +1,5 @@
+import { Tabs } from 'nextra/components'
+
 # OG images
 
 `GET /og/{publicId}` returns a 1200×630 PNG suitable for `<meta property="og:image">`. Every option below is a query parameter.
@@ -5,7 +7,7 @@
 ## Minimum request
 
 ```
-https://api.ogstack.dev/og/{publicId}?url=https%3A%2F%2Fexample.com%2Fpost
+https://api.ogstack.dev/og/{publicId}?url=https://example.com/post
 ```
 
 The `url` parameter is required and must be URL-encoded. Its origin must match one of the project's registered domains.
@@ -31,20 +33,23 @@ The `url` parameter is required and must be URL-encoded. Its origin must match o
 - Binary PNG body
 - `Cache-Control: public, max-age=86400, s-maxage=604800` (24h browser, 7d edge)
 
-## HTML example
+## Framework integration
 
+Pick your stack. Each example wires the OG meta tag (and `twitter:card`) into the page's `<head>`. Replace `cLx8kZ9m` with your project's public ID.
+
+<Tabs items={['HTML', 'Next.js', 'Nuxt 4', 'Astro', 'SvelteKit', 'Remix', 'Vue 3', 'React (Vite)', 'Angular']}>
+<Tabs.Tab>
 ```html
 <meta
   property="og:image"
-  content="https://api.ogstack.dev/og/cLx8kZ9m?url=https%3A%2F%2Fexample.com%2Fpost&template=aurora&accent=%2310b981"
+  content="https://api.ogstack.dev/og/cLx8kZ9m?url=https://example.com/post&template=aurora&accent=%2310b981"
 />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta name="twitter:card" content="summary_large_image" />
 ```
-
-## Next.js metadata API
-
+</Tabs.Tab>
+<Tabs.Tab>
 ```tsx
 import type { Metadata } from "next";
 
@@ -64,18 +69,122 @@ export async function generateMetadata({
   };
 }
 ```
+</Tabs.Tab>
+<Tabs.Tab>
+```vue
+<script setup lang="ts">
+const route = useRoute();
+const config = useRuntimeConfig();
+const ogImage = `https://api.ogstack.dev/og/${config.public.ogstackPublicId}?url=${encodeURIComponent(`https://example.com${route.path}`)}&template=editorial`;
 
-## Astro example
-
+useSeoMeta({
+  ogImage,
+  ogImageWidth: 1200,
+  ogImageHeight: 630,
+  twitterCard: "summary_large_image",
+});
+</script>
+```
+</Tabs.Tab>
+<Tabs.Tab>
 ```astro
 ---
 const publicId = import.meta.env.OGSTACK_PUBLIC_ID;
 const pageUrl = Astro.url.toString();
-const og = `https://api.ogstack.dev/og/${publicId}?url=${encodeURIComponent(pageUrl)}`;
+const og = `https://api.ogstack.dev/og/${publicId}?url=${encodeURIComponent(pageUrl)}&template=editorial`;
 ---
 <meta property="og:image" content={og} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
 <meta name="twitter:card" content="summary_large_image" />
 ```
+</Tabs.Tab>
+<Tabs.Tab>
+```svelte
+<script lang="ts">
+  import { page } from '$app/stores';
+  import { env } from '$env/dynamic/public';
+
+  $: og = `https://api.ogstack.dev/og/${env.PUBLIC_OGSTACK_ID}?url=${encodeURIComponent($page.url.href)}&template=editorial`;
+</script>
+
+<svelte:head>
+  <meta property="og:image" content={og} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+</svelte:head>
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```tsx
+import type { MetaFunction } from "@remix-run/node";
+
+export const meta: MetaFunction = ({ params }) => {
+  const pageUrl = `https://example.com/posts/${params.slug}`;
+  const og = `https://api.ogstack.dev/og/${process.env.OGSTACK_PUBLIC_ID}?url=${encodeURIComponent(pageUrl)}&template=editorial`;
+  return [
+    { property: "og:image", content: og },
+    { property: "og:image:width", content: "1200" },
+    { property: "og:image:height", content: "630" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ];
+};
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```vue
+<script setup lang="ts">
+import { useHead } from "@unhead/vue";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
+const og = `https://api.ogstack.dev/og/${import.meta.env.VITE_OGSTACK_PUBLIC_ID}?url=${encodeURIComponent(`https://example.com${route.path}`)}&template=editorial`;
+
+useHead({
+  meta: [
+    { property: "og:image", content: og },
+    { property: "og:image:width", content: "1200" },
+    { property: "og:image:height", content: "630" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ],
+});
+</script>
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```tsx
+import { Helmet } from "react-helmet-async";
+
+export function PostMeta({ slug }: { slug: string }) {
+  const og = `https://api.ogstack.dev/og/${import.meta.env.VITE_OGSTACK_PUBLIC_ID}?url=${encodeURIComponent(`https://example.com/${slug}`)}&template=editorial`;
+  return (
+    <Helmet>
+      <meta property="og:image" content={og} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta name="twitter:card" content="summary_large_image" />
+    </Helmet>
+  );
+}
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```html
+<!-- src/index.html (inside <head>) -->
+<meta
+  property="og:image"
+  content="https://api.ogstack.dev/og/cLx8kZ9m?url=https://example.com/post&template=aurora&accent=%2310b981"
+/>
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+```
+
+For per-page OG images, pair this with Angular Universal (SSR) so crawlers receive
+the rendered tag with the page-specific URL templated server-side.
+</Tabs.Tab>
+</Tabs>
 
 ## Rate limits
 
