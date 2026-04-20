@@ -1,6 +1,6 @@
 import type { FaviconUrls, FrameworkPlugin } from "./types";
 
-/** Shared by html, astro, sveltekit, angular — all of them ultimately emit `<link>` tags. */
+/** Shared by html, astro, sveltekit, angular - all of them ultimately emit `<link>` tags. */
 export function faviconHtmlLines(u: FaviconUrls): string[] {
   const lines: string[] = [];
   if (u.faviconIco) lines.push(`<link rel="icon" href="${u.faviconIco}" sizes="any" />`);

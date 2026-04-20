@@ -39,7 +39,7 @@ export function CodeSection(): ReactElement {
               One line. Every framework.
             </Typography>
             <Typography variant="body1Muted" sx={{ lineHeight: 1.7 }}>
-              Pick your stack — Next.js, Nuxt, SvelteKit, Remix, Vue, Angular, plain HTML — and copy
+              Pick your stack - Next.js, Nuxt, SvelteKit, Remix, Vue, Angular, plain HTML - and copy
               the snippet. Crawlers on X, LinkedIn, Slack, and Discord render your custom preview
               automatically. Need server-side control? Switch to POST.
             </Typography>

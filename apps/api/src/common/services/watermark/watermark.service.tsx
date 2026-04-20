@@ -23,16 +23,26 @@ export class WatermarkService {
   private badgeCache: Buffer | null = null;
   private badgeInflight: Promise<Buffer> | null = null;
 
-  /** Idempotent: safe to call on already-watermarked or plan-exempt buffers via the caller's guard. */
+  /**
+   * Applies a watermark badge to the bottom-right of the given PNG buffer.
+   * If any step of the process fails (e.g. font fetch, SVG render), logs a warning and returns the original image unmodified.
+   */
   async apply(png: Buffer): Promise<Buffer> {
     try {
       const badge = await this.getBadge();
-      return await sharp(png)
+      const image = sharp(png);
+      const { width, height } = await image.metadata();
+
+      if (!width || !height) {
+        throw new Error("Could not read image dimensions");
+      }
+
+      return image
         .composite([
           {
             input: badge,
-            top: 630 - WATERMARK_HEIGHT - MARGIN,
-            left: 1200 - WATERMARK_WIDTH - MARGIN,
+            top: height - WATERMARK_HEIGHT - MARGIN,
+            left: width - WATERMARK_WIDTH - MARGIN,
           },
         ])
         .png()

@@ -27,7 +27,7 @@ export function ProjectIntegration(props: ProjectIntegrationProps): ReactElement
     <Box>
       <SectionHeader
         title="Integration"
-        description="Drop the OG image into any framework. Pick yours below — the public ID and template are pre-filled."
+        description="Drop the OG image into any framework. Pick yours below - the public ID and template are pre-filled."
       />
       <Stack spacing={2} sx={{ mt: 2 }}>
         <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
