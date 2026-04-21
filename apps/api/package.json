@@ -5,7 +5,8 @@
   "module": "src/index.js",
   "types": "./dist/apps/api/src/app.d.ts",
   "scripts": {
-    "test": "bun run test",
+    "test": "bun test",
+    "test:coverage": "bun test --coverage",
     "dev": "bun run --watch src/app.ts",
     "start": "bun run src/app.ts",
     "db:generate": "prisma generate",
@@ -60,6 +61,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/sharp": "^0.32.0",
+    "fast-check": "^4.7.0",
     "prisma": "^7.7.0",
     "sharp": "^0.34.5",
     "typescript": "^6.0.2"

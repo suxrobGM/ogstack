@@ -292,6 +292,23 @@ app.use(authController);
 - Never log raw API keys or decrypted secrets
 - Validate and sanitize all user-provided URLs before fetching
 
+### OWASP Top 10 Mapping
+
+| OWASP               | Control                                                  | Location                                                                   |
+| ------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------- |
+| A01 Access Control  | Auth + role guards, ownership checks                     | `modules/auth/auth.middleware.ts`, `common/middleware/role-guard.ts`       |
+| A02 Crypto Failures | bcrypt passwords, HMAC-hashed API keys, httpOnly cookies | `common/utils/password.ts`, `modules/api-key/api-key.service.ts`           |
+| A03 Injection       | TypeBox validation, Prisma parameterized queries         | `*.schema.ts`, `prisma/schema/`                                            |
+| A04 Insecure Design | Domain allowlist, SSRF IP-range + scheme allowlist       | `common/utils/url.ts`, `modules/project/project.service.ts`                |
+| A05 Misconfig       | `.env` gitignored, secrets via GH Secrets, Caddy TLS     | `.github/workflows/deploy.yml`                                             |
+| A06 Vulnerable Deps | `bun audit` in CI, pinned versions                       | `.github/workflows/ci.yml`                                                 |
+| A07 Auth Failures   | JWT + refresh, tiered rate limits, reCAPTCHA             | `modules/auth/auth.service.ts`, `common/middleware/tiered-rate-limiter.ts` |
+| A08 Integrity       | Gitleaks scan, frozen-lockfile install                   | `.github/workflows/ci.yml`                                                 |
+| A09 Logging         | Logger strips secrets, no raw keys logged                | `common/utils/logger.ts`                                                   |
+| A10 SSRF            | IP-range + scheme allowlist, DNS pre-check               | `common/utils/url.ts`                                                      |
+
+If a PR touches any referenced file, fill in the **Edge cases** section of the PR template with the OWASP-relevant scenarios.
+
 ---
 
 ## Testing Strategy

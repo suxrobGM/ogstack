@@ -1,4 +1,4 @@
-# Mehnatsevar — Backend API
+# OGStack - Backend API
 
 Elysia.js REST API server running on the Bun runtime.
 
@@ -86,7 +86,7 @@ Each module follows a **3-file core** pattern with optional extras:
 | `{module}.repository.ts` \* | Complex DB queries (dynamic filters, raw SQL) |
 | `{module}.mapper.ts` \*     | Prisma model to API response converters       |
 
-_\* Optional — only add when complexity warrants it._
+_\* Optional - only add when complexity warrants it._
 
 **When to add a repository**: the module needs search with dynamic WHERE clauses, raw SQL, or multi-table upserts. Skip it if every query is a one-liner `findUnique`/`create`/`update`/`delete`.
 

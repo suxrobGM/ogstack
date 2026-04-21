@@ -70,8 +70,9 @@ Visit **[ogstack.dev/audit](https://ogstack.dev/audit)** to drop in any URL and 
 
 Technical details and other guides live in [`docs/`](docs/):
 
-- **[Architecture](docs/architecture.md)** - tech stack, system design, and how the pieces fit together.
-- **[Development](docs/development.md)** - local setup, running the apps, database, and testing.
+- **[Architecture](docs/architecture.md)** - system diagram, tech stack, module patterns, data flow.
+- **[Deployment](docs/deployment.md)** - CI/CD pipeline, VPS setup, required secrets and services.
+- **[Development](docs/development.md)** - local setup, running the apps, database, testing.
 
 ---
 

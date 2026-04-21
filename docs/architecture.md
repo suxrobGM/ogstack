@@ -2,6 +2,50 @@
 
 OGStack is a monorepo made up of three apps and a shared package, all running on Bun.
 
+## System Overview
+
+```mermaid
+flowchart LR
+    subgraph Client["Clients"]
+      Browser["Web browser / Social crawlers"]
+      ApiConsumer["API consumers (server-side)"]
+    end
+
+    subgraph Edge["Edge"]
+      Caddy["Caddy reverse proxy (TLS, HTTP/2)"]
+      CDN["Cloudflare CDN<br/>cdn.ogstack.dev"]
+    end
+
+    subgraph VPS["VPS (Docker Compose)"]
+      Web["Next.js 16 app<br/>ogstack.dev:5001"]
+      API["Elysia + Bun API<br/>ogstack.dev/api:5000"]
+      Docs["Nextra 4 docs<br/>docs.ogstack.dev:5002"]
+    end
+
+    subgraph Data["Data & external"]
+      PG[("PostgreSQL<br/>Prisma 7")]
+      R2[("Cloudflare R2<br/>generated images")]
+      Fal["FAL.ai Flux<br/>AI image generation"]
+      Claude["Claude API<br/>prompt generation"]
+      Stripe["Stripe<br/>subscriptions"]
+      OAuth["GitHub + Google<br/>OAuth"]
+    end
+
+    Browser --> Caddy
+    ApiConsumer --> Caddy
+    Caddy --> Web
+    Caddy --> API
+    Caddy --> Docs
+    Browser -.image URLs.-> CDN
+    CDN --> R2
+    API --> PG
+    API --> R2
+    API --> Fal
+    API --> Claude
+    API --> Stripe
+    API --> OAuth
+```
+
 ## Repository Layout
 
 ```text
