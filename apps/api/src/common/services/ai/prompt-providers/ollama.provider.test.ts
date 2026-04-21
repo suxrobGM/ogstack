@@ -38,11 +38,12 @@ describe("OllamaPromptProvider", () => {
           } as Response),
         ) as unknown as typeof fetch,
       );
+      fetchSpy.mockClear();
 
       const result = await provider.chat({ system: "s", user: "u" });
       expect(result).toBe("reply");
-      const call = fetchSpy.mock.calls[0];
-      expect(call?.[0]).toContain("/api/chat");
+      const call = fetchSpy.mock.calls.at(-1);
+      expect(String(call?.[0])).toContain("/api/chat");
     });
 
     it("throws when no base URL and chat called", () => {
@@ -83,7 +84,7 @@ describe("OllamaPromptProvider", () => {
       );
 
       await provider.chat({ system: "s", user: "u", json: true });
-      const call = fetchSpy.mock.calls[0];
+      const call = fetchSpy.mock.calls.at(-1);
       const body = JSON.parse((call?.[1] as RequestInit).body as string);
       expect(body.format).toBe("json");
     });

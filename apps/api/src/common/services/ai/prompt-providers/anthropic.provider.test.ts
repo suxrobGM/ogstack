@@ -41,12 +41,13 @@ describe("AnthropicPromptProvider", () => {
           } as Response),
         ) as unknown as typeof fetch,
       );
+      fetchSpy.mockClear();
 
       const result = await provider.chat({ system: "s", user: "u" });
       expect(result).toBe("hello");
       expect(fetchSpy).toHaveBeenCalled();
-      const call = fetchSpy.mock.calls[0];
-      expect(call?.[0]).toContain("/v1/messages");
+      const call = fetchSpy.mock.calls.at(-1);
+      expect(String(call?.[0])).toContain("/v1/messages");
     });
 
     it("throws when no API key and chat called", () => {

@@ -39,12 +39,13 @@ describe("BrowserlessRenderProvider", () => {
       ) as unknown as typeof fetch,
     );
 
+    fetchSpy.mockClear();
     const html = await new BrowserlessRenderProvider().render({
       url: "https://example.com",
       signal: new AbortController().signal,
     });
     expect(html).toBe("<html>ok</html>");
-    expect(fetchSpy.mock.calls[0]?.[0]).toContain("/content?token=t");
+    expect(String(fetchSpy.mock.calls.at(-1)?.[0])).toContain("/content?token=t");
   });
 
   it("throws on non-ok response", () => {
@@ -92,12 +93,13 @@ describe("ScrapingBeeRenderProvider", () => {
       ) as unknown as typeof fetch,
     );
 
+    fetchSpy.mockClear();
     const html = await new ScrapingBeeRenderProvider().render({
       url: "https://example.com",
       signal: new AbortController().signal,
     });
     expect(html).toBe("<html>ok</html>");
-    expect(fetchSpy.mock.calls[0]?.[0]).toContain("app.scrapingbee.com");
+    expect(String(fetchSpy.mock.calls.at(-1)?.[0])).toContain("app.scrapingbee.com");
   });
 
   it("throws on non-ok response", () => {

@@ -98,8 +98,9 @@ describe("OpenAiCompatibleProvider", () => {
         ) as unknown as typeof fetch,
       );
 
+      fetchSpy.mockClear();
       await new TestOpenAiProvider().chat({ system: "s", user: "u" });
-      const init = fetchSpy.mock.calls[0]?.[1] as RequestInit;
+      const init = fetchSpy.mock.calls.at(-1)?.[1] as RequestInit;
       expect((init.headers as Record<string, string>).Authorization).toBe("Bearer test-key");
     });
 
@@ -113,8 +114,9 @@ describe("OpenAiCompatibleProvider", () => {
         ) as unknown as typeof fetch,
       );
 
+      fetchSpy.mockClear();
       await new TestOpenAiProviderOptionalKey().chat({ system: "s", user: "u" });
-      const init = fetchSpy.mock.calls[0]?.[1] as RequestInit;
+      const init = fetchSpy.mock.calls.at(-1)?.[1] as RequestInit;
       expect((init.headers as Record<string, string>).Authorization).toBeUndefined();
     });
 
@@ -128,8 +130,9 @@ describe("OpenAiCompatibleProvider", () => {
         ) as unknown as typeof fetch,
       );
 
+      fetchSpy.mockClear();
       await new TestOpenAiProvider().chat({ system: "s", user: "u", json: true });
-      const body = JSON.parse((fetchSpy.mock.calls[0]?.[1] as RequestInit).body as string);
+      const body = JSON.parse((fetchSpy.mock.calls.at(-1)?.[1] as RequestInit).body as string);
       expect(body.response_format).toEqual({ type: "json_object" });
     });
 
