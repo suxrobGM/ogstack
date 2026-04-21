@@ -15,7 +15,7 @@ Two GitHub Actions workflows:
 
 - The API is a long-running process with Postgres connections, background jobs (demo project cleanup, Stripe webhook sync), and local image-generation binaries (resvg, Satori). Not a fit for serverless cold-start plus 10-second execution limits.
 - Generated images are persisted to Cloudflare R2 (via direct S3-compatible calls from the API), then served from a CDN. Vercel's edge caching doesn't add value here.
-- OAuth callback URLs and Stripe webhook endpoints need stable, predictable hostnames. VPS plus Caddy gives a single public surface without per-environment URL churn.
+- OAuth callback URLs and Stripe webhook endpoints need stable, predictable hostnames. VPS plus Nginx gives a single public surface without per-environment URL churn.
 
 ## Required secrets
 
@@ -31,7 +31,7 @@ Set as repository **variables** (visible to the build step):
 
 ## Required services
 
-- **VPS** with Docker plus docker-compose, reachable over SSH on port 22, with Caddy terminating TLS on 80/443.
+- **VPS** with Docker plus docker-compose, reachable over SSH on port 22, with Nginx terminating TLS on 80/443.
 - **Postgres**. The docker-compose brings up a local Postgres by default. Swap the `DATABASE_URL` env var for a managed provider if desired.
 - **Cloudflare R2** bucket for generated images.
 - **Stripe** account (test-mode key works for non-production environments).

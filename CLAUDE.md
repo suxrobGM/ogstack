@@ -12,6 +12,7 @@ OGStack is a developer-first **branded image API platform** — Open Graph previ
 ## PRD & Design References
 
 - **PRD**: `docs/prd.md` — full product spec, API design, data model, pricing, launch plan
+- **PRD summary**: @docs/prd-summary.md — condensed reference for day-to-day engineering
 
 ### UI Component Guidelines
 
@@ -300,7 +301,7 @@ app.use(authController);
 | A02 Crypto Failures | bcrypt passwords, HMAC-hashed API keys, httpOnly cookies | `common/utils/password.ts`, `modules/api-key/api-key.service.ts`           |
 | A03 Injection       | TypeBox validation, Prisma parameterized queries         | `*.schema.ts`, `prisma/schema/`                                            |
 | A04 Insecure Design | Domain allowlist, SSRF IP-range + scheme allowlist       | `common/utils/url.ts`, `modules/project/project.service.ts`                |
-| A05 Misconfig       | `.env` gitignored, secrets via GH Secrets, Caddy TLS     | `.github/workflows/deploy.yml`                                             |
+| A05 Misconfig       | `.env` gitignored, secrets via GH Secrets, Nginx TLS     | `.github/workflows/deploy.yml`                                             |
 | A06 Vulnerable Deps | `bun audit` in CI, pinned versions                       | `.github/workflows/ci.yml`                                                 |
 | A07 Auth Failures   | JWT + refresh, tiered rate limits, reCAPTCHA             | `modules/auth/auth.service.ts`, `common/middleware/tiered-rate-limiter.ts` |
 | A08 Integrity       | Gitleaks scan, frozen-lockfile install                   | `.github/workflows/ci.yml`                                                 |

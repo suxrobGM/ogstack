@@ -315,7 +315,7 @@ Three tiers. Non-AI OG and non-AI blog hero generation are **unmetered on every 
 
 | Tier     | Price  | Non-AI (OG + hero) | AI renders/mo (OG, hero, icon set) | AI Audits/mo | Watermark | Projects  | Domains/project | Rate (req/min) |
 | -------- | ------ | ------------------ | ---------------------------------- | ------------ | --------- | --------- | --------------- | -------------- |
-| **Free** | $0     | Unlimited          | 3 (Flux 2)                         | —            | Yes       | 1         | 1               | 20             |
+| **Free** | $0     | Unlimited          | 3 (Flux 2)                         | 3            | Yes       | 1         | 1               | 20             |
 | **Plus** | $10/mo | Unlimited          | 100 (Flux 2)                       | 100          | Yes       | 5         | 3               | 100            |
 | **Pro**  | $30/mo | Unlimited          | 1,000 (300 Flux 2 Pro + Flux 2)    | 1,000        | No        | Unlimited | Unlimited       | 500            |
 

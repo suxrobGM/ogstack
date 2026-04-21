@@ -12,7 +12,7 @@ flowchart LR
     end
 
     subgraph Edge["Edge"]
-      Caddy["Caddy reverse proxy (TLS, HTTP/2)"]
+      Nginx["Nginx reverse proxy (TLS, HTTP/2)"]
       CDN["Cloudflare CDN<br/>cdn.ogstack.dev"]
     end
 
@@ -31,11 +31,11 @@ flowchart LR
       OAuth["GitHub + Google<br/>OAuth"]
     end
 
-    Browser --> Caddy
-    ApiConsumer --> Caddy
-    Caddy --> Web
-    Caddy --> API
-    Caddy --> Docs
+    Browser --> Nginx
+    ApiConsumer --> Nginx
+    Nginx --> Web
+    Nginx --> API
+    Nginx --> Docs
     Browser -.image URLs.-> CDN
     CDN --> R2
     API --> PG
