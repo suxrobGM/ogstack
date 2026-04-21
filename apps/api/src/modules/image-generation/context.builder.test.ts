@@ -172,22 +172,22 @@ describe("RenderContextBuilder", () => {
     it("blends AI fields when fullOverride is false", () => {
       const ai = {
         imagePrompt: {
-          backgroundKeywords: ["neon", "grid"],
+          backgroundKeywords: "neon, grid",
           headline: "AI-generated dev tools",
           tagline: "ship faster",
           mood: "bold",
           suggestedAccent: "#00ff00",
         },
-        pageTheme: "product",
+        pageTheme: "technical",
         brandHints: { palette: ["#111"], industry: "saas" },
       } as never;
 
       const opts = builder.resolveHeadlineOptions(ai, undefined, false);
       expect(opts.override).toBeNull();
-      expect(opts.enrichedKeywords).toEqual(["neon", "grid"]);
+      expect(opts.enrichedKeywords).toBe("neon, grid");
       expect(opts.overrideHeadline).toBe("AI-generated dev tools");
       expect(opts.overrideTagline).toBe("ship faster");
-      expect(opts.pageTheme).toBe("product");
+      expect(opts.pageTheme).toBe("technical");
       expect(opts.mood).toBe("bold");
       expect(opts.accent).toBe("#00ff00");
       expect(opts.industry).toBe("saas");

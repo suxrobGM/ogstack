@@ -78,7 +78,12 @@ describe("NotificationService", () => {
     });
 
     it("defaults metadata and actionUrl to undefined/null", async () => {
-      await service.create({ userId: "user-1", type: "SYSTEM", title: "t", message: "m" });
+      await service.create({
+        userId: "user-1",
+        type: "SYSTEM_ANNOUNCEMENT",
+        title: "t",
+        message: "m",
+      });
 
       const call = (mockPrisma.notification.create as ReturnType<typeof mock>).mock
         .calls[0] as unknown[];
@@ -90,7 +95,7 @@ describe("NotificationService", () => {
 
   describe("createForAllUsers", () => {
     it("creates a notification for every active user", async () => {
-      const count = await service.createForAllUsers("SYSTEM", "Alert", "all hands");
+      const count = await service.createForAllUsers("SYSTEM_ANNOUNCEMENT", "Alert", "all hands");
       expect(count).toBe(3);
       expect(mockPrisma.notification.createMany).toHaveBeenCalled();
     });
@@ -112,11 +117,11 @@ describe("NotificationService", () => {
     });
 
     it("applies type filter", async () => {
-      await service.list("user-1", { page: 1, limit: 10, type: "SYSTEM" });
+      await service.list("user-1", { page: 1, limit: 10, type: "SYSTEM_ANNOUNCEMENT" });
       const call = (mockPrisma.notification.findMany as ReturnType<typeof mock>).mock
         .calls[0] as unknown[];
       const args = call[0] as { where: { type: string } };
-      expect(args.where.type).toBe("SYSTEM");
+      expect(args.where.type).toBe("SYSTEM_ANNOUNCEMENT");
     });
 
     it("computes totalPages", async () => {
