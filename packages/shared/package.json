@@ -18,6 +18,6 @@
   "devDependencies": {
     "elysia": "^1.4.28",
     "fast-check": "^4.7.0",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.3"
   }
 }
