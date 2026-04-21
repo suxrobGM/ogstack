@@ -19,6 +19,11 @@ interface AiGenerationFieldProps {
   form: AnyReactForm;
 }
 
+/**
+ * AI toggle for OG/hero kinds. When on, reveals the shared prompt + full-override
+ * controls via `AiPromptOverrideFields`. Icon-set skips this wrapper since AI is
+ * always on for favicons.
+ */
 export function AiGenerationField(props: AiGenerationFieldProps): ReactElement {
   const { form } = props;
 
@@ -52,31 +57,7 @@ export function AiGenerationField(props: AiGenerationFieldProps): ReactElement {
           </Stack>
 
           <Collapse in={aiGenerated} timeout="auto" unmountOnExit>
-            <Stack spacing={1.5}>
-              <AiModelField form={form} />
-              <FormTextField
-                form={form}
-                name="aiPrompt"
-                size="small"
-                multiline
-                rows={3}
-                label="Custom prompt (optional)"
-                placeholder="e.g. A futuristic city skyline at dusk, neon reflections, editorial photograph"
-                charLimit={AI_PROMPT_MAX_CHARS}
-              />
-              <FormCheckboxField
-                form={form}
-                name="fullOverride"
-                label={
-                  <Stack spacing={0}>
-                    <Typography variant="body2">Use prompt as full override</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Ignore page content - use your prompt as-is for the image.
-                    </Typography>
-                  </Stack>
-                }
-              />
-            </Stack>
+            <AiPromptOverrideFields form={form} />
           </Collapse>
         </Stack>
       )}
@@ -84,6 +65,51 @@ export function AiGenerationField(props: AiGenerationFieldProps): ReactElement {
   );
 }
 
+interface AiPromptOverrideFieldsProps {
+  form: AnyReactForm;
+  /** Hide the model picker (e.g. icon-set doesn't expose Pro/Standard). */
+  hideModel?: boolean;
+}
+
+/**
+ * Inner controls shared between OG/hero (behind the AI on/off switch) and
+ * icon_set (always AI-on, so the controls render flat).
+ */
+export function AiPromptOverrideFields(props: AiPromptOverrideFieldsProps): ReactElement {
+  const { form, hideModel = false } = props;
+  return (
+    <Stack spacing={1.5}>
+      {!hideModel && <AiModelField form={form} />}
+      <FormTextField
+        form={form}
+        name="aiPrompt"
+        size="small"
+        multiline
+        rows={3}
+        label="Custom prompt (optional)"
+        placeholder="e.g. A futuristic city skyline at dusk, neon reflections, editorial photograph"
+        charLimit={AI_PROMPT_MAX_CHARS}
+      />
+      <FormCheckboxField
+        form={form}
+        name="fullOverride"
+        label={
+          <Stack spacing={0}>
+            <Typography variant="body2">Use prompt as full override</Typography>
+            <Typography variant="caption" color="text.secondary">
+              Ignore page content - use your prompt as-is for the image.
+            </Typography>
+          </Stack>
+        }
+      />
+    </Stack>
+  );
+}
+
+/**
+ * Standard/Pro quality toggle for AI renders. Pro is gated on the user's plan -
+ * non-Pro users see the option disabled with an upgrade hint.
+ */
 function AiModelField(props: { form: AnyReactForm }): ReactElement {
   const { form } = props;
   const { user } = useAuth();
@@ -95,7 +121,7 @@ function AiModelField(props: { form: AnyReactForm }): ReactElement {
   ] as const;
 
   return (
-    <Stack spacing={0.75}>
+    <Stack spacing={1}>
       <Typography variant="body2" sx={{ fontWeight: 500 }}>
         Image quality
       </Typography>

@@ -76,7 +76,7 @@ export class IconPipelineService {
       kind: "icon",
       metadata,
       ai: aiForRender,
-      options: { override: ctx.options?.aiPrompt ?? null },
+      options: { override: ctx.fullOverride ? (ctx.options?.aiPrompt ?? null) : null },
     });
 
     const masterPng = await this.imageProvider.generate({

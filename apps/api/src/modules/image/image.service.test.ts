@@ -27,12 +27,14 @@ function createMockImage(overrides: Record<string, unknown> = {}) {
     aiModel: null,
     aiPrompt: null,
     aiEnabled: false,
+    generatedOnPlan: "FREE",
     generationMs: 420,
     serveCount: 1,
+    assets: null,
     createdAt: new Date("2026-04-01"),
     expiresAt: null,
     template: null,
-    project: { name: "My Project" },
+    project: { name: "My Project", publicId: "proj-public-1" },
     ...overrides,
   };
 }
@@ -54,6 +56,7 @@ function createMockPrisma() {
 function createMockStorage() {
   return {
     delete: mock(() => Promise.resolve()),
+    get: mock(() => Promise.resolve(Buffer.from("fake-png-bytes"))),
   } as unknown as ImageStorageService;
 }
 
@@ -71,6 +74,23 @@ describe("ImageService", () => {
     service = container.resolve(ImageService);
   });
 
+  describe("findById", () => {
+    it("returns the image when owner requests it", async () => {
+      const result = await service.findById("user-1", "img-1");
+      expect(result.id).toBe("img-1");
+      expect(result.projectName).toBe("My Project");
+    });
+
+    it("throws NotFoundError when image doesn't exist", () => {
+      (mockPrisma.image.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
+      expect(service.findById("user-1", "missing")).rejects.toThrow("Image not found");
+    });
+
+    it("throws ForbiddenError for another user's image", () => {
+      expect(service.findById("other", "img-1")).rejects.toThrow("Not allowed");
+    });
+  });
+
   describe("list", () => {
     it("returns paginated user-scoped items", async () => {
       const result = await service.list("user-1", { page: 1, limit: 20 });
@@ -83,6 +103,20 @@ describe("ImageService", () => {
       const call = (mockPrisma.image.findMany as ReturnType<typeof mock>).mock.calls[0];
       const args = (call as unknown[])[0] as { where: Record<string, unknown> };
       expect(args.where.projectId).toBe("proj-9");
+    });
+
+    it("applies category filter", async () => {
+      await service.list("user-1", { page: 1, limit: 20, category: "TECH" });
+      const call = (mockPrisma.image.findMany as ReturnType<typeof mock>).mock.calls[0];
+      const args = (call as unknown[])[0] as { where: { category?: string } };
+      expect(args.where.category).toBe("TECH");
+    });
+
+    it("applies kind filter", async () => {
+      await service.list("user-1", { page: 1, limit: 20, kind: "icon_set" });
+      const call = (mockPrisma.image.findMany as ReturnType<typeof mock>).mock.calls[0];
+      const args = (call as unknown[])[0] as { where: { kind?: string } };
+      expect(args.where.kind).toBe(ImageKind.ICON_SET);
     });
 
     it("applies date range filter", async () => {
@@ -169,6 +203,133 @@ describe("ImageService", () => {
 
     it("throws Forbidden for other user's image", async () => {
       expect(service.delete("other", "img-1")).rejects.toThrow("Not allowed");
+    });
+  });
+
+  describe("bulkDelete", () => {
+    it("deletes every image owned by the user", async () => {
+      (mockPrisma.image.findMany as ReturnType<typeof mock>).mockResolvedValue([
+        { id: "i1", cacheKey: "k1", kind: ImageKind.OG },
+        { id: "i2", cacheKey: "k2", kind: ImageKind.ICON_SET },
+      ]);
+
+      const result = await service.bulkDelete("user-1", ["i1", "i2"]);
+      expect(result.deleted).toBe(2);
+      expect(mockStorage.delete).toHaveBeenCalledTimes(2);
+      expect(mockPrisma.image.delete).toHaveBeenCalledTimes(2);
+    });
+
+    it("returns 0 when no images match the ids", async () => {
+      (mockPrisma.image.findMany as ReturnType<typeof mock>).mockResolvedValue([]);
+      const result = await service.bulkDelete("user-1", ["nope"]);
+      expect(result.deleted).toBe(0);
+      expect(mockPrisma.image.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("deleteAsAdmin", () => {
+    it("deletes regardless of ownership when admin calls", async () => {
+      (mockPrisma.image.findUnique as ReturnType<typeof mock>).mockResolvedValue({
+        id: "img-1",
+        cacheKey: "cache-abc",
+        kind: ImageKind.OG,
+      });
+
+      const result = await service.deleteAsAdmin("img-1");
+      expect(result.success).toBe(true);
+      expect(mockPrisma.image.delete).toHaveBeenCalled();
+    });
+
+    it("throws NotFoundError when image doesn't exist", () => {
+      (mockPrisma.image.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
+      expect(service.deleteAsAdmin("missing")).rejects.toThrow("Image not found");
+    });
+  });
+
+  describe("deleteStaleForProject", () => {
+    it("deletes each stale image and returns count", async () => {
+      (mockPrisma.image.findMany as ReturnType<typeof mock>).mockResolvedValue([
+        { id: "i1", cacheKey: "k1", kind: ImageKind.OG },
+        { id: "i2", cacheKey: "k2", kind: ImageKind.OG },
+      ]);
+
+      const deleted = await service.deleteStaleForProject("proj-1", new Date("2026-03-01"));
+      expect(deleted).toBe(2);
+    });
+
+    it("returns 0 and continues when a row delete fails", async () => {
+      (mockPrisma.image.findMany as ReturnType<typeof mock>).mockResolvedValue([
+        { id: "i1", cacheKey: "k1", kind: ImageKind.OG },
+        { id: "i2", cacheKey: "k2", kind: ImageKind.OG },
+      ]);
+      (mockPrisma.image.delete as ReturnType<typeof mock>).mockImplementationOnce(() =>
+        Promise.reject(new Error("db error")),
+      );
+
+      const deleted = await service.deleteStaleForProject("proj-1", new Date("2026-03-01"));
+      expect(deleted).toBe(1);
+    });
+
+    it("returns 0 when no stale rows match", async () => {
+      (mockPrisma.image.findMany as ReturnType<typeof mock>).mockResolvedValue([]);
+      const deleted = await service.deleteStaleForProject("proj-1", new Date("2026-03-01"));
+      expect(deleted).toBe(0);
+    });
+  });
+
+  describe("buildDownloadBundle", () => {
+    it("returns a single PNG for an OG image", async () => {
+      const bundle = await service.buildDownloadBundle("user-1", "img-1");
+      expect(bundle.filename).toBe("cache-abc.png");
+      expect(bundle.buffer).toBeInstanceOf(Buffer);
+    });
+
+    it("throws NotFoundError when the stored file is missing", () => {
+      (mockStorage.get as ReturnType<typeof mock>).mockResolvedValue(null);
+      expect(service.buildDownloadBundle("user-1", "img-1")).rejects.toThrow(
+        "Image file is missing from storage.",
+      );
+    });
+
+    it("zips every asset for an icon set", async () => {
+      const iconImage = createMockImage({
+        kind: ImageKind.ICON_SET,
+        assets: [
+          { name: "favicon-32.png", url: "u", width: 32, height: 32, sizeBytes: 1 },
+          { name: "favicon-180.png", url: "u", width: 180, height: 180, sizeBytes: 1 },
+        ],
+      });
+      (mockPrisma.image.findUnique as ReturnType<typeof mock>).mockResolvedValue(iconImage);
+
+      const bundle = await service.buildDownloadBundle("user-1", "img-1");
+      expect(bundle.filename).toBe("favicons.zip");
+      expect(bundle.buffer.byteLength).toBeGreaterThan(0);
+    });
+
+    it("throws BadRequestError when icon set has no assets", () => {
+      (mockPrisma.image.findUnique as ReturnType<typeof mock>).mockResolvedValue(
+        createMockImage({ kind: ImageKind.ICON_SET, assets: null }),
+      );
+      expect(service.buildDownloadBundle("user-1", "img-1")).rejects.toThrow(
+        "This icon set has no assets to bundle.",
+      );
+    });
+
+    it("continues past missing icon set assets", async () => {
+      const iconImage = createMockImage({
+        kind: ImageKind.ICON_SET,
+        assets: [
+          { name: "favicon-32.png", url: "u", width: 32, height: 32, sizeBytes: 1 },
+          { name: "favicon-180.png", url: "u", width: 180, height: 180, sizeBytes: 1 },
+        ],
+      });
+      (mockPrisma.image.findUnique as ReturnType<typeof mock>).mockResolvedValue(iconImage);
+      (mockStorage.get as ReturnType<typeof mock>)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValue(Buffer.from("png"));
+
+      const bundle = await service.buildDownloadBundle("user-1", "img-1");
+      expect(bundle.buffer.byteLength).toBeGreaterThan(0);
     });
   });
 });

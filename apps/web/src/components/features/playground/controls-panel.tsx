@@ -16,6 +16,7 @@ import type { Project, TemplateInfo } from "@/types/api";
 import { normalizeUrlInput } from "@/utils/url";
 import {
   AiGenerationField,
+  AiPromptOverrideFields,
   GenerateButton,
   KindSwitcher,
   ProjectSelect,
@@ -104,10 +105,13 @@ export function ControlsPanel(props: ControlsPanelProps): ReactElement {
           {(kind: ImageKind) => {
             if (kind === "icon_set") {
               return (
-                <Typography variant="captionMuted">
-                  Favicon sets are always AI-generated from your brand signals (logo hint, theme
-                  color, page analysis). Templates and styling options don&apos;t apply here.
-                </Typography>
+                <Stack spacing={2}>
+                  <Typography variant="captionMuted">
+                    Favicon sets are always AI-generated from your brand signals (logo hint, theme
+                    color, page analysis). Templates and styling options don&apos;t apply here.
+                  </Typography>
+                  <AiPromptOverrideFields form={form} hideModel />
+                </Stack>
               );
             }
 
