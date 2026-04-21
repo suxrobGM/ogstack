@@ -1,6 +1,7 @@
 # OGStack
 
 [![CI](https://github.com/suxrobGM/ogstack/actions/workflows/ci.yml/badge.svg)](https://github.com/suxrobGM/ogstack/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/suxrobGM/ogstack/actions/workflows/codeql.yml/badge.svg)](https://github.com/suxrobGM/ogstack/actions/workflows/codeql.yml)
 [![Deploy](https://github.com/suxrobGM/ogstack/actions/workflows/deploy.yml/badge.svg)](https://github.com/suxrobGM/ogstack/actions/workflows/deploy.yml)
 [![Bun](https://img.shields.io/badge/runtime-Bun-black?logo=bun)](https://bun.sh)
 [![Elysia](https://img.shields.io/badge/api-Elysia-8b5cf6)](https://elysiajs.com)

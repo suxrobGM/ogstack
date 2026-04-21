@@ -302,7 +302,7 @@ app.use(authController);
 | A03 Injection       | TypeBox validation, Prisma parameterized queries         | `*.schema.ts`, `prisma/schema/`                                            |
 | A04 Insecure Design | Domain allowlist, SSRF IP-range + scheme allowlist       | `common/utils/url.ts`, `modules/project/project.service.ts`                |
 | A05 Misconfig       | `.env` gitignored, secrets via GH Secrets, Nginx TLS     | `.github/workflows/deploy.yml`                                             |
-| A06 Vulnerable Deps | `bun audit` in CI, pinned versions                       | `.github/workflows/ci.yml`                                                 |
+| A06 Vulnerable Deps | `bun audit` + Dependabot in CI, pinned versions          | `.github/workflows/ci.yml`, `.github/dependabot.yml`                       |
 | A07 Auth Failures   | JWT + refresh, tiered rate limits, reCAPTCHA             | `modules/auth/auth.service.ts`, `common/middleware/tiered-rate-limiter.ts` |
 | A08 Integrity       | Gitleaks scan, frozen-lockfile install                   | `.github/workflows/ci.yml`                                                 |
 | A09 Logging         | Logger strips secrets, no raw keys logged                | `common/utils/logger.ts`                                                   |
