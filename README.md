@@ -44,19 +44,10 @@ OGStack fixes that in one step. Paste a URL, get a beautiful, contextual image t
 ## How It Works
 
 1. **Sign up** and add your site.
-2. **Pick a template** in the playground, or let AI choose one that matches your content.
+2. **Pick a template** in the playground, or let AI generate a brand-new design for you.
 3. **Copy the meta tag** into your site's `<head>` - done.
 
 From then on, every page gets a custom preview the first time it's shared, cached on a global CDN for the next visitor. No work. No redeploys. No maintenance.
-
----
-
-## Who It's For
-
-- **Developer bloggers** who want their posts to look professional on social without opening a design tool.
-- **SaaS teams** who care about every shared link being a brand impression.
-- **Documentation teams** managing hundreds of pages that each need a unique preview.
-- **Agencies** running dozens of client sites and tired of repetitive OG work.
 
 ---
 
