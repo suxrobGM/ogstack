@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Box, Chip, Grid, Typography } from "@mui/material";
 import type { ImageKind } from "@ogstack/shared";
-import { accent, line, motion, radii, shadows, surfaces } from "@/theme";
+import { accent, iconSizes, line, motion, radii, shadows, surfaces } from "@/theme";
 import type { TemplateInfo } from "@/types/api";
 import { templateThumbnailUrl } from "@/utils/url";
 
@@ -62,7 +62,7 @@ export function TemplateSelector(props: TemplateSelectorProps): ReactElement {
                       position: "absolute",
                       top: 6,
                       right: 6,
-                      fontSize: 18,
+                      fontSize: iconSizes.sm,
                       color: accent.primary,
                       zIndex: 1,
                     }}

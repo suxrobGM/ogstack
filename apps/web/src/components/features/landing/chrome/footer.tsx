@@ -4,6 +4,7 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 // import XIcon from "@mui/icons-material/X";
 import { Box, Container, Grid, IconButton, Link, Stack, Typography } from "@mui/material";
 import { API_DOCS_URL, DOCS_URL, ROUTES } from "@/lib/constants";
+import { iconSizes } from "@/theme";
 import { line } from "@/theme/palette";
 import { fontFamilies } from "@/theme/typography";
 
@@ -66,9 +67,8 @@ export function Footer(): ReactElement {
             <Stack spacing={2} sx={{ maxWidth: 320 }}>
               <Typography
                 sx={{
-                  fontFamily: fontFamilies.body,
                   fontWeight: 600,
-                  fontSize: 18,
+                  fontSize: iconSizes.sm,
                   letterSpacing: "-0.5px",
                   "& span": { color: "accent.primary" },
                 }}

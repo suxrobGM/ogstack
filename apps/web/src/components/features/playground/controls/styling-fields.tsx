@@ -9,6 +9,7 @@ import TuneIcon from "@mui/icons-material/Tune";
 import { Button, Collapse, Stack } from "@mui/material";
 import { FormColorField, FormSelectField, FormToggleField } from "@/components/ui/form";
 import type { AnyReactForm } from "@/components/ui/form/types";
+import { iconSizes } from "@/theme";
 import { FONT_FAMILIES, FONT_LABELS } from "../schema";
 import { LogoFields } from "./logo-fields";
 
@@ -23,7 +24,7 @@ const MODE_ITEMS = [
     value: true,
     label: (
       <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
-        <DarkModeIcon sx={{ fontSize: 18 }} />
+        <DarkModeIcon sx={{ fontSize: iconSizes.sm }} />
         <span>Dark</span>
       </Stack>
     ),
@@ -32,7 +33,7 @@ const MODE_ITEMS = [
     value: false,
     label: (
       <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
-        <LightModeIcon sx={{ fontSize: 18 }} />
+        <LightModeIcon sx={{ fontSize: iconSizes.sm }} />
         <span>Light</span>
       </Stack>
     ),

@@ -4,7 +4,7 @@ import { Box, Button, Chip, Container, Grid, Stack, Typography } from "@mui/mate
 import Image from "next/image";
 import { Surface } from "@/components/ui/layout/surface";
 import { ROUTES } from "@/lib/constants";
-import { radii } from "@/theme/tokens";
+import { iconSizes, radii } from "@/theme/tokens";
 import { fontFamilies } from "@/theme/typography";
 import { AI_SAMPLES, aiSampleUrl, type AiSample } from "./ai-samples-data";
 
@@ -23,7 +23,7 @@ export function AiShowcaseSection(props: AiShowcaseSectionProps): ReactElement {
       <Container maxWidth="lg">
         <Stack spacing={1.5} sx={{ mb: 5, maxWidth: 720 }}>
           <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-            <AutoAwesomeIcon sx={{ color: "accent.primary", fontSize: 18 }} />
+            <AutoAwesomeIcon sx={{ color: "accent.primary", fontSize: iconSizes.sm }} />
             <Typography variant="overline" sx={{ color: "accent.primary" }}>
               AI Showcase
             </Typography>

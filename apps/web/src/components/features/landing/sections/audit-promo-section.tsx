@@ -65,7 +65,12 @@ export function AuditPromoSection(): ReactElement {
                       sx={{ alignItems: "flex-start" }}
                     >
                       <CheckCircleIcon
-                        sx={{ color: "success.main", fontSize: 18, mt: "2px", flexShrink: 0 }}
+                        sx={{
+                          color: "success.main",
+                          fontSize: iconSizes.sm,
+                          mt: "2px",
+                          flexShrink: 0,
+                        }}
                       />
                       <Typography variant="body2">{item}</Typography>
                     </Stack>

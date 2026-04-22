@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/form";
 import type { AnyReactForm } from "@/components/ui/form/types";
 import { useAuth } from "@/providers";
-import { accent, line, radii } from "@/theme";
+import { accent, iconSizes, line, radii } from "@/theme";
 import { AI_PROMPT_MAX_CHARS } from "../schema";
 
 interface AiGenerationFieldProps {
@@ -43,7 +43,7 @@ export function AiGenerationField(props: AiGenerationFieldProps): ReactElement {
             }}
           >
             <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-              <AutoAwesomeIcon sx={{ fontSize: 18, color: accent.primary }} />
+              <AutoAwesomeIcon sx={{ fontSize: iconSizes.sm, color: accent.primary }} />
               <Stack spacing={0}>
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>
                   Generate with AI
