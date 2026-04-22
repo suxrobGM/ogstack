@@ -55,21 +55,18 @@ interface PlaygroundProps {
   initialTemplate: string;
 }
 
-/** Serialize only the params that differ from backend defaults, so the meta
- *  tag stays as short as possible in the customer's HTML. */
+/**
+ * Build the minimal meta-tag query string. The backend resolves the image by
+ * (projectId, url, kind) and ignores style params on cache hit, so only `url`
+ * plus the generation mode (`ai` or `template`) belong in the customer's HTML.
+ */
 function toOgParams(values: PlaygroundFormValues): Record<string, string> {
   const params: Record<string, string> = { url: values.url };
-  if (values.template !== "editorial") params.template = values.template;
-  if (values.accent !== "#3B82F6") params.accent = values.accent;
-  if (!values.dark) params.dark = "false";
-  if (values.font !== "inter") params.font = values.font;
-  if (values.logoUrl) params.logoUrl = values.logoUrl;
-  if (values.logoPosition !== "top-left") params.logoPosition = values.logoPosition;
   if (values.aiGenerated) {
     params.ai = "true";
-    if (values.aiModel !== "standard") params.aiModel = values.aiModel;
+  } else if (values.template) {
+    params.template = values.template;
   }
-  if (values.aiPrompt) params.aiPrompt = values.aiPrompt;
   return params;
 }
 
