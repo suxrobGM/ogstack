@@ -31,7 +31,7 @@ The `url` parameter is required and must be URL-encoded. Its origin must match o
 
 - `Content-Type: image/png`
 - Binary PNG body
-- `Cache-Control: public, max-age=86400, s-maxage=604800` (24h browser, 7d edge)
+- `Cache-Control: public, max-age=31536000, immutable` (content-addressed — cached indefinitely)
 
 ## Framework integration
 

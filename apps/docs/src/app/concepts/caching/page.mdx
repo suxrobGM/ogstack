@@ -37,7 +37,7 @@ Use `force` sparingly — it counts against your rate limit and (for AI images) 
 
 ## Edge cache (public endpoint)
 
-`GET /og/:publicId` sets long cache headers — 24 h browser (`max-age=86400`) and 7 days CDN (`s-maxage=604800`).
+`GET /og/:publicId` sets `Cache-Control: public, max-age=31536000, immutable` — images are content-addressed (cache key is a hash of the inputs), so once generated they never change. Browsers and the CDN can cache them indefinitely.
 
 Social platforms (Twitter/X, Facebook, Slack, etc.) cache independently. Once a URL has been scraped by a crawler, the preview image is frozen on that platform until its own cache expires — OGStack regenerating the image has no effect. Use each platform's debugger to force a re-scrape:
 

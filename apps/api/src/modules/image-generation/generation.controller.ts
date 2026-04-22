@@ -121,7 +121,7 @@ export const imagePublicController = new Elysia({ prefix: "/og", tags: ["Images"
         ai: aiFromQuery(query) ?? undefined,
       });
       set.headers["content-type"] = "image/png";
-      set.headers["cache-control"] = "public, max-age=86400, s-maxage=604800";
+      set.headers["cache-control"] = "public, max-age=31536000, immutable";
       return pngBuffer;
     },
     {
