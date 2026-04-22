@@ -13,7 +13,8 @@ export function shouldWatermark(plan: Plan): boolean {
 
 const WATERMARK_WIDTH = 140;
 const WATERMARK_HEIGHT = 32;
-const MARGIN = 24;
+const MARGIN_X = 12;
+const MARGIN_Y = 24;
 const FONT_URL = "https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap";
 const FONT_UA =
   "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; de-at) AppleWebKit/533.21.1 (KHTML, like Gecko) Version/5.0.5 Safari/533.21.1";
@@ -41,8 +42,8 @@ export class WatermarkService {
         .composite([
           {
             input: badge,
-            top: height - WATERMARK_HEIGHT - MARGIN,
-            left: width - WATERMARK_WIDTH - MARGIN,
+            top: height - WATERMARK_HEIGHT - MARGIN_Y,
+            left: width - WATERMARK_WIDTH - MARGIN_X,
           },
         ])
         .png()

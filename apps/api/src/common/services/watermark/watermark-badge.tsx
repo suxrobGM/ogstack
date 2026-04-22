@@ -34,6 +34,7 @@ export function WatermarkBadge(props: WatermarkBadgeProps): ReactElement {
           display: "flex",
           fontSize: "16px",
           fontWeight: 600,
+          lineHeight: 1,
           letterSpacing: "0.02em",
           color: "rgba(255,255,255,0.9)",
         }}
