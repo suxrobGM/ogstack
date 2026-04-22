@@ -10,6 +10,10 @@
 ## Team process & submission artifacts
 
 - **Sprint planning + retrospectives** - [`docs/sprints/`](./sprints/) (Sprints 1, 2, 3).
+- **Project board** - [GitHub project board](https://github.com/users/suxrobGM/projects/6).
+- **Sprint 1** - [Github milestone 1](https://github.com/suxrobGM/ogstack/milestone/1).
+- **Sprint 2** - [Github milestone 2](https://github.com/suxrobGM/ogstack/milestone/2).
+- **Sprint 3** - [Github milestone 3](https://github.com/suxrobGM/ogstack/milestone/3).
 - **Async standups** - [`docs/standups/`](./standups/) (3 per partner per sprint).
 - **Peer evaluations** - [`docs/peer-evaluations/`](./peer-evaluations/).
 - **Individual reflections** - [`docs/reflections/`](./reflections/).
