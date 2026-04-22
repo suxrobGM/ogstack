@@ -67,7 +67,7 @@ export class ImagePipelineService {
     const generationMs = Math.round(performance.now() - startMs);
 
     const stored = await this.storage.store(`${ctx.cacheKey}.png`, outcome.pngBuffer);
-    const imageUrl = `${stored.url}?v=${Date.now()}`;
+    const imageUrl = `${stored.url}?t=${Date.now()}`;
 
     // OG and blog_hero share the unified template registry, so both link back
     // to the DB Template row. (icon_set is short-circuited above.)

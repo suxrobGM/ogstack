@@ -101,7 +101,7 @@ export class IconPipelineService {
       canonical,
       "image/png",
     );
-    const canonicalUrl = `${canonicalStored.url}?v=${version}`;
+    const canonicalUrl = `${canonicalStored.url}?t=${version}`;
 
     const image = await this.prisma.image.create({
       data: {
@@ -204,7 +204,7 @@ export class IconPipelineService {
     version: number,
   ): Promise<ImageAsset[]> {
     const pngAssets: ImageAsset[] = [];
-    const bust = (url: string) => `${url}?v=${version}`;
+    const bust = (url: string) => `${url}?t=${version}`;
 
     await Promise.all(
       ICON_FILES.map(async (plan) => {
