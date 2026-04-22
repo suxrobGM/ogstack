@@ -3,7 +3,7 @@
 ## Links
 
 - **Deployed app**: <https://ogstack.dev>
-- **GitHub repo**: <https://github.com/ogstack/ogstack>
+- **GitHub repo**: <https://github.com/suxrobgm/ogstack>
 - **Blog post**: <https://medium.com/@suxrobgm/ogstack-automatic-open-graph-images-blog-covers-and-favicons-from-any-url-5a4849a6ab67>
 - **Video demo**:
 
