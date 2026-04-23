@@ -52,16 +52,14 @@ export function RegisterForm(): ReactElement {
       }}
     >
       <Stack spacing={2.5}>
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={{ xs: 2.5, sm: 2 }}>
-          <FormTextField
-            form={form}
-            name="firstName"
-            label="First name"
-            autoComplete="given-name"
-            autoFocus
-          />
-          <FormTextField form={form} name="lastName" label="Last name" autoComplete="family-name" />
-        </Stack>
+        <FormTextField
+          form={form}
+          name="firstName"
+          label="First name"
+          autoComplete="given-name"
+          autoFocus
+        />
+        <FormTextField form={form} name="lastName" label="Last name" autoComplete="family-name" />
         <FormTextField form={form} name="email" label="Email" type="email" autoComplete="email" />
         <FormTextField
           form={form}
