@@ -16,7 +16,7 @@ export const FAL_MODELS = {
 export type FalModel = (typeof FAL_MODELS)[keyof typeof FAL_MODELS];
 
 const SUPPORTED_MODELS = new Set<string>(Object.values(FAL_MODELS));
-const FAL_TIMEOUT = 30_000;
+const FAL_TIMEOUT = 120_000; //
 
 interface FalSubmitResponse {
   request_id: string;
