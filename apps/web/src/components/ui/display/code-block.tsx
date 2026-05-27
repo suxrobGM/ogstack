@@ -4,7 +4,7 @@ import { use, type ReactElement } from "react";
 import { Box } from "@mui/material";
 import { codeToHtml } from "shiki";
 import { fontFamilies, line, surfaces } from "@/theme";
-import { Surface } from "../layout/surface";
+import { Surface } from "../cards/surface";
 import { CopyButton } from "./copy-button";
 
 interface CodeBlockProps {
@@ -39,7 +39,7 @@ export function CodeBlock(props: CodeBlockProps): ReactElement {
   const html = language ? use(getHighlightedHtml(code, language)) : null;
 
   return (
-    <Surface padding={0} sx={{ position: "relative", overflow: "hidden" }}>
+    <Surface sx={{ position: "relative", overflow: "hidden" }}>
       {copyable && (
         <Box sx={{ position: "absolute", top: 8, right: 8, zIndex: 1 }}>
           <CopyButton text={code} tooltip="Copy code" />

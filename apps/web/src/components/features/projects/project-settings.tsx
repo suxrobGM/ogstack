@@ -1,13 +1,13 @@
 "use client";
 
 import type { ReactElement } from "react";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, CardContent, Stack, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
+import { Surface } from "@/components/ui/cards/surface";
 import { FormDomainField, FormTextField } from "@/components/ui/form";
 import type { AnyReactForm } from "@/components/ui/form/types";
 import { SectionHeader } from "@/components/ui/layout/section-header";
-import { Surface } from "@/components/ui/layout/surface";
 import { useApiMutation } from "@/hooks";
 import { client } from "@/lib/api/client";
 import { ROUTES } from "@/lib/constants";
@@ -76,27 +76,29 @@ export function ProjectSettings(props: ProjectSettingsProps): ReactElement {
       <Box>
         <SectionHeader title="Settings" />
         <Surface sx={{ mt: 2 }}>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              form.handleSubmit();
-            }}
-          >
-            <Stack spacing={3}>
-              <FormTextField
-                form={form as unknown as AnyReactForm}
-                name="name"
-                label="Project Name"
-                required
-              />
-              <FormDomainField form={form as unknown as AnyReactForm} name="domains" />
-              <Box>
-                <Button type="submit" variant="contained" loading={updateMutation.isPending}>
-                  Save Changes
-                </Button>
-              </Box>
-            </Stack>
-          </form>
+          <CardContent>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                form.handleSubmit();
+              }}
+            >
+              <Stack spacing={3}>
+                <FormTextField
+                  form={form as unknown as AnyReactForm}
+                  name="name"
+                  label="Project Name"
+                  required
+                />
+                <FormDomainField form={form as unknown as AnyReactForm} name="domains" />
+                <Box>
+                  <Button type="submit" variant="contained" loading={updateMutation.isPending}>
+                    Save Changes
+                  </Button>
+                </Box>
+              </Stack>
+            </form>
+          </CardContent>
         </Surface>
       </Box>
 
@@ -104,28 +106,30 @@ export function ProjectSettings(props: ProjectSettingsProps): ReactElement {
       <Box>
         <SectionHeader title="Danger Zone" />
         <Surface sx={{ mt: 2, borderColor: "error.main" }}>
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={2}
-            sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}
-          >
-            <Box>
-              <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                Delete this project
-              </Typography>
-              <Typography variant="body2Muted">
-                Permanently remove this project, its API keys, and all generated images.
-              </Typography>
-            </Box>
-            <Button
-              variant="outlined"
-              color="error"
-              onClick={handleDelete}
-              loading={deleteMutation.isPending}
+          <CardContent>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={2}
+              sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}
             >
-              Delete Project
-            </Button>
-          </Stack>
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  Delete this project
+                </Typography>
+                <Typography variant="body2Muted">
+                  Permanently remove this project, its API keys, and all generated images.
+                </Typography>
+              </Box>
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={handleDelete}
+                loading={deleteMutation.isPending}
+              >
+                Delete Project
+              </Button>
+            </Stack>
+          </CardContent>
         </Surface>
       </Box>
     </>

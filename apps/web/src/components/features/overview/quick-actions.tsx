@@ -5,12 +5,10 @@ import ArticleIcon from "@mui/icons-material/Article";
 import FolderIcon from "@mui/icons-material/Folder";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
-import { Box, Grid, Link, Stack, Typography } from "@mui/material";
+import { Box, CardContent, Grid, Link, Stack, Typography } from "@mui/material";
+import { Surface } from "@/components/ui/cards/surface";
 import { SectionHeader } from "@/components/ui/layout/section-header";
-import { Surface } from "@/components/ui/layout/surface";
 import { DOCS_URL, ROUTES } from "@/lib/constants";
-import { line } from "@/theme/palette";
-import { motion } from "@/theme/tokens";
 
 const ACTIONS = [
   {
@@ -53,26 +51,16 @@ export function QuickActions(): ReactElement {
               rel={action.external ? "noopener noreferrer" : undefined}
               sx={{ display: "block", height: "100%" }}
             >
-              <Surface
-                variant="quiet"
-                padding={3}
-                sx={{
-                  height: "100%",
-                  cursor: "pointer",
-                  transition: motion.standard,
-                  "&:hover": {
-                    borderColor: line.borderHi,
-                    bgcolor: "surfaces.elevated",
-                  },
-                }}
-              >
-                <Stack spacing={1.5}>
-                  <Box sx={{ color: "accent.primary" }}>{action.icon}</Box>
-                  <Typography variant="h5" sx={{ color: "accent.primary" }}>
-                    {action.title}
-                  </Typography>
-                  <Typography variant="body2Muted">{action.description}</Typography>
-                </Stack>
+              <Surface variant="quiet" interactive sx={{ height: "100%" }}>
+                <CardContent>
+                  <Stack spacing={1.5}>
+                    <Box sx={{ color: "accent.primary" }}>{action.icon}</Box>
+                    <Typography variant="h5" sx={{ color: "accent.primary" }}>
+                      {action.title}
+                    </Typography>
+                    <Typography variant="body2Muted">{action.description}</Typography>
+                  </Stack>
+                </CardContent>
               </Surface>
             </Link>
           </Grid>

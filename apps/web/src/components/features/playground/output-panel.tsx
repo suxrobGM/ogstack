@@ -2,12 +2,12 @@
 
 import { Suspense, useState, type ReactElement, type SyntheticEvent } from "react";
 import LanguageIcon from "@mui/icons-material/Language";
-import { Box, Skeleton, Stack, Tab, Tabs, Typography } from "@mui/material";
+import { Box, CardContent, Skeleton, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { aiModelLabel } from "@ogstack/shared";
 import Image from "next/image";
+import { Surface } from "@/components/ui/cards/surface";
 import { CodeBlock } from "@/components/ui/display/code-block";
 import { FrameworkSnippetTabs } from "@/components/ui/display/framework-snippet-tabs";
-import { Surface } from "@/components/ui/layout/surface";
 import { textColors } from "@/theme";
 import type { GenerateDto } from "@/types/api";
 import type { FrameworkSnippet } from "@/utils/framework-snippets";
@@ -43,31 +43,33 @@ export function OutputPanel(props: OutputPanelProps): ReactElement {
 
   return (
     <Surface>
-      <Stack spacing={2}>
-        <Tabs value={tab} onChange={handleChange} variant="scrollable" allowScrollButtonsMobile>
-          {hasMetadata && <Tab value="metadata" label="Metadata" />}
-          {hasIntegration && <Tab value="integration" label={integrationLabel} />}
-          {hasAiPrompt && (
-            <Tab
-              value="ai-prompt"
-              label={`AI Prompt${aiModelLabel(result.ai?.model) ? ` · ${aiModelLabel(result.ai?.model)}` : ""}`}
-            />
-          )}
-        </Tabs>
+      <CardContent>
+        <Stack spacing={2}>
+          <Tabs value={tab} onChange={handleChange} variant="scrollable" allowScrollButtonsMobile>
+            {hasMetadata && <Tab value="metadata" label="Metadata" />}
+            {hasIntegration && <Tab value="integration" label={integrationLabel} />}
+            {hasAiPrompt && (
+              <Tab
+                value="ai-prompt"
+                label={`AI Prompt${aiModelLabel(result.ai?.model) ? ` · ${aiModelLabel(result.ai?.model)}` : ""}`}
+              />
+            )}
+          </Tabs>
 
-        <Box>
-          {tab === "metadata" && hasMetadata && <MetadataView result={result} />}
-          {tab === "integration" && hasFrameworks && (
-            <FrameworkSnippetTabs snippets={frameworkSnippets} />
-          )}
-          {tab === "integration" && !hasFrameworks && integration && (
-            <IntegrationView snippet={integration} />
-          )}
-          {tab === "ai-prompt" && hasAiPrompt && result.ai?.prompt && (
-            <AiPromptView prompt={result.ai.prompt} />
-          )}
-        </Box>
-      </Stack>
+          <Box>
+            {tab === "metadata" && hasMetadata && <MetadataView result={result} />}
+            {tab === "integration" && hasFrameworks && (
+              <FrameworkSnippetTabs snippets={frameworkSnippets} />
+            )}
+            {tab === "integration" && !hasFrameworks && integration && (
+              <IntegrationView snippet={integration} />
+            )}
+            {tab === "ai-prompt" && hasAiPrompt && result.ai?.prompt && (
+              <AiPromptView prompt={result.ai.prompt} />
+            )}
+          </Box>
+        </Stack>
+      </CardContent>
     </Surface>
   );
 }

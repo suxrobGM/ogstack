@@ -13,9 +13,9 @@ import {
   Typography,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { Surface } from "@/components/ui/cards/surface";
 import { MonoId } from "@/components/ui/display/mono-id";
 import { SectionHeader } from "@/components/ui/layout/section-header";
-import { Surface } from "@/components/ui/layout/surface";
 import { ROUTES } from "@/lib/constants";
 import type { AdminUserDetail } from "@/types/api";
 
@@ -42,7 +42,7 @@ export function AdminUserProjects(props: AdminUserProjectsProps): ReactElement {
           </Button>
         }
       />
-      <Surface padding={0}>
+      <Surface>
         <Table>
           <TableHead>
             <TableRow>

@@ -3,7 +3,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Box, Button, Container, Grid, Stack, Typography } from "@mui/material";
 import type { Metadata } from "next";
 import Image from "next/image";
-import { Surface } from "@/components/ui/layout/surface";
+import { Surface } from "@/components/ui/cards/surface";
 import { ROUTES } from "@/lib/constants";
 import { fontFamilies } from "@/theme/typography";
 import { templateThumbnailUrl } from "@/utils/url";
@@ -111,7 +111,6 @@ export default function TemplateGalleryPage(): ReactElement {
               <Grid key={t.slug} size={{ xs: 12, sm: 6, md: 4 }}>
                 <Surface
                   variant="quiet"
-                  padding={0}
                   sx={{
                     overflow: "hidden",
                     height: "100%",

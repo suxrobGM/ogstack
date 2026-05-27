@@ -1,17 +1,17 @@
 "use client";
 
 import type { ReactElement } from "react";
-import { Alert, Stack, Typography } from "@mui/material";
+import { Alert, CardContent, Stack, Typography } from "@mui/material";
 import {
   BLOG_HERO_ASPECTS,
   hostMatchesDomain,
   isValidHttpUrl,
   type ImageKind,
 } from "@ogstack/shared";
+import { Surface } from "@/components/ui/cards/surface";
 import { FormSelectField } from "@/components/ui/form/form-select-field";
 import { FormTextField } from "@/components/ui/form/form-text-field";
 import type { AnyReactForm } from "@/components/ui/form/types";
-import { Surface } from "@/components/ui/layout/surface";
 import type { Project, TemplateInfo } from "@/types/api";
 import { normalizeUrlInput } from "@/utils/url";
 import {
@@ -66,100 +66,102 @@ export function ControlsPanel(props: ControlsPanelProps): ReactElement {
 
   return (
     <Surface sx={{ height: "100%" }}>
-      <Stack spacing={3}>
-        <KindSwitcher form={form} />
+      <CardContent>
+        <Stack spacing={3}>
+          <KindSwitcher form={form} />
 
-        <ProjectSelect
-          projects={projects}
-          selectedProjectId={selectedProjectId}
-          onChange={onProjectChange}
-          required
-        />
+          <ProjectSelect
+            projects={projects}
+            selectedProjectId={selectedProjectId}
+            onChange={onProjectChange}
+            required
+          />
 
-        <FormTextField
-          form={form}
-          name="url"
-          label="URL"
-          required
-          placeholder="https://example.com/page"
-          transform={normalizeUrlInput}
-        />
+          <FormTextField
+            form={form}
+            name="url"
+            label="URL"
+            required
+            placeholder="https://example.com/page"
+            transform={normalizeUrlInput}
+          />
 
-        <form.Subscribe selector={(s: { values: { url: string } }) => s.values.url}>
-          {(url: string) => {
-            const mismatch = getMismatchedHostname(url, selectedProject?.domains ?? []);
-            if (!mismatch) {
-              return null;
-            }
-            return (
-              <Alert severity="info" sx={{ mt: -1 }}>
-                <strong>{mismatch}</strong> isn&apos;t in this project&apos;s domain allowlist. The
-                image will still generate, but the public meta tag won&apos;t serve on that domain.
-                Add it under Project → Settings if you plan to use this image there.
-              </Alert>
-            );
-          }}
-        </form.Subscribe>
-
-        <form.Subscribe selector={(s: { values: { kind: ImageKind } }) => s.values.kind}>
-          {(kind: ImageKind) => {
-            if (kind === "icon_set") {
+          <form.Subscribe selector={(s: { values: { url: string } }) => s.values.url}>
+            {(url: string) => {
+              const mismatch = getMismatchedHostname(url, selectedProject?.domains ?? []);
+              if (!mismatch) {
+                return null;
+              }
               return (
-                <Stack spacing={2}>
-                  <Typography variant="captionMuted">
-                    Favicon sets are always AI-generated from your brand signals (logo hint, theme
-                    color, page analysis). Templates and styling options don&apos;t apply here.
-                  </Typography>
-                  <AiPromptOverrideFields form={form} hideModel />
+                <Alert severity="info" sx={{ mt: -1 }}>
+                  <strong>{mismatch}</strong> isn&apos;t in this project&apos;s domain allowlist.
+                  The image will still generate, but the public meta tag won&apos;t serve on that
+                  domain. Add it under Project → Settings if you plan to use this image there.
+                </Alert>
+              );
+            }}
+          </form.Subscribe>
+
+          <form.Subscribe selector={(s: { values: { kind: ImageKind } }) => s.values.kind}>
+            {(kind: ImageKind) => {
+              if (kind === "icon_set") {
+                return (
+                  <Stack spacing={2}>
+                    <Typography variant="captionMuted">
+                      Favicon sets are always AI-generated from your brand signals (logo hint, theme
+                      color, page analysis). Templates and styling options don&apos;t apply here.
+                    </Typography>
+                    <AiPromptOverrideFields form={form} hideModel />
+                  </Stack>
+                );
+              }
+
+              return (
+                <Stack spacing={3}>
+                  <AiGenerationField form={form} />
+
+                  {kind === "blog_hero" && (
+                    <FormSelectField
+                      form={form}
+                      name="aspectRatio"
+                      label="Aspect ratio"
+                      items={ASPECT_RATIO_ITEMS}
+                    />
+                  )}
+
+                  <form.Subscribe
+                    selector={(s: { values: { aiGenerated: boolean } }) => s.values.aiGenerated}
+                  >
+                    {(aiGenerated: boolean) =>
+                      aiGenerated ? (
+                        <Typography variant="captionMuted">
+                          AI mode generates the full image from page content. Template and styling
+                          options are not used.
+                        </Typography>
+                      ) : (
+                        <Stack spacing={3}>
+                          <TemplateField form={form} templates={templates} />
+                          <StylingFields form={form} />
+                        </Stack>
+                      )
+                    }
+                  </form.Subscribe>
                 </Stack>
               );
-            }
+            }}
+          </form.Subscribe>
 
-            return (
-              <Stack spacing={3}>
-                <AiGenerationField form={form} />
-
-                {kind === "blog_hero" && (
-                  <FormSelectField
-                    form={form}
-                    name="aspectRatio"
-                    label="Aspect ratio"
-                    items={ASPECT_RATIO_ITEMS}
-                  />
-                )}
-
-                <form.Subscribe
-                  selector={(s: { values: { aiGenerated: boolean } }) => s.values.aiGenerated}
-                >
-                  {(aiGenerated: boolean) =>
-                    aiGenerated ? (
-                      <Typography variant="captionMuted">
-                        AI mode generates the full image from page content. Template and styling
-                        options are not used.
-                      </Typography>
-                    ) : (
-                      <Stack spacing={3}>
-                        <TemplateField form={form} templates={templates} />
-                        <StylingFields form={form} />
-                      </Stack>
-                    )
-                  }
-                </form.Subscribe>
-              </Stack>
-            );
-          }}
-        </form.Subscribe>
-
-        <form.Subscribe selector={(s: { canSubmit: boolean }) => s.canSubmit}>
-          {(canSubmit: boolean) => (
-            <GenerateButton
-              isGenerating={isGenerating}
-              onClick={onGenerate}
-              disabled={!selectedProjectId || !canSubmit}
-            />
-          )}
-        </form.Subscribe>
-      </Stack>
+          <form.Subscribe selector={(s: { canSubmit: boolean }) => s.canSubmit}>
+            {(canSubmit: boolean) => (
+              <GenerateButton
+                isGenerating={isGenerating}
+                onClick={onGenerate}
+                disabled={!selectedProjectId || !canSubmit}
+              />
+            )}
+          </form.Subscribe>
+        </Stack>
+      </CardContent>
     </Surface>
   );
 }

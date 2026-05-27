@@ -6,9 +6,9 @@ import CachedIcon from "@mui/icons-material/Cached";
 import DownloadIcon from "@mui/icons-material/Download";
 import ImageIcon from "@mui/icons-material/Image";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import { Alert, Box, Button, Chip, Skeleton, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, CardContent, Chip, Skeleton, Stack, Typography } from "@mui/material";
+import { Surface } from "@/components/ui/cards/surface";
 import { AspectImage, IconPreview } from "@/components/ui/display";
-import { Surface } from "@/components/ui/layout/surface";
 import { feedback, line, radii, surfaces, textColors } from "@/theme";
 import type { GenerateDto } from "@/types/api";
 import { downloadImage } from "@/utils/download";
@@ -66,97 +66,99 @@ export function PreviewPane(props: PreviewPaneProps): ReactElement {
 
   return (
     <Surface variant="expressive" sx={{ height: "100%" }}>
-      <Stack spacing={2}>
-        <Typography variant="h6">Preview</Typography>
+      <CardContent>
+        <Stack spacing={2}>
+          <Typography variant="h6">Preview</Typography>
 
-        {isGenerating ? (
-          <PreviewSkeleton />
-        ) : result ? (
-          result.kind === "icon_set" ? (
-            <IconPreview src={result.imageUrl} alt="Generated favicon" bordered />
+          {isGenerating ? (
+            <PreviewSkeleton />
+          ) : result ? (
+            result.kind === "icon_set" ? (
+              <IconPreview src={result.imageUrl} alt="Generated favicon" bordered />
+            ) : (
+              <AspectImage
+                src={result.imageUrl}
+                alt="Generated OG image"
+                sx={{ borderRadius: `${radii.sm}px`, border: `1px solid ${line.border}` }}
+              />
+            )
           ) : (
-            <AspectImage
-              src={result.imageUrl}
-              alt="Generated OG image"
-              sx={{ borderRadius: `${radii.sm}px`, border: `1px solid ${line.border}` }}
-            />
-          )
-        ) : (
-          <EmptyPreview />
-        )}
+            <EmptyPreview />
+          )}
 
-        {result?.ai?.fellBack && (
-          <Alert severity="warning" variant="outlined">
-            AI generation unavailable - rendered template fallback.
-          </Alert>
-        )}
+          {result?.ai?.fellBack && (
+            <Alert severity="warning" variant="outlined">
+              AI generation unavailable - rendered template fallback.
+            </Alert>
+          )}
 
-        {result && !isGenerating && (
-          <Stack spacing={1.5}>
-            <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", rowGap: 1 }}>
-              {result.cached ? (
-                <Chip
-                  icon={<CachedIcon />}
-                  label="Served from cache"
-                  sx={{
-                    backgroundColor: `${feedback.info}14`,
-                    color: feedback.info,
-                    border: `1px solid ${feedback.info}40`,
-                    "& .MuiChip-icon": { color: feedback.info },
-                  }}
-                />
-              ) : (
-                <Chip
-                  icon={<BoltIcon />}
-                  label="Freshly generated"
-                  sx={{
-                    backgroundColor: `${feedback.success}14`,
-                    color: feedback.success,
-                    border: `1px solid ${feedback.success}40`,
-                    "& .MuiChip-icon": { color: feedback.success },
-                  }}
-                />
-              )}
-              {result.generationMs != null && (
-                <Chip
-                  variant="outlined"
-                  label={`${result.generationMs}ms`}
-                  sx={{ fontFamily: "var(--font-jetbrains-mono)", color: textColors.secondary }}
-                />
+          {result && !isGenerating && (
+            <Stack spacing={1.5}>
+              <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", rowGap: 1 }}>
+                {result.cached ? (
+                  <Chip
+                    icon={<CachedIcon />}
+                    label="Served from cache"
+                    sx={{
+                      backgroundColor: `${feedback.info}14`,
+                      color: feedback.info,
+                      border: `1px solid ${feedback.info}40`,
+                      "& .MuiChip-icon": { color: feedback.info },
+                    }}
+                  />
+                ) : (
+                  <Chip
+                    icon={<BoltIcon />}
+                    label="Freshly generated"
+                    sx={{
+                      backgroundColor: `${feedback.success}14`,
+                      color: feedback.success,
+                      border: `1px solid ${feedback.success}40`,
+                      "& .MuiChip-icon": { color: feedback.success },
+                    }}
+                  />
+                )}
+                {result.generationMs != null && (
+                  <Chip
+                    variant="outlined"
+                    label={`${result.generationMs}ms`}
+                    sx={{ fontFamily: "var(--font-jetbrains-mono)", color: textColors.secondary }}
+                  />
+                )}
+              </Stack>
+
+              {result.cached && (
+                <Alert severity="info" icon={<RefreshIcon fontSize="small" />}>
+                  Same inputs as before - click <strong>Regenerate</strong> to force a fresh image.
+                </Alert>
               )}
             </Stack>
+          )}
 
-            {result.cached && (
-              <Alert severity="info" icon={<RefreshIcon fontSize="small" />}>
-                Same inputs as before - click <strong>Regenerate</strong> to force a fresh image.
-              </Alert>
-            )}
-          </Stack>
-        )}
-
-        {result && (
-          <Stack direction="row" spacing={1.5}>
-            <Button
-              variant="outlined"
-              startIcon={<RefreshIcon />}
-              onClick={onRegenerate}
-              disabled={isGenerating}
-              fullWidth
-            >
-              Regenerate
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<DownloadIcon />}
-              onClick={handleDownload}
-              disabled={isGenerating || isDownloading}
-              fullWidth
-            >
-              {result.kind === "icon_set" ? "Download .zip" : "Download"}
-            </Button>
-          </Stack>
-        )}
-      </Stack>
+          {result && (
+            <Stack direction="row" spacing={1.5}>
+              <Button
+                variant="outlined"
+                startIcon={<RefreshIcon />}
+                onClick={onRegenerate}
+                disabled={isGenerating}
+                fullWidth
+              >
+                Regenerate
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<DownloadIcon />}
+                onClick={handleDownload}
+                disabled={isGenerating || isDownloading}
+                fullWidth
+              >
+                {result.kind === "icon_set" ? "Download .zip" : "Download"}
+              </Button>
+            </Stack>
+          )}
+        </Stack>
+      </CardContent>
     </Surface>
   );
 }

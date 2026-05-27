@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { Surface } from "@/components/ui/cards/surface";
 import { SectionHeader } from "@/components/ui/layout/section-header";
-import { Surface } from "@/components/ui/layout/surface";
 import type { AdminUserDetail } from "@/types/api";
 
 interface AdminUserUsageProps {
@@ -17,7 +17,7 @@ export function AdminUserUsage(props: AdminUserUsageProps): ReactElement {
         title="Usage"
         description="Monthly image generation history (last 12 months)."
       />
-      <Surface padding={0}>
+      <Surface>
         <Table>
           <TableHead>
             <TableRow>

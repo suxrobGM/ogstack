@@ -1,8 +1,8 @@
 import type { ReactElement } from "react";
-import { Box, Container, Grid, Stack, Typography } from "@mui/material";
+import { Box, CardContent, Container, Grid, Stack, Typography } from "@mui/material";
 import type { Metadata } from "next";
 import { FinalCtaSection } from "@/components/features/landing";
-import { Surface } from "@/components/ui/layout/surface";
+import { Surface } from "@/components/ui/cards/surface";
 
 export const metadata: Metadata = {
   title: "About",
@@ -58,13 +58,15 @@ export default function AboutPage(): ReactElement {
           <Grid container spacing={2.5}>
             {VALUES.map((v) => (
               <Grid key={v.title} size={{ xs: 12, md: 4 }}>
-                <Surface variant="quiet" padding={3.5} sx={{ height: "100%" }}>
-                  <Stack spacing={1.5}>
-                    <Typography variant="h4" sx={{ fontSize: 22 }}>
-                      {v.title}
-                    </Typography>
-                    <Typography variant="body2Muted">{v.description}</Typography>
-                  </Stack>
+                <Surface variant="quiet" sx={{ height: "100%" }}>
+                  <CardContent>
+                    <Stack spacing={1.5}>
+                      <Typography variant="h4" sx={{ fontSize: 22 }}>
+                        {v.title}
+                      </Typography>
+                      <Typography variant="body2Muted">{v.description}</Typography>
+                    </Stack>
+                  </CardContent>
                 </Surface>
               </Grid>
             ))}

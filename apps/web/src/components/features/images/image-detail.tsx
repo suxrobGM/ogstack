@@ -6,13 +6,22 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import DownloadIcon from "@mui/icons-material/Download";
 import EditIcon from "@mui/icons-material/Edit";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import { Box, Button, Grid, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CardContent,
+  Grid,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PlatformPreviewCard, PLATFORMS } from "@/components/features/audit/report";
+import { Surface } from "@/components/ui/cards/surface";
 import { AspectImage, IconPreview } from "@/components/ui/display";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { Surface } from "@/components/ui/layout/surface";
 import { useApiMutation } from "@/hooks";
 import { client } from "@/lib/api/client";
 import { queryKeys } from "@/lib/query-keys";
@@ -89,101 +98,111 @@ export function ImageDetail(props: ImageDetailProps): ReactElement {
       </Stack>
 
       <Surface>
-        <Stack spacing={{ xs: 2, md: 3 }}>
-          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-            <Typography variant="h6" sx={{ flex: 1 }}>
-              Image
-            </Typography>
-            {mode === "view" && (
-              <Tooltip title="Edit">
-                <IconButton size="small" onClick={() => setMode("edit")}>
-                  <EditIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
-          </Stack>
-          <Grid container spacing={{ xs: 2, md: 3 }}>
-            <Grid size={{ xs: 12, md: 7 }}>
-              {image.kind === "icon_set" ? (
-                <IconPreview src={image.cdnUrl ?? image.imageUrl} alt={title} />
-              ) : (
-                <AspectImage
-                  src={image.cdnUrl ?? image.imageUrl}
-                  alt={title}
-                  objectFit="contain"
-                  sx={{ backgroundColor: surfaces.elevated }}
-                />
-              )}
-            </Grid>
-            <Grid size={{ xs: 12, md: 5 }}>
-              {mode === "view" ? (
-                <ImageMetadata image={image} />
-              ) : (
-                <ImageEditForm
-                  image={image}
-                  onCancel={() => setMode("view")}
-                  onSuccess={() => setMode("view")}
-                />
-              )}
-            </Grid>
-          </Grid>
-          {mode === "view" && (
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{
-                justifyContent: { xs: "flex-start", sm: "flex-end" },
-                flexWrap: "wrap",
-                gap: 1,
-              }}
-            >
-              <Button
-                color="error"
-                startIcon={<DeleteIcon />}
-                onClick={handleDelete}
-                loading={deleteMutation.isPending}
-              >
-                Delete
-              </Button>
-              <Button startIcon={<DownloadIcon />} onClick={handleDownload} loading={isDownloading}>
-                {image.kind === "icon_set" ? "Download .zip" : "Download"}
-              </Button>
-              {image.kind !== "icon_set" && (
-                <Button
-                  startIcon={<OpenInNewIcon />}
-                  href={image.cdnUrl ?? image.imageUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Open
-                </Button>
+        <CardContent>
+          <Stack spacing={{ xs: 2, md: 3 }}>
+            <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+              <Typography variant="h6" sx={{ flex: 1 }}>
+                Image
+              </Typography>
+              {mode === "view" && (
+                <Tooltip title="Edit">
+                  <IconButton size="small" onClick={() => setMode("edit")}>
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
               )}
             </Stack>
-          )}
-        </Stack>
+            <Grid container spacing={{ xs: 2, md: 3 }}>
+              <Grid size={{ xs: 12, md: 7 }}>
+                {image.kind === "icon_set" ? (
+                  <IconPreview src={image.cdnUrl ?? image.imageUrl} alt={title} />
+                ) : (
+                  <AspectImage
+                    src={image.cdnUrl ?? image.imageUrl}
+                    alt={title}
+                    objectFit="contain"
+                    sx={{ backgroundColor: surfaces.elevated }}
+                  />
+                )}
+              </Grid>
+              <Grid size={{ xs: 12, md: 5 }}>
+                {mode === "view" ? (
+                  <ImageMetadata image={image} />
+                ) : (
+                  <ImageEditForm
+                    image={image}
+                    onCancel={() => setMode("view")}
+                    onSuccess={() => setMode("view")}
+                  />
+                )}
+              </Grid>
+            </Grid>
+            {mode === "view" && (
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{
+                  justifyContent: { xs: "flex-start", sm: "flex-end" },
+                  flexWrap: "wrap",
+                  gap: 1,
+                }}
+              >
+                <Button
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                  onClick={handleDelete}
+                  loading={deleteMutation.isPending}
+                >
+                  Delete
+                </Button>
+                <Button
+                  startIcon={<DownloadIcon />}
+                  onClick={handleDownload}
+                  loading={isDownloading}
+                >
+                  {image.kind === "icon_set" ? "Download .zip" : "Download"}
+                </Button>
+                {image.kind !== "icon_set" && (
+                  <Button
+                    startIcon={<OpenInNewIcon />}
+                    href={image.cdnUrl ?? image.imageUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Open
+                  </Button>
+                )}
+              </Stack>
+            )}
+          </Stack>
+        </CardContent>
       </Surface>
 
       <Surface>
-        <ImageIntegrationSnippet image={image} />
+        <CardContent>
+          <ImageIntegrationSnippet image={image} />
+        </CardContent>
       </Surface>
 
       {image.kind === "og" && (
         <Surface>
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="h6">Platform previews</Typography>
-              <Typography variant="body2Muted">
-                How this image appears when shared across networks.
-              </Typography>
-            </Box>
-            <Grid container spacing={2}>
-              {PLATFORMS.map((platform) => (
-                <Grid key={platform.id} size={{ xs: 12, sm: 6, lg: 4 }}>
-                  <PlatformPreviewCard platform={platform} metadata={previewMetadata} />
-                </Grid>
-              ))}
-            </Grid>
-          </Stack>
+          <CardContent>
+            <Stack spacing={2}>
+              <Box>
+                <Typography variant="h6">Platform previews</Typography>
+                <Typography variant="body2Muted">
+                  How this image appears when shared across networks.
+                </Typography>
+              </Box>
+              <Grid container spacing={2}>
+                {PLATFORMS.map((platform) => (
+                  <Grid key={platform.id} size={{ xs: 12, sm: 6, lg: 4 }}>
+                    <PlatformPreviewCard platform={platform} metadata={previewMetadata} />
+                  </Grid>
+                ))}
+              </Grid>
+            </Stack>
+          </CardContent>
         </Surface>
       )}
     </Stack>

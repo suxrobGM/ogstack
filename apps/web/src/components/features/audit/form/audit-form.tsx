@@ -6,6 +6,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   Button,
+  CardContent,
   CircularProgress,
   LinearProgress,
   Link as MuiLink,
@@ -13,9 +14,9 @@ import {
   Typography,
 } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
+import { Surface } from "@/components/ui/cards/surface";
 import { FormCheckboxField } from "@/components/ui/form/form-checkbox-field";
 import { FormTextField } from "@/components/ui/form/form-text-field";
-import { Surface } from "@/components/ui/layout/surface";
 import { useApiMutation } from "@/hooks";
 import { client } from "@/lib/api/client";
 import { accent, iconSizes, radii } from "@/theme";
@@ -69,67 +70,69 @@ export function AuditForm(props: AuditFormProps): ReactElement {
           }}
         />
       )}
-      <Stack
-        component="form"
-        spacing={2}
-        onSubmit={(e) => {
-          e.preventDefault();
-          form.handleSubmit();
-        }}
-      >
-        <FormTextField
-          form={form}
-          name="url"
-          label="Page URL"
-          placeholder="https://example.com/blog/post"
-          transform={normalizeUrlInput}
-          autoFocus={autoFocus}
-          size="medium"
-          disabled={isPending}
-        />
-        {showAiOption && (
-          <FormCheckboxField
-            form={form}
-            name="includeAi"
-            disabled={isPending || !aiAllowed}
-            label={
-              <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
-                <AutoAwesomeIcon sx={{ fontSize: iconSizes.xs, color: accent.primary }} />
-                <Typography variant="body2">Include AI recommendations</Typography>
-              </Stack>
-            }
-            helperText={
-              !aiAllowed ? (
-                <>
-                  <MuiLink href="/login">Sign in</MuiLink> to include AI recommendations.
-                </>
-              ) : undefined
-            }
-          />
-        )}
-        <Button
-          type="submit"
-          variant="contained"
-          size="large"
-          startIcon={
-            isPending ? (
-              <CircularProgress size={18} thickness={5} sx={{ color: "inherit" }} />
-            ) : (
-              <SearchIcon />
-            )
-          }
-          disabled={isPending}
+      <CardContent>
+        <Stack
+          component="form"
+          spacing={2}
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
         >
-          {isPending ? "Analyzing…" : "Analyze URL"}
-        </Button>
-        {isPending && (
-          <Box sx={{ textAlign: "center" }}>
-            <Typography variant="captionMuted">
-              Fetching the page, parsing metadata, and grading it - usually 3–8 seconds.
-            </Typography>
-          </Box>
-        )}
-      </Stack>
+          <FormTextField
+            form={form}
+            name="url"
+            label="Page URL"
+            placeholder="https://example.com/blog/post"
+            transform={normalizeUrlInput}
+            autoFocus={autoFocus}
+            size="medium"
+            disabled={isPending}
+          />
+          {showAiOption && (
+            <FormCheckboxField
+              form={form}
+              name="includeAi"
+              disabled={isPending || !aiAllowed}
+              label={
+                <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+                  <AutoAwesomeIcon sx={{ fontSize: iconSizes.xs, color: accent.primary }} />
+                  <Typography variant="body2">Include AI recommendations</Typography>
+                </Stack>
+              }
+              helperText={
+                !aiAllowed ? (
+                  <>
+                    <MuiLink href="/login">Sign in</MuiLink> to include AI recommendations.
+                  </>
+                ) : undefined
+              }
+            />
+          )}
+          <Button
+            type="submit"
+            variant="contained"
+            size="large"
+            startIcon={
+              isPending ? (
+                <CircularProgress size={18} thickness={5} sx={{ color: "inherit" }} />
+              ) : (
+                <SearchIcon />
+              )
+            }
+            disabled={isPending}
+          >
+            {isPending ? "Analyzing…" : "Analyze URL"}
+          </Button>
+          {isPending && (
+            <Box sx={{ textAlign: "center" }}>
+              <Typography variant="captionMuted">
+                Fetching the page, parsing metadata, and grading it - usually 3–8 seconds.
+              </Typography>
+            </Box>
+          )}
+        </Stack>
+      </CardContent>
     </Surface>
   );
 }

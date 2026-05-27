@@ -3,8 +3,8 @@ import type { SvgIconComponent } from "@mui/icons-material";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import ImageIcon from "@mui/icons-material/Image";
 import LinkIcon from "@mui/icons-material/Link";
-import { Box, Container, Grid, Stack, Typography } from "@mui/material";
-import { Surface } from "@/components/ui/layout/surface";
+import { Box, CardContent, Container, Grid, Stack, Typography } from "@mui/material";
+import { Surface } from "@/components/ui/cards/surface";
 import { fontFamilies } from "@/theme/typography";
 
 interface Step {
@@ -57,54 +57,56 @@ export function HowItWorksSection(): ReactElement {
             const Icon = s.icon;
             return (
               <Grid key={s.step} size={{ xs: 12, md: 4 }}>
-                <Surface variant="quiet" padding={3.5} sx={{ height: "100%" }}>
-                  <Stack spacing={2}>
-                    <Stack
-                      direction="row"
-                      sx={{ alignItems: "center", justifyContent: "space-between" }}
-                    >
+                <Surface variant="quiet" sx={{ height: "100%" }}>
+                  <CardContent>
+                    <Stack spacing={2}>
+                      <Stack
+                        direction="row"
+                        sx={{ alignItems: "center", justifyContent: "space-between" }}
+                      >
+                        <Typography
+                          sx={{
+                            fontFamily: fontFamilies.mono,
+                            fontSize: 12,
+                            color: "accent.secondary",
+                            letterSpacing: "0.18em",
+                          }}
+                        >
+                          STEP {s.step}
+                        </Typography>
+                        <Box
+                          sx={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: "10px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            bgcolor: "rgba(180,83,9,0.08)",
+                            color: "accent.primary",
+                          }}
+                        >
+                          <Icon sx={{ fontSize: 20 }} />
+                        </Box>
+                      </Stack>
+                      <Typography variant="h4" sx={{ fontSize: 22 }}>
+                        {s.title}
+                      </Typography>
+                      <Typography variant="body2Muted">{s.description}</Typography>
                       <Typography
+                        variant="captionMuted"
                         sx={{
                           fontFamily: fontFamilies.mono,
-                          fontSize: 12,
-                          color: "accent.secondary",
-                          letterSpacing: "0.18em",
+                          fontSize: 11,
+                          pt: 1,
+                          borderTop: "1px dashed",
+                          borderColor: "divider",
                         }}
                       >
-                        STEP {s.step}
+                        {s.detail}
                       </Typography>
-                      <Box
-                        sx={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: "10px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          bgcolor: "rgba(180,83,9,0.08)",
-                          color: "accent.primary",
-                        }}
-                      >
-                        <Icon sx={{ fontSize: 20 }} />
-                      </Box>
                     </Stack>
-                    <Typography variant="h4" sx={{ fontSize: 22 }}>
-                      {s.title}
-                    </Typography>
-                    <Typography variant="body2Muted">{s.description}</Typography>
-                    <Typography
-                      variant="captionMuted"
-                      sx={{
-                        fontFamily: fontFamilies.mono,
-                        fontSize: 11,
-                        pt: 1,
-                        borderTop: "1px dashed",
-                        borderColor: "divider",
-                      }}
-                    >
-                      {s.detail}
-                    </Typography>
-                  </Stack>
+                  </CardContent>
                 </Surface>
               </Grid>
             );
