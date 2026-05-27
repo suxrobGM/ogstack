@@ -4,9 +4,9 @@ import type { ReactElement } from "react";
 import ImageIcon from "@mui/icons-material/Image";
 import { Box, Button, Grid, Link, Stack, Typography } from "@mui/material";
 import Image from "next/image";
+import { Surface } from "@/components/ui/cards/surface";
 import { EmptyState } from "@/components/ui/data/empty-state";
 import { SectionHeader } from "@/components/ui/layout/section-header";
-import { Surface } from "@/components/ui/layout/surface";
 import { ROUTES } from "@/lib/constants";
 import { radii, surfaces } from "@/theme";
 import { motion } from "@/theme/tokens";
@@ -51,7 +51,6 @@ export function RecentImages(props: RecentImagesProps): ReactElement {
                 sx={{ display: "block" }}
               >
                 <Surface
-                  padding={0}
                   sx={{
                     overflow: "hidden",
                     transition: motion.standard,

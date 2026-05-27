@@ -2,9 +2,9 @@
 
 import type { ReactElement } from "react";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { Alert, Box, Button, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, CardContent, Stack, Typography } from "@mui/material";
+import { Surface } from "@/components/ui/cards/surface";
 import { SectionHeader } from "@/components/ui/layout/section-header";
-import { Surface } from "@/components/ui/layout/surface";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api/client";
 import { useAuth } from "@/providers/auth-provider";
@@ -51,24 +51,26 @@ export function AccountContent(): ReactElement {
         borderWidth: 1,
       }}
     >
-      <SectionHeader title="Danger zone" />
-      <Stack spacing={2} sx={{ mt: 3 }}>
-        <Alert severity="error" variant="outlined">
-          Deleting your account is permanent. All your data, projects, API keys, and generated
-          images will be permanently removed and cannot be recovered.
-        </Alert>
-        <Box>
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<DeleteForeverIcon />}
-            onClick={handleDelete}
-            disabled={deleteMutation.isPending}
-          >
-            {deleteMutation.isPending ? "Deleting..." : "Delete account"}
-          </Button>
-        </Box>
-      </Stack>
+      <CardContent>
+        <SectionHeader title="Danger zone" />
+        <Stack spacing={2} sx={{ mt: 3 }}>
+          <Alert severity="error" variant="outlined">
+            Deleting your account is permanent. All your data, projects, API keys, and generated
+            images will be permanently removed and cannot be recovered.
+          </Alert>
+          <Box>
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<DeleteForeverIcon />}
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete account"}
+            </Button>
+          </Box>
+        </Stack>
+      </CardContent>
     </Surface>
   );
 }

@@ -1,7 +1,7 @@
 import type { ReactElement, ReactNode } from "react";
 import { Box, Skeleton, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { Surface } from "../layout/surface";
+import { Surface } from "../cards/surface";
 import { EmptyState } from "./empty-state";
 
 export interface Column<T> {
@@ -37,7 +37,7 @@ export function DataTable<T>(props: DataTableProps<T>): ReactElement {
   }
 
   return (
-    <Surface padding={0} sx={sx}>
+    <Surface sx={[{ overflowX: "auto" }, ...(Array.isArray(sx) ? sx : [sx])]}>
       <Table>
         <TableHead>
           <TableRow>

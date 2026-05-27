@@ -9,8 +9,8 @@ import LandscapeIcon from "@mui/icons-material/Landscape";
 import PhotoFilterIcon from "@mui/icons-material/PhotoFilter";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import StarsIcon from "@mui/icons-material/Stars";
-import { Box, Container, Grid, Stack, Typography } from "@mui/material";
-import { Surface } from "@/components/ui/layout/surface";
+import { Box, CardContent, Container, Grid, Stack, Typography } from "@mui/material";
+import { Surface } from "@/components/ui/cards/surface";
 
 interface Feature {
   icon: SvgIconComponent;
@@ -92,7 +92,6 @@ export function FeaturesSection(): ReactElement {
               <Grid key={f.title} size={{ xs: 12, sm: 6, md: 4 }}>
                 <Surface
                   variant="quiet"
-                  padding={3.5}
                   sx={{
                     height: "100%",
                     transition: "box-shadow 240ms, transform 240ms",
@@ -102,24 +101,26 @@ export function FeaturesSection(): ReactElement {
                     },
                   }}
                 >
-                  <Stack spacing={2}>
-                    <Box
-                      sx={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: "10px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        bgcolor: "rgba(180,83,9,0.08)",
-                        color: "accent.primary",
-                      }}
-                    >
-                      <Icon sx={{ fontSize: 20 }} />
-                    </Box>
-                    <Typography variant="h5">{f.title}</Typography>
-                    <Typography variant="body2Muted">{f.description}</Typography>
-                  </Stack>
+                  <CardContent>
+                    <Stack spacing={2}>
+                      <Box
+                        sx={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: "10px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          bgcolor: "rgba(180,83,9,0.08)",
+                          color: "accent.primary",
+                        }}
+                      >
+                        <Icon sx={{ fontSize: 20 }} />
+                      </Box>
+                      <Typography variant="h5">{f.title}</Typography>
+                      <Typography variant="body2Muted">{f.description}</Typography>
+                    </Stack>
+                  </CardContent>
                 </Surface>
               </Grid>
             );

@@ -19,26 +19,38 @@ export const cardOverrides: Components<Theme>["MuiCard"] = {
 
 export const cardContentOverrides: Components<Theme>["MuiCardContent"] = {
   styleOverrides: {
-    root: {
-      padding: 24,
-      "&:last-child": { paddingBottom: 24 },
-    },
+    root: ({ theme }) => ({
+      padding: theme.spacing(1),
+      "&:last-child": { paddingBottom: theme.spacing(2) },
+      [theme.breakpoints.up("sm")]: {
+        padding: theme.spacing(2),
+        "&:last-child": { paddingBottom: theme.spacing(3) },
+      },
+    }),
   },
 };
 
 export const cardHeaderOverrides: Components<Theme>["MuiCardHeader"] = {
   styleOverrides: {
-    root: {
-      padding: "24px 24px 0",
-    },
+    root: ({ theme }) => ({
+      padding: theme.spacing(1, 1, 0),
+      [theme.breakpoints.up("sm")]: {
+        padding: theme.spacing(2, 2, 0),
+      },
+    }),
+    title: ({ theme }) => theme.typography.h6,
+    subheader: ({ theme }) => theme.typography.body2Muted,
   },
 };
 
 export const cardActionsOverrides: Components<Theme>["MuiCardActions"] = {
   styleOverrides: {
-    root: {
-      padding: "16px 24px 24px",
-      gap: 8,
-    },
+    root: ({ theme }) => ({
+      padding: theme.spacing(1.5, 2, 2),
+      gap: theme.spacing(1),
+      [theme.breakpoints.up("sm")]: {
+        padding: theme.spacing(2, 3, 3),
+      },
+    }),
   },
 };

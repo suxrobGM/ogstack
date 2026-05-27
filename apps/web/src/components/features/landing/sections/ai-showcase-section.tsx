@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { Box, Button, Chip, Container, Grid, Stack, Typography } from "@mui/material";
 import Image from "next/image";
-import { Surface } from "@/components/ui/layout/surface";
+import { Surface } from "@/components/ui/cards/surface";
 import { ROUTES } from "@/lib/constants";
 import { iconSizes, radii } from "@/theme/tokens";
 import { fontFamilies } from "@/theme/typography";
@@ -72,7 +72,6 @@ function SampleCard(props: SampleCardProps): ReactElement {
   return (
     <Surface
       variant="quiet"
-      padding={0}
       sx={{
         height: "100%",
         display: "flex",

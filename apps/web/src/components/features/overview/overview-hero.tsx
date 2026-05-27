@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { Chip, Stack, Typography } from "@mui/material";
-import { Surface } from "@/components/ui/layout/surface";
+import { Surface } from "@/components/ui/cards/surface";
 import type { AuthUser } from "@/types/api";
 import { formatPeriod } from "@/utils/formatters";
 import { planChipColor } from "@/utils/plan";
@@ -19,7 +19,6 @@ export function OverviewHero(props: OverviewHeroProps): ReactElement {
   return (
     <Surface
       variant="expressive"
-      padding={0}
       sx={{ px: { xs: 2.5, sm: 3.5, md: 4 }, py: { xs: 2.5, sm: 3.5, md: 4 } }}
     >
       <Stack spacing={1.5}>

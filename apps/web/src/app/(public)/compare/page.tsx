@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import type { Metadata } from "next";
 import { FinalCtaSection } from "@/components/features/landing";
-import { Surface } from "@/components/ui/layout/surface";
+import { Surface } from "@/components/ui/cards/surface";
 
 export const metadata: Metadata = {
   title: "Compare OGStack vs. alternatives",
@@ -78,7 +78,7 @@ export default function ComparePage(): ReactElement {
 
       <Box sx={{ py: { xs: 6, md: 10 } }}>
         <Container maxWidth="lg">
-          <Surface variant="quiet" padding={0} sx={{ overflow: "auto" }}>
+          <Surface variant="quiet" sx={{ overflow: "auto" }}>
             <Table size="medium">
               <TableHead>
                 <TableRow>

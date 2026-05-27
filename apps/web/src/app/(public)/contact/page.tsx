@@ -3,9 +3,9 @@ import type { SvgIconComponent } from "@mui/icons-material";
 import EmailIcon from "@mui/icons-material/Email";
 import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import { Box, Container, Grid, Link, Stack, Typography } from "@mui/material";
+import { Box, CardContent, Container, Grid, Link, Stack, Typography } from "@mui/material";
 import type { Metadata } from "next";
-import { Surface } from "@/components/ui/layout/surface";
+import { Surface } from "@/components/ui/cards/surface";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -77,28 +77,30 @@ export default function ContactPage(): ReactElement {
               const Icon = c.icon;
               return (
                 <Grid key={c.title} size={{ xs: 12, md: 4 }}>
-                  <Surface variant="quiet" padding={3.5} sx={{ height: "100%" }}>
-                    <Stack spacing={2}>
-                      <Box
-                        sx={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: "10px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          bgcolor: "rgba(180,83,9,0.08)",
-                          color: "accent.primary",
-                        }}
-                      >
-                        <Icon sx={{ fontSize: 20 }} />
-                      </Box>
-                      <Typography variant="h5">{c.title}</Typography>
-                      <Typography variant="body2Muted">{c.description}</Typography>
-                      <Link href={c.href} underline="hover" sx={{ fontSize: 14 }}>
-                        {c.linkLabel}
-                      </Link>
-                    </Stack>
+                  <Surface variant="quiet" sx={{ height: "100%" }}>
+                    <CardContent>
+                      <Stack spacing={2}>
+                        <Box
+                          sx={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: "10px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            bgcolor: "rgba(180,83,9,0.08)",
+                            color: "accent.primary",
+                          }}
+                        >
+                          <Icon sx={{ fontSize: 20 }} />
+                        </Box>
+                        <Typography variant="h5">{c.title}</Typography>
+                        <Typography variant="body2Muted">{c.description}</Typography>
+                        <Link href={c.href} underline="hover" sx={{ fontSize: 14 }}>
+                          {c.linkLabel}
+                        </Link>
+                      </Stack>
+                    </CardContent>
                   </Surface>
                 </Grid>
               );

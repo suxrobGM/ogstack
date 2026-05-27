@@ -9,9 +9,9 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { Surface } from "@/components/ui/cards/surface";
 import { MonoId } from "@/components/ui/display/mono-id";
 import { SectionHeader } from "@/components/ui/layout/section-header";
-import { Surface } from "@/components/ui/layout/surface";
 import type { AdminUserDetail } from "@/types/api";
 
 interface AdminUserApiKeysProps {
@@ -24,7 +24,7 @@ export function AdminUserApiKeys(props: AdminUserApiKeysProps): ReactElement {
   return (
     <Stack spacing={2}>
       <SectionHeader title="API Keys" />
-      <Surface padding={0}>
+      <Surface>
         <Table>
           <TableHead>
             <TableRow>

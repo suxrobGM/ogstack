@@ -3,8 +3,8 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import VerifiedIcon from "@mui/icons-material/Verified";
-import { Box, Button, Chip, Container, Grid, Stack, Typography } from "@mui/material";
-import { Surface } from "@/components/ui/layout/surface";
+import { Box, Button, CardContent, Chip, Container, Grid, Stack, Typography } from "@mui/material";
+import { Surface } from "@/components/ui/cards/surface";
 import { ROUTES } from "@/lib/constants";
 import { iconSizes } from "@/theme";
 import { fontFamilies } from "@/theme/typography";
@@ -21,80 +21,82 @@ export function AuditPromoSection(): ReactElement {
     <Box sx={{ py: { xs: 8, md: 12 } }}>
       <Container maxWidth="lg">
         <Surface variant="expressive" sx={{ overflow: "hidden" }}>
-          <Grid container spacing={{ xs: 4, md: 6 }} sx={{ alignItems: "center" }}>
-            <Grid size={{ xs: 12, md: 7 }}>
-              <Stack spacing={2.5}>
-                <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                  <VerifiedIcon sx={{ color: "accent.primary", fontSize: iconSizes.sm }} />
-                  <Typography
-                    variant="overline"
-                    sx={{ color: "accent.primary", letterSpacing: "0.12em" }}
-                  >
-                    Free audit tool
-                  </Typography>
-                </Stack>
-                <Typography variant="h2" sx={{ maxWidth: 520 }}>
-                  Is your URL ready to be shared?
-                </Typography>
-                <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
-                  <Chip
-                    icon={<AutoAwesomeIcon sx={{ fontSize: 14 }} />}
-                    label="+ AI recommendations on Plus & Pro"
-                    size="small"
-                    sx={{
-                      bgcolor: "rgba(180,83,9,0.10)",
-                      color: "accent.primary",
-                      border: "1px solid rgba(180,83,9,0.22)",
-                      fontSize: 12,
-                      "& .MuiChip-icon": { color: "accent.primary" },
-                    }}
-                  />
-                </Stack>
-                <Typography variant="body1Muted" sx={{ maxWidth: 520 }}>
-                  Paste any URL and get an A–F grade in seconds. See exactly how it previews on
-                  every major platform, and get a line-by-line fix list for anything that&apos;s
-                  missing.
-                </Typography>
-                <Stack component="ul" spacing={1.25} sx={{ pl: 0, m: 0, listStyle: "none" }}>
-                  {HIGHLIGHTS.map((item) => (
-                    <Stack
-                      key={item}
-                      component="li"
-                      direction="row"
-                      spacing={1.25}
-                      sx={{ alignItems: "flex-start" }}
+          <CardContent>
+            <Grid container spacing={{ xs: 4, md: 6 }} sx={{ alignItems: "center" }}>
+              <Grid size={{ xs: 12, md: 7 }}>
+                <Stack spacing={2.5}>
+                  <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                    <VerifiedIcon sx={{ color: "accent.primary", fontSize: iconSizes.sm }} />
+                    <Typography
+                      variant="overline"
+                      sx={{ color: "accent.primary", letterSpacing: "0.12em" }}
                     >
-                      <CheckCircleIcon
-                        sx={{
-                          color: "success.main",
-                          fontSize: iconSizes.sm,
-                          mt: "2px",
-                          flexShrink: 0,
-                        }}
-                      />
-                      <Typography variant="body2">{item}</Typography>
-                    </Stack>
-                  ))}
+                      Free audit tool
+                    </Typography>
+                  </Stack>
+                  <Typography variant="h2" sx={{ maxWidth: 520 }}>
+                    Is your URL ready to be shared?
+                  </Typography>
+                  <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
+                    <Chip
+                      icon={<AutoAwesomeIcon sx={{ fontSize: 14 }} />}
+                      label="+ AI recommendations on Plus & Pro"
+                      size="small"
+                      sx={{
+                        bgcolor: "rgba(180,83,9,0.10)",
+                        color: "accent.primary",
+                        border: "1px solid rgba(180,83,9,0.22)",
+                        fontSize: 12,
+                        "& .MuiChip-icon": { color: "accent.primary" },
+                      }}
+                    />
+                  </Stack>
+                  <Typography variant="body1Muted" sx={{ maxWidth: 520 }}>
+                    Paste any URL and get an A–F grade in seconds. See exactly how it previews on
+                    every major platform, and get a line-by-line fix list for anything that&apos;s
+                    missing.
+                  </Typography>
+                  <Stack component="ul" spacing={1.25} sx={{ pl: 0, m: 0, listStyle: "none" }}>
+                    {HIGHLIGHTS.map((item) => (
+                      <Stack
+                        key={item}
+                        component="li"
+                        direction="row"
+                        spacing={1.25}
+                        sx={{ alignItems: "flex-start" }}
+                      >
+                        <CheckCircleIcon
+                          sx={{
+                            color: "success.main",
+                            fontSize: iconSizes.sm,
+                            mt: "2px",
+                            flexShrink: 0,
+                          }}
+                        />
+                        <Typography variant="body2">{item}</Typography>
+                      </Stack>
+                    ))}
+                  </Stack>
+                  <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ pt: 1 }}>
+                    <Button
+                      href={ROUTES.audit}
+                      variant="contained"
+                      size="large"
+                      endIcon={<ArrowForwardIcon />}
+                    >
+                      Audit a URL - free
+                    </Button>
+                    <Button href={ROUTES.register} variant="outlined" size="large">
+                      Create account
+                    </Button>
+                  </Stack>
                 </Stack>
-                <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ pt: 1 }}>
-                  <Button
-                    href={ROUTES.audit}
-                    variant="contained"
-                    size="large"
-                    endIcon={<ArrowForwardIcon />}
-                  >
-                    Audit a URL - free
-                  </Button>
-                  <Button href={ROUTES.register} variant="outlined" size="large">
-                    Create account
-                  </Button>
-                </Stack>
-              </Stack>
+              </Grid>
+              <Grid size={{ xs: 12, md: 5 }}>
+                <ScoreMockup />
+              </Grid>
             </Grid>
-            <Grid size={{ xs: 12, md: 5 }}>
-              <ScoreMockup />
-            </Grid>
-          </Grid>
+          </CardContent>
         </Surface>
       </Container>
     </Box>

@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from "react";
 import { Box, Link, Stack, Typography } from "@mui/material";
-import { Surface } from "@/components/ui/layout/surface";
+import { Surface } from "@/components/ui/cards/surface";
 
 interface AuthCardProps {
   title: string;
@@ -15,7 +15,6 @@ export function AuthCard(props: AuthCardProps): ReactElement {
   return (
     <Surface
       variant="expressive"
-      padding={0}
       sx={{
         width: "100%",
         maxWidth: 440,

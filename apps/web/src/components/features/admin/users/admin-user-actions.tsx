@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import { Box, Button, Stack } from "@mui/material";
+import { Box, Button, CardContent, Stack } from "@mui/material";
 import { PLANS, type Plan } from "@ogstack/shared";
 import { useRouter } from "next/navigation";
+import { Surface } from "@/components/ui/cards/surface";
 import { SelectInput } from "@/components/ui/form/select-input";
 import { SectionHeader } from "@/components/ui/layout/section-header";
-import { Surface } from "@/components/ui/layout/surface";
 import { useApiMutation } from "@/hooks";
 import { client } from "@/lib/api/client";
 import { queryKeys } from "@/lib/query-keys";
@@ -63,32 +63,34 @@ export function AdminUserActions(props: AdminUserActionsProps): ReactElement {
         title="Plan & Account"
         description="Change plan assigns a complimentary subscription. Suspending blocks sign-in."
       />
-      <Surface padding={3}>
-        <Stack direction={{ xs: "column", md: "row" }} spacing={3} sx={{ alignItems: "center" }}>
-          <SelectInput<Plan>
-            label="Plan"
-            minWidth={200}
-            value={planDraft}
-            onChange={setPlanDraft}
-            items={PLANS.map((p) => ({ value: p, label: p }))}
-          />
-          <Button
-            variant="contained"
-            disabled={planDraft === currentPlan || planMutation.isPending}
-            onClick={() => planMutation.mutate(planDraft)}
-          >
-            {planMutation.isPending ? "Updating..." : "Change Plan"}
-          </Button>
-          <Box sx={{ flex: 1 }} />
-          <Button
-            variant="outlined"
-            color={suspended ? "primary" : "error"}
-            disabled={suspendMutation.isPending}
-            onClick={handleSuspendToggle}
-          >
-            {suspended ? "Unsuspend" : "Suspend"}
-          </Button>
-        </Stack>
+      <Surface>
+        <CardContent>
+          <Stack direction={{ xs: "column", md: "row" }} spacing={3} sx={{ alignItems: "center" }}>
+            <SelectInput<Plan>
+              label="Plan"
+              minWidth={200}
+              value={planDraft}
+              onChange={setPlanDraft}
+              items={PLANS.map((p) => ({ value: p, label: p }))}
+            />
+            <Button
+              variant="contained"
+              disabled={planDraft === currentPlan || planMutation.isPending}
+              onClick={() => planMutation.mutate(planDraft)}
+            >
+              {planMutation.isPending ? "Updating..." : "Change Plan"}
+            </Button>
+            <Box sx={{ flex: 1 }} />
+            <Button
+              variant="outlined"
+              color={suspended ? "primary" : "error"}
+              disabled={suspendMutation.isPending}
+              onClick={handleSuspendToggle}
+            >
+              {suspended ? "Unsuspend" : "Suspend"}
+            </Button>
+          </Stack>
+        </CardContent>
       </Surface>
     </Stack>
   );

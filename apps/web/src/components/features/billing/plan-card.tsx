@@ -4,6 +4,7 @@ import type { ReactElement } from "react";
 import CheckIcon from "@mui/icons-material/Check";
 import {
   Button,
+  CardContent,
   Chip,
   List,
   ListItem,
@@ -13,7 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Plan } from "@ogstack/shared";
-import { Surface } from "@/components/ui/layout/surface";
+import { Surface } from "@/components/ui/cards/surface";
 import { fontFamilies, iconSizes } from "@/theme";
 import type { PlanResponse } from "@/types/api";
 
@@ -59,49 +60,53 @@ export function PlanCard(props: PlanCardProps): ReactElement {
   return (
     <Surface
       variant={isCurrentPlan ? "expressive" : "quiet"}
-      padding={4}
       sx={{ height: "100%", display: "flex", flexDirection: "column" }}
     >
-      <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-        <Typography variant="overline" sx={{ color: "text.disabled" }}>
-          {plan.name}
-        </Typography>
-        {isCurrentPlan && <Chip label="Current" size="small" color="success" />}
-      </Stack>
-      <Stack direction="row" sx={{ alignItems: "baseline", mt: 1, mb: 3 }}>
-        <Typography
-          sx={{
-            fontFamily: fontFamilies.mono,
-            fontSize: "2.5rem",
-            fontWeight: 600,
-            lineHeight: 1,
-          }}
+      <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        <Stack
+          direction="row"
+          sx={{ justifyContent: "space-between", alignItems: "center", mb: 1 }}
         >
-          ${plan.price}
-        </Typography>
-        <Typography variant="body2Muted" sx={{ ml: 0.5 }}>
-          {plan.price === 0 ? "forever" : "/month"}
-        </Typography>
-      </Stack>
-      <List dense sx={{ flex: 1, py: 0 }}>
-        {plan.features.map((feature) => (
-          <ListItem key={feature} disableGutters sx={{ py: 0.5 }}>
-            <ListItemIcon sx={{ minWidth: 28, color: "success.main" }}>
-              <CheckIcon sx={{ fontSize: iconSizes.xs }} />
-            </ListItemIcon>
-            <ListItemText primary={feature} />
-          </ListItem>
-        ))}
-      </List>
-      <Button
-        variant={isUpgrade || isCurrentPlan ? "contained" : "outlined"}
-        fullWidth
-        sx={{ mt: 3 }}
-        onClick={handleClick}
-        disabled={disabled}
-      >
-        {buttonLabel}
-      </Button>
+          <Typography variant="overline" sx={{ color: "text.disabled" }}>
+            {plan.name}
+          </Typography>
+          {isCurrentPlan && <Chip label="Current" size="small" color="success" />}
+        </Stack>
+        <Stack direction="row" sx={{ alignItems: "baseline", mt: 1, mb: 3 }}>
+          <Typography
+            sx={{
+              fontFamily: fontFamilies.mono,
+              fontSize: "2.5rem",
+              fontWeight: 600,
+              lineHeight: 1,
+            }}
+          >
+            ${plan.price}
+          </Typography>
+          <Typography variant="body2Muted" sx={{ ml: 0.5 }}>
+            {plan.price === 0 ? "forever" : "/month"}
+          </Typography>
+        </Stack>
+        <List dense sx={{ flex: 1, py: 0 }}>
+          {plan.features.map((feature) => (
+            <ListItem key={feature} disableGutters sx={{ py: 0.5 }}>
+              <ListItemIcon sx={{ minWidth: 28, color: "success.main" }}>
+                <CheckIcon sx={{ fontSize: iconSizes.xs }} />
+              </ListItemIcon>
+              <ListItemText primary={feature} />
+            </ListItem>
+          ))}
+        </List>
+        <Button
+          variant={isUpgrade || isCurrentPlan ? "contained" : "outlined"}
+          fullWidth
+          sx={{ mt: 3 }}
+          onClick={handleClick}
+          disabled={disabled}
+        >
+          {buttonLabel}
+        </Button>
+      </CardContent>
     </Surface>
   );
 }

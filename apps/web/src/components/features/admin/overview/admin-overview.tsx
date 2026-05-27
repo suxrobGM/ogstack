@@ -4,11 +4,11 @@ import ImageIcon from "@mui/icons-material/Image";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PersonOffIcon from "@mui/icons-material/PersonOff";
 import TodayIcon from "@mui/icons-material/Today";
-import { Grid, Stack, Typography } from "@mui/material";
+import { CardContent, Grid, Stack, Typography } from "@mui/material";
+import { Surface } from "@/components/ui/cards/surface";
 import { StatCard } from "@/components/ui/data/stat-card";
 import { PageHeader } from "@/components/ui/layout/page-header";
 import { SectionHeader } from "@/components/ui/layout/section-header";
-import { Surface } from "@/components/ui/layout/surface";
 import type { AdminStats } from "@/types/api";
 
 interface AdminOverviewProps {
@@ -62,23 +62,25 @@ export function AdminOverview(props: AdminOverviewProps): ReactElement {
 
       <Stack spacing={2}>
         <SectionHeader title="Plan Distribution" />
-        <Surface padding={3}>
-          <Stack spacing={1.5}>
-            {(Object.keys(stats.planDistribution) as (keyof typeof stats.planDistribution)[]).map(
-              (plan) => (
-                <Stack
-                  key={plan}
-                  direction="row"
-                  sx={{ justifyContent: "space-between", alignItems: "center" }}
-                >
-                  <Typography variant="body2">{plan}</Typography>
-                  <Typography variant="body2" sx={{ fontVariantNumeric: "tabular-nums" }}>
-                    {stats.planDistribution[plan]}
-                  </Typography>
-                </Stack>
-              ),
-            )}
-          </Stack>
+        <Surface>
+          <CardContent>
+            <Stack spacing={1.5}>
+              {(Object.keys(stats.planDistribution) as (keyof typeof stats.planDistribution)[]).map(
+                (plan) => (
+                  <Stack
+                    key={plan}
+                    direction="row"
+                    sx={{ justifyContent: "space-between", alignItems: "center" }}
+                  >
+                    <Typography variant="body2">{plan}</Typography>
+                    <Typography variant="body2" sx={{ fontVariantNumeric: "tabular-nums" }}>
+                      {stats.planDistribution[plan]}
+                    </Typography>
+                  </Stack>
+                ),
+              )}
+            </Stack>
+          </CardContent>
         </Surface>
       </Stack>
     </Stack>

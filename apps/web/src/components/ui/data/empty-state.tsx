@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from "react";
-import { Box, Stack, Typography } from "@mui/material";
-import { Surface } from "../layout/surface";
+import { Box, CardContent, Stack, Typography } from "@mui/material";
+import { Surface } from "../cards/surface";
 
 interface EmptyStateProps {
   icon?: ReactNode;
@@ -18,31 +18,33 @@ export function EmptyState(props: EmptyStateProps): ReactElement {
   const { icon, title, description, action, variant = "quiet" } = props;
 
   return (
-    <Surface variant={variant} padding={6} sx={{ textAlign: "center" }}>
-      <Stack spacing={2} sx={{ alignItems: "center" }}>
-        {icon && (
-          <Box
-            sx={{
-              color: "text.disabled",
-              fontSize: 48,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {icon}
-          </Box>
-        )}
-        <Typography variant="h4" sx={{ color: "text.primary" }}>
-          {title}
-        </Typography>
-        {description && (
-          <Typography variant="body2Muted" sx={{ maxWidth: 420 }}>
-            {description}
+    <Surface variant={variant} sx={{ textAlign: "center" }}>
+      <CardContent>
+        <Stack spacing={2} sx={{ alignItems: "center" }}>
+          {icon && (
+            <Box
+              sx={{
+                color: "text.disabled",
+                fontSize: 48,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {icon}
+            </Box>
+          )}
+          <Typography variant="h4" sx={{ color: "text.primary" }}>
+            {title}
           </Typography>
-        )}
-        {action && <Box sx={{ mt: 1 }}>{action}</Box>}
-      </Stack>
+          {description && (
+            <Typography variant="body2Muted" sx={{ maxWidth: 420 }}>
+              {description}
+            </Typography>
+          )}
+          {action && <Box sx={{ mt: 1 }}>{action}</Box>}
+        </Stack>
+      </CardContent>
     </Surface>
   );
 }

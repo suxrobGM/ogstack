@@ -4,8 +4,8 @@ import BrokenImageIcon from "@mui/icons-material/BrokenImage";
 import DesignServicesIcon from "@mui/icons-material/DesignServices";
 import HistoryToggleOffIcon from "@mui/icons-material/HistoryToggleOff";
 import QueryStatsIcon from "@mui/icons-material/QueryStats";
-import { Box, Container, Grid, Stack, Typography } from "@mui/material";
-import { Surface } from "@/components/ui/layout/surface";
+import { Box, CardContent, Container, Grid, Stack, Typography } from "@mui/material";
+import { Surface } from "@/components/ui/cards/surface";
 
 interface Problem {
   icon: SvgIconComponent;
@@ -59,28 +59,30 @@ export function ProblemsSection(): ReactElement {
             const Icon = p.icon;
             return (
               <Grid key={p.title} size={{ xs: 12, sm: 6 }}>
-                <Surface variant="quiet" padding={3.5} sx={{ height: "100%" }}>
-                  <Stack direction="row" spacing={2.5} sx={{ alignItems: "flex-start" }}>
-                    <Box
-                      sx={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: "10px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        bgcolor: "rgba(180,83,9,0.08)",
-                        color: "accent.primary",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <Icon sx={{ fontSize: 20 }} />
-                    </Box>
-                    <Stack spacing={1} sx={{ flex: 1 }}>
-                      <Typography variant="h5">{p.title}</Typography>
-                      <Typography variant="body2Muted">{p.description}</Typography>
+                <Surface variant="quiet" sx={{ height: "100%" }}>
+                  <CardContent>
+                    <Stack direction="row" spacing={2.5} sx={{ alignItems: "flex-start" }}>
+                      <Box
+                        sx={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: "10px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          bgcolor: "rgba(180,83,9,0.08)",
+                          color: "accent.primary",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <Icon sx={{ fontSize: 20 }} />
+                      </Box>
+                      <Stack spacing={1} sx={{ flex: 1 }}>
+                        <Typography variant="h5">{p.title}</Typography>
+                        <Typography variant="body2Muted">{p.description}</Typography>
+                      </Stack>
                     </Stack>
-                  </Stack>
+                  </CardContent>
                 </Surface>
               </Grid>
             );

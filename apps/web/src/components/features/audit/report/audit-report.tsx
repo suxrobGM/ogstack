@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
-import { Box, Divider, Grid, Stack, Typography } from "@mui/material";
-import { Surface } from "@/components/ui/layout/surface";
+import { Box, CardContent, Divider, Grid, Stack, Typography } from "@mui/material";
+import { Surface } from "@/components/ui/cards/surface";
 import { fontFamilies } from "@/theme/typography";
 import type { PageAuditReportResponse } from "@/types/api";
 import { withCacheBust } from "@/utils/url";
@@ -23,38 +23,40 @@ export function AuditReport(props: AuditReportProps): ReactElement {
   return (
     <Stack spacing={5}>
       <Surface>
-        <Grid container spacing={4} sx={{ alignItems: "center" }}>
-          <Grid size={{ xs: 12, md: "auto" }}>
-            <ScoreGauge score={report.overallScore} letterGrade={report.letterGrade} />
-          </Grid>
-          <Grid size={{ xs: 12, md: "grow" }}>
-            <Stack spacing={1.5}>
-              <Typography
-                variant="body1Muted"
-                sx={{
-                  fontFamily: fontFamilies.mono,
-                  fontSize: 12,
-                  wordBreak: "break-all",
-                }}
-              >
-                {report.url}
-              </Typography>
-              <Typography variant="h3">{report.metadata.title ?? "Untitled page"}</Typography>
-              {report.metadata.description && (
-                <Typography variant="body1Muted" sx={{ maxWidth: 640 }}>
-                  {report.metadata.description}
+        <CardContent>
+          <Grid container spacing={4} sx={{ alignItems: "center" }}>
+            <Grid size={{ xs: 12, md: "auto" }}>
+              <ScoreGauge score={report.overallScore} letterGrade={report.letterGrade} />
+            </Grid>
+            <Grid size={{ xs: 12, md: "grow" }}>
+              <Stack spacing={1.5}>
+                <Typography
+                  variant="body1Muted"
+                  sx={{
+                    fontFamily: fontFamilies.mono,
+                    fontSize: 12,
+                    wordBreak: "break-all",
+                  }}
+                >
+                  {report.url}
                 </Typography>
-              )}
-              <Divider sx={{ my: 1 }} />
-              <Stack direction="row" spacing={4} sx={{ flexWrap: "wrap" }}>
-                <Stat label="OG" value={`${report.categoryScores.og}/100`} />
-                <Stat label="Twitter" value={`${report.categoryScores.twitter}/100`} />
-                <Stat label="SEO" value={`${report.categoryScores.seo}/100`} />
-                <Stat label="Issues" value={String(failing)} />
+                <Typography variant="h3">{report.metadata.title ?? "Untitled page"}</Typography>
+                {report.metadata.description && (
+                  <Typography variant="body1Muted" sx={{ maxWidth: 640 }}>
+                    {report.metadata.description}
+                  </Typography>
+                )}
+                <Divider sx={{ my: 1 }} />
+                <Stack direction="row" spacing={4} sx={{ flexWrap: "wrap" }}>
+                  <Stat label="OG" value={`${report.categoryScores.og}/100`} />
+                  <Stat label="Twitter" value={`${report.categoryScores.twitter}/100`} />
+                  <Stat label="SEO" value={`${report.categoryScores.seo}/100`} />
+                  <Stat label="Issues" value={String(failing)} />
+                </Stack>
               </Stack>
-            </Stack>
+            </Grid>
           </Grid>
-        </Grid>
+        </CardContent>
       </Surface>
 
       <AiRecommendationsPanel report={report} viewer={viewer} />
