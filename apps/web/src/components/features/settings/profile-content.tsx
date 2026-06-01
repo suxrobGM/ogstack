@@ -26,13 +26,12 @@ import type { UserProfile } from "@/types/api";
 import { changeEmailSchema, profileSchema } from "./schema";
 
 interface ProfileContentProps {
-  initialUser: UserProfile;
+  user: UserProfile;
 }
 
 export function ProfileContent(props: ProfileContentProps): ReactElement {
-  const { initialUser } = props;
   const { setUser } = useAuth();
-  const [user, setLocalUser] = useState(initialUser);
+  const [user, setLocalUser] = useState(props.user);
   const [showEmailForm, setShowEmailForm] = useState(false);
 
   const fullName = `${user.firstName} ${user.lastName}`.trim();

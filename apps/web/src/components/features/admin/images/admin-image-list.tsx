@@ -16,18 +16,18 @@ import { AdminImageFiltersBar } from "./admin-image-filters";
 import { useAdminImageFilters } from "./use-admin-image-filters";
 
 interface AdminImageListProps {
-  initialData?: AdminImageListResponse | null;
-  initialUserId?: string;
-  initialProjectId?: string;
+  data?: AdminImageListResponse | null;
+  userId?: string;
+  projectId?: string;
 }
 
 export function AdminImageList(props: AdminImageListProps): ReactElement {
-  const { initialData, initialUserId = "", initialProjectId = "" } = props;
+  const { userId = "", projectId = "" } = props;
   const confirm = useConfirm();
 
   const { filters, setFilter, hasActiveFilters } = useAdminImageFilters({
-    userId: initialUserId,
-    projectId: initialProjectId,
+    userId,
+    projectId,
   });
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -63,7 +63,7 @@ export function AdminImageList(props: AdminImageListProps): ReactElement {
           ...(filters.to && { to: new Date(`${filters.to}T23:59:59.999Z`) }),
         },
       }),
-    { initialData: initialData!, errorMessage: "Failed to load images." },
+    { initialData: props.data!, errorMessage: "Failed to load images." },
   );
 
   const deleteMutation = useApiMutation((id: string) => client.api.admin.images({ id }).delete(), {

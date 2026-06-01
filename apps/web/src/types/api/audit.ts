@@ -1,7 +1,7 @@
 import type { client } from "@/lib/api/client";
-import type { Data } from "./utils";
+import type { Body, Data } from "./utils";
 
-export type PageAuditCreateBody = Parameters<(typeof client)["api"]["audits"]["post"]>[0];
+export type PageAuditCreateBody = Body<(typeof client)["api"]["audits"]["post"]>;
 export type PageAuditReportResponse = Data<(typeof client)["api"]["audits"]["post"]>;
 export type PageAuditIssue = PageAuditReportResponse["issues"][number];
 export type PageAuditPreviewMetadata = PageAuditReportResponse["metadata"];

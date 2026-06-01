@@ -3,18 +3,14 @@ import { Container } from "@mui/material";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AuditReport } from "@/components/features/audit";
-import { getServerClient } from "@/lib/api/server";
-import type { PageAuditReportResponse } from "@/types/api";
+import { getAudit } from "@/lib/api/queries";
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-async function fetchReport(id: string): Promise<PageAuditReportResponse | null> {
-  const client = await getServerClient({ auth: false });
-  const { data, error } = await client.api.audits({ id }).get();
-  if (error || !data) return null;
-  return data;
+function fetchReport(id: string) {
+  return getAudit(id, { auth: false });
 }
 
 export async function generateMetadata(props: PageProps): Promise<Metadata> {

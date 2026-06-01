@@ -10,7 +10,7 @@ export default function AuthLayout(props: PropsWithChildren): ReactElement {
 
   return (
     <QueryProvider>
-      <AuthProvider initialUser={null}>
+      <AuthProvider user={null}>
         {siteKey && (
           <Script
             src={`https://www.google.com/recaptcha/enterprise.js?render=${siteKey}`}

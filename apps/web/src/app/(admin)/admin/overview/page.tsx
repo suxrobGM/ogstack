@@ -1,11 +1,10 @@
 import type { ReactElement } from "react";
 import { notFound } from "next/navigation";
 import { AdminOverview } from "@/components/features/admin";
-import { getServerClient } from "@/lib/api/server";
+import { getAdminStats } from "@/lib/api/queries";
 
 export default async function AdminOverviewPage(): Promise<ReactElement> {
-  const client = await getServerClient();
-  const { data } = await client.api.admin.stats.get();
+  const data = await getAdminStats();
   if (!data) notFound();
   return <AdminOverview stats={data} />;
 }

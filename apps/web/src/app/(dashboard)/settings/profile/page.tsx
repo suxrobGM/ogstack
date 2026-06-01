@@ -1,10 +1,9 @@
 import type { ReactElement } from "react";
 import { ProfileContent } from "@/components/features/settings/profile-content";
-import { getServerClient } from "@/lib/api/server";
+import { getCurrentUser } from "@/lib/api/queries";
 
 export default async function ProfilePage(): Promise<ReactElement> {
-  const client = await getServerClient();
-  const { data: user } = await client.api.users.me.get();
+  const user = await getCurrentUser();
 
-  return <ProfileContent initialUser={user!} />;
+  return <ProfileContent user={user!} />;
 }

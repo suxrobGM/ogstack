@@ -28,11 +28,10 @@ import type { Project, ProjectListResponse } from "@/types/api";
 import { ProjectDialog } from "./project-dialog";
 
 interface ProjectListProps {
-  initialData?: ProjectListResponse | null;
+  data?: ProjectListResponse | null;
 }
 
 export function ProjectList(props: ProjectListProps): ReactElement {
-  const { initialData } = props;
   const router = useRouter();
   const confirm = useConfirm();
 
@@ -46,7 +45,7 @@ export function ProjectList(props: ProjectListProps): ReactElement {
   const { data, isLoading } = useApiQuery<ProjectListResponse>(
     queryKeys.projects.list({ page, search: debouncedSearch }),
     () => client.api.projects.get({ query: { page, limit: 10, search: debouncedSearch } }),
-    { initialData: initialData!, errorMessage: "Failed to load projects." },
+    { initialData: props.data!, errorMessage: "Failed to load projects." },
   );
 
   const deleteMutation = useApiMutation((id: string) => client.api.projects({ id }).delete(), {

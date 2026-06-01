@@ -16,12 +16,12 @@ export interface AuthContextValue {
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
 interface AuthProviderProps extends PropsWithChildren {
-  initialUser: AuthUser | null;
+  user: AuthUser | null;
 }
 
 export function AuthProvider(props: AuthProviderProps): ReactElement {
-  const { initialUser, children } = props;
-  const [user, setUser] = useState<AuthUser | null>(initialUser);
+  const { children } = props;
+  const [user, setUser] = useState<AuthUser | null>(props.user);
   const [isLoading, setIsLoading] = useState(false);
 
   const logout = async () => {

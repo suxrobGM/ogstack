@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { AdminImageList } from "@/components/features/admin";
-import { getServerClient } from "@/lib/api/server";
+import { getAdminImages } from "@/lib/api/queries";
 
 interface PageProps {
   searchParams: Promise<{ userId?: string; projectId?: string }>;
@@ -8,14 +8,6 @@ interface PageProps {
 
 export default async function AdminImagesPage(props: PageProps): Promise<ReactElement> {
   const { userId, projectId } = await props.searchParams;
-  const client = await getServerClient();
-  const { data } = await client.api.admin.images.get({
-    query: {
-      page: 1,
-      limit: 20,
-      ...(userId && { userId }),
-      ...(projectId && { projectId }),
-    },
-  });
-  return <AdminImageList initialData={data} initialUserId={userId} initialProjectId={projectId} />;
+  const data = await getAdminImages({ page: 1, limit: 20, userId, projectId });
+  return <AdminImageList data={data} userId={userId} projectId={projectId} />;
 }

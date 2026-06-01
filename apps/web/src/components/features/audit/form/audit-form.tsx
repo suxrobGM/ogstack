@@ -27,7 +27,7 @@ import { auditFormSchema, type AuditFormValues } from "./schema";
 interface AuditFormProps {
   onSuccess: (report: PageAuditReportResponse) => void;
   autoFocus?: boolean;
-  initialUrl?: string;
+  url?: string;
   showAiOption?: boolean;
   /**
    * Whether the AI recommendations checkbox is selectable. All authenticated
@@ -38,14 +38,14 @@ interface AuditFormProps {
 }
 
 export function AuditForm(props: AuditFormProps): ReactElement {
-  const { onSuccess, autoFocus, initialUrl, showAiOption, aiAllowed = false } = props;
+  const { onSuccess, autoFocus, url, showAiOption, aiAllowed = false } = props;
 
   const mutation = useApiMutation((body: AuditFormValues) => client.api.audits.post(body), {
     errorMessage: (err) => err.message,
     onSuccess: (data) => onSuccess(data as PageAuditReportResponse),
   });
 
-  const defaultValues: AuditFormValues = { url: initialUrl ?? "", includeAi: false };
+  const defaultValues: AuditFormValues = { url: url ?? "", includeAi: false };
   const form = useForm({
     defaultValues,
     validators: { onSubmit: auditFormSchema },

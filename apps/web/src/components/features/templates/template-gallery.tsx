@@ -17,22 +17,22 @@ const ASPECT_PREVIEW_OPTIONS: Array<{ value: AspectPreview; label: string; cssAs
 ];
 
 interface TemplateGalleryProps {
-  initialTemplates: TemplateInfo[];
+  templates: TemplateInfo[];
   projects: Project[];
 }
 
 export function TemplateGallery(props: TemplateGalleryProps): ReactElement {
-  const { initialTemplates, projects } = props;
+  const { templates, projects } = props;
 
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [aspectPreview, setAspectPreview] = useState<AspectPreview>("og");
   const [previewTemplate, setPreviewTemplate] = useState<TemplateInfo | null>(null);
 
-  const categories = Array.from(new Set(initialTemplates.map((t) => t.category)));
+  const categories = Array.from(new Set(templates.map((t) => t.category)));
   const visible =
     selectedCategory === "all"
-      ? initialTemplates
-      : initialTemplates.filter((t) => t.category === selectedCategory);
+      ? templates
+      : templates.filter((t) => t.category === selectedCategory);
   const cssAspect =
     ASPECT_PREVIEW_OPTIONS.find((o) => o.value === aspectPreview)?.cssAspect ?? "1200 / 630";
 

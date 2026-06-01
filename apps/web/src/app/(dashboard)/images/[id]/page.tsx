@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { notFound } from "next/navigation";
 import { ImageDetail } from "@/components/features/images/image-detail";
-import { getServerClient } from "@/lib/api/server";
+import { getImage } from "@/lib/api/queries";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -9,10 +9,9 @@ interface PageProps {
 
 export default async function ImageDetailPage(props: PageProps): Promise<ReactElement> {
   const { id } = await props.params;
-  const client = await getServerClient();
-  const { data, error } = await client.api.images({ id }).get();
+  const data = await getImage(id);
 
-  if (error || !data) {
+  if (!data) {
     notFound();
   }
 

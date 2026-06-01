@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { redirect } from "next/navigation";
 import { ProjectSettings } from "@/components/features/projects/project-settings";
-import { getServerClient } from "@/lib/api/server";
+import { getProject } from "@/lib/api/queries";
 import { ROUTES } from "@/lib/constants";
 
 interface PageProps {
@@ -10,8 +10,7 @@ interface PageProps {
 
 export default async function ProjectSettingsPage(props: PageProps): Promise<ReactElement> {
   const { id } = await props.params;
-  const client = await getServerClient();
-  const { data: project } = await client.api.projects({ id }).get();
+  const project = await getProject(id);
 
   if (!project) {
     redirect(ROUTES.projects);

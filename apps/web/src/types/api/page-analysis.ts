@@ -1,6 +1,6 @@
 import type { client } from "@/lib/api/client";
-import type { Data } from "./utils";
+import type { Body, Data } from "./utils";
 
-export type AnalyzeRequestBody = Parameters<(typeof client)["api"]["analyses"]["post"]>[0];
+export type AnalyzeRequestBody = Body<(typeof client)["api"]["analyses"]["post"]>;
 
 export type PageAnalysisResponse = Data<(typeof client)["api"]["analyses"]["post"]>;

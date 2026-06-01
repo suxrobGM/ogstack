@@ -11,11 +11,11 @@ import { AuditForm } from "./audit-form";
 import { AuditHistoryList } from "./audit-history-list";
 
 interface AuditDashboardProps {
-  initialHistory: PageAuditHistoryResponse;
+  history: PageAuditHistoryResponse;
 }
 
 export function AuditDashboard(props: AuditDashboardProps): ReactElement {
-  const { initialHistory } = props;
+  const { history } = props;
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -39,7 +39,7 @@ export function AuditDashboard(props: AuditDashboardProps): ReactElement {
       <Grid size={{ xs: 12, md: 7 }}>
         <Stack spacing={3}>
           <Typography variant="h5">Recent audits</Typography>
-          <AuditHistoryList items={initialHistory.items} />
+          <AuditHistoryList items={history.items} />
         </Stack>
       </Grid>
     </Grid>

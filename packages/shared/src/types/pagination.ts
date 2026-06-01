@@ -5,6 +5,10 @@ export interface PaginationQuery {
   limit?: number;
 }
 
+export interface SearchableQuery extends PaginationQuery {
+  search?: string;
+}
+
 export interface PaginationResult<T = unknown> {
   items: T[];
   pagination: PaginationInfo;

@@ -20,11 +20,11 @@ const ALL_PROJECTS = "__all__";
 
 interface ApiKeyListProps {
   projects: Project[];
-  initialData?: ApiKeyListResponse | null;
+  data?: ApiKeyListResponse | null;
 }
 
 export function ApiKeyList(props: ApiKeyListProps): ReactElement {
-  const { projects, initialData } = props;
+  const { projects } = props;
   const confirm = useConfirm();
 
   const [filter, setFilter] = useState<string>(ALL_PROJECTS);
@@ -44,7 +44,7 @@ export function ApiKeyList(props: ApiKeyListProps): ReactElement {
         query: projectIdQuery ? { projectId: projectIdQuery } : {},
       }),
     {
-      initialData: filter === ALL_PROJECTS ? (initialData ?? undefined) : undefined,
+      initialData: filter === ALL_PROJECTS ? (props.data ?? undefined) : undefined,
       errorMessage: "Failed to load API keys.",
     },
   );

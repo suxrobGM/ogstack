@@ -48,11 +48,11 @@ interface AnalyzeVariables {
 }
 
 interface PlaygroundProps {
-  initialProjects: ProjectListResponse | null;
-  initialTemplates: TemplateInfo[] | null;
-  initialKind: ImageKind;
-  initialUrl: string;
-  initialTemplate: string;
+  projects: ProjectListResponse | null;
+  templates: TemplateInfo[] | null;
+  kind: ImageKind;
+  url: string;
+  template: string;
 }
 
 /**
@@ -71,10 +71,10 @@ function toOgParams(values: PlaygroundFormValues): Record<string, string> {
 }
 
 export function Playground(props: PlaygroundProps): ReactElement {
-  const { initialProjects, initialTemplates, initialKind, initialUrl, initialTemplate } = props;
+  const { kind, url, template } = props;
 
   const [selectedProjectId, setSelectedProjectId] = useState(
-    () => initialProjects?.items[0]?.id ?? "",
+    () => props.projects?.items[0]?.id ?? "",
   );
   const [result, setResult] = useState<GenerateDto | null>(null);
   const [lastFormValues, setLastFormValues] = useState<PlaygroundFormValues | null>(null);
@@ -84,11 +84,11 @@ export function Playground(props: PlaygroundProps): ReactElement {
   const { data: templatesData } = useApiQuery<TemplateInfo[]>(
     queryKeys.templates.list(),
     () => client.api.templates.get(),
-    { initialData: initialTemplates! },
+    { initialData: props.templates! },
   );
 
   const templates = templatesData ?? [];
-  const projects = initialProjects?.items ?? [];
+  const projects = props.projects?.items ?? [];
   const selectedProject = projects.find((p) => p.id === selectedProjectId);
 
   const { data: usageStats, refetch: refetchUsage } = useApiQuery<UsageStatsResponse>(
@@ -162,9 +162,9 @@ export function Playground(props: PlaygroundProps): ReactElement {
   const form = useForm({
     defaultValues: {
       ...DEFAULTS,
-      kind: initialKind,
-      template: initialTemplate,
-      url: initialUrl,
+      kind,
+      template,
+      url,
     } as PlaygroundFormValues,
     validators: {
       onBlur: playgroundFormSchema,

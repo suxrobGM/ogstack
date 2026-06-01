@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { redirect } from "next/navigation";
 import { ImagesGallery } from "@/components/features/images/images-gallery";
-import { getServerClient } from "@/lib/api/server";
+import { getImages, getProject } from "@/lib/api/queries";
 import { ROUTES } from "@/lib/constants";
 
 interface PageProps {
@@ -10,18 +10,13 @@ interface PageProps {
 
 export default async function ProjectImagesPage(props: PageProps): Promise<ReactElement> {
   const { id } = await props.params;
-  const client = await getServerClient();
-  const { data: project } = await client.api.projects({ id }).get();
+  const project = await getProject(id);
 
   if (!project) {
     redirect(ROUTES.projects);
   }
 
-  const { data: images } = await client.api.images.get({
-    query: { page: 1, limit: 24, projectId: project.id },
-  });
+  const images = await getImages({ page: 1, limit: 24, projectId: project.id });
 
-  return (
-    <ImagesGallery initialData={images ?? null} projects={[]} projectId={project.id} hideHeader />
-  );
+  return <ImagesGallery data={images ?? null} projects={[]} projectId={project.id} hideHeader />;
 }

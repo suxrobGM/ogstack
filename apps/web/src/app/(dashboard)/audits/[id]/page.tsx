@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { AuditReport } from "@/components/features/audit";
 import type { AuditViewer } from "@/components/features/audit/ai-recommendations";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { getServerClient } from "@/lib/api/server";
+import { getAudit, getCurrentUser } from "@/lib/api/queries";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -12,19 +12,14 @@ interface PageProps {
 
 export default async function DashboardAuditReportPage(props: PageProps): Promise<ReactElement> {
   const { id } = await props.params;
-  const client = await getServerClient();
 
-  const [reportRes, userRes] = await Promise.all([
-    client.api.audits({ id }).get(),
-    client.api.users.me.get(),
-  ]);
+  const [report, user] = await Promise.all([getAudit(id), getCurrentUser()]);
 
-  if (reportRes.error || !reportRes.data) {
+  if (!report) {
     notFound();
   }
 
-  const report = reportRes.data;
-  const viewer: AuditViewer = userRes.data ? "authenticated" : "anonymous";
+  const viewer: AuditViewer = user ? "authenticated" : "anonymous";
 
   return (
     <>

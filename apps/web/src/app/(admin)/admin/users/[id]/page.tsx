@@ -9,7 +9,7 @@ import {
   AdminUserUsage,
 } from "@/components/features/admin";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { getServerClient } from "@/lib/api/server";
+import { getAdminUser } from "@/lib/api/queries";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -17,8 +17,7 @@ interface PageProps {
 
 export default async function AdminUserDetailPage(props: PageProps): Promise<ReactElement> {
   const { id } = await props.params;
-  const client = await getServerClient();
-  const { data: user } = await client.api.admin.users({ id }).get();
+  const user = await getAdminUser(id);
 
   if (!user) notFound();
 

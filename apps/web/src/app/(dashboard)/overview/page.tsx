@@ -5,22 +5,18 @@ import { QuickActions } from "@/components/features/overview/quick-actions";
 import { RecentImages } from "@/components/features/overview/recent-images";
 import { RecentProjects } from "@/components/features/overview/recent-projects";
 import { UsageSummary } from "@/components/features/overview/usage-summary";
-import { getServerClient } from "@/lib/api/server";
+import { getCurrentUser, getImages, getProjects, getUsageStats } from "@/lib/api/queries";
 
 export default async function OverviewPage(): Promise<ReactElement> {
-  const client = await getServerClient();
-
-  const [userRes, projectsRes, usageRes, imagesRes] = await Promise.all([
-    client.api.users.me.get(),
-    client.api.projects.get({ query: { page: 1, limit: 5 } }),
-    client.api.usage.stats.get({ query: {} }),
-    client.api.images.get({ query: { page: 1, limit: 6 } }),
+  const [user, projectsData, usage, imagesData] = await Promise.all([
+    getCurrentUser(),
+    getProjects({ page: 1, limit: 5 }),
+    getUsageStats(),
+    getImages({ page: 1, limit: 6 }),
   ]);
 
-  const user = userRes.data;
-  const projects = projectsRes.data?.items ?? [];
-  const usage = usageRes.data;
-  const images = imagesRes.data?.items ?? [];
+  const projects = projectsData?.items ?? [];
+  const images = imagesData?.items ?? [];
 
   const fullName = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
 

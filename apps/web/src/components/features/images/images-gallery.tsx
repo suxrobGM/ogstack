@@ -14,7 +14,7 @@ import { ImagesFilters, type ImageGalleryFilters } from "./images-filters";
 import { ImagesGrid } from "./images-grid";
 
 interface ImagesGalleryProps {
-  initialData: ImageListResponse | null;
+  data: ImageListResponse | null;
   projects: Project[];
   projectId?: string;
   hideHeader?: boolean;
@@ -32,7 +32,7 @@ const emptyFilters = (projectId?: string): ImageGalleryFilters => ({
 });
 
 export function ImagesGallery(props: ImagesGalleryProps): ReactElement {
-  const { initialData, projects, projectId: fixedProjectId, hideHeader = false } = props;
+  const { projects, projectId: fixedProjectId, hideHeader = false } = props;
   const confirm = useConfirm();
 
   const [page, setPage] = useState(1);
@@ -74,7 +74,7 @@ export function ImagesGallery(props: ImagesGalleryProps): ReactElement {
         },
       }),
     {
-      initialData: !hasFilters && page === 1 ? (initialData ?? undefined) : undefined,
+      initialData: !hasFilters && page === 1 ? (props.data ?? undefined) : undefined,
       errorMessage: "Failed to load images.",
     },
   );

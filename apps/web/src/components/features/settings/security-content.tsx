@@ -16,21 +16,20 @@ import { ChangePasswordForm } from "./change-password-form";
 import { ConnectedAccounts } from "./connected-accounts";
 
 interface SecurityContentProps {
-  initialUser: UserProfile;
+  user: UserProfile;
 }
 
 export function SecurityContent(props: SecurityContentProps): ReactElement {
-  const { initialUser } = props;
   const { logout } = useAuth();
   const confirm = useConfirm();
 
   const { data: user } = useApiQuery<UserProfile>(
     queryKeys.users.me(),
     () => client.api.users.me.get(),
-    { initialData: initialUser },
+    { initialData: props.user },
   );
 
-  const profile = user ?? initialUser;
+  const profile = user ?? props.user;
 
   const deleteMutation = useApiMutation<{ message: string }, void>(
     () => client.api.users.me.delete(),

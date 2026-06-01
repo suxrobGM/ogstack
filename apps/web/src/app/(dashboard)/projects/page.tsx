@@ -1,10 +1,9 @@
 import type { ReactElement } from "react";
 import { ProjectList } from "@/components/features/projects/project-list";
-import { getServerClient } from "@/lib/api/server";
+import { getProjects } from "@/lib/api/queries";
 
 export default async function ProjectsPage(): Promise<ReactElement> {
-  const client = await getServerClient();
-  const { data } = await client.api.projects.get({ query: { page: 1, limit: 10 } });
+  const data = await getProjects({ page: 1, limit: 10 });
 
-  return <ProjectList initialData={data} />;
+  return <ProjectList data={data} />;
 }

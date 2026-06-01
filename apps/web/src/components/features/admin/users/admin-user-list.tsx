@@ -18,11 +18,10 @@ import type { AdminUserListItem, AdminUserListResponse } from "@/types/api";
 type StatusFilter = "" | "active" | "suspended";
 
 interface AdminUserListProps {
-  initialData?: AdminUserListResponse | null;
+  data?: AdminUserListResponse | null;
 }
 
 export function AdminUserList(props: AdminUserListProps): ReactElement {
-  const { initialData } = props;
   const router = useRouter();
 
   const [search, setSearch] = useState("");
@@ -44,7 +43,7 @@ export function AdminUserList(props: AdminUserListProps): ReactElement {
           ...(status && { status }),
         },
       }),
-    { initialData: initialData!, errorMessage: "Failed to load users." },
+    { initialData: props.data!, errorMessage: "Failed to load users." },
   );
 
   const items = data?.items ?? [];

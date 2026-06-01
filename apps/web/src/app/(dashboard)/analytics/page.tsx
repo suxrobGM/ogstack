@@ -9,7 +9,7 @@ import { PeriodSummary } from "@/components/features/analytics/period-summary";
 import { TemplateBreakdown } from "@/components/features/analytics/template-breakdown";
 import { TopProjects, type TopProject } from "@/components/features/analytics/top-projects";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { getServerClient } from "@/lib/api/server";
+import { getImages, getUsageDaily, getUsageHistory, getUsageStats } from "@/lib/api/queries";
 import type { ImageItem } from "@/types/api";
 import { formatPeriod } from "@/utils/formatters";
 
@@ -80,23 +80,18 @@ export default async function AnalyticsPage(props: AnalyticsPageProps): Promise<
   const range = parseRange(params.range);
   const useDaily = range === "30d";
 
-  const client = await getServerClient();
-
   const dateRange = rangeToDateRange(range);
 
-  const [usageRes, imagesRes, dailyRes, historyRes] = await Promise.all([
-    client.api.usage.stats.get({ query: {} }),
-    client.api.images.get({ query: { page: 1, limit: 100 } }),
-    useDaily ? client.api.usage.daily.get({ query: dateRange }) : Promise.resolve({ data: null }),
-    !useDaily
-      ? client.api.usage.history.get({ query: dateRange })
-      : Promise.resolve({ data: null }),
+  const [usage, imagesData, dailyData, historyData] = await Promise.all([
+    getUsageStats(),
+    getImages({ page: 1, limit: 100 }),
+    useDaily ? getUsageDaily(dateRange) : Promise.resolve(null),
+    !useDaily ? getUsageHistory(dateRange) : Promise.resolve(null),
   ]);
 
-  const usage = usageRes.data;
-  const images = imagesRes.data?.items ?? [];
-  const daily = dailyRes.data ?? [];
-  const history = historyRes.data ?? [];
+  const images = imagesData?.items ?? [];
+  const daily = dailyData ?? [];
+  const history = historyData ?? [];
 
   const points = useDaily
     ? daily.map((d) => {

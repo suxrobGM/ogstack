@@ -15,31 +15,29 @@ import { UsageQuotas } from "./usage-quotas";
 type DowngradeTarget = "FREE" | "PLUS";
 
 interface BillingContentProps {
-  initialPlans: PlanResponse[];
-  initialSubscription: SubscriptionResponse | null;
-  initialUsage: UsageStatsResponse;
+  plans: PlanResponse[];
+  subscription: SubscriptionResponse | null;
+  usage: UsageStatsResponse;
 }
 
 export function BillingContent(props: BillingContentProps): ReactElement {
-  const { initialPlans, initialSubscription, initialUsage } = props;
-
   const [promoCode, setPromoCode] = useState("");
   const [pendingDowngrade, setPendingDowngrade] = useState<DowngradeTarget | null>(null);
 
   const { data: plans } = useApiQuery(
     queryKeys.billing.plans(),
     () => client.api.billing.plans.get(),
-    { initialData: initialPlans },
+    { initialData: props.plans },
   );
 
   const { data: subscription } = useApiQuery(
     queryKeys.billing.subscription(),
     () => client.api.billing.subscription.get(),
-    { initialData: initialSubscription },
+    { initialData: props.subscription },
   );
 
   const { data: usage } = useApiQuery(queryKeys.usage.all, () => client.api.usage.stats.get(), {
-    initialData: initialUsage,
+    initialData: props.usage,
   });
 
   const checkoutMutation = useApiMutation(

@@ -3,7 +3,7 @@ import { Stack } from "@mui/material";
 import { redirect } from "next/navigation";
 import { ProjectTabs } from "@/components/features/projects/project-tabs";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { getServerClient } from "@/lib/api/server";
+import { getProject } from "@/lib/api/queries";
 import { ROUTES } from "@/lib/constants";
 
 interface ProjectLayoutProps {
@@ -14,8 +14,7 @@ interface ProjectLayoutProps {
 export default async function ProjectLayout(props: ProjectLayoutProps): Promise<ReactElement> {
   const { children, params } = props;
   const { id } = await params;
-  const client = await getServerClient();
-  const { data: project } = await client.api.projects({ id }).get();
+  const project = await getProject(id);
 
   if (!project) {
     redirect(ROUTES.projects);
