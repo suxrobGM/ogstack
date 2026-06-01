@@ -75,7 +75,14 @@ const EnvSchema = t.Object({
 export type Env = Static<typeof EnvSchema>;
 
 declare global {
+  /**
+   * Augmenting the global `NodeJS.ProcessEnv` requires namespace + interface
+   * merging — there is no ES2015-module equivalent, so the lint rules below are
+   * disabled for this single declaration.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace NodeJS {
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     interface ProcessEnv extends Env {}
   }
 }

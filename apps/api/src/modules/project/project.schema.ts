@@ -1,6 +1,6 @@
 import { t, type Static } from "elysia";
 import { PaginationQueryBaseSchema } from "@/types/pagination";
-import { PaginatedResponseSchema, PaginationSchema } from "@/types/response";
+import { PaginatedResponseSchema } from "@/types/response";
 
 export const ProjectSchema = t.Object({
   id: t.String(),

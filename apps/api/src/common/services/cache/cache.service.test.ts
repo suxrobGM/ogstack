@@ -137,10 +137,9 @@ describe("CacheService", () => {
     expect(cache.size).toBe(10_000);
 
     // Manually expire 100 entries by accessing internal map
-    const internalCache = (cache as any).cache as Map<
-      string,
-      { value: unknown; expiresAt: number }
-    >;
+    const internalCache = (
+      cache as unknown as { cache: Map<string, { value: unknown; expiresAt: number }> }
+    ).cache;
     for (let i = 0; i < 100; i++) {
       const entry = internalCache.get(`alive-${i}`)!;
       entry.expiresAt = Date.now() - 1;

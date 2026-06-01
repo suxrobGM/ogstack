@@ -1,8 +1,11 @@
 import { Plan } from "@ogstack/shared";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { container } from "@/common/di";
-import { PrismaClient } from "@/generated/prisma";
+import { PrismaClient, UserRole } from "@/generated/prisma";
 import { AdminUserService } from "./admin-user.service";
+
+type QueryCallArgs = [{ where: Record<string, unknown>; skip?: number; take?: number }];
+type AuditCreateCallArgs = [{ data: { action: string } }];
 
 function createMockUser(overrides = {}) {
   return {
@@ -64,28 +67,32 @@ describe("AdminUserService", () => {
     it("should pass search filter to query", async () => {
       await service.listUsers({ page: 1, limit: 20, search: "test" });
 
-      const call = (mockPrisma.user.findMany as ReturnType<typeof mock>).mock.calls[0] as any[];
+      const call = (mockPrisma.user.findMany as ReturnType<typeof mock>).mock
+        .calls[0] as QueryCallArgs;
       expect(call[0].where.OR).toBeDefined();
     });
 
     it("should filter by plan", async () => {
       await service.listUsers({ page: 1, limit: 20, plan: "PRO" });
 
-      const call = (mockPrisma.user.findMany as ReturnType<typeof mock>).mock.calls[0] as any[];
+      const call = (mockPrisma.user.findMany as ReturnType<typeof mock>).mock
+        .calls[0] as QueryCallArgs;
       expect(call[0].where.plan).toBe("PRO");
     });
 
     it("should filter by suspended status", async () => {
       await service.listUsers({ page: 1, limit: 20, status: "suspended" });
 
-      const call = (mockPrisma.user.findMany as ReturnType<typeof mock>).mock.calls[0] as any[];
+      const call = (mockPrisma.user.findMany as ReturnType<typeof mock>).mock
+        .calls[0] as QueryCallArgs;
       expect(call[0].where.suspended).toBe(true);
     });
 
     it("should filter by active status", async () => {
       await service.listUsers({ page: 1, limit: 20, status: "active" });
 
-      const call = (mockPrisma.user.findMany as ReturnType<typeof mock>).mock.calls[0] as any[];
+      const call = (mockPrisma.user.findMany as ReturnType<typeof mock>).mock
+        .calls[0] as QueryCallArgs;
       expect(call[0].where.suspended).toBe(false);
     });
 
@@ -95,7 +102,8 @@ describe("AdminUserService", () => {
       const result = await service.listUsers({ page: 2, limit: 20 });
 
       expect(result.pagination.totalPages).toBe(3);
-      const call = (mockPrisma.user.findMany as ReturnType<typeof mock>).mock.calls[0] as any[];
+      const call = (mockPrisma.user.findMany as ReturnType<typeof mock>).mock
+        .calls[0] as QueryCallArgs;
       expect(call[0].skip).toBe(20);
     });
   });
@@ -134,13 +142,13 @@ describe("AdminUserService", () => {
         "user-uuid-1",
         { plan: "PRO" },
         "admin-1",
-        "ADMIN" as any,
+        UserRole.ADMIN,
       );
 
       expect(result.plan).toBe("PRO");
       expect(mockPrisma.auditLog.create).toHaveBeenCalled();
       const logCall = (mockPrisma.auditLog.create as ReturnType<typeof mock>).mock
-        .calls[0] as any[];
+        .calls[0] as AuditCreateCallArgs;
       expect(logCall[0].data.action).toBe("UPDATE_USER_PLAN");
     });
 
@@ -148,13 +156,13 @@ describe("AdminUserService", () => {
       (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
 
       expect(
-        service.updateUserPlan("nonexistent", { plan: "PRO" }, "admin-1", "ADMIN" as any),
+        service.updateUserPlan("nonexistent", { plan: "PRO" }, "admin-1", UserRole.ADMIN),
       ).rejects.toThrow("User not found");
     });
 
     it("should throw BadRequestError when plan is the same", () => {
       expect(
-        service.updateUserPlan("user-uuid-1", { plan: Plan.FREE }, "admin-1", "ADMIN" as any),
+        service.updateUserPlan("user-uuid-1", { plan: Plan.FREE }, "admin-1", UserRole.ADMIN),
       ).rejects.toThrow("already on the FREE plan");
     });
   });
@@ -168,12 +176,12 @@ describe("AdminUserService", () => {
         "user-uuid-1",
         { suspend: true },
         "admin-1",
-        "ADMIN" as any,
+        UserRole.ADMIN,
       );
 
       expect(result.suspended).toBe(true);
       const logCall = (mockPrisma.auditLog.create as ReturnType<typeof mock>).mock
-        .calls[0] as any[];
+        .calls[0] as AuditCreateCallArgs;
       expect(logCall[0].data.action).toBe("SUSPEND_USER");
     });
 
@@ -188,12 +196,12 @@ describe("AdminUserService", () => {
         "user-uuid-1",
         { suspend: false },
         "admin-1",
-        "ADMIN" as any,
+        UserRole.ADMIN,
       );
 
       expect(result.suspended).toBe(false);
       const logCall = (mockPrisma.auditLog.create as ReturnType<typeof mock>).mock
-        .calls[0] as any[];
+        .calls[0] as AuditCreateCallArgs;
       expect(logCall[0].data.action).toBe("UNSUSPEND_USER");
     });
 
@@ -203,13 +211,13 @@ describe("AdminUserService", () => {
       );
 
       expect(
-        service.suspendUser("user-uuid-1", { suspend: true }, "admin-1", "ADMIN" as any),
+        service.suspendUser("user-uuid-1", { suspend: true }, "admin-1", UserRole.ADMIN),
       ).rejects.toThrow("already suspended");
     });
 
     it("should throw BadRequestError if not suspended", () => {
       expect(
-        service.suspendUser("user-uuid-1", { suspend: false }, "admin-1", "ADMIN" as any),
+        service.suspendUser("user-uuid-1", { suspend: false }, "admin-1", UserRole.ADMIN),
       ).rejects.toThrow("not suspended");
     });
 
@@ -217,7 +225,7 @@ describe("AdminUserService", () => {
       (mockPrisma.user.findUnique as ReturnType<typeof mock>).mockResolvedValue(null);
 
       expect(
-        service.suspendUser("nonexistent", { suspend: true }, "admin-1", "ADMIN" as any),
+        service.suspendUser("nonexistent", { suspend: true }, "admin-1", UserRole.ADMIN),
       ).rejects.toThrow("User not found");
     });
   });

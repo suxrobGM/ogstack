@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
+import { afterEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { OpenAiCompatibleProvider } from "./openai-compatible.provider";
 
 class TestOpenAiProvider extends OpenAiCompatibleProvider {

@@ -28,7 +28,7 @@ export class OAuthUserService {
     const normalizedEmail = profile.email.trim().toLowerCase();
 
     const existingByProvider = await this.prisma.user.findUnique({
-      where: { [providerIdField]: profile.id } as any,
+      where: provider === "github" ? { githubId: profile.id } : { googleId: profile.id },
     });
 
     if (existingByProvider) {

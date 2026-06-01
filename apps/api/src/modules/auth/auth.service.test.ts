@@ -179,7 +179,7 @@ describe("AuthService", () => {
         recaptchaToken: TEST_RECAPTCHA_TOKEN,
       });
 
-      expect((mockPrisma as any).project).toBeUndefined();
+      expect((mockPrisma as unknown as Record<string, unknown>).project).toBeUndefined();
     });
   });
 

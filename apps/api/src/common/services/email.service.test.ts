@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
+import type { ReactElement } from "react";
 import { logger } from "@/common/logger";
 import { EmailService } from "./email.service";
 
@@ -33,7 +34,7 @@ describe("EmailService", () => {
     });
 
     it("should send email via Resend", async () => {
-      const react = { type: "div", props: {}, key: null } as any;
+      const react = { type: "div", props: {}, key: null } as unknown as ReactElement;
 
       await service.send({ to: "user@example.com", subject: "Test", react });
 
@@ -47,7 +48,7 @@ describe("EmailService", () => {
 
     it("should catch and log errors from Resend", async () => {
       mockSend.mockRejectedValueOnce(new Error("API error"));
-      const react = { type: "div", props: {}, key: null } as any;
+      const react = { type: "div", props: {}, key: null } as unknown as ReactElement;
 
       await service.send({ to: "user@example.com", subject: "Test", react });
 
@@ -65,7 +66,7 @@ describe("EmailService", () => {
     });
 
     it("should log instead of sending", async () => {
-      const react = { type: "div", props: {}, key: null } as any;
+      const react = { type: "div", props: {}, key: null } as unknown as ReactElement;
 
       await service.send({ to: "user@example.com", subject: "Test", react });
 

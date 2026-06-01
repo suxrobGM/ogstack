@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+import type { Cookie } from "elysia";
 import {
   clearAuthCookies,
   clearOAuthStateCookie,
@@ -34,7 +35,7 @@ function createMockCookieJar() {
         };
       },
     },
-  ) as Record<string, { value: unknown; set: (opts: Record<string, unknown>) => void }>;
+  ) as unknown as Record<string, Cookie<unknown>>;
 }
 
 describe("parseExpiry", () => {
@@ -87,7 +88,7 @@ describe("setAuthCookies", () => {
       refreshToken: "rt",
     };
 
-    setAuthCookies(cookie as any, result);
+    setAuthCookies(cookie, result);
 
     expect(cookie.access_token!.value).toBe("at");
     expect(cookie.refresh_token!.value).toBe("rt");
@@ -100,7 +101,7 @@ describe("clearAuthCookies", () => {
     cookie.access_token!.value = "old";
     cookie.refresh_token!.value = "old";
 
-    clearAuthCookies(cookie as any);
+    clearAuthCookies(cookie);
 
     expect(cookie.access_token!.value).toBe("");
     expect(cookie.refresh_token!.value).toBe("");
@@ -110,7 +111,7 @@ describe("clearAuthCookies", () => {
 describe("setOAuthStateCookie", () => {
   it("should set oauth_state cookie", () => {
     const cookie = createMockCookieJar();
-    setOAuthStateCookie(cookie as any, "random-state");
+    setOAuthStateCookie(cookie, "random-state");
     expect(cookie.oauth_state!.value).toBe("random-state");
   });
 });
@@ -119,7 +120,7 @@ describe("clearOAuthStateCookie", () => {
   it("should clear oauth_state cookie", () => {
     const cookie = createMockCookieJar();
     cookie.oauth_state!.value = "old-state";
-    clearOAuthStateCookie(cookie as any);
+    clearOAuthStateCookie(cookie);
     expect(cookie.oauth_state!.value).toBe("");
   });
 });
@@ -128,11 +129,11 @@ describe("getOAuthStateCookie", () => {
   it("should return the stored state", () => {
     const cookie = createMockCookieJar();
     cookie.oauth_state!.value = "my-state";
-    expect(getOAuthStateCookie(cookie as any)).toBe("my-state");
+    expect(getOAuthStateCookie(cookie)).toBe("my-state");
   });
 
   it("should return undefined when no state set", () => {
     const cookie = createMockCookieJar();
-    expect(getOAuthStateCookie(cookie as any)).toBeUndefined();
+    expect(getOAuthStateCookie(cookie)).toBeUndefined();
   });
 });
