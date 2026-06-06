@@ -16,14 +16,22 @@ COPY apps/api/ apps/api/
 
 WORKDIR /app/apps/api
 RUN DATABASE_URL="postgresql://build:build@localhost:5432/build" bun run db:generate
-RUN bun run build:linux
+
+# tsc first: --compile drops emitDecoratorMetadata (needed by tsyringe) when fed TS.
+RUN ./node_modules/.bin/tsc
+RUN cp -r src/generated dist/apps/api/src/generated
+RUN bun build --compile --minify-whitespace --minify-syntax \
+    --define 'process.env.NODE_ENV="production"' \
+    --target bun-linux-x64 \
+    --outfile /app/server \
+    dist/apps/api/src/app.js
 
 FROM alpine:latest AS runner
 WORKDIR /app/apps/api
 
 RUN apk add --no-cache openssl curl libstdc++ libgcc
 
-COPY --from=build /app/apps/api/dist/server ./server
+COPY --from=build /app/server ./server
 COPY --from=build /app/apps/api/prisma ./prisma
 
 RUN mkdir -p uploads
