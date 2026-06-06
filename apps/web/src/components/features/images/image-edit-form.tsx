@@ -3,11 +3,11 @@
 import { useEffect, type ReactElement } from "react";
 import { Button, Stack } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { ImageItem } from "@/api/types";
 import { FormTextField } from "@/components/ui/form";
-import { useApiMutation } from "@/hooks";
-import { client } from "@/lib/api/client";
-import { queryKeys } from "@/lib/query-keys";
-import type { ImageItem } from "@/types/api";
 import { imageEditFormSchema, type ImageEditFormValues } from "./schema";
 
 interface ImageEditFormProps {

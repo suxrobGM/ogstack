@@ -1,8 +1,8 @@
 import type { ReactElement } from "react";
+import { getAuditHistory } from "@/api/queries";
+import type { PageAuditHistoryResponse } from "@/api/types";
 import { AuditDashboard } from "@/components/features/audit/form";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { getAuditHistory } from "@/lib/api/queries";
-import type { PageAuditHistoryResponse } from "@/types/api";
 
 const EMPTY_HISTORY: PageAuditHistoryResponse = {
   items: [],

@@ -2,13 +2,14 @@
 
 import { useState, type ReactElement } from "react";
 import { Stack } from "@mui/material";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { ImageListResponse, Project } from "@/api/types";
 import { Pagination } from "@/components/ui/data/pagination";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { useApiMutation, useApiQuery, useDebouncedValue } from "@/hooks";
-import { client } from "@/lib/api/client";
-import { queryKeys } from "@/lib/query-keys";
+import { useDebouncedValue } from "@/hooks";
 import { useConfirm } from "@/providers/confirm-provider";
-import type { ImageListResponse, Project } from "@/types/api";
 import { ImagesBulkActions } from "./images-bulk-actions";
 import { ImagesFilters, type ImageGalleryFilters } from "./images-filters";
 import { ImagesGrid } from "./images-grid";

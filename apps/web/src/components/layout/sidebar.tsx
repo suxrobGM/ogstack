@@ -9,9 +9,9 @@ import { Box, Button, Divider, IconButton, List, Stack, Tooltip, Typography } fr
 import { isAdminRole } from "@ogstack/shared";
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/auth";
 import { AppLogo } from "@/components/icons/app-logo";
 import { ROUTES } from "@/lib/constants";
-import { useAuth } from "@/providers/auth-provider";
 import { line } from "@/theme/palette";
 import { motion } from "@/theme/tokens";
 import { isNavGroup } from "./constants";

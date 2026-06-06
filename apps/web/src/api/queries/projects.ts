@@ -1,5 +1,5 @@
 import type { SearchableQuery } from "@ogstack/shared";
-import { getServerClient } from "@/lib/api/server";
+import { getServerClient } from "@/api/server";
 
 export async function getProjects(params?: SearchableQuery) {
   const client = await getServerClient();

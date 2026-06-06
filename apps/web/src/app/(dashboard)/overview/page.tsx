@@ -1,11 +1,11 @@
 import type { ReactElement } from "react";
 import { Grid, Stack } from "@mui/material";
+import { getCurrentUser, getImages, getProjects, getUsageStats } from "@/api/queries";
 import { OverviewHero } from "@/components/features/overview/overview-hero";
 import { QuickActions } from "@/components/features/overview/quick-actions";
 import { RecentImages } from "@/components/features/overview/recent-images";
 import { RecentProjects } from "@/components/features/overview/recent-projects";
 import { UsageSummary } from "@/components/features/overview/usage-summary";
-import { getCurrentUser, getImages, getProjects, getUsageStats } from "@/lib/api/queries";
 
 export default async function OverviewPage(): Promise<ReactElement> {
   const [user, projectsData, usage, imagesData] = await Promise.all([

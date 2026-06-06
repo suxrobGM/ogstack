@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
+import { getCurrentUser } from "@/api/queries";
 import { SecurityContent } from "@/components/features/settings/security-content";
-import { getCurrentUser } from "@/lib/api/queries";
 
 export default async function SecurityPage(): Promise<ReactElement> {
   const user = await getCurrentUser();

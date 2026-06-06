@@ -1,5 +1,7 @@
 import type { ReactElement } from "react";
 import { Stack } from "@mui/material";
+import { getImages, getUsageDaily, getUsageHistory, getUsageStats } from "@/api/queries";
+import type { ImageItem } from "@/api/types";
 import { ImagesOverTimeChart } from "@/components/features/analytics/images-over-time-chart";
 import {
   PeriodSelector,
@@ -9,8 +11,6 @@ import { PeriodSummary } from "@/components/features/analytics/period-summary";
 import { TemplateBreakdown } from "@/components/features/analytics/template-breakdown";
 import { TopProjects, type TopProject } from "@/components/features/analytics/top-projects";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { getImages, getUsageDaily, getUsageHistory, getUsageStats } from "@/lib/api/queries";
-import type { ImageItem } from "@/types/api";
 import { formatPeriod } from "@/utils/formatters";
 
 interface AnalyticsPageProps {

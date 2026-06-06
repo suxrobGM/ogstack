@@ -3,12 +3,12 @@
 import type { ReactElement } from "react";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import { Button, Chip, Link, Stack, Typography } from "@mui/material";
+import type { Project } from "@/api/types";
 import { DataTable } from "@/components/ui/data/data-table";
 import { EmptyState } from "@/components/ui/data/empty-state";
 import { MonoId } from "@/components/ui/display/mono-id";
 import { SectionHeader } from "@/components/ui/layout/section-header";
 import { ROUTES } from "@/lib/constants";
-import type { Project } from "@/types/api";
 
 interface RecentProjectsProps {
   projects: Project[];

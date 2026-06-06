@@ -9,8 +9,8 @@ import {
   type ImageKind,
   type TemplateCategorySlug,
 } from "@ogstack/shared";
+import type { Project } from "@/api/types";
 import { SelectInput } from "@/components/ui/form/select-input";
-import type { Project } from "@/types/api";
 
 export interface ImageGalleryFilters {
   search: string;

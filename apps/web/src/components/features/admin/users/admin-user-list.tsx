@@ -5,15 +5,16 @@ import SearchIcon from "@mui/icons-material/Search";
 import { Chip, InputAdornment, Stack, TextField, Typography } from "@mui/material";
 import { PLANS, type Plan } from "@ogstack/shared";
 import { useRouter } from "next/navigation";
+import { client } from "@/api/client";
+import { useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { AdminUserListItem, AdminUserListResponse } from "@/api/types";
 import { DataTable, type Column } from "@/components/ui/data/data-table";
 import { Pagination } from "@/components/ui/data/pagination";
 import { SelectInput } from "@/components/ui/form/select-input";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { useApiQuery, useDebouncedValue } from "@/hooks";
-import { client } from "@/lib/api/client";
+import { useDebouncedValue } from "@/hooks";
 import { ROUTES } from "@/lib/constants";
-import { queryKeys } from "@/lib/query-keys";
-import type { AdminUserListItem, AdminUserListResponse } from "@/types/api";
 
 type StatusFilter = "" | "active" | "suspended";
 

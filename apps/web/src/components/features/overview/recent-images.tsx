@@ -4,13 +4,13 @@ import type { ReactElement } from "react";
 import ImageIcon from "@mui/icons-material/Image";
 import { Box, Button, Grid, Link, Stack, Typography } from "@mui/material";
 import Image from "next/image";
+import type { ImageItem } from "@/api/types";
 import { Surface } from "@/components/ui/cards/surface";
 import { EmptyState } from "@/components/ui/data/empty-state";
 import { SectionHeader } from "@/components/ui/layout/section-header";
 import { ROUTES } from "@/lib/constants";
 import { radii, surfaces } from "@/theme";
 import { motion } from "@/theme/tokens";
-import type { ImageItem } from "@/types/api";
 
 interface RecentImagesProps {
   images: ImageItem[];

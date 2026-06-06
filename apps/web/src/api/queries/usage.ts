@@ -1,4 +1,4 @@
-import { getServerClient } from "@/lib/api/server";
+import { getServerClient } from "@/api/server";
 
 interface DateRange {
   from?: Date;

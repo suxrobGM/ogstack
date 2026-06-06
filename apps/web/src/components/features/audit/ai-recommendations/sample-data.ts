@@ -1,4 +1,4 @@
-import type { PageAuditReportResponse } from "@/types/api";
+import type { PageAuditReportResponse } from "@/api/types";
 
 export type AiInsights = NonNullable<NonNullable<PageAuditReportResponse["ai"]>["analysis"]>;
 

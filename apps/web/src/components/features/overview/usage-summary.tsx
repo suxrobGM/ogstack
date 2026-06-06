@@ -6,12 +6,12 @@ import CachedIcon from "@mui/icons-material/Cached";
 import ImageIcon from "@mui/icons-material/Image";
 import RateReviewIcon from "@mui/icons-material/RateReview";
 import { Box, CardContent, Grid, LinearProgress, Link, Stack, Typography } from "@mui/material";
+import type { UsageStatsResponse } from "@/api/types";
 import { Surface } from "@/components/ui/cards/surface";
 import { StatCard } from "@/components/ui/data/stat-card";
 import { SectionHeader } from "@/components/ui/layout/section-header";
 import { ROUTES } from "@/lib/constants";
 import { fontFamilies } from "@/theme";
-import type { UsageStatsResponse } from "@/types/api";
 import { getProgressColor } from "@/utils/usage";
 
 interface UsageSummaryProps {

@@ -4,12 +4,12 @@ import { useState, type ReactElement } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import { Button, CardContent, CircularProgress, Stack, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
+import type { PageAuditPreviewMetadata } from "@/api/types";
 import { PlatformPreviewGrid } from "@/components/features/audit/report";
 import { Surface } from "@/components/ui/cards";
 import { FormTextField } from "@/components/ui/form/";
-import { useApiMutation } from "@/hooks";
-import { client } from "@/lib/api/client";
-import type { PageAuditPreviewMetadata } from "@/types/api";
 import { normalizeUrlInput, withCacheBust } from "@/utils/url";
 import { socialPreviewSchema, type SocialPreviewValues } from "./schema";
 

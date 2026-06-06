@@ -1,4 +1,4 @@
-import type { client } from "@/lib/api/client";
+import type { client } from "@/api/client";
 import type { Data } from "./utils";
 
 type AdminUserById = ReturnType<(typeof client)["api"]["admin"]["users"]>;

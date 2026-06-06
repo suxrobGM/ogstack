@@ -9,10 +9,10 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import type { AdminUserDetail } from "@/api/types";
 import { Surface } from "@/components/ui/cards/surface";
 import { MonoId } from "@/components/ui/display/mono-id";
 import { SectionHeader } from "@/components/ui/layout/section-header";
-import type { AdminUserDetail } from "@/types/api";
 
 interface AdminUserApiKeysProps {
   apiKeys: AdminUserDetail["apiKeys"];

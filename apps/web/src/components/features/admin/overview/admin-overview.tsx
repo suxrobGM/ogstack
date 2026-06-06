@@ -5,11 +5,11 @@ import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PersonOffIcon from "@mui/icons-material/PersonOff";
 import TodayIcon from "@mui/icons-material/Today";
 import { CardContent, Grid, Stack, Typography } from "@mui/material";
+import type { AdminStats } from "@/api/types";
 import { Surface } from "@/components/ui/cards/surface";
 import { StatCard } from "@/components/ui/data/stat-card";
 import { PageHeader } from "@/components/ui/layout/page-header";
 import { SectionHeader } from "@/components/ui/layout/section-header";
-import type { AdminStats } from "@/types/api";
 
 interface AdminOverviewProps {
   stats: AdminStats;

@@ -4,9 +4,9 @@ import { useState, type ReactElement } from "react";
 import { Grid } from "@mui/material";
 import { ERROR_CODES, type ImageKind } from "@ogstack/shared";
 import { useForm } from "@tanstack/react-form";
-import { useApiMutation, useApiQuery } from "@/hooks";
-import { client } from "@/lib/api/client";
-import { queryKeys } from "@/lib/query-keys";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
 import type {
   GenerateDto,
   ImageGenerateBody,
@@ -14,7 +14,7 @@ import type {
   ProjectListResponse,
   TemplateInfo,
   UsageStatsResponse,
-} from "@/types/api";
+} from "@/api/types";
 import { buildPlaygroundFrameworkSnippets } from "@/utils/framework-snippets";
 import { buildPlaygroundSnippet } from "@/utils/integration-snippet";
 import { ControlsPanel } from "./controls-panel";

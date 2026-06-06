@@ -16,10 +16,10 @@ import {
 } from "@mui/material";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
-import { useApiMutation } from "@/hooks";
-import { client } from "@/lib/api/client";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
+import type { GenerateDto, ImageGenerateBody, Project, TemplateInfo } from "@/api/types";
 import { surfaces } from "@/theme";
-import type { GenerateDto, ImageGenerateBody, Project, TemplateInfo } from "@/types/api";
 
 const SAMPLE_PREVIEW_URL = "https://vercel.com/blog/introducing-vercel-agent";
 

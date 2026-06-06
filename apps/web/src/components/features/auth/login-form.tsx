@@ -4,13 +4,13 @@ import { useState, type ReactElement } from "react";
 import { Alert, Button, Link, Stack } from "@mui/material";
 import { isAdminRole } from "@ogstack/shared";
 import { useForm } from "@tanstack/react-form";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
+import type { AuthResponse } from "@/api/types";
+import { useAuth } from "@/auth";
 import { FormTextField } from "@/components/ui/form";
-import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useRecaptcha } from "@/hooks/use-recaptcha";
-import { client } from "@/lib/api/client";
 import { ROUTES } from "@/lib/constants";
-import { useAuth } from "@/providers/auth-provider";
-import type { AuthResponse } from "@/types/api";
 import { loginSchema } from "./schema";
 import type { LoginPayload } from "./types";
 

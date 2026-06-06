@@ -4,10 +4,10 @@ import type { ReactElement } from "react";
 import { Chip, Typography } from "@mui/material";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
+import type { PageAuditHistoryItem } from "@/api/types";
 import { DataTable, type Column } from "@/components/ui/data/data-table";
 import { feedback } from "@/theme";
 import { fontFamilies } from "@/theme/typography";
-import type { PageAuditHistoryItem } from "@/types/api";
 
 interface AuditHistoryListProps {
   items: PageAuditHistoryItem[];

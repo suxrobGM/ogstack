@@ -2,7 +2,7 @@
 
 import type { ReactElement } from "react";
 import { FormLabel, MenuItem, Select, Stack, Typography } from "@mui/material";
-import type { Project } from "@/types/api";
+import type { Project } from "@/api/types";
 
 interface ProjectSelectProps {
   projects: Pick<Project, "id" | "name">[];

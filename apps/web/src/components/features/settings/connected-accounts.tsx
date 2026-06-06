@@ -6,11 +6,11 @@ import GoogleIcon from "@mui/icons-material/Google";
 import LinkIcon from "@mui/icons-material/Link";
 import LinkOffIcon from "@mui/icons-material/LinkOff";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { client } from "@/lib/api/client";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { UserProfile } from "@/api/types";
 import { API_BASE_URL } from "@/lib/constants";
-import { queryKeys } from "@/lib/query-keys";
-import type { UserProfile } from "@/types/api";
 
 interface ConnectedAccountsProps {
   user: UserProfile;

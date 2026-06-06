@@ -1,6 +1,6 @@
 import type { ImageKind } from "@ogstack/shared/constants";
+import type { GenerateDto, ImageItem } from "@/api/types";
 import { API_BASE_URL } from "@/lib/constants";
-import type { GenerateDto, ImageItem } from "@/types/api";
 
 type Asset = { name: string; url: string };
 

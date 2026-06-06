@@ -14,9 +14,9 @@ import {
   Typography,
 } from "@mui/material";
 import { Plan } from "@ogstack/shared";
+import type { PlanResponse } from "@/api/types";
 import { Surface } from "@/components/ui/cards/surface";
 import { fontFamilies, iconSizes } from "@/theme";
-import type { PlanResponse } from "@/types/api";
 
 type DowngradeTarget = "FREE" | "PLUS";
 

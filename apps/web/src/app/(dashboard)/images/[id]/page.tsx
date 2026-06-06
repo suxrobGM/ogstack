@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { notFound } from "next/navigation";
+import { getImage } from "@/api/queries";
 import { ImageDetail } from "@/components/features/images/image-detail";
-import { getImage } from "@/lib/api/queries";
 
 interface PageProps {
   params: Promise<{ id: string }>;

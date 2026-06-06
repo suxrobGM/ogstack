@@ -1,8 +1,8 @@
 import type { ReactElement } from "react";
 import { Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import type { AdminUserDetail } from "@/api/types";
 import { Surface } from "@/components/ui/cards/surface";
 import { SectionHeader } from "@/components/ui/layout/section-header";
-import type { AdminUserDetail } from "@/types/api";
 
 interface AdminUserUsageProps {
   usage: AdminUserDetail["usage"];

@@ -13,11 +13,11 @@ import {
   Typography,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
+import type { AdminUserDetail } from "@/api/types";
 import { Surface } from "@/components/ui/cards/surface";
 import { MonoId } from "@/components/ui/display/mono-id";
 import { SectionHeader } from "@/components/ui/layout/section-header";
 import { ROUTES } from "@/lib/constants";
-import type { AdminUserDetail } from "@/types/api";
 
 interface AdminUserProjectsProps {
   userId: string;

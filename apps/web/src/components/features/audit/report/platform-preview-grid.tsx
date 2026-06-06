@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { Grid } from "@mui/material";
-import type { PageAuditPreviewMetadata } from "@/types/api";
+import type { PageAuditPreviewMetadata } from "@/api/types";
 import { PlatformPreviewCard } from "./platform-preview-card";
 import { PLATFORMS } from "./platforms";
 

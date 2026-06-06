@@ -2,9 +2,9 @@
 
 import type { ReactElement } from "react";
 import { Stack, Typography } from "@mui/material";
+import type { ImageItem } from "@/api/types";
 import { CodeBlock } from "@/components/ui/display/code-block";
 import { FrameworkSnippetTabs } from "@/components/ui/display/framework-snippet-tabs";
-import type { ImageItem } from "@/types/api";
 import { buildImageFrameworkSnippets } from "@/utils/framework-snippets";
 import { buildImageSnippet } from "@/utils/integration-snippet";
 

@@ -1,8 +1,8 @@
 import type { ReactElement } from "react";
 import { CardContent, Chip, Stack, Typography } from "@mui/material";
+import type { AdminUserDetail } from "@/api/types";
 import { Surface } from "@/components/ui/cards/surface";
 import { UserAvatar } from "@/components/ui/display/user-avatar";
-import type { AdminUserDetail } from "@/types/api";
 
 interface AdminUserProfileProps {
   user: AdminUserDetail;

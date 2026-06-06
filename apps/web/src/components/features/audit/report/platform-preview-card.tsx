@@ -1,11 +1,11 @@
 import type { ReactElement } from "react";
 import { Box, Stack, Typography } from "@mui/material";
 import Image from "next/image";
+import type { PageAuditPreviewMetadata } from "@/api/types";
 import { PLATFORM_ICONS } from "@/components/icons";
 import { line } from "@/theme/palette";
 import { radii, shadows } from "@/theme/tokens";
 import { fontFamilies } from "@/theme/typography";
-import type { PageAuditPreviewMetadata } from "@/types/api";
 import { truncate, type PlatformConfig } from "./platforms";
 
 interface PlatformPreviewCardProps {

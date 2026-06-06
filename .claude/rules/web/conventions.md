@@ -50,8 +50,8 @@ import Alert from "@mui/material/Alert";
 tsconfig uses `"@/*": ["./src/*"]`. Imports use `@/` without `src/`:
 
 ```typescript
-import { useAuth } from "@/hooks/use-auth";
-import { client } from "@/lib/api/client";
+import { client } from "@/api/client";
+import { useAuth } from "@/auth";
 ```
 
 ## Zod v4

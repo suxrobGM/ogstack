@@ -8,11 +8,11 @@ import {
   isValidHttpUrl,
   type ImageKind,
 } from "@ogstack/shared";
+import type { Project, TemplateInfo } from "@/api/types";
 import { Surface } from "@/components/ui/cards/surface";
 import { FormSelectField } from "@/components/ui/form/form-select-field";
 import { FormTextField } from "@/components/ui/form/form-text-field";
 import type { AnyReactForm } from "@/components/ui/form/types";
-import type { Project, TemplateInfo } from "@/types/api";
 import { normalizeUrlInput } from "@/utils/url";
 import {
   AiGenerationField,

@@ -1,4 +1,4 @@
-import type { client } from "@/lib/api/client";
+import type { client } from "@/api/client";
 import type { Body, Data } from "./utils";
 
 export type AuthResponse = Data<(typeof client)["api"]["auth"]["login"]["post"]>;

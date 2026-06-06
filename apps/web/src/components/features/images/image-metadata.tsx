@@ -4,9 +4,9 @@ import type { ReactElement, ReactNode } from "react";
 import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 import { Box, Chip, Stack, Typography } from "@mui/material";
 import { aiModelLabel } from "@ogstack/shared";
+import type { ImageItem } from "@/api/types";
 import { AiChip } from "@/components/ui/display/ai-chip";
 import { CopyButton } from "@/components/ui/display/copy-button";
-import type { ImageItem } from "@/types/api";
 
 interface ImageMetadataProps {
   image: ImageItem;

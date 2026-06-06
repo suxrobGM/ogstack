@@ -5,11 +5,11 @@ import LanguageIcon from "@mui/icons-material/Language";
 import { Box, CardContent, Skeleton, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { aiModelLabel } from "@ogstack/shared";
 import Image from "next/image";
+import type { GenerateDto } from "@/api/types";
 import { Surface } from "@/components/ui/cards/surface";
 import { CodeBlock } from "@/components/ui/display/code-block";
 import { FrameworkSnippetTabs } from "@/components/ui/display/framework-snippet-tabs";
 import { textColors } from "@/theme";
-import type { GenerateDto } from "@/types/api";
 import type { FrameworkSnippet } from "@/utils/framework-snippets";
 import type { IntegrationSnippet } from "@/utils/integration-snippet";
 

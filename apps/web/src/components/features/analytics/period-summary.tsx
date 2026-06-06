@@ -4,8 +4,8 @@ import ImageIcon from "@mui/icons-material/Image";
 import InsightsIcon from "@mui/icons-material/Insights";
 import TimerIcon from "@mui/icons-material/Timer";
 import { Grid } from "@mui/material";
+import type { UsageStatsResponse } from "@/api/types";
 import { StatCard } from "@/components/ui/data/stat-card";
-import type { UsageStatsResponse } from "@/types/api";
 
 interface PeriodSummaryProps {
   usage: UsageStatsResponse;

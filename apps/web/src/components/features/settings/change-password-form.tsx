@@ -3,9 +3,9 @@
 import type { ReactElement } from "react";
 import { Box, Button, Stack } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
 import { FormTextField } from "@/components/ui/form";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { client } from "@/lib/api/client";
 import { changePasswordSchema } from "./schema";
 
 export function ChangePasswordForm(): ReactElement {

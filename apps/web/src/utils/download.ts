@@ -1,5 +1,5 @@
-import { API_BASE_URL } from "@/lib/api/constants";
-import { fetchWithRefresh } from "@/lib/fetch-with-refresh";
+import { API_BASE_URL } from "@/api/constants";
+import { fetchWithRefresh } from "@/api/fetch-with-refresh";
 
 /**
  * Fetches the image data for the given image ID and triggers a download in the browser.

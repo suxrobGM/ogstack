@@ -15,16 +15,17 @@ import {
   Typography,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { Project, ProjectListResponse } from "@/api/types";
 import { DataTable, type Column } from "@/components/ui/data/data-table";
 import { Pagination } from "@/components/ui/data/pagination";
 import { MonoId } from "@/components/ui/display/mono-id";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { useApiMutation, useApiQuery, useDebouncedValue } from "@/hooks";
-import { client } from "@/lib/api/client";
-import { queryKeys } from "@/lib/query-keys";
+import { useDebouncedValue } from "@/hooks";
 import { useConfirm } from "@/providers/confirm-provider";
 import { iconSizes } from "@/theme";
-import type { Project, ProjectListResponse } from "@/types/api";
 import { ProjectDialog } from "./project-dialog";
 
 interface ProjectListProps {

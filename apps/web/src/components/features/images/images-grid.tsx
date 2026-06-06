@@ -3,9 +3,9 @@
 import type { ReactElement } from "react";
 import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import { Grid, Skeleton } from "@mui/material";
+import type { ImageItem } from "@/api/types";
 import { EmptyState } from "@/components/ui/data/empty-state";
 import { radii } from "@/theme";
-import type { ImageItem } from "@/types/api";
 import { ImageCard } from "./image-card";
 
 interface ImagesGridProps {

@@ -1,9 +1,9 @@
 import type { ReactElement, ReactNode } from "react";
 import { Stack } from "@mui/material";
 import { redirect } from "next/navigation";
+import { getProject } from "@/api/queries";
 import { ProjectTabs } from "@/components/features/projects/project-tabs";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { getProject } from "@/lib/api/queries";
 import { ROUTES } from "@/lib/constants";
 
 interface ProjectLayoutProps {

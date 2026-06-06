@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { notFound } from "next/navigation";
+import { getAdminStats } from "@/api/queries";
 import { AdminOverview } from "@/components/features/admin";
-import { getAdminStats } from "@/lib/api/queries";
 
 export default async function AdminOverviewPage(): Promise<ReactElement> {
   const data = await getAdminStats();

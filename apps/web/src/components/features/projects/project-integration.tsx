@@ -2,10 +2,10 @@
 
 import type { ReactElement } from "react";
 import { Box, Stack, Typography } from "@mui/material";
+import type { Project } from "@/api/types";
 import { FrameworkSnippetTabs } from "@/components/ui/display/framework-snippet-tabs";
 import { MonoId } from "@/components/ui/display/mono-id";
 import { SectionHeader } from "@/components/ui/layout/section-header";
-import type { Project } from "@/types/api";
 import { buildFrameworkSnippets } from "@/utils/framework-snippets";
 import { buildOgImageUrl } from "@/utils/integration-snippet";
 

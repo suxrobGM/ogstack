@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
+import { getApiKeys, getProjects } from "@/api/queries";
 import { ApiKeyList } from "@/components/features/api-keys/api-key-list";
-import { getApiKeys, getProjects } from "@/lib/api/queries";
 
 export default async function ApiKeysPage(): Promise<ReactElement> {
   const [projectsData, keys] = await Promise.all([

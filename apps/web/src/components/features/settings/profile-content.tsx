@@ -15,14 +15,14 @@ import {
   Typography,
 } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
+import type { UserProfile } from "@/api/types";
+import { useAuth } from "@/auth";
 import { Surface } from "@/components/ui/cards/surface";
 import { UserAvatar } from "@/components/ui/display/user-avatar";
 import { FormTextField } from "@/components/ui/form";
 import { SectionHeader } from "@/components/ui/layout/section-header";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { client } from "@/lib/api/client";
-import { useAuth } from "@/providers/auth-provider";
-import type { UserProfile } from "@/types/api";
 import { changeEmailSchema, profileSchema } from "./schema";
 
 interface ProfileContentProps {

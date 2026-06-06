@@ -1,4 +1,5 @@
-import { API_BASE_URL, ROUTES } from "./constants";
+import { ROUTES } from "@/lib/constants";
+import { API_BASE_URL } from "./constants";
 
 let refreshPromise: Promise<boolean> | null = null;
 

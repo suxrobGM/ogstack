@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { Chip, Stack, Typography } from "@mui/material";
+import type { AuthUser } from "@/api/types";
 import { Surface } from "@/components/ui/cards/surface";
-import type { AuthUser } from "@/types/api";
 import { formatPeriod } from "@/utils/formatters";
 import { planChipColor } from "@/utils/plan";
 

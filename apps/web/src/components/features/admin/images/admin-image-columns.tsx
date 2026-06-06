@@ -2,10 +2,10 @@
 
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Box, Checkbox, Chip, IconButton, Tooltip, Typography } from "@mui/material";
+import type { AdminImageItem } from "@/api/types";
 import type { Column } from "@/components/ui/data/data-table";
 import { AspectImage } from "@/components/ui/display/aspect-image";
 import { iconSizes } from "@/theme";
-import type { AdminImageItem } from "@/types/api";
 
 interface BuildColumnsParams {
   selected: Set<string>;

@@ -5,8 +5,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import { Chip, InputAdornment, Stack, TextField } from "@mui/material";
 import { IMAGE_KINDS, type ImageKind } from "@ogstack/shared";
+import type { TemplateInfo } from "@/api/types";
 import { SelectInput } from "@/components/ui/form/select-input";
-import type { TemplateInfo } from "@/types/api";
 import { IMAGE_KIND_LABELS } from "@/types/image-kinds";
 import type { AdminImageFilters, AiFilter } from "./use-admin-image-filters";
 

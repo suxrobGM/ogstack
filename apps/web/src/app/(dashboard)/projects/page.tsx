@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
+import { getProjects } from "@/api/queries";
 import { ProjectList } from "@/components/features/projects/project-list";
-import { getProjects } from "@/lib/api/queries";
 
 export default async function ProjectsPage(): Promise<ReactElement> {
   const data = await getProjects({ page: 1, limit: 10 });

@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { redirect } from "next/navigation";
+import { getImages, getProject } from "@/api/queries";
 import { ImagesGallery } from "@/components/features/images/images-gallery";
-import { getImages, getProject } from "@/lib/api/queries";
 import { ROUTES } from "@/lib/constants";
 
 interface PageProps {

@@ -3,11 +3,11 @@
 import type { ReactElement } from "react";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { Alert, Box, Button, CardContent, Stack, Typography } from "@mui/material";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
+import { useAuth } from "@/auth";
 import { Surface } from "@/components/ui/cards/surface";
 import { SectionHeader } from "@/components/ui/layout/section-header";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { client } from "@/lib/api/client";
-import { useAuth } from "@/providers/auth-provider";
 import { useConfirm } from "@/providers/confirm-provider";
 
 export function AccountContent(): ReactElement {

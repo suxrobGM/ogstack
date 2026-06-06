@@ -1,5 +1,5 @@
 import type { PaginationQuery } from "@ogstack/shared";
-import { getServerClient } from "@/lib/api/server";
+import { getServerClient } from "@/api/server";
 
 export async function getAuditHistory(params?: PaginationQuery) {
   const client = await getServerClient();

@@ -2,14 +2,15 @@
 
 import { useState, type ReactElement } from "react";
 import { Stack } from "@mui/material";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { AdminImageItem, AdminImageListResponse, TemplateInfo } from "@/api/types";
 import { DataTable } from "@/components/ui/data/data-table";
 import { Pagination } from "@/components/ui/data/pagination";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { useApiMutation, useApiQuery, useDebouncedValue } from "@/hooks";
-import { client } from "@/lib/api/client";
-import { queryKeys } from "@/lib/query-keys";
+import { useDebouncedValue } from "@/hooks";
 import { useConfirm } from "@/providers/confirm-provider";
-import type { AdminImageItem, AdminImageListResponse, TemplateInfo } from "@/types/api";
 import { AdminImageBulkBar } from "./admin-image-bulk-bar";
 import { buildAdminImageColumns } from "./admin-image-columns";
 import { AdminImageFiltersBar } from "./admin-image-filters";

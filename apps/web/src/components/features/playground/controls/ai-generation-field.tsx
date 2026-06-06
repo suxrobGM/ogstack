@@ -4,6 +4,7 @@ import type { ReactElement } from "react";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { Collapse, Stack, Typography } from "@mui/material";
 import { Plan } from "@ogstack/shared";
+import { useAuth } from "@/auth";
 import {
   FormCheckboxField,
   FormSwitchField,
@@ -11,7 +12,6 @@ import {
   FormToggleField,
 } from "@/components/ui/form";
 import type { AnyReactForm } from "@/components/ui/form/types";
-import { useAuth } from "@/providers";
 import { accent, iconSizes, line, radii } from "@/theme";
 import { AI_PROMPT_MAX_CHARS } from "../schema";
 

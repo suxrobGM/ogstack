@@ -5,8 +5,8 @@ import { Autocomplete, Box, Chip, Link as MuiLink, TextField, Typography } from 
 import { isValidDomain, Plan, PLAN_CONFIGS, UNLIMITED } from "@ogstack/shared";
 import type { AnyFieldApi } from "@tanstack/react-form";
 import NextLink from "next/link";
+import { useAuth } from "@/auth";
 import { ROUTES } from "@/lib/constants";
-import { useAuth } from "@/providers/auth-provider";
 import type { AnyReactForm } from "./types";
 
 interface FormDomainFieldProps {

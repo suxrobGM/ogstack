@@ -12,10 +12,10 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import type { PageAuditIssue } from "@/api/types";
 import { SectionHeader } from "@/components/ui/layout/section-header";
 import { feedback } from "@/theme";
 import { fontFamilies } from "@/theme/typography";
-import type { PageAuditIssue } from "@/types/api";
 
 interface IssueListProps {
   issues: PageAuditIssue[];

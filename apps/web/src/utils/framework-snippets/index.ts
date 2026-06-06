@@ -1,5 +1,5 @@
 import type { ImageKind } from "@ogstack/shared/constants";
-import type { GenerateDto, ImageItem } from "@/types/api";
+import type { GenerateDto, ImageItem } from "@/api/types";
 import { buildFaviconTags, buildOgImageUrl } from "../integration-snippet";
 import { angularPlugin } from "./angular";
 import { astroPlugin } from "./astro";

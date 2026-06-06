@@ -3,10 +3,10 @@
 import { type ReactElement } from "react";
 import { Alert, Button, Stack, Typography } from "@mui/material";
 import { useSearchParams } from "next/navigation";
-import { useApiMutation } from "@/hooks/use-api-mutation";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
+import type { MessageResponse, ResendVerificationBody } from "@/api/types";
 import { useRecaptcha } from "@/hooks/use-recaptcha";
-import { client } from "@/lib/api/client";
-import type { MessageResponse, ResendVerificationBody } from "@/types/api";
 
 export function VerifyEmailSent(): ReactElement {
   const searchParams = useSearchParams();

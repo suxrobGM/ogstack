@@ -1,8 +1,8 @@
 "use client";
 
-import { useApiMutation, useApiQuery } from "@/hooks";
-import { client } from "@/lib/api/client";
-import { queryKeys } from "@/lib/query-keys";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
 
 const POLL_INTERVAL = 30_000;
 

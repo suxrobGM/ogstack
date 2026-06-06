@@ -1,10 +1,10 @@
 import type { ReactElement } from "react";
 import { Container } from "@mui/material";
 import { notFound } from "next/navigation";
+import { getAudit, getCurrentUser } from "@/api/queries";
 import { AuditReport } from "@/components/features/audit";
 import type { AuditViewer } from "@/components/features/audit/ai-recommendations";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { getAudit, getCurrentUser } from "@/lib/api/queries";
 
 interface PageProps {
   params: Promise<{ id: string }>;

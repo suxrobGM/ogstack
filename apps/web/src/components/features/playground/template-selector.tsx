@@ -4,8 +4,8 @@ import type { ReactElement } from "react";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Box, Chip, Grid, Typography } from "@mui/material";
 import type { ImageKind } from "@ogstack/shared";
+import type { TemplateInfo } from "@/api/types";
 import { accent, iconSizes, line, motion, radii, shadows, surfaces } from "@/theme";
-import type { TemplateInfo } from "@/types/api";
 import { templateThumbnailUrl } from "@/utils/url";
 
 interface TemplateSelectorProps {

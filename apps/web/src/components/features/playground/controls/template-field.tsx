@@ -3,8 +3,8 @@
 import type { ReactElement } from "react";
 import { Stack, Typography } from "@mui/material";
 import type { ImageKind } from "@ogstack/shared";
+import type { TemplateInfo } from "@/api/types";
 import type { AnyReactForm } from "@/components/ui/form/types";
-import type { TemplateInfo } from "@/types/api";
 import { TemplateSelector } from "../template-selector";
 
 interface TemplateFieldProps {

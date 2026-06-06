@@ -1,9 +1,9 @@
 "use client";
 
 import type { ReactElement } from "react";
-import { useApiQuery } from "@/hooks";
-import { client } from "@/lib/api/client";
-import type { PageAuditReportResponse } from "@/types/api";
+import { client } from "@/api/client";
+import { useApiQuery } from "@/api/hooks";
+import type { PageAuditReportResponse } from "@/api/types";
 import { InsightsView } from "./insights-view";
 import { LockedPreview } from "./locked-preview";
 import { EmptyProView, FailedView, PendingView } from "./status-views";

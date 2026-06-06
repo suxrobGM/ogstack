@@ -1,9 +1,9 @@
 import type { ReactElement } from "react";
 import { Stack } from "@mui/material";
 import { isImageKind, type ImageKind } from "@ogstack/shared";
+import { getProjects, getTemplates } from "@/api/queries";
 import { Playground } from "@/components/features/playground";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { getProjects, getTemplates } from "@/lib/api/queries";
 
 interface PlaygroundPageProps {
   searchParams: Promise<{ kind?: string; url?: string; template?: string }>;

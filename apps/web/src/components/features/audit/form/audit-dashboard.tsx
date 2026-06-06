@@ -5,8 +5,8 @@ import { Grid, Stack, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/providers/auth-provider";
-import type { PageAuditHistoryResponse } from "@/types/api";
+import type { PageAuditHistoryResponse } from "@/api/types";
+import { useAuth } from "@/auth";
 import { AuditForm } from "./audit-form";
 import { AuditHistoryList } from "./audit-history-list";
 

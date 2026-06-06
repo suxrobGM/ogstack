@@ -4,12 +4,12 @@ import { useState, type ReactElement } from "react";
 import { Box, Button, CardContent, Stack } from "@mui/material";
 import { PLANS, type Plan } from "@ogstack/shared";
 import { useRouter } from "next/navigation";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
 import { Surface } from "@/components/ui/cards/surface";
 import { SelectInput } from "@/components/ui/form/select-input";
 import { SectionHeader } from "@/components/ui/layout/section-header";
-import { useApiMutation } from "@/hooks";
-import { client } from "@/lib/api/client";
-import { queryKeys } from "@/lib/query-keys";
 import { useConfirm } from "@/providers/confirm-provider";
 
 interface AdminUserActionsProps {

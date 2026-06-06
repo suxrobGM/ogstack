@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
+import { getAdminImages } from "@/api/queries";
 import { AdminImageList } from "@/components/features/admin";
-import { getAdminImages } from "@/lib/api/queries";
 
 interface PageProps {
   searchParams: Promise<{ userId?: string; projectId?: string }>;

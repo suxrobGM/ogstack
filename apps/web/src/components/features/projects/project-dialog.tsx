@@ -4,13 +4,13 @@ import { useEffect, type ReactElement } from "react";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from "@mui/material";
 import { Plan, PLAN_CONFIGS, UNLIMITED } from "@ogstack/shared";
 import { useForm } from "@tanstack/react-form";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { Project } from "@/api/types";
+import { useAuth } from "@/auth";
 import { FormDomainField, FormTextField } from "@/components/ui/form";
 import type { AnyReactForm } from "@/components/ui/form/types";
-import { useApiMutation } from "@/hooks";
-import { client } from "@/lib/api/client";
-import { queryKeys } from "@/lib/query-keys";
-import { useAuth } from "@/providers/auth-provider";
-import type { Project } from "@/types/api";
 import { projectFormSchema } from "./schema";
 
 interface ProjectDialogProps {

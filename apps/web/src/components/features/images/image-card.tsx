@@ -6,9 +6,9 @@ import { Box, Checkbox, Stack, Tooltip, Typography } from "@mui/material";
 import { isPlanAtLeast, Plan } from "@ogstack/shared";
 import Image from "next/image";
 import Link from "next/link";
-import { useAuth } from "@/providers/auth-provider";
+import type { ImageItem } from "@/api/types";
+import { useAuth } from "@/auth";
 import { line, motion, radii, shadows, surfaces } from "@/theme";
-import type { ImageItem } from "@/types/api";
 import { ImageGenerationChip } from "./image-generation-chip";
 import { ImageKindChip } from "./image-kind-chip";
 

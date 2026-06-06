@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { API_BASE_URL } from "@/lib/api/constants";
+import { API_BASE_URL } from "@/api/constants";
 
 interface UseOgPreviewResult {
   imageUrl: string | null;

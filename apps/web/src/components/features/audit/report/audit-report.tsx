@@ -1,8 +1,8 @@
 import type { ReactElement } from "react";
 import { Box, CardContent, Divider, Grid, Stack, Typography } from "@mui/material";
+import type { PageAuditReportResponse } from "@/api/types";
 import { Surface } from "@/components/ui/cards/surface";
 import { fontFamilies } from "@/theme/typography";
-import type { PageAuditReportResponse } from "@/types/api";
 import { withCacheBust } from "@/utils/url";
 import { AiRecommendationsPanel, type AuditViewer } from "../ai-recommendations";
 import { CtaBanner } from "./cta-banner";

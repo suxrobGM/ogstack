@@ -14,12 +14,12 @@ import {
   Typography,
 } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { Project } from "@/api/types";
 import { CopyButton } from "@/components/ui/display/copy-button";
 import { FormSelectField, FormTextField } from "@/components/ui/form";
-import { useApiMutation } from "@/hooks";
-import { client } from "@/lib/api/client";
-import { queryKeys } from "@/lib/query-keys";
-import type { Project } from "@/types/api";
 import { createApiKeySchema, type CreateApiKeyForm } from "./schema";
 
 const ALL_PROJECTS = "__all__";

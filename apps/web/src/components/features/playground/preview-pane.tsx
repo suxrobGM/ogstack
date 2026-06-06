@@ -7,10 +7,10 @@ import DownloadIcon from "@mui/icons-material/Download";
 import ImageIcon from "@mui/icons-material/Image";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { Alert, Box, Button, CardContent, Chip, Skeleton, Stack, Typography } from "@mui/material";
+import type { GenerateDto } from "@/api/types";
 import { Surface } from "@/components/ui/cards/surface";
 import { AspectImage, IconPreview } from "@/components/ui/display";
 import { feedback, line, radii, surfaces, textColors } from "@/theme";
-import type { GenerateDto } from "@/types/api";
 import { downloadImage } from "@/utils/download";
 
 interface PreviewPaneProps {

@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
+import { getImages, getProjects } from "@/api/queries";
 import { ImagesGallery } from "@/components/features/images/images-gallery";
-import { getImages, getProjects } from "@/lib/api/queries";
 
 export default async function ImagesPage(): Promise<ReactElement> {
   const [images, projectsData] = await Promise.all([

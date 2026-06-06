@@ -2,12 +2,12 @@
 
 import type { ReactElement } from "react";
 import { Alert, Box, Button, Chip, Stack, Typography } from "@mui/material";
-import { useApiMutation } from "@/hooks";
-import { client } from "@/lib/api/client";
-import { queryKeys } from "@/lib/query-keys";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { SubscriptionResponse } from "@/api/types";
 import { useConfirm } from "@/providers/confirm-provider";
 import { fontFamilies } from "@/theme";
-import type { SubscriptionResponse } from "@/types/api";
 import { formatDate } from "@/utils/formatters";
 
 interface SubscriptionStatusProps {

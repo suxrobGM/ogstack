@@ -1,5 +1,5 @@
 import { Plan } from "@ogstack/shared";
-import type { AuthUser } from "@/types/api";
+import type { AuthUser } from "@/api/types";
 
 export type PlanChipColor = "default" | "primary" | "secondary" | "warning";
 

@@ -6,12 +6,12 @@ import SearchIcon from "@mui/icons-material/Search";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { Alert, Box, CardContent, Chip, CircularProgress, Stack, Typography } from "@mui/material";
 import { Plan } from "@ogstack/shared";
+import type { PageAnalysisResponse } from "@/api/types";
+import { useAuth } from "@/auth";
 import { Surface } from "@/components/ui/cards/surface";
 import { AiChip } from "@/components/ui/display/ai-chip";
 import { SkeletonList } from "@/components/ui/feedback/skeleton-list";
-import { useAuth } from "@/providers/auth-provider";
 import { accent, line } from "@/theme";
-import type { PageAnalysisResponse } from "@/types/api";
 
 interface PageContentPanelProps {
   data: PageAnalysisResponse | null | undefined;

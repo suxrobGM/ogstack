@@ -1,9 +1,9 @@
 import type { ReactElement } from "react";
 import { Stack } from "@mui/material";
 import { Plan } from "@ogstack/shared";
+import { getBillingPlans, getSubscription, getUsageStats } from "@/api/queries";
 import { BillingContent } from "@/components/features/billing";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { getBillingPlans, getSubscription, getUsageStats } from "@/lib/api/queries";
 
 export default async function BillingPage(): Promise<ReactElement> {
   const [plansData, subscriptionData, usageData] = await Promise.all([

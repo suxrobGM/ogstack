@@ -10,12 +10,12 @@ import SpeedIcon from "@mui/icons-material/Speed";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { Box, Button, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
 import { DataTable, type Column } from "@/components/ui/data/data-table";
 import { Pagination } from "@/components/ui/data/pagination";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { useApiMutation, useApiQuery } from "@/hooks";
-import { client } from "@/lib/api/client";
-import { queryKeys } from "@/lib/query-keys";
 
 type Filter = "all" | "unread";
 

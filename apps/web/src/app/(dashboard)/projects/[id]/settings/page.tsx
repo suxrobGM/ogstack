@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { redirect } from "next/navigation";
+import { getProject } from "@/api/queries";
 import { ProjectSettings } from "@/components/features/projects/project-settings";
-import { getProject } from "@/lib/api/queries";
 import { ROUTES } from "@/lib/constants";
 
 interface PageProps {

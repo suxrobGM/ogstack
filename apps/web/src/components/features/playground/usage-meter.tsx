@@ -1,8 +1,8 @@
 import type { ReactElement } from "react";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { LinearProgress, Stack, Typography } from "@mui/material";
+import type { UsageStatsResponse } from "@/api/types";
 import { accent, iconSizes, line, radii } from "@/theme";
-import type { UsageStatsResponse } from "@/types/api";
 
 interface UsageMeterProps {
   stats: UsageStatsResponse;

@@ -6,9 +6,9 @@ import CachedIcon from "@mui/icons-material/Cached";
 import ImageIcon from "@mui/icons-material/Image";
 import RateReviewIcon from "@mui/icons-material/RateReview";
 import { Box, CardContent, Grid, LinearProgress, Stack, Typography } from "@mui/material";
+import type { UsageStatsResponse } from "@/api/types";
 import { Surface } from "@/components/ui/cards/surface";
 import { fontFamilies } from "@/theme";
-import type { UsageStatsResponse } from "@/types/api";
 import { getProgressColor } from "@/utils/usage";
 
 interface UsageQuotasProps {

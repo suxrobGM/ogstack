@@ -2,10 +2,10 @@
 
 import { useState, type ReactElement } from "react";
 import { Grid, Stack, Typography } from "@mui/material";
-import { useApiMutation, useApiQuery } from "@/hooks";
-import { client } from "@/lib/api/client";
-import { queryKeys } from "@/lib/query-keys";
-import type { PlanResponse, SubscriptionResponse, UsageStatsResponse } from "@/types/api";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { PlanResponse, SubscriptionResponse, UsageStatsResponse } from "@/api/types";
 import { DowngradeDialog } from "./downgrade-dialog";
 import { PlanCard } from "./plan-card";
 import { PromoCodeInput } from "./promo-code-input";

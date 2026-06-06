@@ -3,9 +3,9 @@
 import { useState, type ReactElement } from "react";
 import { Box, Chip, Grid, Stack, Typography } from "@mui/material";
 import type { ImageKind } from "@ogstack/shared";
+import type { Project, TemplateInfo } from "@/api/types";
 import { PageHeader } from "@/components/ui/layout/page-header";
 import { accent, line, motion, radii, shadows, surfaces } from "@/theme";
-import type { Project, TemplateInfo } from "@/types/api";
 import { templateThumbnailUrl } from "@/utils/url";
 import { TemplatePreviewDialog } from "./template-preview-dialog";
 

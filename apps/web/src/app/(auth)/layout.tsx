@@ -1,7 +1,7 @@
 import type { PropsWithChildren, ReactElement } from "react";
 import { Box } from "@mui/material";
 import Script from "next/script";
-import { AuthProvider } from "@/providers/auth-provider";
+import { AuthProvider } from "@/auth";
 import { QueryProvider } from "@/providers/query-provider";
 
 export default function AuthLayout(props: PropsWithChildren): ReactElement {

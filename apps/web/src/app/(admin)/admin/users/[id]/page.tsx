@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 import { Stack } from "@mui/material";
 import { notFound } from "next/navigation";
+import { getAdminUser } from "@/api/queries";
 import {
   AdminUserActions,
   AdminUserApiKeys,
@@ -9,7 +10,6 @@ import {
   AdminUserUsage,
 } from "@/components/features/admin";
 import { PageHeader } from "@/components/ui/layout/page-header";
-import { getAdminUser } from "@/lib/api/queries";
 
 interface PageProps {
   params: Promise<{ id: string }>;

@@ -4,16 +4,16 @@ import type { ReactElement } from "react";
 import { Box, Button, CardContent, Stack, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { Project } from "@/api/types";
 import { Surface } from "@/components/ui/cards/surface";
 import { FormDomainField, FormTextField } from "@/components/ui/form";
 import type { AnyReactForm } from "@/components/ui/form/types";
 import { SectionHeader } from "@/components/ui/layout/section-header";
-import { useApiMutation } from "@/hooks";
-import { client } from "@/lib/api/client";
 import { ROUTES } from "@/lib/constants";
-import { queryKeys } from "@/lib/query-keys";
 import { useConfirm } from "@/providers/confirm-provider";
-import type { Project } from "@/types/api";
 import { projectFormSchema } from "./schema";
 
 interface ProjectSettingsProps {
