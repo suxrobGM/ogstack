@@ -41,7 +41,9 @@ RUN apk add --no-cache openssl curl libstdc++ libgcc
 
 COPY --from=build /app/server ./server
 COPY --from=build /app/apps/api/prisma ./prisma
-COPY --from=build /native/node_modules ./node_modules
+
+# The bun binary resolves --external sharp from the real filesystem root.
+COPY --from=build /native/node_modules /node_modules
 
 RUN mkdir -p uploads
 
